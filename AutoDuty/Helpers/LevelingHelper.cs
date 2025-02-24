@@ -38,7 +38,10 @@ namespace AutoDuty.Helpers
                         823u,  // Qitana
                         822u,  // Mt. Gulg
                         952u,  // Tower of Zot
+                        969u,
+                        970u,
                         974u,  // Ktisis Hyperboreia
+                        978u,
                         1167u, // Ihuykatumu
                         1193u, // Worqor Zormor
                         1194u, // The Skydeep Cenote

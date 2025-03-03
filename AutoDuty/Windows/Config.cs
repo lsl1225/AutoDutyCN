@@ -123,12 +123,17 @@ public class Configuration : IPluginConfiguration
     public bool EquipButton = true;
 
     internal bool updatePathsOnStartup = true;
-    public bool UpdatePathsOnStartup => !Plugin.isDev || this.updatePathsOnStartup;
+    public   bool UpdatePathsOnStartup
+    {
+        get => !Plugin.isDev || this.updatePathsOnStartup;
+        set => this.updatePathsOnStartup = value;
+    }
 
     //Duty Config Options
-    public bool AutoExitDuty = true;
-    public bool AutoManageRotationPluginState = true;
-    internal bool autoManageBossModAISettings = true;
+    public   bool AutoExitDuty                  = true;
+    public   bool OnlyExitWhenDutyDone          = false;
+    public   bool AutoManageRotationPluginState = true;
+    internal bool autoManageBossModAISettings   = true;
     public bool AutoManageBossModAISettings
     {
         get => autoManageBossModAISettings;
@@ -144,6 +149,7 @@ public class Configuration : IPluginConfiguration
     public bool       LootBossTreasureOnly           = false;
     public int        TreasureCofferScanDistance     = 25;
     public bool       RebuildNavmeshOnStuck          = true;
+    public int        MinStuckTime                   = 500;
     public bool       OverridePartyValidation        = false;
     public bool       UsingAlternativeRotationPlugin = false;
     public bool       UsingAlternativeMovementPlugin = false;
@@ -507,10 +513,15 @@ public static class ConfigTab
 
         if (dutyConfigHeaderSelected == true)
         {
-            if (ImGui.Checkbox("Auto Leave Duty", ref Configuration.AutoExitDuty))
+            ImGui.Columns(2);
+            if (ImGui.Checkbox("Auto Leave Duty in last loop", ref Configuration.AutoExitDuty))
                 Configuration.Save();
             ImGuiComponents.HelpMarker("Will automatically exit the dungeon upon completion of the path.");
-
+            ImGui.NextColumn();
+            if (ImGui.Checkbox("Only leave dungeon if duty completed", ref Configuration.OnlyExitWhenDutyDone))
+                Configuration.Save();
+            ImGuiComponents.HelpMarker("Blocks leaving dungeon before duty is completed");
+            ImGui.Columns(1);
             if (ImGui.Checkbox("Auto Manage Rotation Plugin State", ref Configuration.AutoManageRotationPluginState))
                 Configuration.Save();
             ImGuiComponents.HelpMarker("Autoduty will enable the Rotation Plugin at the start of each duty\n*Only if using Wrath Combo, Rotation Solver or BossMod AutoRotation\n**AutoDuty will try to use them in that order");
@@ -774,6 +785,12 @@ public static class ConfigTab
             }
             ImGuiComponents.HelpMarker("AutoDuty will ignore all non-boss chests, and only loot boss chests. (Only works with AD Looting)");
 
+            if (ImGui.InputInt("Minimum time before declared stuck (in ms)", ref Configuration.MinStuckTime))
+            {
+                Configuration.MinStuckTime = Math.Max(250, Configuration.MinStuckTime);
+                Configuration.Save();
+            }
+
             if (ImGui.Checkbox("Rebuild Navmesh when stuck", ref Configuration.RebuildNavmeshOnStuck))
                 Configuration.Save();
 
@@ -797,15 +814,6 @@ public static class ConfigTab
                 Configuration.Save();
             ImGuiComponents.HelpMarker("AutoDuty will ignore your party makeup when queueing for duties\nThis is for Multi-Boxing Only\n*AutoDuty is not recommended to be used with other players*");
 
-            //ImGui.BeginListBox("##W2WRoleSelection", new System.Numerics.Vector2(300, 800));
-
-            //ImGui.PushStyleVar(ImGuiStyleVar);
-
-            /*
-            foreach (JobWithRole category in categories.Keys)
-                DrawW2WCategory(category);
-            */
-            //ImGui.EndListBox();
 
             ImGui.PushStyleVar(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f));
             var advModeHeader = ImGui.Selectable("Advanced Config Options", advModeHeaderSelected, ImGuiSelectableFlags.DontClosePopups);

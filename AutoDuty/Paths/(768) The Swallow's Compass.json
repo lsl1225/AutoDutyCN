@@ -1,7 +1,33 @@
 {
   "actions": [
     {
-      "tag": 0,
+      "tag": "W2W",
+      "name": "StopForCombat",
+      "position": {
+        "X": 0,
+        "Y": 0,
+        "Z": 0
+      },
+      "arguments": [
+        "false"
+      ],
+      "note": ""
+    },
+    {
+      "tag": "W2W",
+      "name": "StopForCombat",
+      "position": {
+        "X": -180.57,
+        "Y": -478.4,
+        "Z": -4.99
+      },
+      "arguments": [
+        "true"
+      ],
+      "note": ""
+    },
+    {
+      "tag": "None",
       "name": "MoveTo",
       "position": {
         "X": -261.53217,
@@ -12,20 +38,20 @@
       "note": ""
     },
     {
-      "tag": 0,
-      "name": "AutoMoveFor",
+      "tag": "None",
+      "name": "MoveTo",
       "position": {
-        "X": -261.4,
-        "Y": -477.27,
-        "Z": 59.52
+        "X": -245.26,
+        "Y": -478.4,
+        "Z": 56.52
       },
       "arguments": [
-        "2000"
+        "false"
       ],
       "note": ""
     },
     {
-      "tag": 0,
+      "tag": "None",
       "name": "Interactable",
       "position": {
         "X": -239.92,
@@ -38,12 +64,12 @@
       "note": "Dragon\u0027s Seal"
     },
     {
-      "tag": 5,
-      "name": "TreasureCoffer",
+      "tag": "None",
+      "name": "Boss",
       "position": {
-        "X": -240.05,
+        "X": -239.59,
         "Y": -480,
-        "Z": -9.32
+        "Z": 0.78
       },
       "arguments": [
         ""
@@ -51,7 +77,7 @@
       "note": ""
     },
     {
-      "tag": 0,
+      "tag": "None",
       "name": "Interactable",
       "position": {
         "X": -240.01,
@@ -64,7 +90,59 @@
       "note": "Geomantic Aetheryte"
     },
     {
-      "tag": 5,
+      "tag": "None",
+      "name": "WaitFor",
+      "position": {
+        "X": 0,
+        "Y": 0,
+        "Z": 0
+      },
+      "arguments": [
+        "IsReady"
+      ],
+      "note": ""
+    },
+    {
+      "tag": "W2W",
+      "name": "StopForCombat",
+      "position": {
+        "X": 0,
+        "Y": 0,
+        "Z": 0
+      },
+      "arguments": [
+        "false"
+      ],
+      "note": ""
+    },
+    {
+      "tag": "W2W",
+      "name": "Wait",
+      "position": {
+        "X": 216.21,
+        "Y": -453.82,
+        "Z": 99.28
+      },
+      "arguments": [
+        "2000"
+      ],
+      "note": ""
+    },
+    {
+      "tag": "W2W",
+      "name": "StopForCombat",
+      "position": {
+        "X": 224.18,
+        "Y": -454.08,
+        "Z": 46.99
+      },
+      "arguments": [
+        "true"
+      ],
+      "note": ""
+    },
+    {
+      "tag": "Treasure",
       "name": "TreasureCoffer",
       "position": {
         "X": 215.9,
@@ -77,7 +155,33 @@
       "note": ""
     },
     {
-      "tag": 5,
+      "tag": "W2W",
+      "name": "StopForCombat",
+      "position": {
+        "X": 0,
+        "Y": 0,
+        "Z": 0
+      },
+      "arguments": [
+        "false"
+      ],
+      "note": ""
+    },
+    {
+      "tag": "W2W",
+      "name": "StopForCombat",
+      "position": {
+        "X": 293.22,
+        "Y": -470.45,
+        "Z": -126.06
+      },
+      "arguments": [
+        "true"
+      ],
+      "note": ""
+    },
+    {
+      "tag": "Treasure",
       "name": "TreasureCoffer",
       "position": {
         "X": 291.75,
@@ -90,7 +194,7 @@
       "note": ""
     },
     {
-      "tag": 0,
+      "tag": "None",
       "name": "Interactable",
       "position": {
         "X": 288.08,
@@ -103,12 +207,25 @@
       "note": "Geomantic Aetheryte"
     },
     {
-      "tag": 5,
-      "name": "TreasureCoffer",
+      "tag": "None",
+      "name": "WaitFor",
       "position": {
-        "X": 11.51,
+        "X": 0,
         "Y": 0,
-        "Z": 314.09
+        "Z": 0
+      },
+      "arguments": [
+        "IsReady"
+      ],
+      "note": ""
+    },
+    {
+      "tag": "None",
+      "name": "Boss",
+      "position": {
+        "X": 25.98,
+        "Y": 0,
+        "Z": 306.85
       },
       "arguments": [
         ""
@@ -116,7 +233,33 @@
       "note": ""
     },
     {
-      "tag": 5,
+      "tag": "W2W",
+      "name": "StopForCombat",
+      "position": {
+        "X": 0,
+        "Y": 0,
+        "Z": 0
+      },
+      "arguments": [
+        "false"
+      ],
+      "note": ""
+    },
+    {
+      "tag": "W2W",
+      "name": "StopForCombat",
+      "position": {
+        "X": -41.42,
+        "Y": 0.07,
+        "Z": 170.81
+      },
+      "arguments": [
+        "true"
+      ],
+      "note": ""
+    },
+    {
+      "tag": "Treasure",
       "name": "TreasureCoffer",
       "position": {
         "X": -53.8,
@@ -129,7 +272,7 @@
       "note": ""
     },
     {
-      "tag": 0,
+      "tag": "None",
       "name": "MoveTo",
       "position": {
         "X": -45.100506,
@@ -140,7 +283,7 @@
       "note": ""
     },
     {
-      "tag": 0,
+      "tag": "None",
       "name": "MoveTo",
       "position": {
         "X": -48.485615,
@@ -151,20 +294,59 @@
       "note": ""
     },
     {
-      "tag": 0,
-      "name": "AutoMoveFor",
+      "tag": "None",
+      "name": "MoveTo",
       "position": {
-        "X": -48.49,
-        "Y": -0.47,
-        "Z": 146.33
+        "X": -53.22,
+        "Y": 0.67,
+        "Z": 141.47
       },
       "arguments": [
-        "2000"
+        "false"
       ],
       "note": ""
     },
     {
-      "tag": 5,
+      "tag": "None",
+      "name": "WaitFor",
+      "position": {
+        "X": 0,
+        "Y": 0,
+        "Z": 0
+      },
+      "arguments": [
+        "IsReady"
+      ],
+      "note": ""
+    },
+    {
+      "tag": "W2W",
+      "name": "StopForCombat",
+      "position": {
+        "X": 0,
+        "Y": 0,
+        "Z": 0
+      },
+      "arguments": [
+        "false"
+      ],
+      "note": ""
+    },
+    {
+      "tag": "W2W",
+      "name": "StopForCombat",
+      "position": {
+        "X": 19.58,
+        "Y": 0.97,
+        "Z": -32.4
+      },
+      "arguments": [
+        "true"
+      ],
+      "note": ""
+    },
+    {
+      "tag": "Treasure",
       "name": "TreasureCoffer",
       "position": {
         "X": 23.32,
@@ -177,7 +359,7 @@
       "note": ""
     },
     {
-      "tag": 0,
+      "tag": "None",
       "name": "MoveTo",
       "position": {
         "X": 11.05994,
@@ -188,7 +370,44 @@
       "note": ""
     },
     {
-      "tag": 0,
+      "tag": "None",
+      "name": "MoveTo",
+      "position": {
+        "X": 13.709136,
+        "Y": 0.9541968,
+        "Z": -52.65067
+      },
+      "arguments": [],
+      "note": ""
+    },
+    {
+      "tag": "None",
+      "name": "MoveTo",
+      "position": {
+        "X": 13.66,
+        "Y": 64.99,
+        "Z": -154.71
+      },
+      "arguments": [
+        "false"
+      ],
+      "note": ""
+    },
+    {
+      "tag": "None",
+      "name": "WaitFor",
+      "position": {
+        "X": 0,
+        "Y": 0,
+        "Z": 0
+      },
+      "arguments": [
+        "IsReady"
+      ],
+      "note": ""
+    },
+    {
+      "tag": "None",
       "name": "MoveTo",
       "position": {
         "X": 14.786574,
@@ -199,22 +418,44 @@
       "note": ""
     },
     {
-      "tag": 5,
-      "name": "TreasureCoffer",
+      "tag": "None",
+      "name": "Boss",
       "position": {
-        "X": 15.01,
+        "X": 14.95,
         "Y": 73,
-        "Z": -258.4
+        "Z": -251.26
       },
       "arguments": [
         ""
       ],
       "note": ""
+    },
+    {
+      "tag": "None",
+      "name": "MoveTo",
+      "position": {
+        "X": 15.105515,
+        "Y": 73.00001,
+        "Z": -258.63742
+      },
+      "arguments": [],
+      "note": ""
     }
   ],
   "meta": {
     "createdAt": 183,
-    "changelog": [],
-    "notes": ["Unsync"]
+    "changelog": [
+      {
+        "version": 189,
+        "change": "Adjusted tags to string values"
+      },
+      {
+        "version": 192,
+        "change": "Modernized Path"
+      }
+    ],
+    "notes": [
+      "Unsync"
+    ]
   }
 }

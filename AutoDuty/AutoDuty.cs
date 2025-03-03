@@ -216,7 +216,7 @@ public sealed class AutoDuty : IDalamudPlugin
             AssemblyDirectoryInfo = AssemblyFileInfo.Directory;
             
             Configuration.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 188) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 189) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
             Configuration.Save();
 
@@ -235,7 +235,7 @@ public sealed class AutoDuty : IDalamudPlugin
             ContentHelper.PopulateDuties();
             RepairNPCHelper.PopulateRepairNPCs();
             FileHelper.Init();
-            Patcher.Patch();
+            Patcher.Patch(startup: true);
             Chat = new();
             _overrideAFK = new();
             _ipcProvider = new();
@@ -306,7 +306,11 @@ public sealed class AutoDuty : IDalamudPlugin
     private void DutyState_DutyStarted(object? sender, ushort e) => DutyState = DutyState.DutyStarted;
     private void DutyState_DutyWiped(object? sender, ushort e) => DutyState = DutyState.DutyWiped;
     private void DutyState_DutyRecommenced(object? sender, ushort e) => DutyState = DutyState.DutyRecommenced;
-    private void DutyState_DutyCompleted(object? sender, ushort e) => DutyState = DutyState.DutyComplete;
+    private void DutyState_DutyCompleted(object? sender, ushort e)
+    {
+        DutyState = DutyState.DutyComplete;
+        this.CheckFinishing();
+    }
 
     private void MessageReceived(string messageJson)
     {
@@ -1142,20 +1146,30 @@ public sealed class AutoDuty : IDalamudPlugin
 
     private void DoneNavigating()
     {
+        States &= ~PluginState.Navigating;
+        this.CheckFinishing();
+    }
+
+    private void CheckFinishing()
+    {
         //we finished lets exit the duty or stop
-        if (Configuration.AutoExitDuty || CurrentLoop < Configuration.LoopTimes)
+        if ((Configuration.AutoExitDuty || CurrentLoop < Configuration.LoopTimes))
         {
-            if (ExitDutyHelper.State != ActionState.Running)
-                ExitDuty();
-            if (Configuration.AutoManageRotationPluginState && !Configuration.UsingAlternativeRotationPlugin)
-                SetRotationPluginSettings(false);
-            if (Configuration.AutoManageBossModAISettings)
+            if (!Stage.EqualsAny(Stage.Stopped, Stage.Paused)                                     &&
+                (!Configuration.OnlyExitWhenDutyDone || this.DutyState == DutyState.DutyComplete) &&
+                !this.States.HasFlag(PluginState.Navigating))
             {
-                Chat.ExecuteCommand($"/vbmai off");
-                if (!IPCSubscriber_Common.IsReady("BossModReborn"))
-                    Chat.ExecuteCommand($"/vbm cfg AIConfig Enable false");
+                if (ExitDutyHelper.State != ActionState.Running)
+                    ExitDuty();
+                if (Configuration.AutoManageRotationPluginState && !Configuration.UsingAlternativeRotationPlugin)
+                    SetRotationPluginSettings(false);
+                if (Configuration.AutoManageBossModAISettings)
+                {
+                    Chat.ExecuteCommand($"/vbmai off");
+                    if (!IPCSubscriber_Common.IsReady("BossModReborn"))
+                        Chat.ExecuteCommand($"/vbm cfg AIConfig Enable false");
+                }
             }
-            States &= ~PluginState.Navigating;
         }
         else
             Stage = Stage.Stopped;

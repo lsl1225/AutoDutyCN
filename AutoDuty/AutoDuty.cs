@@ -195,6 +195,7 @@ public sealed class AutoDuty : IDalamudPlugin
     private         bool           _lootTreasure;
     private         SettingsActive _settingsActive         = SettingsActive.None;
     private         SettingsActive _bareModeSettingsActive = SettingsActive.None;
+    private         DateTime       _lastRotationSetTime    = DateTime.MinValue;
     public readonly bool           isDev;
 
     public AutoDuty()
@@ -216,7 +217,7 @@ public sealed class AutoDuty : IDalamudPlugin
             AssemblyDirectoryInfo = AssemblyFileInfo.Directory;
             
             Configuration.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 189) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 192) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
             Configuration.Save();
 
@@ -598,6 +599,13 @@ public sealed class AutoDuty : IDalamudPlugin
 
         if (Configuration.EnableBetweenLoopActions)
         {
+            if (Configuration.ExecuteCommandsBetweenLoop)
+            {
+                TaskManager.Enqueue(() => Svc.Log.Debug($"ExecutingCommandsBetweenLoops, executing {Configuration.CustomCommandsBetweenLoop.Count} commands"));
+                Configuration.CustomCommandsBetweenLoop.Each(x => Chat.ExecuteCommand(x));
+                TaskManager.DelayNext("Loop-DelayAfterCommands", 1000);
+            }
+
             if (Configuration.EnableAutoRetainer && AutoRetainer_IPCSubscriber.IsEnabled && AutoRetainer_IPCSubscriber.AreAnyRetainersAvailableForCurrentChara())
             {
                 TaskManager.Enqueue(() => Svc.Log.Debug($"AutoRetainer BetweenLoop Actions"));
@@ -857,17 +865,18 @@ public sealed class AutoDuty : IDalamudPlugin
 
         PathAction = Actions[Indexer];
 
-        if (PathAction.Tag.HasFlag(ActionTag.W2W) && !Configuration.W2WJobs.HasJob(this.JobLastKnown))
-        {
-            Svc.Log.Debug($"Skipping path entry {Actions[Indexer]} because we are not W2W-ing");
-            this.Indexer++;
-            return;
-        }
-
-        if (PathAction.Tag.HasFlag(ActionTag.Unsynced) && (!Configuration.Unsynced || !Configuration.DutyModeEnum.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial)))
+        bool sync = !this.Configuration.Unsynced || !this.Configuration.DutyModeEnum.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial);
+        if (PathAction.Tag.HasFlag(ActionTag.Unsynced) && sync)
         {
             Svc.Log.Debug($"Skipping path entry {Actions[Indexer]} because we are synced");
             Indexer++;
+            return;
+        }
+
+        if (PathAction.Tag.HasFlag(ActionTag.W2W) && !Configuration.IsW2W(unsync: !sync))
+        {
+            Svc.Log.Debug($"Skipping path entry {Actions[Indexer]} because we are not W2W-ing");
+            this.Indexer++;
             return;
         }
 
@@ -950,10 +959,10 @@ public sealed class AutoDuty : IDalamudPlugin
             return;
         }
 
-        if (StuckHelper.IsStuck())
+        if (StuckHelper.IsStuck(out byte stuckCount))
         {
             VNavmesh_IPCSubscriber.Path_Stop();
-            if (Configuration.RebuildNavmeshOnStuck)
+            if (Configuration.RebuildNavmeshOnStuck && stuckCount >= Configuration.RebuildNavmeshAfterStuckXTimes)
                 VNavmesh_IPCSubscriber.Nav_Rebuild();
             Stage = Stage.Reading_Path;
             return;
@@ -1214,6 +1223,11 @@ public sealed class AutoDuty : IDalamudPlugin
 
     internal void SetRotationPluginSettings(bool on, bool ignoreConfig = false)
     {
+        // Only try to set the rotation state every few seconds
+        if ((DateTime.Now - _lastRotationSetTime).TotalSeconds < 5)
+            return;
+        _lastRotationSetTime = DateTime.Now;
+
         if (!ignoreConfig && !this.Configuration.AutoManageRotationPluginState)
             return;
         bool bmEnabled     = BossMod_IPCSubscriber.IsEnabled;
@@ -1223,7 +1237,7 @@ public sealed class AutoDuty : IDalamudPlugin
         {
             bool wrathRotationReady = true;
             if (on)
-                wrathRotationReady = Wrath_IPCSubscriber.IsCurrentJobAutoRotationReady() || 
+                wrathRotationReady = Wrath_IPCSubscriber.IsCurrentJobAutoRotationReady() ||
                                      this.Configuration.Wrath_AutoSetupJobs && Wrath_IPCSubscriber.SetJobAutoReady();
 
             if (!on || wrathRotationReady)
@@ -1763,10 +1777,10 @@ public sealed class AutoDuty : IDalamudPlugin
                     Svc.Log.Info($"{failPreMessage}Argument 2 value was not of type {dutyMode}, which you inputed in Argument 1, Argument 2 value was {argsArray[2]}{failPostMessage}");
                     return;
                 }
-                if (!content.CanRun(PlayerHelper.GetCurrentLevelFromSheet()) || (dutyMode == DutyMode.Trust && !content.CanTrustRun()))
+                if (!content.CanRun(trust: dutyMode == DutyMode.Trust))
                 {
                     var failReason = !UIState.IsInstanceContentCompleted(content.Id) ? "You dont have it unlocked" : (!ContentPathsManager.DictionaryPaths.ContainsKey(content.TerritoryType) ? "There is no path file" : (PlayerHelper.GetCurrentLevelFromSheet() < content.ClassJobLevelRequired ? $"Your Lvl({PlayerHelper.GetCurrentLevelFromSheet()}) is less than {content.ClassJobLevelRequired}" : (InventoryHelper.CurrentItemLevel < content.ItemLevelRequired ? $"Your iLvl({InventoryHelper.CurrentItemLevel}) is less than {content.ItemLevelRequired}" : "Your trust party is not of correct levels")));
-                    Svc.Log.Info($"Unable to run {content.Name}, {failReason} {TrustHelper.CanTrustRun(content)}");
+                    Svc.Log.Info($"Unable to run {content.Name}, {failReason} {content.CanTrustRun()}");
                     return;
                 }
 

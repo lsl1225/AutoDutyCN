@@ -72,7 +72,7 @@ namespace AutoDuty.Helpers
             AgentDawn* agentDawn = AgentDawn.Instance();
             if (!agentDawn->IsAddonReady())
             {
-                if (!EzThrottler.Throttle("OpenDawn", 5000)) return;
+                if (!EzThrottler.Throttle("OpenDawn", 5000) || !AgentHUD.Instance()->IsMainCommandEnabled(82)) return;
 
                 Svc.Log.Debug("Queue Helper - Opening Dawn");
                 RaptureAtkModule.Instance()->OpenDawn(_content.RowId);
@@ -86,9 +86,9 @@ namespace AutoDuty.Helpers
                 return;
             }
 
-            if (agentDawn->SelectedDawnContentId != _content.DawnRowId)
+            if ((byte) agentDawn->SelectedDawnContentId != _content.DawnRowId)
             {
-                Svc.Log.Debug($"Queue Helper - Clicking: {_content.EnglishName} at index: {_content.TrustIndex}");
+                Svc.Log.Debug($"Queue Helper - Clicking: {_content.EnglishName} at {_content.RowId} with dawn {_content.DawnRowId} instead of {agentDawn->SelectedDawnContentId}");
                 RaptureAtkModule.Instance()->OpenDawn(_content.RowId);
             }
             else if (!_turnedOffTrustMembers)
@@ -122,7 +122,7 @@ namespace AutoDuty.Helpers
                     SchedulerHelper.ScheduleAction("_turnedOnConfigMembers", () => _turnedOnConfigMembers = true, 250);
                 }
             }
-            else
+            else if(EzThrottler.Throttle("ClickRegisterButton", 10000))
             {
                 Svc.Log.Debug($"Queue Helper - Clicking: Register For Duty");
                 agentDawn->RegisterForDuty();
@@ -134,7 +134,7 @@ namespace AutoDuty.Helpers
             AgentDawnStory* agentDawnStory = AgentDawnStory.Instance();
             if (!agentDawnStory->IsAddonReady())
             {
-                if (!EzThrottler.Throttle("OpenDawnStory", 5000)) return;
+                if (!EzThrottler.Throttle("OpenDawnStory", 5000) || !AgentHUD.Instance()->IsMainCommandEnabled(91)) return;
                 
                 Svc.Log.Debug("Queue Helper - Opening DawnStory");
                 RaptureAtkModule.Instance()->OpenDawnStory(_content.Id);
@@ -154,7 +154,7 @@ namespace AutoDuty.Helpers
 
                 RaptureAtkModule.Instance()->OpenDawnStory(_content.RowId);
             }
-            else
+            else if(EzThrottler.Throttle("ClickRegisterButton", 10000))
             {
                 Svc.Log.Debug($"Queue Helper - Clicking: Register For Duty");
                 AgentDawnStory.Instance()->RegisterForDuty();
@@ -169,9 +169,12 @@ namespace AutoDuty.Helpers
                 ContentsFinder.Instance()->IsUnrestrictedParty = Plugin.Configuration.Unsynced;
                 return;
             }
-            
-            if (!_allConditionsMetToJoin && (!GenericHelpers.TryGetAddonByName("ContentsFinder", out _addonContentsFinder) || !GenericHelpers.IsAddonReady((AtkUnitBase*)_addonContentsFinder)))
+
+            GenericHelpers.TryGetAddonByName("ContentsFinder", out _addonContentsFinder);
+            if (!_allConditionsMetToJoin && (_addonContentsFinder == null || !GenericHelpers.IsAddonReady((AtkUnitBase*)_addonContentsFinder)))
             {
+                if (!AgentHUD.Instance()->IsMainCommandEnabled(33))
+                    return;
                 Svc.Log.Debug($"Queue Helper - Opening ContentsFinder to {_content!.Name}");
                 AgentContentsFinder.Instance()->OpenRegularDuty(_content.ContentFinderCondition);
                 return;
@@ -225,7 +228,7 @@ namespace AutoDuty.Helpers
             if (_content == null || Plugin.InDungeon || Svc.ClientState.TerritoryType == _content?.TerritoryType)
                 Stop();
 
-            if (!EzThrottler.Throttle("QueueHelper", 250)|| !PlayerHelper.IsReadyFull || ContentsFinderConfirm() || Conditions.IsInDutyQueue) return;
+            if (!EzThrottler.Throttle("QueueHelper", 250)|| !PlayerHelper.IsReadyFull || ContentsFinderConfirm() || Conditions.Instance()->InDutyQueue) return;
 
             switch (_dutyMode)
             {

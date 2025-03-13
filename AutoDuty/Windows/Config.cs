@@ -21,12 +21,15 @@ using Serilog.Events;
 
 namespace AutoDuty.Windows;
 
+using System.Numerics;
+using System.Text.Json.Serialization;
 using Data;
 using ECommons.ExcelServices;
 using Properties;
 using Lumina.Excel.Sheets;
 using Vector2 = FFXIVClientStructs.FFXIV.Common.Math.Vector2;
 using ECommons.UIHelpers.AddonMasterImplementations;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
 [Serializable]
 public class Configuration : IPluginConfiguration
@@ -58,8 +61,10 @@ public class Configuration : IPluginConfiguration
         }
     }
     
-    public bool Unsynced = false;
-    public bool HideUnavailableDuties = false;
+    public bool Unsynced                       = false;
+    public bool HideUnavailableDuties          = false;
+    public bool PreferTrustOverSupportLeveling = false;
+
     public bool ShowMainWindowOnStartup = false;
 
     //Overlay Config Options
@@ -113,16 +118,17 @@ public class Configuration : IPluginConfiguration
                 SchedulerHelper.ScheduleAction("OverlayNoBGSetter", () => { if (Plugin.Overlay.Flags.HasFlag(ImGuiWindowFlags.NoBackground)) Plugin.Overlay.Flags -= ImGuiWindowFlags.NoBackground; }, () => Plugin.Overlay != null);
         }
     }
-    public bool ShowDutyLoopText = true;
-    public bool ShowActionText = true;
-    public bool UseSliderInputs = false;
+    public bool ShowDutyLoopText       = true;
+    public bool ShowActionText         = true;
+    public bool UseSliderInputs        = false;
     public bool OverrideOverlayButtons = true;
-    public bool GotoButton = true;
-    public bool TurninButton = true;
-    public bool DesynthButton = true;
-    public bool ExtractButton = true;
-    public bool RepairButton = true;
-    public bool EquipButton = true;
+    public bool GotoButton             = true;
+    public bool TurninButton           = true;
+    public bool DesynthButton          = true;
+    public bool ExtractButton          = true;
+    public bool RepairButton           = true;
+    public bool EquipButton            = true;
+    public bool CofferButton            = true;
 
     internal bool updatePathsOnStartup = true;
     public   bool UpdatePathsOnStartup
@@ -175,29 +181,36 @@ public class Configuration : IPluginConfiguration
 
 
     //PreLoop Config Options
-    public bool EnablePreLoopActions = true;
-    public bool ExecuteCommandsPreLoop = false;
-    public List<string> CustomCommandsPreLoop = [];
-    public bool RetireMode = false;
-    public RetireLocation RetireLocationEnum = RetireLocation.Inn;
-    public List<System.Numerics.Vector3> PersonalHomeEntrancePath = [];
-    public List<System.Numerics.Vector3> FCEstateEntrancePath = [];
-    public bool AutoEquipRecommendedGear;
-    public bool AutoEquipRecommendedGearGearsetter;
-    public bool AutoRepair = false;
-    public int AutoRepairPct = 50;
-    public bool AutoRepairSelf = false;
-    public RepairNpcData? PreferredRepairNPC = null;
-    public bool AutoConsume = false;
-    public bool AutoConsumeIgnoreStatus = false;
-    public List<KeyValuePair<ushort, ConsumableItem>> AutoConsumeItemsList = [];
+    public bool                                       EnablePreLoopActions     = true;
+    public bool                                       ExecuteCommandsPreLoop   = false;
+    public List<string>                               CustomCommandsPreLoop    = [];
+    public bool                                       RetireMode               = false;
+    public RetireLocation                             RetireLocationEnum       = RetireLocation.Inn;
+    public List<System.Numerics.Vector3>              PersonalHomeEntrancePath = [];
+    public List<System.Numerics.Vector3>              FCEstateEntrancePath     = [];
+    public bool                                       AutoEquipRecommendedGear;
+    public bool                                       AutoEquipRecommendedGearGearsetter;
+    public bool                                       AutoRepair              = false;
+    public int                                        AutoRepairPct           = 50;
+    public bool                                       AutoRepairSelf          = false;
+    public RepairNpcData?                             PreferredRepairNPC      = null;
+    public bool                                       AutoConsume             = false;
+    public bool                                       AutoConsumeIgnoreStatus = false;
+    public int                                        AutoConsumeTime         = 29;
+    public List<KeyValuePair<ushort, ConsumableItem>> AutoConsumeItemsList    = [];
 
     //Between Loop Config Options
-    public bool         EnableBetweenLoopActions       = true;
-    public int          WaitTimeBeforeAfterLoopActions = 0;
-    public bool         ExecuteCommandsBetweenLoop     = false;
-    public List<string> CustomCommandsBetweenLoop      = [];
-    public bool         AutoExtract                    = false;
+    public bool         EnableBetweenLoopActions         = true;
+    public bool         ExecuteBetweenLoopActionLastLoop = false;
+    public int          WaitTimeBeforeAfterLoopActions   = 0;
+    public bool         ExecuteCommandsBetweenLoop       = false;
+    public List<string> CustomCommandsBetweenLoop        = [];
+    public bool         AutoExtract                      = false;
+
+    public bool                     AutoOpenCoffers = false;
+    public byte?                    AutoOpenCoffersGearset;
+    public bool                     AutoOpenCoffersBlacklistUse;
+    public Dictionary<uint, string> AutoOpenCoffersBlacklist = [];
 
     internal bool autoExtractAll = false;
     public bool AutoExtractAll
@@ -341,6 +354,9 @@ public class Configuration : IPluginConfiguration
                 SchedulerHelper.ScheduleAction("PositionalRoleBasedBMRoleChecks", () => Plugin.BMRoleChecks(), () => PlayerHelper.IsReady);
         }
     }
+    public float MaxDistanceToTargetRoleMelee  = 2.6f;
+    public float MaxDistanceToTargetRoleRanged = 10f;
+
 
     internal bool       positionalAvarice = true;
     public   Positional PositionalEnum    = Positional.Any;
@@ -371,9 +387,12 @@ public static class ConfigTab
     private static string preLoopCommand = string.Empty;
     private static string betweenLoopCommand = string.Empty;
     private static string terminationCommand = string.Empty;
-    private static Dictionary<uint, string> Items { get; set; } = Svc.Data.GetExcelSheet<Item>()?.Where(x => !x.Name.ToString().IsNullOrEmpty()).ToDictionary(x => x.RowId, x => x.Name.ToString()) ?? [];
+    private static Dictionary<uint, Item> Items { get; set; } = Svc.Data.GetExcelSheet<Item>()?.Where(x => !x.Name.ToString().IsNullOrEmpty()).ToDictionary(x => x.RowId, x => x) ?? [];
     private static string stopItemQtyItemNameInput = "";
     private static KeyValuePair<uint, string> stopItemQtySelectedItem = new(0, "");
+
+    private static string                     autoOpenCoffersNameInput    = "";
+    private static KeyValuePair<uint, string> autoOpenCoffersSelectedItem = new(0, "");
 
     public class ConsumableItem
     {
@@ -489,7 +508,9 @@ public static class ConfigTab
                         Configuration.Save();
                     if (ImGui.Checkbox("Equip", ref Configuration.EquipButton))
                         Configuration.Save();
-                    
+                    if (ImGui.Checkbox("Coffer", ref Configuration.CofferButton))
+                        Configuration.Save();
+
                     ImGui.Unindent();
                 }
                 ImGui.Unindent();
@@ -735,12 +756,28 @@ public static class ConfigTab
                         }
                         ImGui.PopItemWidth();
                     }
-                    ImGui.PushItemWidth(195);
-                    if (ImGui.SliderFloat("Max Distance To Slot", ref Configuration.MaxDistanceToSlotFloat, 1, 30))
+                    using (ImRaii.Disabled(!Configuration.MaxDistanceToTargetRoleBased))
+                    {
+                        ImGui.PushItemWidth(195);
+                        if (ImGui.SliderFloat("Max Distance To Target | Melee", ref Configuration.MaxDistanceToTargetRoleMelee, 1, 30))
                         {
-                            Configuration.MaxDistanceToSlotFloat = Math.Clamp(Configuration.MaxDistanceToSlotFloat, 1, 30);
+                            Configuration.MaxDistanceToTargetRoleMelee = Math.Clamp(Configuration.MaxDistanceToTargetRoleMelee, 1, 30);
                             Configuration.Save();
                         }
+                        if (ImGui.SliderFloat("Max Distance To Target | Ranged", ref Configuration.MaxDistanceToTargetRoleRanged, 1, 30))
+                        {
+                            Configuration.MaxDistanceToTargetRoleRanged = Math.Clamp(Configuration.MaxDistanceToTargetRoleRanged, 1, 30);
+                            Configuration.Save();
+                        }
+                        ImGui.PopItemWidth();
+                    }
+
+                    ImGui.PushItemWidth(195);
+                    if (ImGui.SliderFloat("Max Distance To Slot", ref Configuration.MaxDistanceToSlotFloat, 1, 30))
+                    {
+                        Configuration.MaxDistanceToSlotFloat = Math.Clamp(Configuration.MaxDistanceToSlotFloat, 1, 30);
+                        Configuration.Save();
+                    }
                     ImGui.PopItemWidth();
                     if (ImGui.Checkbox("Set Positional Based on Player Role", ref Configuration.positionalRoleBased))
                     {
@@ -1106,18 +1143,37 @@ public static class ConfigTab
                     ImGui.Unindent();
                 }
 
+                ImGui.Columns(3);
+
                 if (ImGui.Checkbox("Auto Consume", ref Configuration.AutoConsume))
                     Configuration.Save();
 
                 ImGuiComponents.HelpMarker("AutoDuty will consume these items on run and between each loop (if status does not exist)");
                 if (Configuration.AutoConsume)
                 {
-                    ImGui.SameLine(0, 5);
+                    //ImGui.SameLine(0, 5);
+                    ImGui.NextColumn();
                     if (ImGui.Checkbox("Ignore Status", ref Configuration.AutoConsumeIgnoreStatus))
                         Configuration.Save();
 
                     ImGuiComponents.HelpMarker("AutoDuty will consume these items on run and between each loop every time (even if status does exists)");
+                    ImGui.NextColumn();
+                    //ImGui.SameLine(0, 5);
                     
+                    ImGui.PushItemWidth(80);
+
+                    using (ImRaii.Disabled(Configuration.AutoConsumeIgnoreStatus))
+                    {
+                        if (ImGui.InputInt("Min time remaining", ref Configuration.AutoConsumeTime))
+                        {
+                            Configuration.AutoConsumeTime = Math.Clamp(Configuration.AutoConsumeTime, 0, 59);
+                            Configuration.Save();
+                        }
+                        ImGuiComponents.HelpMarker("If the status has less than this amount of time remaining (in minutes), it will consume these items");
+                    }
+
+                    ImGui.PopItemWidth();
+                    ImGui.Columns(1);
                     ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 115);
                     if (ImGui.BeginCombo("##SelectAutoConsumeItem", consumableItemsSelectedItem.Name))
                     {
@@ -1164,6 +1220,7 @@ public static class ConfigTab
                         Configuration.Save();
                     }
                 }
+                ImGui.Columns(1);
             }
         }
 
@@ -1180,11 +1237,20 @@ public static class ConfigTab
 
         if (betweenLoopHeaderSelected == true)
         {
+            ImGui.Columns(2);
+
             if (ImGui.Checkbox("Enable###BetweenLoopEnable", ref Configuration.EnableBetweenLoopActions))
                 Configuration.Save();
 
             using (ImRaii.Disabled(!Configuration.EnableBetweenLoopActions))
             {
+                ImGui.NextColumn();
+
+                if (ImGui.Checkbox("Run on last Loop###BetweenLoopEnableLastLoop", ref Configuration.ExecuteBetweenLoopActionLastLoop))
+                    Configuration.Save();
+
+                ImGui.Columns(1);
+
                 ImGui.Separator();
                 ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - ImGui.CalcItemWidth());
                 if (ImGui.InputInt("(s) Wait time between loops", ref Configuration.WaitTimeBeforeAfterLoopActions))
@@ -1215,6 +1281,102 @@ public static class ConfigTab
                     {
                         Configuration.AutoExtractAll = true;
                         Configuration.Save();
+                    }
+                }
+
+                if (ImGui.Checkbox("Auto open gear coffers", ref Configuration.AutoOpenCoffers))
+                    Configuration.Save();
+
+                ImGuiComponents.HelpMarker("AutoDuty will open gear coffers (like paladin arms) between each loop");
+
+                ImGui.SameLine();
+                ImGui.TextColored(Configuration.AutoOpenCoffers ? GradientColor.Get(ImGuiHelper.ExperimentalColor, ImGuiHelper.ExperimentalColor2, 500) : ImGuiHelper.ExperimentalColor, "EXPERIMENTAL");
+                if (Configuration.AutoOpenCoffers)
+                {
+                    unsafe
+                    {
+                        ImGui.Indent();
+                        ImGui.Text("Open Coffers with Gearset: ");
+                        ImGui.AlignTextToFramePadding();
+                        ImGui.SameLine();
+
+                        RaptureGearsetModule* module = RaptureGearsetModule.Instance();
+                        
+                        if (Configuration.AutoOpenCoffersGearset != null && !module->IsValidGearset((int) Configuration.AutoOpenCoffersGearset))
+                        {
+                            Configuration.AutoOpenCoffersGearset = null;
+                            Configuration.Save();
+                        }
+
+
+                        if (ImGui.BeginCombo("##CofferGearsetSelection", Configuration.AutoOpenCoffersGearset != null ? module->GetGearset(Configuration.AutoOpenCoffersGearset.Value)->NameString : "Current Gearset"))
+                        {
+                            if (ImGui.Selectable("Current Gearset"))
+                            {
+                                Configuration.AutoOpenCoffersGearset = null;
+                                Configuration.Save();
+                            }
+
+                            for (int i = 0; i < module->NumGearsets; i++)
+                            {
+                                RaptureGearsetModule.GearsetEntry* gearset = module->GetGearset(i);
+                                if(ImGui.Selectable(gearset->NameString))
+                                {
+                                    Configuration.AutoOpenCoffersGearset = gearset->Id;
+                                    Configuration.Save();
+                                }
+                            }
+
+                            ImGui.EndCombo();
+                        }
+
+                        if (ImGui.Checkbox("Use Blacklist", ref Configuration.AutoOpenCoffersBlacklistUse))
+                            Configuration.Save();
+
+                        ImGuiComponents.HelpMarker("Option to disable some coffers from being opened automatically.");
+                        if (Configuration.AutoOpenCoffersBlacklistUse)
+                        {
+                            if (ImGui.BeginCombo("Select Coffer", autoOpenCoffersSelectedItem.Value))
+                            {
+                                ImGui.InputTextWithHint("Coffer Name", "Start typing coffer name to search", ref autoOpenCoffersNameInput, 1000);
+                                foreach (var item in Items.Where(x => CofferHelper.ValidCoffer(x.Value) && x.Value.Name.ToString().Contains(autoOpenCoffersNameInput, StringComparison.InvariantCultureIgnoreCase)))
+                                {
+                                    if (ImGui.Selectable($"{item.Value.Name.ToString()}"))
+                                        autoOpenCoffersSelectedItem = new KeyValuePair<uint, string>(item.Key, item.Value.Name.ToString());
+                                }
+                                ImGui.EndCombo();
+                            }
+
+                            ImGui.SameLine(0, 5);
+                            using (ImRaii.Disabled(autoOpenCoffersSelectedItem.Value.IsNullOrEmpty()))
+                            {
+                                if (ImGui.Button("Add Coffer"))
+                                {
+                                    if (!Configuration.AutoOpenCoffersBlacklist.TryAdd(autoOpenCoffersSelectedItem.Key, autoOpenCoffersSelectedItem.Value))
+                                    {
+                                        Configuration.AutoOpenCoffersBlacklist.Remove(autoOpenCoffersSelectedItem.Key);
+                                        Configuration.AutoOpenCoffersBlacklist.Add(autoOpenCoffersSelectedItem.Key, autoOpenCoffersSelectedItem.Value);
+                                    }
+                                    autoOpenCoffersSelectedItem = new(0, "");
+                                    Configuration.Save();
+                                }
+                            }
+                            
+                            if (!ImGui.BeginListBox("##CofferBlackList", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, (ImGui.GetTextLineHeightWithSpacing() * Configuration.AutoOpenCoffersBlacklist.Count) + 5))) return;
+
+                            foreach (var item in Configuration.AutoOpenCoffersBlacklist)
+                            {
+                                ImGui.Selectable($"{item.Value}");
+                                if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+                                {
+                                    Configuration.AutoOpenCoffersBlacklist.Remove(item);
+                                    Configuration.Save();
+                                }
+                            }
+                            ImGui.EndListBox();
+                        }
+                        
+                        ImGui.Unindent();
                     }
                 }
 
@@ -1426,10 +1588,10 @@ public static class ConfigTab
                     if (ImGui.BeginCombo("Select Item", stopItemQtySelectedItem.Value))
                     {
                         ImGui.InputTextWithHint("Item Name", "Start typing item name to search", ref stopItemQtyItemNameInput, 1000);
-                        foreach (var item in Items.Where(x => x.Value.Contains(stopItemQtyItemNameInput, StringComparison.InvariantCultureIgnoreCase))!)
+                        foreach (var item in Items.Where(x => x.Value.Name.ToString().Contains(stopItemQtyItemNameInput, StringComparison.InvariantCultureIgnoreCase))!)
                         {
-                            if (ImGui.Selectable($"{item.Value}"))
-                                stopItemQtySelectedItem = item;
+                            if (ImGui.Selectable($"{item.Value.Name.ToString()}"))
+                                stopItemQtySelectedItem = new KeyValuePair<uint, string>(item.Key, item.Value.Name.ToString());
                         }
                         ImGui.EndCombo();
                     }

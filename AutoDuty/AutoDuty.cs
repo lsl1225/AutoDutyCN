@@ -450,10 +450,16 @@ public sealed class AutoDuty : IDalamudPlugin
             }
             else
             {
-                TaskManager.Enqueue(() => Svc.Log.Debug($"Loops Done"), "Loop-Debug");
-                TaskManager.Enqueue(() => PlayerHelper.IsReady, int.MaxValue, "Loop-WaitPlayerReady");
+                TaskManager.Enqueue(() => Svc.Log.Debug($"Loops Done"),                                                                                         "Loop-Debug");
+                TaskManager.Enqueue(() => PlayerHelper.IsReady,                                                                                                 int.MaxValue, "Loop-WaitPlayerReady");
                 TaskManager.Enqueue(() => Svc.Log.Debug($"Loop {CurrentLoop} == {Configuration.LoopTimes} we are done Looping, Invoking LoopsCompleteActions"), "Loop-Debug");
-                TaskManager.Enqueue(() => LoopsCompleteActions(), "Loop-LoopCompleteActions");
+                TaskManager.Enqueue(() =>
+                                    {
+                                        if (this.Configuration.ExecuteBetweenLoopActionLastLoop)
+                                            this.LoopTasks(false);
+                                        else
+                                            this.LoopsCompleteActions();
+                                    },     "Loop-LoopCompleteActions");
             }
         }
     }
@@ -593,7 +599,7 @@ public sealed class AutoDuty : IDalamudPlugin
             CurrentLoop = 1;
     }
 
-    private unsafe void LoopTasks()
+    private unsafe void LoopTasks(bool queue = true)
     {
         if (CurrentTerritoryContent == null) return;
 
@@ -604,6 +610,14 @@ public sealed class AutoDuty : IDalamudPlugin
                 TaskManager.Enqueue(() => Svc.Log.Debug($"ExecutingCommandsBetweenLoops, executing {Configuration.CustomCommandsBetweenLoop.Count} commands"));
                 Configuration.CustomCommandsBetweenLoop.Each(x => Chat.ExecuteCommand(x));
                 TaskManager.DelayNext("Loop-DelayAfterCommands", 1000);
+            }
+
+            if (Configuration.AutoOpenCoffers)
+            {
+                TaskManager.Enqueue(() => Svc.Log.Debug($"AutoCoffers Between Loop Action"));
+                TaskManager.Enqueue(CofferHelper.Invoke, "Loop-AutoCoffers");
+                TaskManager.DelayNext("Loop-Delay50", 50);
+                TaskManager.Enqueue(() => CofferHelper.State != ActionState.Running, int.MaxValue, "Loop-WaitAutoCofferComplete");
             }
 
             if (Configuration.EnableAutoRetainer && AutoRetainer_IPCSubscriber.IsEnabled && AutoRetainer_IPCSubscriber.AreAnyRetainersAvailableForCurrentChara())
@@ -684,12 +698,33 @@ public sealed class AutoDuty : IDalamudPlugin
                 TaskManager.Enqueue(() => GotoHousingHelper.State != ActionState.Running && GotoBarracksHelper.State != ActionState.Running && GotoInnHelper.State != ActionState.Running, int.MaxValue, "Loop-WaitGotoComplete");
             }
         }
+
+        if (!queue)
+        {
+            LoopsCompleteActions();
+            return;
+        }
+
         if (LevelingEnabled)
         {
             Svc.Log.Info("Leveling Enabled");
             Content? duty = LevelingHelper.SelectHighestLevelingRelevantDuty(LevelingModeEnum == LevelingMode.Trust);
             if (duty != null)
             {
+                if (this.LevelingModeEnum == LevelingMode.Support && Configuration.PreferTrustOverSupportLeveling && duty.ClassJobLevelRequired > 70)
+                {
+                    levelingModeEnum           = LevelingMode.Trust;
+                    Configuration.dutyModeEnum = DutyMode.Trust;
+
+                    Content? dutyTrust = LevelingHelper.SelectHighestLevelingRelevantDuty(true);
+
+                    if (duty != dutyTrust)
+                    {
+                        levelingModeEnum           = LevelingMode.Support;
+                        Configuration.dutyModeEnum = DutyMode.Support;
+                    }
+                }
+
                 Svc.Log.Info("Next Leveling Duty: " + duty.Name);
                 CurrentTerritoryContent = duty;
                 ContentPathsManager.DictionaryPaths[duty.TerritoryType].SelectPath(out CurrentPath);
@@ -826,7 +861,7 @@ public sealed class AutoDuty : IDalamudPlugin
                     if (Configuration.AutoConsumeIgnoreStatus)
                         TaskManager.Enqueue(() => InventoryHelper.UseItemUntilAnimationLock(x.Value.ItemId, x.Value.CanBeHq), $"AutoConsume - {x.Value.Name} is available: {isAvailable}");
                     else
-                        TaskManager.Enqueue(() => InventoryHelper.UseItemUntilStatus(x.Value.ItemId, x.Key, x.Value.CanBeHq), $"AutoConsume - {x.Value.Name} is available: {isAvailable}");
+                        TaskManager.Enqueue(() => InventoryHelper.UseItemUntilStatus(x.Value.ItemId, x.Key, Plugin.Configuration.AutoConsumeTime * 60, x.Value.CanBeHq), $"AutoConsume - {x.Value.Name} is available: {isAvailable}");
                 }
                 TaskManager.DelayNext("AutoConsume-DelayNext50", 50);
                 TaskManager.Enqueue(() => PlayerHelper.IsReadyFull, "AutoConsume-WaitPlayerIsReadyFull");
@@ -1070,7 +1105,7 @@ public sealed class AutoDuty : IDalamudPlugin
                     {
                         Svc.Log.Debug($"Changing MaxDistanceToTarget to {Configuration.MaxDistanceToTargetFloat}, because BM MaxDistanceToTarget={floatMDT} and enemy count = {enemyCount}");
                         BossMod_IPCSubscriber.Configuration(["AIConfig", "MaxDistanceToTarget", $"{Configuration.MaxDistanceToTargetFloat}"], false);
-                        BossMod_IPCSubscriber.Configuration(["AIConfig", "MaxDistanceToTarget", $"{Configuration.MaxDistanceToTargetFloat}"], false);
+                        //BossMod_IPCSubscriber.Configuration(["AIConfig", "MaxDistanceToTarget", $"{Configuration.MaxDistanceToTargetFloat}"], false);
                     }
                 }
             }
@@ -1339,7 +1374,8 @@ public sealed class AutoDuty : IDalamudPlugin
         }
 
         //RoleBased MaxDistanceToTarget
-        float maxDistanceToTarget = (Player.Object.ClassJob.Value.GetJobRole() == JobRole.Melee || Player.Object.ClassJob.Value.GetJobRole() == JobRole.Tank ? 2.6f : 10);
+        float maxDistanceToTarget = (Player.Object.ClassJob.Value.GetJobRole() == JobRole.Melee || Player.Object.ClassJob.Value.GetJobRole() == JobRole.Tank ? 
+                                         Plugin.Configuration.MaxDistanceToTargetRoleMelee : Plugin.Configuration.MaxDistanceToTargetRoleRanged);
         if (PlayerHelper.IsValid && Configuration.MaxDistanceToTargetRoleBased && Math.Abs(this.Configuration.MaxDistanceToTargetFloat - maxDistanceToTarget) > 0.01f)
         {
             Configuration.MaxDistanceToTargetFloat = maxDistanceToTarget;
@@ -1347,7 +1383,8 @@ public sealed class AutoDuty : IDalamudPlugin
         }
 
         //RoleBased MaxDistanceToTargetAoE
-        float maxDistanceToTargetAoE = (Player.Object.ClassJob.Value!.GetJobRole() == JobRole.Melee || Player.Object.ClassJob.Value!.GetJobRole() == JobRole.Tank || Player.Object.ClassJob.ValueNullable?.JobIndex == 18 ? 2.6f : 10);
+        float maxDistanceToTargetAoE = (Player.Object.ClassJob.Value!.GetJobRole() == JobRole.Melee || Player.Object.ClassJob.Value!.GetJobRole() == JobRole.Tank || Player.Object.ClassJob.ValueNullable?.JobIndex == 18 ?
+                                            Plugin.Configuration.MaxDistanceToTargetRoleMelee : Plugin.Configuration.MaxDistanceToTargetRoleRanged);
         if (PlayerHelper.IsValid && Configuration.MaxDistanceToTargetRoleBased && Math.Abs(this.Configuration.MaxDistanceToTargetAoEFloat - maxDistanceToTargetAoE) > 0.01f)
         {
             Configuration.MaxDistanceToTargetAoEFloat = maxDistanceToTargetAoE;
@@ -1570,6 +1607,8 @@ public sealed class AutoDuty : IDalamudPlugin
             ExitDutyHelper.Stop();
         if (AutoEquipHelper.State == ActionState.Running)
             AutoEquipHelper.Stop();
+        if (CofferHelper.State == ActionState.Running)
+            CofferHelper.Stop();
         if (DeathHelper.DeathState == PlayerLifeState.Revived)
             DeathHelper.Stop();
          

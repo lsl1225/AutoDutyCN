@@ -8,6 +8,9 @@ using ECommons.Throttlers;
 
 namespace AutoDuty.Helpers
 {
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Linq;
     using FFXIVClientStructs.FFXIV.Client.UI.Misc;
     using Lumina.Excel.Sheets;
 
@@ -21,12 +24,12 @@ namespace AutoDuty.Helpers
 
         internal static void UseItem(uint itemId) => ActionManager.Instance()->UseAction(ActionType.Item, itemId, extraParam: 65535);
 
-        internal static bool UseItemUntilStatus(uint itemId, uint statusId, bool allowHq = true)
+        internal static bool UseItemUntilStatus(uint itemId, uint statusId, float minTime = 0, bool allowHq = true)
         {
             if (!EzThrottler.Throttle("UseItemUntilStatus", 250) || !PlayerHelper.IsReady || Player.Character->IsCasting)
                 return false;
 
-            if (PlayerHelper.HasStatus(statusId))
+            if (PlayerHelper.HasStatus(statusId, minTime))
                 return true;
 
             UseItemIfAvailable(itemId, allowHq);
@@ -154,6 +157,22 @@ namespace AutoDuty.Helpers
             }
 
             return equipedItems->Items[itemLowest];
+        }
+
+        public static IEnumerable<InventoryItem> GetInventorySelection(params InventoryType[] types)
+        {
+            IEnumerable<InventoryItem> items = [];
+            foreach (InventoryType type in types)
+            {
+                InventoryContainer container = *InventoryManager.Instance()->GetInventoryContainer(type);
+                if(container.IsLoaded)
+                {
+                    for (uint i = 0; i < container.Size; i++) 
+                        items = items.Append(container.Items[i]);
+                }
+            }
+            
+            return items.Where(item => item.ItemId > 0);
         }
 
         internal static bool CanRepair() => (LowestEquippedItem().Condition / 300f) <= Plugin.Configuration.AutoRepairPct;// && (!Plugin.Configuration.AutoRepairSelf || CanRepairItem(LowestEquippedItem().GetItemId()));

@@ -16,9 +16,14 @@ using Dalamud.Interface.Components;
 using AutoDuty.Data;
 using static AutoDuty.Windows.MainWindow;
 using System.Diagnostics;
+using Dalamud.Interface.Utility;
+using Pictomancy;
 
 namespace AutoDuty.Windows
 {
+    using System.Globalization;
+    using Dalamud.Utility.Numerics;
+
     internal static class BuildTab
     {
         internal static List<(string, string, string)>? ActionsList { get; set; }
@@ -29,26 +34,27 @@ namespace AutoDuty.Windows
         private static          string                   _actionText        = string.Empty;
         private static          string                   _note              = string.Empty;
         private static          Vector3                  _position          = Vector3.Zero;
-        private static          string                   _positionText      = string.Empty;
-        private static          List<string>             _arguments         = [];
-        private static          string                   _argumentsString   = string.Empty;
-        private static          string                   _argumentHint      = string.Empty;
-        private static          bool                     _dontMove          = false;
-        private static          bool                     _showAddActionUI   = false;
-        private static          (string, string, string) _dropdownSelected  = (string.Empty, string.Empty, string.Empty);
-        private static          int                      _buildListSelected = -1;
-        private static          string                   _addActionButton   = "Add";
-        private static          bool                     _dragDrop          = false;
-        private static          bool                     _noArgument        = false;
-        private static          bool                     _comment           = false;
-        private static          Vector4                  _argumentTextColor = new(1,1,1,1);
-        private static          bool                     _deleteItem        = false;
-        private static          int                      _deleteItemIndex   = -1;
+        //private static          string                   _positionText      = string.Empty;
+        private static          List<string>             _arguments          = [];
+        private static          string                   _argumentHint       = string.Empty;
+        private static          bool                     _dontMove           = false;
+        private static          bool                     _showAddActionUI    = false;
+        private static          (string, string, string) _dropdownSelected   = (string.Empty, string.Empty, string.Empty);
+        private static          int                      _buildListSelected  = -1;
+        private static          string                   _addActionButton    = "Add";
+        private static          bool                     _dragDrop           = false;
+        private static          bool                     _noArgument         = false;
+        private static          bool                     _comment            = false;
+        private static          Vector4                  _argumentTextColor  = new(1,1,1,1);
+        private static          bool                     _deleteItem         = false;
+        private static          int                      _deleteItemIndex    = -1;
+        private static          bool                     _duplicateItem      = false;
+        private static          int                      _duplicateItemIndex = -1;
         private static          ActionTag                _actionTag;
-        private static readonly ActionTag[]              _actionTags           = [ActionTag.None, ActionTag.Synced, ActionTag.Unsynced, ActionTag.W2W];
+        private static readonly ActionTag[]              _actionTags           = [ActionTag.None, ActionTag.Synced, ActionTag.Unsynced, ActionTag.W2W, ActionTag.Treasure];
         public static readonly  JsonSerializerOptions    jsonSerializerOptions = new() { WriteIndented = true, IgnoreReadOnlyProperties = true, IncludeFields = true };
 
-        internal unsafe static void Draw()
+        internal static unsafe void Draw()
         {
             SetCurrentTabName("BuildTab");
             using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Navigating) || Plugin.States.HasFlag(PluginState.Looping)))
@@ -159,8 +165,6 @@ namespace AutoDuty.Windows
                             default:
                                 break;
                         }
-                        _positionText = _position.ToCustomString();
-                        _argumentsString = _arguments.ToCustomString();
                         _action = new() { Name = _actionText, Position = _position, Arguments = _arguments, Note = _note, Tag = _actionTag };
                         _showAddActionUI = true;
                     }
@@ -206,11 +210,11 @@ namespace AutoDuty.Windows
                         if (dutyPath != null)
                         {
                             pathFile = dutyPath.PathFile;
-                            if (pathFile.Meta.LastUpdatedVersion < Plugin.Configuration.Version || _changelog.Length > 0)
+                            if (pathFile.Meta.LastUpdatedVersion < Plugin.Version || _changelog.Length > 0)
                             {
                                 pathFile.Meta.Changelog.Add(new PathFileChangelogEntry
                                 {
-                                    Version = Plugin.Configuration.Version,
+                                    Version = Plugin.Version,
                                     Change = _changelog
                                 });
                                 _changelog = string.Empty;
@@ -247,7 +251,7 @@ namespace AutoDuty.Windows
             }
         }
 
-        private unsafe static void DrawAddActionUIPopup()
+        private static unsafe void DrawAddActionUIPopup()
         {
             if (_action == null)
             {
@@ -256,7 +260,7 @@ namespace AutoDuty.Windows
                 return;
             }
 
-            using (ImRaii.Disabled(_argumentsString.IsNullOrEmpty() && !_noArgument && !_comment))
+            using (ImRaii.Disabled(_arguments.Count == 0 && !_noArgument && !_comment))
             {
                 if (ImGuiEx.ButtonWrapped(_addActionButton))
                 {
@@ -268,7 +272,9 @@ namespace AutoDuty.Windows
                             ShowPopup("Error", $"{_action.Name}'s must be uint's corresponding to the objects DataId", true);
                     }
                     else
+                    {
                         AddAction();
+                    }
                 }
             }
             ImGui.SameLine();
@@ -296,28 +302,86 @@ namespace AutoDuty.Windows
                     }
                 }
             }
-            using (ImRaii.Disabled(_noArgument || _comment))
+            if (!(_noArgument || _comment))
             {
-                ImGui.TextColored(_argumentTextColor, "Argument: (arg1,arg2)");
+                ImGui.AlignTextToFramePadding();
+                ImGui.TextColored(_argumentTextColor, "Arguments:");
                 ImGui.SameLine();
-                ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                ImGui.InputTextWithHint("##Argument", _argumentHint, ref _argumentsString, 200);
+                ImGui.TextColored(_argumentTextColor, _argumentHint);
+                ImGui.SameLine();
+                float addX = ImGui.GetCursorPosX();
+                if (ImGui.Button("+##AddArgument"))
+                {
+                    _arguments.Add(string.Empty);
+                }
+
+                for (int i = 0; i < _arguments.Count; i++)
+                {
+                    ImGui.PushID(i);
+
+                    using (ImRaii.Disabled(i <= 0))
+                    {
+                        if (ImGui.Button("↑##MoveUp")) 
+                            (_arguments[i], _arguments[i - 1]) = (_arguments[i - 1], _arguments[i]);
+                    }
+
+                    ImGui.SameLine();
+                    using (ImRaii.Disabled(i >= _arguments.Count - 1))
+                    {
+                        if (ImGui.Button("↓##MoveDown")) 
+                            (_arguments[i], _arguments[i + 1]) = (_arguments[i + 1], _arguments[i]);
+                    }
+
+                    ImGui.SameLine();
+                    using (ImRaii.Disabled(!ImGui.GetIO().KeyCtrl))
+                    {
+                        if (ImGui.Button("X##RemoveArgument"))
+                        {
+                            _arguments.RemoveAt(i);
+                            i--;
+                        }
+                    }
+
+                    ImGui.SameLine();
+                    ImGui.SetCursorPosX(addX);
+                    if (ImGui.Button("+##AddArgument"))
+                        _arguments.Insert(i + 1, string.Empty);
+                    ImGui.SameLine();
+
+                    ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
+                    string tempArgument = _arguments[i];
+                    if (ImGui.InputText($"##Argument{i}", ref tempArgument, 200)) 
+                        _arguments[i] = tempArgument;
+                    ImGui.PopID();
+                }
+                ImGui.Spacing();
             }
-            using (ImRaii.Disabled(_comment))
+
+
+            if (!_comment)
             {
                 if (ImGui.Button("Position:"))
-                    _positionText = Player.Position.ToCustomString() == _positionText ? Vector3.Zero.ToCustomString() : Player.Position.ToCustomString();
-  
+                    _position = (_position - Player.Position).LengthSquared() <= 0.1f ? Vector3.Zero : Player.Position;
+
                 ImGui.SameLine();
-                ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                ImGui.InputText("##Position", ref _positionText, 200);
+                ImGui.PushItemWidth(145 * ImGuiHelpers.GlobalScale);
+                //ImGui.InputText("##Position", ref _positionText, 200);
+                ImGui.InputFloat("X##PositionX", ref _position.X, 0.1f, 1f);
+                ImGui.SameLine();
+                ImGui.InputFloat("Y##PositionY", ref _position.Y, 0.1f, 1f);
+                ImGui.SameLine();
+                ImGui.InputFloat("Z##PositionZ", ref _position.Z, 0.1f, 1f);
+
+
             }
+            ImGui.AlignTextToFramePadding();
             ImGui.Text("Note:");
             ImGui.SameLine();
             ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
             ImGui.InputText("##Note", ref _note, 200);
             using (ImRaii.Disabled(_action == null || _action.Tag.HasAnyFlag(ActionTag.Comment, ActionTag.Revival, ActionTag.Treasure)))
             {
+                ImGui.AlignTextToFramePadding();
                 ImGui.Text("Tag:");
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
@@ -336,6 +400,8 @@ namespace AutoDuty.Windows
                 }
             }
         }
+
+        private static bool guide = false;
 
         private static void DrawBuildList()
         {
@@ -369,10 +435,9 @@ namespace AutoDuty.Windows
                                 _dontMove          = item.Value.Position == Vector3.Zero;
                                 _actionText        = item.Value.Name;
                                 _note              = item.Value.Note;
-                                _arguments         = item.Value.Arguments;
-                                _argumentsString   = item.Value.Arguments.ToCustomString();
+                                _arguments         = [..item.Value.Arguments];
                                 _position          = item.Value.Position;
-                                _positionText      = _position.ToCustomString();
+                                //_positionText      = _position.ToCustomString();
                                 _buildListSelected = item.Index;
                                 _showAddActionUI   = true;
                                 _dropdownSelected  = ("", "", "");
@@ -388,10 +453,16 @@ namespace AutoDuty.Windows
                             _deleteItemIndex = item.Index;
                         }
 
+                        if (ImGui.IsItemClicked(ImGuiMouseButton.Middle))
+                        {
+                            _duplicateItem      = true;
+                            _duplicateItemIndex = item.Index;
+                        }
+
                         if (ImGui.IsItemActive() && !ImGui.IsItemHovered() && !_dragDrop) 
                             _buildListSelected = item.Index;
 
-                        if (_buildListSelected == item.Index && ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                        if (_buildListSelected == item.Index && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !_showAddActionUI)
                         {
                             float mouseYDelta = ImGui.GetMouseDragDelta(0).Y;
 
@@ -429,6 +500,12 @@ namespace AutoDuty.Windows
                         _deleteItemIndex = -1;
                         _deleteItem      = false;
                     }
+
+                    if (_duplicateItem)
+                    {
+                        Plugin.Actions.Insert(_duplicateItemIndex, Plugin.Actions[_duplicateItemIndex.JSONClone()]);
+                        _duplicateItem = false;
+                    }
                 }
                 else
                     ImGuiEx.TextWrapped(new Vector4(0, 1, 0, 1), "You must enter a dungeon to Build a Path");
@@ -447,7 +524,6 @@ namespace AutoDuty.Windows
             _actionText = string.Empty;
             _note = string.Empty;
             _position = Vector3.Zero;
-            _positionText = string.Empty;
             _arguments = [];
             _argumentHint = string.Empty;
             _dropdownSelected = (string.Empty, string.Empty, string.Empty);
@@ -466,9 +542,9 @@ namespace AutoDuty.Windows
             if (_action == null) return;
 
             _action.Name = _actionText;
-            _action.Arguments = [.. _argumentsString.Split(",", StringSplitOptions.TrimEntries)];
+            _action.Arguments = [.. _arguments];
             _action.Tag = _actionTag;
-            _action.Position = !_comment && _positionText.TryGetVector3(out var position) ? position : Vector3.Zero;
+            _action.Position = !_comment ? _position : Vector3.Zero;
             _action.Note = _comment && !_note.StartsWith("<--") && !_note.EndsWith("-->") ? $"<-- {_note} -->" : _note;
             if (_buildListSelected == -1)
             {
@@ -479,6 +555,40 @@ namespace AutoDuty.Windows
                 Plugin.Actions[_buildListSelected] = _action;
             ImGui.CloseCurrentPopup();
             ClearAll();
+        }
+
+        public static void DrawHelper(PctDrawList drawList)
+        {
+            if (_showAddActionUI && _position.LengthSquared() > 0.1f)
+            {
+                drawList.AddCircle(_position, 1.25f, 0xFFFFFFFF, thickness: 2);
+                drawList.AddText(_position + Vector3.UnitZ * 1.1f, 0xFFFFFFFF, "+Z", 5f);
+                drawList.AddText(_position + Vector3.UnitZ * -1.1f, 0xFFFFFFFF, "-Z", 5f);
+
+                drawList.AddText(_position + Vector3.UnitX * 1.1f,  0xFFFFFFFF, "+X", 5f);
+                drawList.AddText(_position + Vector3.UnitX * -1.1f, 0xFFFFFFFF, "-X", 5f);
+
+                if(PlayerHelper.IsValid)
+                {
+                    float playerY   = Player.Position.Y;
+                    float ydiff = (_position.Y - playerY);
+                    if (MathF.Abs(ydiff) > 0.1f)
+                    {
+                        drawList.AddText(_position + Vector3.UnitY * MathF.Sign(ydiff), 0xFFFFFFFF, "Y-Diff: " + ydiff.ToString("F3", CultureInfo.CurrentCulture), 5f);
+                        
+                        drawList.PathLineTo(_position);
+                        drawList.PathLineTo(_position.WithY(playerY));
+                        drawList.PathStroke(0xFFFFFFFF);
+                    }
+                }
+
+                drawList.PathLineTo(_position - Vector3.UnitX);
+                drawList.PathLineTo(_position + Vector3.UnitX);
+                drawList.PathStroke(0xFFFFFFFF);
+                drawList.PathLineTo(_position - Vector3.UnitZ);
+                drawList.PathLineTo(_position + Vector3.UnitZ);
+                drawList.PathStroke(0xFFFFFFFF);
+            }
         }
     }
 }

@@ -26,12 +26,26 @@ public unsafe class Overlay : Window
         if (!PlayerHelper.IsValid)
         {
             if (!SchedulerHelper.Schedules.ContainsKey("OpenOverlay"))
-                SchedulerHelper.ScheduleAction("OpenOverlay", () => IsOpen = true, () => PlayerHelper.IsReady);
-            IsOpen = false;
+                SchedulerHelper.ScheduleAction("OpenOverlay", () => this.IsOpen = true, () => PlayerHelper.IsReady);
+            this.IsOpen = false;
+            return;
         }
 
-        if (!Plugin.States.HasFlag(PluginState.Looping) && !Plugin.States.HasFlag(PluginState.Navigating))
+        if(!Plugin.Configuration.ShowOverlay)
         {
+            this.IsOpen = false;
+            return;
+        }
+
+
+        if (!Plugin.States.HasAnyFlag(PluginState.Looping, PluginState.Navigating))
+        {
+            if (Plugin.Configuration.HideOverlayWhenStopped)
+            {
+                this.IsOpen = false;
+                return;
+            }
+
             MainWindow.GotoAndActions();
             if (!Plugin.InDungeon)
             {
@@ -41,7 +55,7 @@ public unsafe class Overlay : Window
                 ImGui.SameLine(0, 5);
                 if (ImGuiEx.IconButton(Dalamud.Interface.FontAwesomeIcon.WindowClose, "CloseOverlay"))
                 {
-                    IsOpen = false;
+                    this.IsOpen = false;
                     Plugin.Configuration.ShowOverlay = false;
                     Plugin.MainWindow.IsOpen = true;
                 }
@@ -50,21 +64,22 @@ public unsafe class Overlay : Window
 
         if (Plugin.InDungeon || Plugin.States.HasFlag(PluginState.Looping))
         {
-            using (var d1 = ImRaii.Disabled(!Plugin.InDungeon || !ContentPathsManager.DictionaryPaths.ContainsKey(Svc.ClientState.TerritoryType)))
+            using (ImRaii.Disabled(!Plugin.InDungeon || !ContentPathsManager.DictionaryPaths.ContainsKey(Svc.ClientState.TerritoryType)))
             {
                 if (Plugin.Stage == 0)
                 {
                     if (!Plugin.States.HasFlag(PluginState.Navigating) && !Plugin.States.HasFlag(PluginState.Looping))
-                    {
                         if (ImGui.Button("Start"))
                         {
                             Plugin.LoadPath();
                             Plugin.Run(Svc.ClientState.TerritoryType);
                         }
-                    }
                 }
                 else
+                {
                     MainWindow.StopResumePause();
+                }
+
                 ImGui.SameLine(0, 5);
             }
             ImGui.PushItemWidth(75 * ImGuiHelpers.GlobalScale);
@@ -78,23 +93,20 @@ public unsafe class Overlay : Window
             ImGui.SameLine();
             if (ImGuiEx.IconButton(Dalamud.Interface.FontAwesomeIcon.WindowClose, "CloseOverlay"))
             {
-                IsOpen = false;
+                this.IsOpen = false;
                 Plugin.Configuration.ShowOverlay = false;
                 Plugin.MainWindow.IsOpen = true;
             }
 
             if (Plugin.Configuration.ShowDutyLoopText)
             {
-                if (ImGui.Button(hideText))
+                if (ImGui.Button($"{hideText}##OverlayHideButton"))
                 {
                     Plugin.Configuration.ShowDutyLoopText = false;
                     Plugin.Configuration.Save();
                 }
 
-                if (ImGui.IsItemHovered())
-                    hideText = "Hide";
-                else
-                    hideText = "";
+                hideText = ImGui.IsItemHovered() ? "Hide" : "";
 
                 ImGui.SameLine(0, 5);
 
@@ -107,10 +119,9 @@ public unsafe class Overlay : Window
             }
         }
         if (Plugin.InDungeon || Plugin.States.HasFlag(PluginState.Navigating) || RepairHelper.State == ActionState.Running || GotoHelper.State == ActionState.Running || GotoInnHelper.State == ActionState.Running || GotoBarracksHelper.State == ActionState.Running || GCTurninHelper.State == ActionState.Running || ExtractHelper.State == ActionState.Running || DesynthHelper.State == ActionState.Running || QueueHelper.State == ActionState.Running)
-        {
             if (Plugin.Configuration.ShowActionText)
             {
-                if (ImGui.Button(hideTextAction))
+                if (ImGui.Button(hideTextAction + "##OverlayHideActionButton"))
                 {
                     Plugin.Configuration.ShowActionText = false;
                     Plugin.Configuration.Save();
@@ -121,6 +132,5 @@ public unsafe class Overlay : Window
                 ImGui.SameLine(0, 5);
                 ImGui.TextColored(new Vector4(0, 255f, 0, 1), Plugin.Action.Length > 40 ? Plugin.Action[..37] + "..." : Plugin.Action);
             }
-        }
     }
 }

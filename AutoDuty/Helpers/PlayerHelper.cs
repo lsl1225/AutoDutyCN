@@ -10,6 +10,9 @@ using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 
 namespace AutoDuty.Helpers
 {
+    using System;
+    using Dalamud.Utility;
+    using FFXIVClientStructs.FFXIV.Client.Game.Control;
     using Lumina.Excel.Sheets;
 
     internal static class PlayerHelper
@@ -87,11 +90,14 @@ namespace AutoDuty.Helpers
             return role;
         }
 
-        internal static bool IsValid => Svc.Condition.Any()
-        && !Svc.Condition[ConditionFlag.BetweenAreas]
-        && !Svc.Condition[ConditionFlag.BetweenAreas51]
-        && Player.Available
-        && Player.Interactable;
+        internal static unsafe bool IsValid =>
+            Control.GetLocalPlayer() != null
+         && ThreadSafety.IsMainThread
+         && Svc.Condition.Any()
+         && !Svc.Condition[ConditionFlag.BetweenAreas]
+         && !Svc.Condition[ConditionFlag.BetweenAreas51]
+         && Player.Available
+         && Player.Interactable;
 
         internal static bool IsJumping => Svc.Condition.Any()
         && (Svc.Condition[ConditionFlag.Jumping]
@@ -109,7 +115,7 @@ namespace AutoDuty.Helpers
 
         internal static unsafe bool IsCasting => Player.Character->IsCasting;
 
-        internal static unsafe bool IsMoving => AgentMap.Instance()->IsPlayerMoving == 1;
+        internal static unsafe bool IsMoving => AgentMap.Instance()->IsPlayerMoving;
 
         internal static unsafe bool InCombat => Svc.Condition[ConditionFlag.InCombat];
 

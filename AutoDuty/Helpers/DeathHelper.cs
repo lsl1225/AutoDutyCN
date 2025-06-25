@@ -10,6 +10,8 @@ using System;
 
 namespace AutoDuty.Helpers
 {
+    using System.Numerics;
+
     internal static class DeathHelper
     {
         private static PlayerLifeState _deathState = PlayerLifeState.Alive;
@@ -22,11 +24,15 @@ namespace AutoDuty.Helpers
                     return;
                 else if (value == PlayerLifeState.Dead)
                 {
-                    Svc.Log.Debug("DeathHelper - Player is Dead changing state to Dead");
-                    OnDeath();
+                    if (value != _deathState)
+                    {
+                        Svc.Log.Debug("DeathHelper - Player is Dead changing state to Dead");
+                        SchedulerHelper.ScheduleAction("OnDeath", OnDeath, 500, false); 
+                    }
                 }
                 else if (value == PlayerLifeState.Revived)
                 {
+                    SchedulerHelper.DescheduleAction("OnDeath");
                     Svc.Log.Debug("DeathHelper - Player is Revived changing state to Revived");
                     _oldIndex = Plugin.Indexer;
                     _findShortcutStartTime = Environment.TickCount;
@@ -49,13 +55,12 @@ namespace AutoDuty.Helpers
 
             if (Plugin.TaskManager.IsBusy)
                 Plugin.TaskManager.Abort();
-           
-            if (Plugin.Configuration.DutyModeEnum.EqualsAny(DutyMode.Regular, DutyMode.Trial, DutyMode.Raid))
+            
+            if (Plugin.Configuration.DutyModeEnum.EqualsAny(DutyMode.Regular, DutyMode.Trial, DutyMode.Raid, DutyMode.Variant))
             {
+                Svc.Log.Debug("DeathHelper - On Death, looking for YesNo");
                 if (GenericHelpers.TryGetAddonByName("SelectYesno", out AtkUnitBase* addonSelectYesno) && GenericHelpers.IsAddonReady(addonSelectYesno))
                     AddonHelper.ClickSelectYesno();
-                else
-                    SchedulerHelper.ScheduleAction("OnDeath", OnDeath, 500);
             }
         }
 
@@ -65,59 +70,56 @@ namespace AutoDuty.Helpers
 
         private static int FindWaypoint()
         {
+            /*
             if (Plugin.Indexer == 0)
             {
-                //Svc.Log.Info($"Finding Closest Waypoint {ListBoxPOSText.Count}");
                 float closestWaypointDistance = float.MaxValue;
                 int closestWaypointIndex = -1;
-                float currentDistance;
 
                 for (int i = 0; i < Plugin.Actions.Count; i++)
                 {
-                    var node = Plugin.Actions[i].Name;
-                    var position = Plugin.Actions[i].Position;
-                    if (node.Equals("Boss", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        currentDistance = ObjectHelper.GetDistanceToPlayer(position);
+                    string node = Plugin.Actions[i].Name;
+                    Vector3 position = Plugin.Actions[i].Position;
 
-                        if (currentDistance < closestWaypointDistance)
-                        {
-                            closestWaypointDistance = currentDistance;
-                            closestWaypointIndex = i;
-                        }
-                    }
-                    else
+                    float currentDistance = ObjectHelper.GetDistanceToPlayer(position);
+                    if (currentDistance < closestWaypointDistance)
+
                     {
-                        currentDistance = ObjectHelper.GetDistanceToPlayer(position);
-                        //Svc.Log.Info($"cd: {currentDistance}");
-                        if (currentDistance < closestWaypointDistance)
-                        {
-                            closestWaypointDistance = ObjectHelper.GetDistanceToPlayer(Plugin.Actions[Plugin.Indexer].Position);
-                            closestWaypointIndex = i;
-                        }
+                        closestWaypointDistance = node.Equals("Boss", StringComparison.InvariantCultureIgnoreCase) ?
+                                                      currentDistance :
+                                                      ObjectHelper.GetDistanceToPlayer(Plugin.Actions[Plugin.Indexer].Position);
+                        closestWaypointIndex = i;
                     }
                 }
-                //Svc.Log.Info($"Closest Waypoint was {closestWaypointIndex}");
+                Svc.Log.Info($"Closest Waypoint was {closestWaypointIndex}");
                 return closestWaypointIndex;
-            }
+            }*/
 
             if (Plugin.Indexer != -1)
             {
                 bool revivalFound = ContentPathsManager.DictionaryPaths[Plugin.CurrentTerritoryType].Paths[Plugin.CurrentPath].RevivalFound;
 
-                Svc.Log.Info("Finding Revival Point. Using Revival Action: " + revivalFound);
+                bool isBoss = Plugin.Actions[Plugin.Indexer].Name.Equals("Boss");
+                if (!revivalFound)
+                {
+                    if (Plugin.Indexer > 0 && isBoss)
+                        return Plugin.Indexer;
+                }
+
+
+
+
+                Svc.Log.Info($"Finding Revival Point starting at {Plugin.Indexer}. Using Revival Action: {revivalFound}");
                 for (int i = Plugin.Indexer; i >= 0; i--)
                 {
-                    if (revivalFound)
-                    {
-                        if (Plugin.Actions[i].Name.Equals("Revival", StringComparison.InvariantCultureIgnoreCase) && i != Plugin.Indexer) 
-                            return i;
-                    }
+                    if (Plugin.Actions[i].Name.Equals(isBoss ? "Revival" : "Boss", StringComparison.InvariantCultureIgnoreCase) && i != Plugin.Indexer)
+                        return isBoss ? i : i + 1;
+                    /* Pre 7.2
                     else
                     {
                         if (Plugin.Actions[i].Name.Equals("Boss", StringComparison.InvariantCultureIgnoreCase) && i != Plugin.Indexer)
                             return i + 1;
-                    }
+                    }*/
                 }
             }
 
@@ -151,12 +153,13 @@ namespace AutoDuty.Helpers
                 VNavmesh_IPCSubscriber.Path_Stop();
             Plugin.Stage = Stage.Reading_Path;
             Svc.Log.Debug("DeathHelper - Player is Alive, and we are done with Revived Actions, changing state to Alive");
-            _deathState = PlayerLifeState.Alive;
+            _deathState               = PlayerLifeState.Alive;
+            Plugin.SkipTreasureCoffer = false;
         }
 
         private static unsafe void OnRevive(IFramework _)
         {
-            if (!EzThrottler.Throttle("OnRevive", 500) || (!PlayerHelper.IsReady && !Conditions.IsOccupiedInQuestEvent) || PlayerHelper.IsCasting) return;
+            if (!EzThrottler.Throttle("OnRevive", 500) || (!PlayerHelper.IsReady && !Conditions.Instance()->OccupiedInQuestEvent) || PlayerHelper.IsCasting) return;
 
             float distanceToPlayer;
 

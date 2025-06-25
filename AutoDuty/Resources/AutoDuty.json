@@ -1,6 +1,12 @@
 {
   "Name": "AutoDuty",
   "Modules": {
+    "BossMod.Autorotation.MiscAI.AutoFarm": [
+      {
+        "Track": "General",
+        "Option": "Aggressive"
+      }
+    ],
     "BossMod.Autorotation.xan.BLM": [
       {
         "Track": "Targeting",
@@ -277,7 +283,7 @@
         "Option": "Auto"
       }
     ],
-    "BossMod.Autorotation.StandardWAR": [
+    "BossMod.Autorotation.VeynWAR": [
       {
         "Track": "AOE",
         "Option": "AutoFinishCombo"
@@ -334,7 +340,7 @@
         "Option": "Enabled"
       },
       {
-        "Track": "Esuna",
+        "Track": "Esuna2",
         "Option": "Enabled"
       }
     ],
@@ -372,10 +378,6 @@
         "Option": "Enabled"
       },
       {
-        "Track": "Interject",
-        "Option": "Enabled"
-      },
-      {
         "Track": "Low Blow",
         "Option": "Enabled"
       },
@@ -394,6 +396,26 @@
       {
         "Track": "Protect party members",
         "Option": "Enabled"
+      },
+      {
+        "Track": "Interject2",
+        "Option": "Enabled"
+      }
+    ],
+    "BossMod.Autorotation.MiscAI.StayWithinLeylines": [
+      {
+        "Track": "Use Retrace",
+        "Option": "Yes"
+      },
+      {
+        "Track": "Use Between The Lines",
+        "Option": "Yes"
+      }
+    ],
+    "BossMod.Autorotation.MiscAI.NormalMovement": [
+      {
+        "Track": "Destination",
+        "Option": "Pathfind"
       }
     ]
   }

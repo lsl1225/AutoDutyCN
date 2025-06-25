@@ -11,58 +11,22 @@ namespace AutoDuty.Helpers
 {
     using Lumina.Excel.Sheets;
 
-    internal static class DesynthHelper
+    internal class DesynthHelper : ActiveHelperBase<DesynthHelper>
     {
-        internal static void Invoke()
+        protected override string Name        => nameof(DesynthHelper);
+        protected override string DisplayName => "Desynthing";
+
+        protected override string[] AddonsToClose { get; } = ["Desynth", "SalvageResult", "SalvageDialog", "SalvageItemSelector"];
+
+        internal override void Start()
         {
-            if (State != ActionState.Running)
-            {
-                Svc.Log.Info("Desynth Started");
-                State = ActionState.Running;
-                Plugin.States |= PluginState.Other;
-                if (!Plugin.States.HasFlag(PluginState.Looping))
-                    Plugin.SetGeneralSettings(false);
-                SchedulerHelper.ScheduleAction("DesynthTimeOut", Stop, 300000);
-                Plugin.Action = "Desynthing";
-                Svc.Framework.Update += DesynthUpdate;
-                _maxDesynthLevel = PlayerHelper.GetMaxDesynthLevel();
-            }
+            _maxDesynthLevel = PlayerHelper.GetMaxDesynthLevel();
+            base.Start();
         }
 
-        internal static unsafe void Stop()
-        {
-            Plugin.Action = "";
-            SchedulerHelper.DescheduleAction("DesynthTimeOut");
-            Svc.Framework.Update += DesynthStopUpdate;
-            Svc.Framework.Update -= DesynthUpdate;
-            if (GenericHelpers.TryGetAddonByName("Desynth", out AtkUnitBase* addonDesynth))
-                addonDesynth->Close(true);
-        }
+        private float _maxDesynthLevel = 1;
 
-        internal static ActionState State = ActionState.None;
-
-        private static float _maxDesynthLevel = 1;
-        
-        internal static unsafe void DesynthStopUpdate(IFramework framework)
-        {
-            if (GenericHelpers.TryGetAddonByName("SalvageResult", out AtkUnitBase* addonSalvageResultClose))
-                addonSalvageResultClose->Close(true);
-            else if (GenericHelpers.TryGetAddonByName("SalvageDialog", out AtkUnitBase* addonSalvageDialog))
-                addonSalvageDialog->Close(true);
-            else if (GenericHelpers.TryGetAddonByName("SalvageItemSelector", out AtkUnitBase* addonSalvageItemSelectorClose))
-                addonSalvageItemSelectorClose->Close(true);
-            else
-            {
-                State = ActionState.None;
-                Plugin.States &= ~PluginState.Other;
-                if (!Plugin.States.HasFlag(PluginState.Looping))
-                    Plugin.SetGeneralSettings(true);
-                Svc.Framework.Update -= DesynthStopUpdate;
-            }
-            return;
-        }
-
-        internal static unsafe void DesynthUpdate(IFramework framework)
+        protected override unsafe void HelperUpdate(IFramework framework)
         {
             if (Plugin.States.HasFlag(PluginState.Navigating) || Plugin.InDungeon)
                 Stop();
@@ -70,7 +34,7 @@ namespace AutoDuty.Helpers
             if (!EzThrottler.Throttle("Desynth", 250))
                 return;
 
-            if (Conditions.IsMounted)
+            if (Conditions.Instance()->Mounted)
             {
                 ActionManager.Instance()->UseAction(ActionType.GeneralAction, 23);
                 return;
@@ -89,25 +53,29 @@ namespace AutoDuty.Helpers
 
             if (GenericHelpers.TryGetAddonByName("SalvageResult", out AtkUnitBase* addonSalvageResult) && GenericHelpers.IsAddonReady(addonSalvageResult))
             {
-                Svc.Log.Info("Closing SalvageResult");
+                DebugLog("Closing SalvageResult");
                 addonSalvageResult->Close(true);
                 return;
             }
             else if (GenericHelpers.TryGetAddonByName("SalvageDialog", out AtkUnitBase* addonSalvageDialog) && GenericHelpers.IsAddonReady(addonSalvageDialog))
             {
-                Svc.Log.Info("Confirming SalvageDialog");
+                DebugLog("Confirming SalvageDialog");
                 AddonHelper.FireCallBack(addonSalvageDialog, true, 0, false);
                 return;
             }
-
+            
             if (!GenericHelpers.TryGetAddonByName<AddonSalvageItemSelector>("SalvageItemSelector", out var addonSalvageItemSelector))
-                AgentSalvage.Instance()->AgentInterface.Show();
-            else if (GenericHelpers.IsAddonReady((AtkUnitBase*)addonSalvageItemSelector))
             {
-                AgentSalvage.Instance()->ItemListRefresh();
+                AgentSalvage.Instance()->AgentInterface.Show();
+                EzThrottler.Throttle("Desynth", 2000, true);
+                return;
+            }
+            else if (GenericHelpers.IsAddonReady((AtkUnitBase*)addonSalvageItemSelector) && addonSalvageItemSelector->IsReady)
+            {
+                AgentSalvage.Instance()->ItemListRefresh(true);
                 if (AgentSalvage.Instance()->SelectedCategory != AgentSalvage.SalvageItemCategory.InventoryEquipment)
                 {
-                    Svc.Log.Info("Switching Category");
+                    DebugLog("Switching Category");
                     AddonHelper.FireCallBack((AtkUnitBase*)addonSalvageItemSelector, true, 11, 0);
                     return;
                 }
@@ -118,7 +86,7 @@ namespace AutoDuty.Helpers
                     {
                         var item = AgentSalvage.Instance()->ItemList[i];
                         var itemId = InventoryManager.Instance()->GetInventorySlot(item.InventoryType, (int)item.InventorySlot)->ItemId;
-
+                            
                         if (itemId == 10146) continue;
 
                         var itemSheetRow = Svc.Data.Excel.GetSheet<Item>()?.GetRow(itemId);
@@ -127,9 +95,9 @@ namespace AutoDuty.Helpers
 
                         if (itemLevel == null || itemSheetRow == null) continue;
 
-                        if (!Plugin.Configuration.AutoDesynthSkillUp || (desynthLevel < itemLevel + 50 && desynthLevel < _maxDesynthLevel))
+                        if (!Plugin.Configuration.AutoDesynthSkillUp || (desynthLevel < itemLevel + Plugin.Configuration.AutoDesynthSkillUpLimit && desynthLevel < _maxDesynthLevel))
                         {
-                            Svc.Log.Debug($"Salvaging Item({i}): {itemSheetRow.Value.Name.ToString()} with iLvl {itemLevel} because our desynth level is {desynthLevel}");
+                            DebugLog($"Salvaging Item({i}): {itemSheetRow.Value.Name.ToString()} with iLvl {itemLevel} because our desynth level is {desynthLevel}");
                             foundOne = true;
                             AddonHelper.FireCallBack((AtkUnitBase*)addonSalvageItemSelector, true, 12, i);
                             return;
@@ -139,14 +107,14 @@ namespace AutoDuty.Helpers
                     if (!foundOne)
                     {
                         addonSalvageItemSelector->Close(true);
-                        Svc.Log.Info("Desynth Finished");
+                        DebugLog("Desynth Finished");
                         Stop();
                     }
                 }
                 else
                 {
                     addonSalvageItemSelector->Close(true);
-                    Svc.Log.Info("Desynth Finished");
+                    DebugLog("Desynth Finished");
                     Stop();
                 }
             }

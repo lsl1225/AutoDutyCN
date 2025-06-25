@@ -156,7 +156,10 @@ namespace AutoDuty.Managers
             }
         }
 
-        public void BossMod(PathAction action) => _chat.ExecuteCommand($"/vbmai {action.Arguments[0]}");
+        public void BossMod(PathAction action)
+        {
+            BossMod_IPCSubscriber.SetMovement(action.Arguments[0].Equals("on", StringComparison.InvariantCultureIgnoreCase));
+        }
 
         public void ModifyIndex(PathAction action)
         {
@@ -194,8 +197,7 @@ namespace AutoDuty.Managers
             var boolTrueFalse = action.Arguments[0].Equals("true", StringComparison.InvariantCultureIgnoreCase);
             Plugin.Action = $"StopForCombat: {action.Arguments[0]}";
             Plugin.StopForCombat = boolTrueFalse;
-            _taskManager.Enqueue(() => _chat.ExecuteCommand($"/vbmai followtarget {(boolTrueFalse ? "on" : "off")}"), "StopForCombat");
-            _taskManager.Enqueue(() => _chat.ExecuteCommand($"/vbmai {(boolTrueFalse ? "on" : "off")}"), "StopForCombat");
+            _taskManager.Enqueue(() => BossMod_IPCSubscriber.SetMovement(boolTrueFalse), "StopForCombat");
             if(boolTrueFalse && (action.Arguments.Count <= 1 || action.Arguments[1] != "noWait"))
                 this.Wait(new PathAction {Arguments = ["500"]});
         }
@@ -366,7 +368,7 @@ namespace AutoDuty.Managers
 
         public void TreasureCoffer(PathAction _)
         {
-            return;
+            this.Wait(new PathAction() { Arguments = ["250"] });
         }
 
         private bool TargetCheck(IGameObject? gameObject)
@@ -398,7 +400,7 @@ namespace AutoDuty.Managers
 
         private unsafe bool InteractableCheck(IGameObject? gameObject)
         {
-            if (Conditions.IsMounted || Conditions.IsMounted2)
+            if (Conditions.Instance()->Mounted || Conditions.Instance()->RidingPillion)
                 return true;
 
             if (Player.Available && IsCasting)
@@ -439,9 +441,11 @@ namespace AutoDuty.Managers
         }
         private unsafe void Interactable(IGameObject? gameObject)
         {
+            _taskManager.Enqueue(() => BossMod_IPCSubscriber.SetMovement(false));
             _taskManager.Enqueue(() => InteractableCheck(gameObject), "Interactable-InteractableCheck");
             _taskManager.Enqueue(() => IsCasting, 500, "Interactable-WaitIsCasting");
             _taskManager.Enqueue(() => !IsCasting, "Interactable-WaitNotIsCasting");
+            _taskManager.Enqueue(() => BossMod_IPCSubscriber.SetMovement(true));
             _taskManager.DelayNext("Interactable-DelayNext100", 100);
             _taskManager.Enqueue(() =>
             {
@@ -452,8 +456,8 @@ namespace AutoDuty.Managers
                 var boolAddonTalk = GenericHelpers.TryGetAddonByName("Talk", out AtkUnitBase* addonTalk) && GenericHelpers.IsAddonReady(addonTalk);
 
                 if (!boolAddonSelectYesno && !boolAddonTalk && (!(gameObject?.IsTargetable ?? false) ||
-                Conditions.IsMounted ||
-                Conditions.IsMounted2 ||
+                Conditions.Instance()->Mounted ||
+                Conditions.Instance()->RidingPillion ||
                 Svc.Condition[ConditionFlag.BetweenAreas] ||
                 Svc.Condition[ConditionFlag.BetweenAreas51] ||
                 Svc.Condition[ConditionFlag.BeingMoved] ||
@@ -515,12 +519,13 @@ namespace AutoDuty.Managers
 
         private bool BossCheck()
         {
-            if (((Plugin.BossObject?.IsDead ?? true) && !Svc.Condition[ConditionFlag.InCombat]) || !Svc.Condition[ConditionFlag.InCombat])
+            if (!Svc.Condition[ConditionFlag.InCombat])
                 return true;
 
-            if (EzThrottler.Throttle("PositionalChecker", 25) && ReflectionHelper.Avarice_Reflection.PositionalChanged(out Positional positional) && !Plugin.Configuration.UsingAlternativeBossPlugin && IPCSubscriber_Common.IsReady("BossModReborn"))
-                Plugin.Chat.ExecuteCommand($"/vbm cfg AIConfig DesiredPositional {positional}");
-
+            
+            if (EzThrottler.Throttle("PositionalChecker", 25) && ReflectionHelper.Avarice_Reflection.PositionalChanged(out Positional positional))
+                BossMod_IPCSubscriber.SetPositional(positional);
+            
             return false;
         }
 
@@ -543,6 +548,8 @@ namespace AutoDuty.Managers
             }
 
             _taskManager.Enqueue(() => MovementHelper.Move(gameObjects[index], 0.25f, 1f), "BossLoot-MoveToChest");
+            this.Wait(new PathAction() { Arguments = ["250"] });
+            
             _taskManager.Enqueue(() =>
             {
                 index++;
@@ -564,6 +571,7 @@ namespace AutoDuty.Managers
             if (Plugin.BossObject == null)
                 _taskManager.Enqueue(() => (Plugin.BossObject = GetBossObject()) != null, "Boss-GetBossObject");
             _taskManager.Enqueue(() => Plugin.Action = $"Boss: {Plugin.BossObject?.Name.TextValue ?? ""}", "Boss-SetActionVar");
+            _taskManager.Enqueue(() => Svc.Targets.Target = Plugin.BossObject, "Boss-SetTarget");
             _taskManager.Enqueue(() => Svc.Condition[ConditionFlag.InCombat], "Boss-WaitInCombat");
             _taskManager.Enqueue(() => BossCheck(), int.MaxValue, "Boss-BossCheck");
             _taskManager.Enqueue(() => { Plugin.BossObject = null; }, "Boss-ClearBossObject");
@@ -571,7 +579,7 @@ namespace AutoDuty.Managers
             if (Plugin.Configuration.LootTreasure)
             {
                 _taskManager.DelayNext("Boss-TreasureDelay", 1000);
-                _taskManager.Enqueue(() => treasureCofferObjects = GetObjectsByObjectKind(Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure)?.Where(x => GetDistanceToPlayer(x) <= 50).ToList(), "Boss-GetTreasureChests");
+                _taskManager.Enqueue(() => treasureCofferObjects = GetObjectsByObjectKind(Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure)?.Where(x => BelowDistanceToPlayer(x.Position, 50, 10)).ToList(), "Boss-GetTreasureChests");
                 _taskManager.Enqueue(() => BossLoot(treasureCofferObjects, index), "Boss-LootCheck");
             }
         }
@@ -662,12 +670,10 @@ namespace AutoDuty.Managers
                     switch (action.Arguments[0])
                     {
                         case "1":
-                            Plugin.Chat.ExecuteCommand($"/vbm cfg AIConfig OverridePositional false");
                             Plugin.Framework_Update_InDuty += this.PraeFrameworkUpdateMount;
                             Interactable(new PathAction { Arguments = ["2012819"] });
                             break;
                         case "2":
-                            Plugin.Chat.ExecuteCommand($"/vbm cfg AIConfig OverridePositional true");
                             Plugin.Framework_Update_InDuty -= this.PraeFrameworkUpdateMount;
                             break;
                         case "3":

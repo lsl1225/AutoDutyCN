@@ -10,83 +10,51 @@ namespace AutoDuty.Helpers
     using FFXIVClientStructs.FFXIV.Client.UI.Misc;
     using Lumina.Excel.Sheets;
 
-    internal static class CofferHelper
+    internal class CofferHelper : ActiveHelperBase<CofferHelper>
     {
-        private static List<InventoryItem> doneItems = [];
-        private static int                 initialGearset;
+        private readonly Dictionary<uint, int> doneItems = [];
+        private          int           initialGearset;
 
-        internal static unsafe void Invoke()
+        internal override unsafe void Start()
         {
-            if (State != ActionState.Running)
-            {
-                Svc.Log.Info("Opening Coffers Started");
-                State         =  ActionState.Running;
-                Plugin.States |= PluginState.Other;
-
-                initialGearset = RaptureGearsetModule.Instance()->CurrentGearsetIndex;
-
-                if (!Plugin.States.HasFlag(PluginState.Looping))
-                    Plugin.SetGeneralSettings(false);
-                doneItems.Clear();
-                SchedulerHelper.ScheduleAction("CofferTimeOut", Stop, 300000);
-                Plugin.Action        =  "Opening Coffers";
-                Svc.Framework.Update += CofferOpenUpdate;
-            }
+            base.Start();
+            this.initialGearset = RaptureGearsetModule.Instance()->CurrentGearsetIndex;
+            this.doneItems.Clear();
         }
 
-        internal unsafe static void Stop()
+        protected override string Name        { get; } = nameof(CofferHelper);
+        protected override string DisplayName { get; } = "Opening Coffers";
+
+        protected override unsafe void HelperUpdate(IFramework framework)
         {
-            Svc.Log.Info("Opening Coffers Done");
-            Plugin.States |= PluginState.Other;
-            Plugin.Action =  "";
-
-            SchedulerHelper.DescheduleAction("CofferTimeOut");
-            Svc.Framework.Update += CofferOpenStopUpdate;
-            Svc.Framework.Update -= CofferOpenUpdate;
-        }
-
-        internal static ActionState State = ActionState.None;
-
-        internal static void CofferOpenStopUpdate(IFramework framework)
-        {
-            State         =  ActionState.None;
-            Plugin.States &= ~PluginState.Other;
-            if (!Plugin.States.HasFlag(PluginState.Looping))
-                Plugin.SetGeneralSettings(true);
-            Svc.Framework.Update -= CofferOpenStopUpdate;
-        }
-
-
-        internal static unsafe void CofferOpenUpdate(IFramework framework)
-        {
-            if (Plugin.States.HasFlag(PluginState.Navigating) || Plugin.InDungeon)
-                Stop();
-
-            if (!EzThrottler.Throttle("CofferOpen", 250))
+            if (!this.UpdateBase())
                 return;
 
             if (Conditions.Instance()->Mounted)
             {
+                DebugLog("Dismount");
                 ActionManager.Instance()->UseAction(ActionType.GeneralAction, 23);
                 return;
             }
 
             if (InventoryManager.Instance()->GetEmptySlotsInBag() < 1)
             {
-                Stop();
+                this.DebugLog("No empty slots");
+                this.Stop();
                 return;
             }
 
             if (PlayerHelper.IsCasting || !PlayerHelper.IsReadyFull || Player.IsBusy)
                 return;
 
-            Svc.Log.Debug("CofferHelper: Checking items");
+            this.DebugLog("Checking items");
 
-            IEnumerable <InventoryItem> items = InventoryHelper.GetInventorySelection(InventoryType.Inventory1, InventoryType.Inventory2, InventoryType.Inventory3, InventoryType.Inventory4)
+            IEnumerable <InventoryItem> items = InventoryHelper.GetInventorySelection(InventoryHelper.Bag)
                                                                .Where(iv =>
                                                                       {
                                                                           Item? excelItem = InventoryHelper.GetExcelItem(iv.ItemId);
-                                                                          return !doneItems.Contains(iv) && excelItem.HasValue && ValidCoffer(excelItem.Value);
+                                                                          this.DebugLog($"checking item: {iv.ItemId} in {iv.Container} {iv.Slot}");
+                                                                          return iv.ItemId > 0 && (!this.doneItems.ContainsKey(iv.ItemId) || this.doneItems[iv.ItemId] != iv.Quantity) && excelItem.HasValue && ValidCoffer(excelItem.Value);
                                                                       });
 
 
@@ -94,13 +62,13 @@ namespace AutoDuty.Helpers
             
             if (items.Any())
             {
-                Svc.Log.Debug("CofferHelper: item found");
+                this.DebugLog("item found");
                 if (Plugin.Configuration.AutoOpenCoffersGearset != null && module->CurrentGearsetIndex != Plugin.Configuration.AutoOpenCoffersGearset)
                 {
-                    Svc.Log.Debug("CofferHelper: change gearset");
+                    this.DebugLog("change gearset");
                     if (!module->IsValidGearset((int)Plugin.Configuration.AutoOpenCoffersGearset))
                     {
-                        Svc.Log.Debug("CofferHelper: invalid gearset");
+                        this.DebugLog("invalid gearset");
                         Plugin.Configuration.AutoOpenCoffersGearset = null;
                         Plugin.Configuration.Save();
                     } else
@@ -116,29 +84,29 @@ namespace AutoDuty.Helpers
 
                 if (!PlayerHelper.IsCasting)
                 {
-                    Svc.Log.Debug("CofferHelper: failed to use item");
+                    this.DebugLog("failed to use item");
                     return;
                 }
 
-                Svc.Log.Debug("CofferHelper: item used");
-                doneItems.Add(item);
+                this.DebugLog("item used");
+                this.doneItems[item.ItemId] = item.Quantity;
 
-            } else if (initialGearset != module->CurrentGearsetIndex)
+            } else if (this.initialGearset != module->CurrentGearsetIndex)
             {
                 if (!EzThrottler.Throttle("CofferChangeBack", 1000))
                     return;
 
-                Svc.Log.Debug("CofferHelper: change back to original gearset");
-                module->EquipGearset(initialGearset);
+                this.DebugLog("change back to original gearset");
+                module->EquipGearset(this.initialGearset);
             }
             else
             {
-                Svc.Log.Debug("CofferHelper: no items found");
-                Stop();
+                this.DebugLog("no items found");
+                this.Stop();
             }
         }
 
-        internal static bool ValidCoffer(Item item) => //                Miscellany
+        internal static bool ValidCoffer(Item item) => // Miscellany
             item.ItemAction.RowId is 1085 or 388 && item.ItemUICategory.RowId is 61 && (!Plugin.Configuration.AutoOpenCoffersBlacklistUse || !Plugin.Configuration.AutoOpenCoffersBlacklist.ContainsKey(item.RowId));
     }
 }

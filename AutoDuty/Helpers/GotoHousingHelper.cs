@@ -10,89 +10,92 @@ using System.Collections.Generic;
 
 namespace AutoDuty.Helpers
 {
-    internal static class GotoHousingHelper
+    internal class GotoHousingHelper : ActiveHelperBase<GotoHousingHelper>
     {
+        protected override string Name        { get; } = nameof(GotoHousingHelper);
+        protected override string DisplayName { get; } = string.Empty;
+
+        protected override string[] AddonsToClose { get; } = ["SelectYesno", "SelectString", "HousingWardSelection", "HousingWardSelectionDialog"];
+
+        protected override int TimeOut { get; set; } = 600_000;
+
         internal static void Invoke(Housing whichHousing)
         {
-            if (State != ActionState.Running && !InPrivateHouse(whichHousing))
+            if (!InPrivateHouse(whichHousing))
             {
-                Svc.Log.Info($"Goto {whichHousing} Started");
-                State = ActionState.Running;
-                Plugin.States |= PluginState.Other;
-                if (!Plugin.States.HasFlag(PluginState.Looping))
-                    Plugin.SetGeneralSettings(false);
                 _whichHousing = whichHousing;
-                SchedulerHelper.ScheduleAction("GotoHousingTimeOut", Stop, 600000);
-                Svc.Framework.Update += GotoHousingUpdate;
+                Instance.Start();
             }
         }
 
-        internal static void Stop() 
+        internal override void Stop() 
         {
-            if (State == ActionState.Running)
-                Svc.Log.Info($"Goto {_whichHousing} Finished");
-            SchedulerHelper.DescheduleAction("GotoHousingTimeOut");
-            GotoHelper.Stop();
-            Svc.Framework.Update += GotoHousingStopUpdate;
-            Svc.Framework.Update -= GotoHousingUpdate;
+            GotoHelper.ForceStop();
+            base.Stop();
             _whichHousing = Housing.Apartment;
-            Plugin.Action = "";
             _index = 0;
         }
 
         internal static bool InPrivateHouse(Housing whichHousing) =>
-            //Mist
-            (whichHousing == Housing.Apartment && TeleportHelper.ApartmentTeleportId == 59 && Svc.ClientState.TerritoryType == 608) || (whichHousing == Housing.Personal_Home && TeleportHelper.PersonalHomeTeleportId == 59 && (Svc.ClientState.TerritoryType == 282 || Svc.ClientState.TerritoryType == 283 || Svc.ClientState.TerritoryType == 284)) || (whichHousing == Housing.FC_Estate && TeleportHelper.FCEstateTeleportId == 56 && (Svc.ClientState.TerritoryType == 282 || Svc.ClientState.TerritoryType == 283 || Svc.ClientState.TerritoryType == 284)) ||
-            //LavenderBeds
-            (whichHousing == Housing.Apartment && TeleportHelper.ApartmentTeleportId == 60 && Svc.ClientState.TerritoryType == 609) || (whichHousing == Housing.Personal_Home && TeleportHelper.PersonalHomeTeleportId == 60 && (Svc.ClientState.TerritoryType == 342 || Svc.ClientState.TerritoryType == 343 || Svc.ClientState.TerritoryType == 344)) || (whichHousing == Housing.FC_Estate && TeleportHelper.FCEstateTeleportId == 57 && (Svc.ClientState.TerritoryType == 342 || Svc.ClientState.TerritoryType == 343 || Svc.ClientState.TerritoryType == 344)) ||
-            //Goblet
-            (whichHousing == Housing.Apartment && TeleportHelper.ApartmentTeleportId == 61 && Svc.ClientState.TerritoryType == 610) || (whichHousing == Housing.Personal_Home && TeleportHelper.PersonalHomeTeleportId == 61 && (Svc.ClientState.TerritoryType == 345 || Svc.ClientState.TerritoryType == 346 || Svc.ClientState.TerritoryType == 347)) || (whichHousing == Housing.FC_Estate && TeleportHelper.FCEstateTeleportId == 58 && (Svc.ClientState.TerritoryType == 345 || Svc.ClientState.TerritoryType == 346 || Svc.ClientState.TerritoryType == 347)) ||
-            //Shirogane
-            (whichHousing == Housing.Apartment && TeleportHelper.ApartmentTeleportId == 97 && Svc.ClientState.TerritoryType == 655) || (whichHousing == Housing.Personal_Home && TeleportHelper.PersonalHomeTeleportId == 97 && (Svc.ClientState.TerritoryType == 649 || Svc.ClientState.TerritoryType == 650 || Svc.ClientState.TerritoryType == 651)) || (whichHousing == Housing.FC_Estate && TeleportHelper.FCEstateTeleportId == 96 && (Svc.ClientState.TerritoryType == 649 || Svc.ClientState.TerritoryType == 650 || Svc.ClientState.TerritoryType == 651)) ||
-            //Empyreum
-            (whichHousing == Housing.Apartment && TeleportHelper.ApartmentTeleportId == 165 && Svc.ClientState.TerritoryType == 999) || (whichHousing == Housing.Personal_Home && TeleportHelper.PersonalHomeTeleportId == 165 && (Svc.ClientState.TerritoryType == 980 || Svc.ClientState.TerritoryType == 981 || Svc.ClientState.TerritoryType == 982)) || (whichHousing == Housing.FC_Estate && TeleportHelper.FCEstateTeleportId == 164 && (Svc.ClientState.TerritoryType == 980 || Svc.ClientState.TerritoryType == 981 || Svc.ClientState.TerritoryType == 982));
+            whichHousing == Housing.Apartment && (
+                                                     (TeleportHelper.ApartmentTeleportId == 59  && Svc.ClientState.TerritoryType == 608) ||  //Mist
+                                                     (TeleportHelper.ApartmentTeleportId == 60  && Svc.ClientState.TerritoryType == 609) ||  //LavenderBeds
+                                                     (TeleportHelper.ApartmentTeleportId == 61  && Svc.ClientState.TerritoryType == 610) ||  //Goblet
+                                                     (TeleportHelper.ApartmentTeleportId == 97  && Svc.ClientState.TerritoryType == 655) ||  //Shirogane
+                                                     (TeleportHelper.ApartmentTeleportId == 165 && Svc.ClientState.TerritoryType == 999)) || //Empyreum
+            //FC Estates
+            (whichHousing == Housing.FC_Estate && TeleportHelper.FCEstateTeleportId is 56 or 57 or 58 or 96 or 164 ||
+             //Private houses
+             whichHousing == Housing.Personal_Home && TeleportHelper.PersonalHomeTeleportId is 59 or 60 or 61 or 97 or 165) &&
+
+            Svc.ClientState.TerritoryType is
+                282 or 283 or 284 or
+                342 or 343 or 344 or
+                345 or 346 or 347 or
+                649 or 650 or 651 or
+                980 or 981 or 982 or
+                1249 or 1250 or 1251; //minimalistic
+
         internal static bool InHousingArea(Housing whichHousing) =>
             //Mist
             (Svc.ClientState.TerritoryType == 339 &&
-            ((whichHousing == Housing.FC_Estate && TeleportHelper.FCEstateTeleportId == 56) || (whichHousing == Housing.Personal_Home && TeleportHelper.PersonalHomeTeleportId == 59) || (whichHousing == Housing.Apartment && TeleportHelper.ApartmentTeleportId == 59))) ||
+             ((whichHousing == Housing.FC_Estate     && TeleportHelper.FCEstateTeleportId     == 56) ||
+              (whichHousing == Housing.Personal_Home && TeleportHelper.PersonalHomeTeleportId == 59) ||
+              (whichHousing == Housing.Apartment     && TeleportHelper.ApartmentTeleportId    == 59))) ||
             //Lavender Beds
             (Svc.ClientState.TerritoryType == 340 &&
-            ((whichHousing == Housing.FC_Estate && TeleportHelper.FCEstateTeleportId == 57) || (whichHousing == Housing.Personal_Home && TeleportHelper.PersonalHomeTeleportId == 60) || (whichHousing == Housing.Apartment && TeleportHelper.ApartmentTeleportId == 60))) ||
+             ((whichHousing == Housing.FC_Estate     && TeleportHelper.FCEstateTeleportId     == 57) ||
+              (whichHousing == Housing.Personal_Home && TeleportHelper.PersonalHomeTeleportId == 60) ||
+              (whichHousing == Housing.Apartment     && TeleportHelper.ApartmentTeleportId    == 60))) ||
             //Goblet
             (Svc.ClientState.TerritoryType == 341 &&
-            ((whichHousing == Housing.FC_Estate && TeleportHelper.FCEstateTeleportId == 58) || (whichHousing == Housing.Personal_Home && TeleportHelper.PersonalHomeTeleportId == 61) || (whichHousing == Housing.Apartment && TeleportHelper.ApartmentTeleportId == 61))) ||
+             ((whichHousing == Housing.FC_Estate     && TeleportHelper.FCEstateTeleportId     == 58) ||
+              (whichHousing == Housing.Personal_Home && TeleportHelper.PersonalHomeTeleportId == 61) ||
+              (whichHousing == Housing.Apartment     && TeleportHelper.ApartmentTeleportId    == 61))) ||
             //Shirogane
             (Svc.ClientState.TerritoryType == 641 &&
-            ((whichHousing == Housing.FC_Estate && TeleportHelper.FCEstateTeleportId == 96) || (whichHousing == Housing.Personal_Home && TeleportHelper.PersonalHomeTeleportId == 97) || (whichHousing == Housing.Apartment && TeleportHelper.ApartmentTeleportId == 97))) ||
+             ((whichHousing == Housing.FC_Estate     && TeleportHelper.FCEstateTeleportId     == 96) ||
+              (whichHousing == Housing.Personal_Home && TeleportHelper.PersonalHomeTeleportId == 97) ||
+              (whichHousing == Housing.Apartment     && TeleportHelper.ApartmentTeleportId    == 97))) ||
             //Empyreum
             (Svc.ClientState.TerritoryType == 979 &&
-            ((whichHousing == Housing.FC_Estate && TeleportHelper.FCEstateTeleportId == 164) || (whichHousing == Housing.Personal_Home && TeleportHelper.PersonalHomeTeleportId == 165) || (whichHousing == Housing.Apartment && TeleportHelper.ApartmentTeleportId == 165)));
+             ((whichHousing == Housing.FC_Estate     && TeleportHelper.FCEstateTeleportId     == 164) ||
+              (whichHousing == Housing.Personal_Home && TeleportHelper.PersonalHomeTeleportId == 165) ||
+              (whichHousing == Housing.Apartment     && TeleportHelper.ApartmentTeleportId    == 165)));
 
-        internal static ActionState State = ActionState.None;
-
-        private static IGameObject? _entranceGameObject => _whichHousing == Housing.FC_Estate ? TeleportHelper.FCEstateEntranceGameObject : (_whichHousing == Housing.Personal_Home ? TeleportHelper.PersonalHomeEntranceGameObject : TeleportHelper.ApartmentEntranceGameObject);
-        private static Housing _whichHousing = Housing.Apartment;
-        private static List<Vector3> _entrancePath => _whichHousing == Housing.Personal_Home ? Plugin.Configuration.PersonalHomeEntrancePath : Plugin.Configuration.FCEstateEntrancePath;
-        private static int _index = 0;
-
-        internal unsafe static void GotoHousingStopUpdate(IFramework framework)
+        private static IGameObject? _entranceGameObject => _whichHousing switch
         {
-            if (GenericHelpers.TryGetAddonByName("SelectYesno", out AtkUnitBase* addonSelectYesno))
-                addonSelectYesno->Close(true);
-            else if (GenericHelpers.TryGetAddonByName("SelectString", out AtkUnitBase* addonSelectString))
-                addonSelectString->Close(true);
-            else if (PlayerHelper.IsReady)
-            {
-                State = ActionState.None;
-                Plugin.States &= ~PluginState.Other;
-                if (!Plugin.States.HasFlag(PluginState.Looping))
-                    Plugin.SetGeneralSettings(true);
-                Svc.Framework.Update -= GotoHousingStopUpdate;
-            }
-            return;
-        }
+            Housing.FC_Estate => TeleportHelper.FCEstateEntranceGameObject,
+            Housing.Personal_Home => TeleportHelper.PersonalHomeEntranceGameObject,
+            _ => TeleportHelper.ApartmentEntranceGameObject
+        };
+        private static Housing _whichHousing = Housing.Apartment;
+        private static List<Vector3> _entrancePath => _whichHousing == Housing.Personal_Home ? 
+                                                          Plugin.Configuration.PersonalHomeEntrancePath : 
+                                                          Plugin.Configuration.FCEstateEntrancePath;
+        private int _index = 0;
 
-        internal unsafe static void GotoHousingUpdate(IFramework framework)
+        protected override void HelperUpdate(IFramework framework)
         {
             if (Plugin.States.HasFlag(PluginState.Navigating))
             {

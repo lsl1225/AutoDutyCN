@@ -10,127 +10,113 @@ using System.Linq;
 
 namespace AutoDuty.Helpers
 {
-    internal static class AutoRetainerHelper
+    internal class AutoRetainerHelper : ActiveHelperBase<AutoRetainerHelper>
     {
-        internal static void Invoke()
+        protected override string Name        { get; } = nameof(AutoRetainerHelper);
+        protected override string DisplayName { get; } = "AutoRetainer";
+
+        protected override int TimeOut { get; set; } = 600_000;
+
+        protected override string[] AddonsToClose { get; } = ["RetainerList", "SelectYesno", "SelectString", "RetainerTaskAsk"];
+
+        internal override void Start()
         {
             if (!AutoRetainer_IPCSubscriber.IsEnabled || !AutoRetainer_IPCSubscriber.AreAnyRetainersAvailableForCurrentChara())
                 return;
-            Svc.Log.Debug("AutoRetainerHelper.Invoke");
+            DebugLog("AutoRetainerHelper.Invoke");
             if (!AutoRetainer_IPCSubscriber.IsEnabled)
-            {
                 Svc.Log.Info("AutoRetainer requires a plugin, visit https://puni.sh/plugin/AutoRetainer for more info");
-            }
-            else if (State != ActionState.Running)
-            {
-                Svc.Log.Info("AutoRetainer Started");
-                State = ActionState.Running;
-                Plugin.States |= PluginState.Other;
-                SchedulerHelper.ScheduleAction("AutoRetainerTimeOut", Stop, 600000);
-                Svc.Framework.Update += AutoRetainerUpdate;
-            }
+            else if (State != ActionState.Running) 
+                base.Start();
         }
 
-        internal static void Stop()
+        internal override void Stop()
         {
-            Svc.Log.Debug("AutoRetainerHelper.Stop");
-            if (State == ActionState.Running)
-                Svc.Log.Info("AutoRetainer Finished");
-            GotoInnHelper.Stop();
-            Plugin.Action = "";
-            SchedulerHelper.DescheduleAction("AutoRetainerTimeOut");
-            _autoRetainerStarted = false;
-            Svc.Framework.Update -= AutoRetainerUpdate;
-            Svc.Framework.Update += AutoRetainerStopUpdate;
+            this._autoRetainerStarted = false;
+            this._autoRetainerStopped = false;
+            GotoInnHelper.ForceStop();
+
+            base.Stop();
+
             if (AutoRetainer_IPCSubscriber.IsBusy())
                 AutoRetainer_IPCSubscriber.AbortAllTasks();
+            Plugin.Chat.ExecuteCommand("/autoretainer d");
         }
 
-        internal static ActionState State = ActionState.None;
-        private static bool _autoRetainerStarted = false;
-        private static IGameObject? SummoningBellGameObject => Svc.Objects.FirstOrDefault(x => x.DataId == SummoningBellHelper.SummoningBellDataIds((uint)Plugin.Configuration.PreferredSummoningBellEnum));
+        private bool         _autoRetainerStarted = false;
+        private bool         _autoRetainerStopped = false;
+        private IGameObject? SummoningBellGameObject => Svc.Objects.FirstOrDefault(x => x.DataId == SummoningBellHelper.SummoningBellDataIds((uint)Plugin.Configuration.PreferredSummoningBellEnum));
 
-        internal static unsafe void CloseRetainerWindows()
+        protected override unsafe void HelperStopUpdate(IFramework framework)
         {
-            if (Svc.Targets.Target != null)
-                Svc.Targets.Target = null;
-            else if (GenericHelpers.TryGetAddonByName("SelectYesno", out AtkUnitBase* addonSelectYesno))
-                addonSelectYesno->Close(true);
-            else if (GenericHelpers.TryGetAddonByName("SelectString", out AtkUnitBase* addonSelectString))
-                addonSelectString->Close(true);
-            else if (GenericHelpers.TryGetAddonByName("RetainerList", out AtkUnitBase* addonRetainerList))
-                addonRetainerList->Close(true);
-            else if (GenericHelpers.TryGetAddonByName("RetainerTaskAsk", out AtkUnitBase* addonRetainerSell))
-                addonRetainerSell->Close(true);
-        }
-
-        internal static unsafe void AutoRetainerStopUpdate(IFramework framework)
-        {
-
             if (!Svc.Condition[ConditionFlag.OccupiedSummoningBell])
             {
-                State = ActionState.None;
-                Plugin.States &= ~PluginState.Other;
-                Svc.Framework.Update -= AutoRetainerStopUpdate;
+                base.HelperStopUpdate(framework);
             }
             else
-                CloseRetainerWindows();
+            {
+                if (Svc.Targets.Target != null)
+                    Svc.Targets.Target = null;
+                this.CloseAddons();
+            }
         }
+    
 
-        internal static unsafe void AutoRetainerUpdate(IFramework framework)
+        protected override unsafe void HelperUpdate(IFramework framework)
         {
-            if (Plugin.States.HasFlag(PluginState.Navigating))
-            {
-                Svc.Log.Debug("AutoDuty is Started, Stopping AutoRetainerHelper");
-                Stop();
-            }
-
-            if (!_autoRetainerStarted && AutoRetainer_IPCSubscriber.IsBusy())
-            {
-                Svc.Log.Info("AutoRetainer has Started");
-                _autoRetainerStarted = true;
-                return;
-            }
-            else if (_autoRetainerStarted && !AutoRetainer_IPCSubscriber.IsBusy())
-            {
-                Svc.Log.Debug("AutoRetainer is Complete");
-                Stop();
-                return;
-            }
-
-            if (!EzThrottler.Throttle("AM", 250))
+            if (!this.UpdateBase())
                 return;
 
             if (!PlayerHelper.IsValid) return;
 
-            if (GotoHelper.State == ActionState.Running)
+            if (this._autoRetainerStopped)
             {
-                Svc.Log.Debug("Goto Running");
+                if (AutoRetainer_IPCSubscriber.IsBusy())
+                {
+                    this._autoRetainerStopped = false;
+                }
+                else
+                {
+                    this.Stop();
+                    return;
+                }
+            }
+
+            if (!this._autoRetainerStarted && AutoRetainer_IPCSubscriber.IsBusy())
+            {
+                DebugLog("AutoRetainer has Started");
+                this._autoRetainerStarted = true;
+                UpdateBaseThrottle        = 1000;
                 return;
             }
-            Plugin.Action = "AutoRetainer Running";
-
-            if (SummoningBellGameObject != null && !SummoningBellHelper.HousingZones.Contains(Player.Territory) && ObjectHelper.GetDistanceToPlayer(SummoningBellGameObject) > 4)
+            else if (this._autoRetainerStarted && !AutoRetainer_IPCSubscriber.IsBusy())
             {
-                Svc.Log.Debug("Moving Closer to Summoning Bell");
-                MovementHelper.Move(SummoningBellGameObject, 0.25f, 4);
+                DebugLog("AutoRetainer is Complete");
+                this._autoRetainerStopped = true;
+                EzThrottler.Throttle(this.Name, 2000, true);
             }
-            else if ((SummoningBellGameObject == null || SummoningBellHelper.HousingZones.Contains(Player.Territory)) && GotoHelper.State != ActionState.Running)
+
+            if (this.SummoningBellGameObject != null && !SummoningBellHelper.HousingZones.Contains(Player.Territory) && ObjectHelper.GetDistanceToPlayer(this.SummoningBellGameObject) > 4)
             {
-                Svc.Log.Debug("Moving to Summoning Bell Location");
+                DebugLog("Moving Closer to Summoning Bell");
+                MovementHelper.Move(this.SummoningBellGameObject, 0.25f, 4);
+            }
+            else if ((this.SummoningBellGameObject == null || SummoningBellHelper.HousingZones.Contains(Player.Territory)) && GotoHelper.State != ActionState.Running)
+            {
+                DebugLog("Moving to Summoning Bell Location");
                 SummoningBellHelper.Invoke(Plugin.Configuration.PreferredSummoningBellEnum);
             }
-            else if (SummoningBellGameObject != null && ObjectHelper.GetDistanceToPlayer(SummoningBellGameObject) <= 4 && !_autoRetainerStarted && !GenericHelpers.TryGetAddonByName("RetainerList", out AtkUnitBase* addonRetainerList) && (ObjectHelper.InteractWithObjectUntilAddon(SummoningBellGameObject, "RetainerList") == null))
+            else if (this.SummoningBellGameObject != null && ObjectHelper.GetDistanceToPlayer(this.SummoningBellGameObject) <= 4 && !this._autoRetainerStarted && !GenericHelpers.TryGetAddonByName("RetainerList", out AtkUnitBase* _) && (ObjectHelper.InteractWithObjectUntilAddon(this.SummoningBellGameObject, "RetainerList") == null))
             {
                 if (Svc.Condition[ConditionFlag.OccupiedSummoningBell])
                 {
                     if (VNavmesh_IPCSubscriber.Path_IsRunning())
                         VNavmesh_IPCSubscriber.Path_Stop();
-                    Svc.Log.Debug("Waiting for AutoRetainer to Start");
-                    new ECommons.Automation.Chat().ExecuteCommand("/autoretainer e");
+                    DebugLog("Waiting for AutoRetainer to Start");
+                    Plugin.Chat.ExecuteCommand("/autoretainer e");
                 }
                 else
-                    Svc.Log.Debug("Interacting with SummoningBell");
+                    DebugLog("Interacting with SummoningBell");
                 
             }
         }

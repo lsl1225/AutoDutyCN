@@ -11,76 +11,58 @@ using System.Numerics;
 
 namespace AutoDuty.Helpers
 {
-    internal static class GCTurninHelper
+    internal class GCTurninHelper : ActiveHelperBase<GCTurninHelper>
     {
-        internal static void Invoke() 
+        protected override string Name        { get; } = nameof(GCTurninHelper);
+        protected override string DisplayName { get; } = "GC Turnin";
+
+        protected override string[] AddonsToClose { get; } = ["GrandCompanySupplyReward", "SelectYesno", "SelectString", "GrandCompanySupplyList"];
+
+        protected override int TimeOut { get; set; } = 600_000;
+
+        internal override void Start()
         {
-            Svc.Log.Debug("GCTurninHelper.Invoke");
             if (!Deliveroo_IPCSubscriber.IsEnabled)
-                Svc.Log.Info("GC Turnin Requires Deliveroo plugin. Get @ https://git.carvel.li/liza/plugin-repo");
-            else if (State != ActionState.Running)
-            {
-                Svc.Log.Info("GCTurnin Started");
-                State = ActionState.Running;
-                Plugin.States |= PluginState.Other;
-                if (!Plugin.States.HasFlag(PluginState.Looping))
-                    Plugin.SetGeneralSettings(false);
-                SchedulerHelper.ScheduleAction("GCTurninTimeOut", Stop, 600000);
-                Svc.Framework.Update += GCTurninUpdate;
-            }
+                Svc.Log.Info("GC Turnin Requires Deliveroo plugin. Get @ https://puni.sh/api/repository/vera");
+            else
+                base.Start();
         }
 
-        internal static void Stop() 
+        internal override void Stop() 
         {
-            Svc.Log.Debug("GCTurninHelper.Stop");
-            if (State == ActionState.Running)
-                Svc.Log.Info("GCTurnin Finished");
             _deliverooStarted = false;
-            GotoHelper.Stop();
-            Plugin.Action = "";
-            Svc.Framework.Update += GCTurninStopUpdate;
-            Svc.Framework.Update -= GCTurninUpdate;
-            SchedulerHelper.DescheduleAction("GCTurninTimeOut");
+            GotoHelper.ForceStop();
+            base.Stop();
         }
 
-        internal static ActionState State = ActionState.None;
         internal static Vector3 GCSupplyLocation => PlayerHelper.GetGrandCompany() == 1 ? new Vector3(94.02183f, 40.27537f, 74.475525f) : (PlayerHelper.GetGrandCompany() == 2 ? new Vector3(-68.678566f, -0.5015295f, -8.470145f) : new Vector3(-142.82619f, 4.0999994f, -106.31349f));
 
-        private static IGameObject? _personnelOfficerGameObject => ObjectHelper.GetObjectByDataId(_personnelOfficerDataId);
+        private IGameObject? _personnelOfficerGameObject => ObjectHelper.GetObjectByDataId(_personnelOfficerDataId);
         private static uint _personnelOfficerDataId => PlayerHelper.GetGrandCompany() == 1 ? 1002388u : (PlayerHelper.GetGrandCompany() == 2 ? 1002394u : 1002391u);
         private static uint _aetheryteTicketId = PlayerHelper.GetGrandCompany() == 1 ? 21069u : (PlayerHelper.GetGrandCompany() == 2 ? 21070u : 21071u);
-        private static bool _deliverooStarted = false;
-        private static Chat _chat = new();
+        private bool _deliverooStarted = false;
 
-        internal static unsafe void GCTurninStopUpdate(IFramework framework)
+        protected override unsafe void HelperStopUpdate(IFramework framework)
         {
             if (!Svc.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.OccupiedInQuestEvent])
             {
-                State = ActionState.None;
-                Plugin.States &= ~PluginState.Other;
-                if (!Plugin.States.HasFlag(PluginState.Looping))
-                    Plugin.SetGeneralSettings(true);
-                Svc.Framework.Update -= GCTurninStopUpdate;
+                base.HelperStopUpdate(framework);
             }
-            else if (Svc.Targets.Target != null)
-                Svc.Targets.Target = null;
-            else if (GenericHelpers.TryGetAddonByName("GrandCompanySupplyReward", out AtkUnitBase* addonGrandCompanySupplyReward))
-                addonGrandCompanySupplyReward->Close(true);
-            else if (GenericHelpers.TryGetAddonByName("SelectYesno", out AtkUnitBase* addonSelectYesno))
-                addonSelectYesno->Close(true);
-            else if (GenericHelpers.TryGetAddonByName("SelectString", out AtkUnitBase* addonSelectString))
-                addonSelectString->Close(true);
-            else if (GenericHelpers.TryGetAddonByName("GrandCompanySupplyList", out AtkUnitBase* addonGrandCompanySupplyList))
-                addonGrandCompanySupplyList->Close(true);
-            return;
+            else
+            {
+                if (Svc.Targets.Target != null)
+                    Svc.Targets.Target = null;
+                this.CloseAddons();
+            }
         }
 
-        internal static unsafe void GCTurninUpdate(IFramework framework)
+        protected override unsafe void HelperUpdate(IFramework framework)
         {
             if (Plugin.States.HasFlag(PluginState.Navigating))
             {
-                Svc.Log.Debug("AutoDuty is Started, Stopping GCTurninHelper");
+                DebugLog("AutoDuty is Started, Stopping GCTurninHelper");
                 Stop();
+                return;
             }
             if (!_deliverooStarted && Deliveroo_IPCSubscriber.IsTurnInRunning())
             {
@@ -90,7 +72,7 @@ namespace AutoDuty.Helpers
             }
             else if (_deliverooStarted && !Deliveroo_IPCSubscriber.IsTurnInRunning())
             {
-                Svc.Log.Debug("Deliveroo is Complete");
+                DebugLog("Deliveroo is Complete");
                 Stop();
                 return;
             }
@@ -100,14 +82,14 @@ namespace AutoDuty.Helpers
 
             if (GotoHelper.State == ActionState.Running)
             {
-                //Svc.Log.Debug("Goto Running");
+                //DebugLog("Goto Running");
                 return;
             }
             Plugin.Action = "GC Turning In";
 
             if (GotoHelper.State != ActionState.Running && Svc.ClientState.TerritoryType != PlayerHelper.GetGrandCompanyTerritoryType(PlayerHelper.GetGrandCompany()))
             {
-                Svc.Log.Debug("Moving to GC Supply");
+                DebugLog("Moving to GC Supply");
                 if (Plugin.Configuration.AutoGCTurninUseTicket && InventoryHelper.ItemCount(_aetheryteTicketId) > 0)
                 {
                     if (!PlayerHelper.IsCasting)
@@ -120,18 +102,18 @@ namespace AutoDuty.Helpers
 
             if (ObjectHelper.GetDistanceToPlayer(GCSupplyLocation) > 4 && PlayerHelper.IsReady && VNavmesh_IPCSubscriber.Nav_IsReady() && !VNavmesh_IPCSubscriber.SimpleMove_PathfindInProgress() && VNavmesh_IPCSubscriber.Path_NumWaypoints() == 0)
             {
-                Svc.Log.Debug("Setting Move to Personnel Officer");
+                DebugLog("Setting Move to Personnel Officer");
                 MovementHelper.Move(GCSupplyLocation, 0.25f, 4f);
                 return;
             }
             else if (ObjectHelper.GetDistanceToPlayer(GCSupplyLocation) > 4 && VNavmesh_IPCSubscriber.Path_NumWaypoints() > 0)
             {
-                Svc.Log.Debug("Moving to Personnel Officer");
+                DebugLog("Moving to Personnel Officer");
                 return;
             }
             else if (ObjectHelper.GetDistanceToPlayer(GCSupplyLocation) <= 4 && VNavmesh_IPCSubscriber.Path_NumWaypoints() > 0)
             {
-                Svc.Log.Debug("Stopping Path");
+                DebugLog("Stopping Path");
                 VNavmesh_IPCSubscriber.Path_Stop();
                 return;
             }
@@ -159,8 +141,8 @@ namespace AutoDuty.Helpers
                 }
                 else
                 {
-                    Svc.Log.Debug("Sending Chat Command /deliveroo e");
-                    _chat.SendMessage("/deliveroo e");
+                    DebugLog("Sending Chat Command /deliveroo e");
+                    Plugin.Chat.SendMessage("/deliveroo e");
                 }
                 return;
             }

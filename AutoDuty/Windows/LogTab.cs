@@ -13,6 +13,8 @@ using static AutoDuty.Updater.GitHubHelper;
 
 namespace AutoDuty.Windows
 {
+    using ECommons.DalamudServices;
+
     internal static class LogTab
     {
         internal static void Add(LogMessage message) => _logEntriesToAdd.Enqueue(message);
@@ -101,12 +103,22 @@ namespace AutoDuty.Windows
             ImGui.SameLine();
             ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
             if (ImGuiEx.EnumCombo("##LogEventLevel", ref Plugin.Configuration.LogEventLevel))
+            {
+                if(Svc.Log.MinimumLogLevel > Plugin.Configuration.LogEventLevel)
+                    Svc.Log.MinimumLogLevel = Plugin.Configuration.LogEventLevel;
                 Plugin.Configuration.Save();
-            
+            }
+
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Filter log event level");
             ImGuiEx.Spacing();
 
+            if (Plugin.Configuration.LogEventLevel < LogEventLevel.Information)
+            {
+                ImGui.TextWrapped("AutoDuty can't change the log level dalamud uses. To see debug related things, you have to go in the dalamud log \"/xllog\" and set the appropriate level in the top left.");
+            }
+
+            ImGuiEx.Spacing();
             ImGui.BeginChild("scrolling", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y), true, ImGuiWindowFlags.HorizontalScrollbar);
 
             Plugin.DalamudLogEntries.Each(e => { if (e.LogEventLevel >= Plugin.Configuration.LogEventLevel) ImGui.TextColored(GetLogEntryColor(e.LogEventLevel), e.Message); });

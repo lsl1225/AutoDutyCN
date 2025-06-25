@@ -28,7 +28,7 @@ public class MainWindow : Window, IDisposable
     private static string openTabName = "";
 
     public MainWindow() : base(
-        $"AutoDuty v0.0.0.{Plugin.Configuration.Version}###Autoduty")
+        $"AutoDuty v0.0.0.{Plugin.Version}###Autoduty")
     {
         SizeConstraints = new WindowSizeConstraints
         {
@@ -105,9 +105,16 @@ public class MainWindow : Window, IDisposable
 
     internal static void GotoAndActions()
     {
+        if(Plugin.States.HasFlag(PluginState.Other))
+        {
+            if(ImGui.Button("Stop"))
+                Plugin.Stage = Stage.Stopped;
+            ImGui.SameLine(0,5);
+        }
+
         using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Looping) || Plugin.States.HasFlag(PluginState.Navigating)))
         {
-            using (ImRaii.Disabled(Plugin.Configuration.OverrideOverlayButtons && !Plugin.Configuration.GotoButton))
+            using (ImRaii.Disabled(Plugin.Configuration is { OverrideOverlayButtons: true, GotoButton: false }))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other) && GotoHelper.State != ActionState.Running))
                 {
@@ -125,6 +132,51 @@ public class MainWindow : Window, IDisposable
                     }
                 }
             }
+
+            if (ImGui.BeginPopup("GotoPopup"))
+            {
+                if (ImGui.Selectable("Barracks"))
+                {
+                    GotoBarracksHelper.Invoke();
+                }
+                if (ImGui.Selectable("Inn"))
+                {
+                    GotoInnHelper.Invoke();
+                }
+                if (ImGui.Selectable("GCSupply"))
+                {
+                    GotoHelper.Invoke(PlayerHelper.GetGrandCompanyTerritoryType(PlayerHelper.GetGrandCompany()), [GCTurninHelper.GCSupplyLocation], 0.25f, 3f);
+                }
+                if (ImGui.Selectable("Flag Marker"))
+                {
+                    MapHelper.MoveToMapMarker();
+                }
+                if (ImGui.Selectable("Summoning Bell"))
+                {
+                    SummoningBellHelper.Invoke(Plugin.Configuration.PreferredSummoningBellEnum);
+                }
+                if (ImGui.Selectable("Apartment"))
+                {
+                    GotoHousingHelper.Invoke(Housing.Apartment);
+                }
+                if (ImGui.Selectable("Personal Home"))
+                {
+                    GotoHousingHelper.Invoke(Housing.Personal_Home);
+                }
+                if (ImGui.Selectable("FC Estate"))
+                {
+                    GotoHousingHelper.Invoke(Housing.FC_Estate);
+                }
+
+                if (ImGui.Selectable("Triple Triad Trader"))
+                {
+                    GotoHelper.Invoke(TripleTriadCardSellHelper.GoldSaucerTerritoryType, TripleTriadCardSellHelper.TripleTriadCardVendorLocation);
+                }
+                ImGui.EndPopup();
+            }
+
+
+
             ImGui.SameLine(0, 5);
             using (ImRaii.Disabled(!Plugin.Configuration.AutoGCTurnin && !Plugin.Configuration.OverrideOverlayButtons || !Plugin.Configuration.TurninButton))
             {
@@ -142,12 +194,12 @@ public class MainWindow : Window, IDisposable
                             if (Deliveroo_IPCSubscriber.IsEnabled)
                                 GCTurninHelper.Invoke();
                             else
-                                ShowPopup("Missing Plugin", "GC Turnin Requires Deliveroo plugin. Get @ https://git.carvel.li/liza/plugin-repo");
+                                ShowPopup("Missing Plugin", "GC Turnin Requires Deliveroo plugin. Get @ https://puni.sh/api/repository/vera");
                         }
                         if (Deliveroo_IPCSubscriber.IsEnabled)
                             ToolTip("Click to Goto GC Turnin and Invoke Deliveroo");
                         else
-                            ToolTip("GC Turnin Requires Deliveroo plugin. Get @ https://git.carvel.li/liza/plugin-repo");
+                            ToolTip("GC Turnin Requires Deliveroo plugin. Get @ https://puni.sh/api/repository/vera");
                     }
                 }
             }
@@ -267,41 +319,31 @@ public class MainWindow : Window, IDisposable
                     }
                 }
             }
+            ImGui.SameLine(0, 5);
 
-            if (ImGui.BeginPopup("GotoPopup"))
+            using (ImRaii.Disabled(!Plugin.Configuration.TripleTriadEnabled && (!Plugin.Configuration.OverrideOverlayButtons || !Plugin.Configuration.TTButton)))
             {
-                if (ImGui.Selectable("Barracks"))
+                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
-                    GotoBarracksHelper.Invoke();
+                    if ((GotoHelper.State == ActionState.Running && TripleTriadCardUseHelper.State != ActionState.Running && TripleTriadCardSellHelper.State != ActionState.Running))
+                    {
+                        if (ImGui.Button("Stop"))
+                            Plugin.Stage = Stage.Stopped;
+                    }
+                    else
+                    {
+                        if (ImGui.Button("Triple Triad"))
+                            ImGui.OpenPopup("TTPopup");
+                    }
                 }
-                if (ImGui.Selectable("Inn"))
-                {
-                    GotoInnHelper.Invoke();
-                }
-                if (ImGui.Selectable("GCSupply"))
-                {
-                    GotoHelper.Invoke(PlayerHelper.GetGrandCompanyTerritoryType(PlayerHelper.GetGrandCompany()), [GCTurninHelper.GCSupplyLocation], 0.25f, 3f);
-                }
-                if (ImGui.Selectable("Flag Marker"))
-                {
-                    MapHelper.MoveToMapMarker();
-                }
-                if (ImGui.Selectable("Summoning Bell"))
-                {
-                    SummoningBellHelper.Invoke(Plugin.Configuration.PreferredSummoningBellEnum);
-                }
-                if (ImGui.Selectable("Apartment"))
-                {
-                    GotoHousingHelper.Invoke(Housing.Apartment);
-                }
-                if (ImGui.Selectable("Personal Home"))
-                {
-                    GotoHousingHelper.Invoke(Housing.Personal_Home);
-                }
-                if (ImGui.Selectable("FC Estate"))
-                {
-                    GotoHousingHelper.Invoke(Housing.FC_Estate);
-                }
+            }
+
+            if (ImGui.BeginPopup("TTPopup"))
+            {
+                if (ImGui.Selectable("Register TT Cards"))
+                    TripleTriadCardUseHelper.Invoke();
+                if (ImGui.Selectable("Sell TT Cards")) 
+                    TripleTriadCardSellHelper.Invoke();
                 ImGui.EndPopup();
             }
         }
@@ -318,13 +360,6 @@ public class MainWindow : Window, IDisposable
             ImGui.EndTooltip();
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
         }
-    }
-
-    internal static bool CenteredButton(string label, float percentWidth, float xIndent = 0)
-    {
-        var buttonWidth = ImGui.GetContentRegionAvail().X * percentWidth;
-        ImGui.SetCursorPosX(xIndent + (ImGui.GetContentRegionAvail().X - buttonWidth) / 2f);
-        return ImGui.Button(label, new(buttonWidth, 35f));
     }
 
     internal static void ShowPopup(string popupTitle, string popupText, bool nested = false)
@@ -348,7 +383,7 @@ public class MainWindow : Window, IDisposable
         {
             ImGuiEx.TextCentered(_popupText);
             ImGui.Spacing();
-            if (CenteredButton("OK", .5f, 15))
+            if (ImGuiHelper.CenteredButton("OK", .5f, 15))
             {
                 _showPopup = false;
                 ImGui.CloseCurrentPopup();
@@ -399,13 +434,13 @@ public class MainWindow : Window, IDisposable
             }
             if (ImGuiEx.BeginTabItem(x.name, openTabName == x.name ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None))
             {
-                if (x.color != null)
-                {
+                if (x.color != null) 
                     ImGui.PopStyleColor();
-                }
-                if (x.child) ImGui.BeginChild(x.name + "child");
+                if (x.child) 
+                    ImGui.BeginChild(x.name + "child");
                 x.function();
-                if (x.child) ImGui.EndChild();
+                if (x.child) 
+                    ImGui.EndChild();
                 ImGui.EndTabItem();
             }
             else
@@ -427,6 +462,16 @@ public class MainWindow : Window, IDisposable
     public override void Draw()
     {
         DrawPopup();
+
+        if(DalamudInfoHelper.IsOnStaging())
+        {
+            ImGui.TextColored(GradientColor.Get(ImGuiHelper.ExperimentalColor, ImGuiHelper.ExperimentalColor2, 500), "NOT SUPPORTED ON STAGING.");
+            ImGui.Text("Please type in \"/xlbranch\" and pick Release, then restart the game.");
+
+            if (!ImGui.CollapsingHeader("Use despite staging. Support will not be given##stagingHeader"))
+                return;
+        }
+
         EzTabBar("MainTab", null, openTabName, ImGuiTabBarFlags.None, tabList.ToArray());
     }
 }

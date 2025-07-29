@@ -479,7 +479,7 @@ public class Configuration
     public bool                                       AutoEquipRecommendedGearGearsetter;
     public bool                                       AutoEquipRecommendedGearGearsetterOldToInventory;
     public bool                                       AutoRepair              = false;
-    public int                                        AutoRepairPct           = 50;
+    public uint                                       AutoRepairPct           = 50;
     public bool                                       AutoRepairSelf          = false;
     public RepairNpcData?                             PreferredRepairNPC      = null;
     public bool                                       AutoConsume             = false;
@@ -1527,9 +1527,10 @@ public static class ConfigTab
                     ImGui.Text("Trigger @");
                     ImGui.SameLine();
                     ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-                    if (ImGui.SliderInt("##Repair@", ref Configuration.AutoRepairPct, 0, 99, "%d%%"))
+                    int autoRepairPct = (int)Configuration.AutoRepairPct;
+                    if (ImGui.SliderInt("##Repair@", ref autoRepairPct, 0, 99, "%d%%"))
                     {
-                        Configuration.AutoRepairPct = Math.Clamp(Configuration.AutoRepairPct, 0, 99);
+                        Configuration.AutoRepairPct = Math.Clamp((uint)autoRepairPct, 0, 99);
                         Configuration.Save();
                     }
 
@@ -1851,7 +1852,7 @@ public static class ConfigTab
                 }
                 ImGui.NextColumn();
                 //ImGui.SameLine(0, 5);
-                using (ImRaii.Disabled(!Deliveroo_IPCSubscriber.IsEnabled))
+                using (ImRaii.Disabled(!AutoRetainer_IPCSubscriber.IsEnabled))
                 {
                     if (ImGui.Checkbox("Auto GC Turnin", ref Configuration.autoGCTurnin))
                     {
@@ -1929,17 +1930,17 @@ public static class ConfigTab
                 }
                 ImGui.Columns(1);
 
-                if (!Deliveroo_IPCSubscriber.IsEnabled)
+                if (!AutoRetainer_IPCSubscriber.IsEnabled)
                 {
                     if (Configuration.AutoGCTurnin)
                     {
                         Configuration.AutoGCTurnin = false;
                         Configuration.Save();
                     }
-                    ImGui.Text("* Auto GC Turnin Requires Deliveroo plugin");
+                    ImGui.Text("* Auto GC Turnin Requires AutoRetainer plugin");
                     ImGui.Text("Get @ ");
                     ImGui.SameLine(0, 0);
-                    ImGuiEx.TextCopy(ImGuiHelper.LinkColor, @"https://puni.sh/api/repository/vera");
+                    ImGuiEx.TextCopy(ImGuiHelper.LinkColor, @"https://love.puni.sh/ment.json");
                 }
 
                 if(ImGui.Checkbox("Triple Triad", ref Configuration.TripleTriadEnabled))

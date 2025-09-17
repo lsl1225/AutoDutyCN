@@ -7,7 +7,7 @@ using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.ImGuiMethods;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,7 +38,7 @@ namespace AutoDuty.Windows
             static void DrawSearchBar()
             {
                 // Set the maximum search to 10 characters
-                uint inputMaxLength = 10;
+                int inputMaxLength = 10;
                 
                 // Calculate the X width of the maximum amount of search characters
                 Vector2 _characterWidth = ImGui.CalcTextSize("W");
@@ -184,7 +184,9 @@ namespace AutoDuty.Windows
 
                         if (!ImGui.BeginListBox("##MainList", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y))) return;
 
-                        if ((VNavmesh_IPCSubscriber.IsEnabled || Plugin.Configuration.UsingAlternativeMovementPlugin) && (BossMod_IPCSubscriber.IsEnabled || Plugin.Configuration.UsingAlternativeBossPlugin) && (ReflectionHelper.RotationSolver_Reflection.RotationSolverEnabled || BossMod_IPCSubscriber.IsEnabled || Plugin.Configuration.UsingAlternativeRotationPlugin))
+                        if ((VNavmesh_IPCSubscriber.IsEnabled || Plugin.Configuration.UsingAlternativeMovementPlugin) &&
+                            (BossMod_IPCSubscriber.IsEnabled  || Plugin.Configuration.UsingAlternativeBossPlugin)     &&
+                            (RSR_IPCSubscriber.IsEnabled      || BossMod_IPCSubscriber.IsEnabled || Plugin.Configuration.UsingAlternativeRotationPlugin))
                         {
                             foreach (var item in Plugin.Actions.Select((Value, Index) => (Value, Index)))
                             {
@@ -192,6 +194,7 @@ namespace AutoDuty.Windows
                                 //var text = item.Value.Name.StartsWith("<--", StringComparison.InvariantCultureIgnoreCase) ? item.Value.Note : $"{item.Value.ToCustomString()}";
                                 ////////////////////////////////////////////////////////////////
                             }
+
                             if (_currentStepIndex != Plugin.Indexer && _currentStepIndex > -1 && Plugin.Stage > 0)
                             {
                                 var lineHeight = ImGui.GetTextLineHeightWithSpacing();
@@ -204,8 +207,10 @@ namespace AutoDuty.Windows
                                 _currentStepIndex = 0;
                                 ImGui.SetScrollY(_currentStepIndex);
                             }
+
                             if (Plugin.InDungeon && Plugin.Actions.Count < 1 && !ContentPathsManager.DictionaryPaths.ContainsKey(Plugin.CurrentTerritoryContent.TerritoryType))
-                                ImGui.TextColored(new Vector4(0, 255, 0, 1), $"No Path file was found for:\n{TerritoryName.GetTerritoryName(Plugin.CurrentTerritoryContent.TerritoryType).Split('|')[1].Trim()}\n({Plugin.CurrentTerritoryContent.TerritoryType}.json)\nin the Paths Folder:\n{Plugin.PathsDirectory.FullName.Replace('\\', '/')}\nPlease download from:\n{_pathsURL}\nor Create in the Build Tab");
+                                ImGui.TextColored(new Vector4(0, 255, 0, 1),
+                                                  $"No Path file was found for:\n{TerritoryName.GetTerritoryName(Plugin.CurrentTerritoryContent.TerritoryType).Split('|')[1].Trim()}\n({Plugin.CurrentTerritoryContent.TerritoryType}.json)\nin the Paths Folder:\n{Plugin.PathsDirectory.FullName.Replace('\\', '/')}\nPlease download from:\n{_pathsURL}\nor Create in the Build Tab");
                         }
                         else
                         {
@@ -213,7 +218,7 @@ namespace AutoDuty.Windows
                                 ImGui.TextColored(new Vector4(255, 0, 0, 1), "AutoDuty Requires VNavmesh plugin to be Installed and Loaded\nPlease add 3rd party repo:\nhttps://puni.sh/api/repository/veyn");
                             if (!BossMod_IPCSubscriber.IsEnabled && !Plugin.Configuration.UsingAlternativeBossPlugin)
                                 ImGui.TextColored(new Vector4(255, 0, 0, 1), "AutoDuty Requires BossMod plugin to be Installed and Loaded\nPlease add 3rd party repo:\nhttps://puni.sh/api/repository/veyn");
-                            if (!Wrath_IPCSubscriber.IsEnabled && !ReflectionHelper.RotationSolver_Reflection.RotationSolverEnabled && !BossMod_IPCSubscriber.IsEnabled && !Plugin.Configuration.UsingAlternativeRotationPlugin)
+                            if (!Wrath_IPCSubscriber.IsEnabled && !RSR_IPCSubscriber.IsEnabled && !BossMod_IPCSubscriber.IsEnabled && !Plugin.Configuration.UsingAlternativeRotationPlugin)
                                 ImGui.TextColored(new Vector4(255, 0, 0, 1), "AutoDuty Requires a Rotation plugin to be Installed and Loaded (Either Wrath Combo, Rotation Solver Reborn, or BossMod AutoRotation)");
                         }
                         ImGui.EndListBox();
@@ -264,7 +269,7 @@ namespace AutoDuty.Windows
                     {
                         foreach (DutyMode mode in Enum.GetValues(typeof(DutyMode)))
                         {
-                            if (ImGui.Selectable(mode.ToCustomString()))
+                            if (ImGui.Selectable(mode.ToCustomString(), Plugin.Configuration.DutyModeEnum == mode))
                             {
                                 Plugin.Configuration.DutyModeEnum = mode;
                                 Plugin.Configuration.Save();
@@ -280,20 +285,37 @@ namespace AutoDuty.Windows
                             ImGui.TextColored(Plugin.LevelingModeEnum == LevelingMode.None ? new Vector4(1, 0, 0, 1) : new Vector4(0, 1, 0, 1), "Select Leveling Mode: ");
                             ImGui.SameLine(0);
                             ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-                            if (ImGui.BeginCombo("##LevelingModeEnum", Plugin.LevelingModeEnum == LevelingMode.None ? "None" : "Auto"))
+                            if (ImGui.BeginCombo("##LevelingModeEnum", Plugin.LevelingModeEnum switch
+                                {
+                                    LevelingMode.None => "None",
+                                    _ => $"{Plugin.LevelingModeEnum.ToCustomString().Replace(Plugin.Configuration.DutyModeEnum.ToString(), null)} Auto".Trim()
+                                }))
                             {
-                                if (ImGui.Selectable("None"))
+                                if (ImGui.Selectable("None", Plugin.LevelingModeEnum == LevelingMode.None))
                                 {
                                     Plugin.LevelingModeEnum = LevelingMode.None;
                                     Plugin.Configuration.Save();
                                 }
-                                if (ImGui.Selectable("Auto"))
+
+                                LevelingMode autoLevelMode = (Plugin.Configuration.DutyModeEnum == DutyMode.Support ? LevelingMode.Support : LevelingMode.Trust_Group);
+                                if (ImGui.Selectable($"{autoLevelMode.ToCustomString().Replace(Plugin.Configuration.DutyModeEnum.ToString(), null)} Auto".Trim(), Plugin.LevelingModeEnum == autoLevelMode))
                                 {
-                                    Plugin.LevelingModeEnum = Plugin.Configuration.DutyModeEnum == DutyMode.Support ? LevelingMode.Support : LevelingMode.Trust;
+                                    Plugin.LevelingModeEnum = autoLevelMode;
                                     Plugin.Configuration.Save();
                                     if (Plugin.Configuration.AutoEquipRecommendedGear)
                                         AutoEquipHelper.Invoke();
                                 }
+
+                                if(Plugin.Configuration.DutyModeEnum == DutyMode.Trust)
+                                    if (ImGui.Selectable($"{LevelingMode.Trust_Solo.ToCustomString().Replace(Plugin.Configuration.DutyModeEnum.ToString(), null)} Auto".Trim(), Plugin.LevelingModeEnum == LevelingMode.Trust_Solo))
+                                    {
+                                        Plugin.LevelingModeEnum = LevelingMode.Trust_Solo;
+                                        Plugin.Configuration.Save();
+                                        if (Plugin.Configuration.AutoEquipRecommendedGear)
+                                            AutoEquipHelper.Invoke();
+                                    }
+
+
                                 ImGui.EndCombo();
                             }
                             ImGui.PopItemWidth();
@@ -352,7 +374,7 @@ namespace AutoDuty.Windows
                                     SchedulerHelper.ScheduleAction("Refresh Levels - DT", () => TrustHelper.GetLevels(ContentHelper.DictionaryContent[1167u]), () => TrustHelper.State == ActionState.None);
                                 }
                                 ImGui.NextColumn();
-                                ImGui.Columns(1, null, true);
+                                ImGui.Columns(1);
                             }
                             else if (ImGui.Button("Refresh trust member levels"))
                             {
@@ -373,13 +395,13 @@ namespace AutoDuty.Windows
                         ImGui.SameLine();
                         if (ImGui.Checkbox("Hide Unavailable Duties", ref Plugin.Configuration.HideUnavailableDuties))
                             Plugin.Configuration.Save();
-                        if (Plugin.Configuration.DutyModeEnum == DutyMode.Regular || Plugin.Configuration.DutyModeEnum == DutyMode.Trial || Plugin.Configuration.DutyModeEnum == DutyMode.Raid)
+                        if (Plugin.Configuration.DutyModeEnum is DutyMode.Regular or DutyMode.Trial or DutyMode.Raid)
                         {
                             if (ImGuiEx.CheckboxWrapped("Unsynced", ref Plugin.Configuration.Unsynced))
                                 Plugin.Configuration.Save();
                         }
                     }
-                    var ilvl = InventoryHelper.CurrentItemLevel;
+                    ushort ilvl = InventoryHelper.CurrentItemLevel;
                     if (!ImGui.BeginListBox("##DutyList", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y))) return;
 
                     if (VNavmesh_IPCSubscriber.IsEnabled && BossMod_IPCSubscriber.IsEnabled)
@@ -388,7 +410,9 @@ namespace AutoDuty.Windows
                         {
                             if (Plugin.LevelingModeEnum != LevelingMode.None)
                             {
-                                if (Player.Job.GetCombatRole() == CombatRole.NonCombat || (Plugin.LevelingModeEnum == LevelingMode.Trust && ilvl < 370) || (Plugin.LevelingModeEnum == LevelingMode.Trust && Plugin.CurrentPlayerItemLevelandClassJob.Value != null && Plugin.CurrentPlayerItemLevelandClassJob.Value != Player.Job))
+                                if (Player.Job.GetCombatRole() == CombatRole.NonCombat || 
+                                    (Plugin.LevelingModeEnum.IsTrustLeveling() && 
+                                        (ilvl < 370 || Plugin.CurrentPlayerItemLevelandClassJob.Value != null && Plugin.CurrentPlayerItemLevelandClassJob.Value != Player.Job)))
                                 {
                                     Svc.Log.Debug($"You are on a non-compatible job: {Player.Job.GetCombatRole()}, or your doing trust and your iLvl({ilvl}) is below 370, or your iLvl has changed, Disabling Leveling Mode");
                                     Plugin.LevelingModeEnum = LevelingMode.None;
@@ -396,7 +420,7 @@ namespace AutoDuty.Windows
                                 else if (ilvl > 0 && ilvl != Plugin.CurrentPlayerItemLevelandClassJob.Key)
                                 {
                                     Svc.Log.Debug($"Your iLvl has changed, Selecting new Duty.");
-                                    Plugin.CurrentTerritoryContent = LevelingHelper.SelectHighestLevelingRelevantDuty(Plugin.LevelingModeEnum == LevelingMode.Trust);
+                                    Plugin.CurrentTerritoryContent = LevelingHelper.SelectHighestLevelingRelevantDuty(Plugin.LevelingModeEnum);
                                 }
                                 else
                                 {

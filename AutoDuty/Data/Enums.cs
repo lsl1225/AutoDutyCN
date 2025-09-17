@@ -7,7 +7,7 @@ namespace AutoDuty.Data
     using System.Numerics;
     using Dalamud.Interface.Utility.Raii;
     using ECommons.ExcelServices;
-    using ImGuiNET;
+    using Dalamud.Bindings.ImGui;
 
     public static class Enums
     {
@@ -21,6 +21,14 @@ namespace AutoDuty.Data
             Revival  = 1 << 3,
             Treasure = 1 << 4,
             W2W      = 1 << 5
+        }
+
+        public enum RotationPlugin
+        {
+            BossMod              = 0,
+            RotationSolverReborn = 1,
+            WrathCombo           = 2,
+            All                  = 3
         }
 
         public enum ClassJobType
@@ -122,11 +130,18 @@ namespace AutoDuty.Data
         public enum LootMethod : int
         {
             AutoDuty = 0,
-            [Obsolete("Removed by RSR", false)]
-            RotationSolver = 1,
+            //[Obsolete("Removed by RSR", false)] RotationSolver = 1,
             Pandora = 2,
-            All = 3
+            All     = 3
         }
+
+        public enum GearsetUpdateSource : int
+        {
+            Vanilla,
+            Gearsetter,
+            Stylist
+        }
+
         public enum Housing : int
         {
             Apartment = 1,
@@ -232,7 +247,8 @@ namespace AutoDuty.Data
         {
             None = 0,
             Support = 1,
-            Trust = 2
+            Trust_Group = 2,
+            Trust_Solo = 3
         }
 
         [Flags]
@@ -336,6 +352,20 @@ namespace AutoDuty.Data
             SmallBlue = 60779,
             MediumBlue = 60780,
             LargeBlue = 60781,
+        }
+
+        public enum ExternalPlugin
+        {
+            vnav,
+            BossMod,
+            Avarice,
+            RotationSolverReborn,
+            WrathCombo,
+            AutoRetainer,
+            Gearsetter,
+            Stylist,
+            Lifestream,
+            AntiAFK
         }
 
         public static bool HasAnyFlag<T>(this T instance, params T[] parameter) where T : Enum

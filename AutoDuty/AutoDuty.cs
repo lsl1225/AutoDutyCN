@@ -48,6 +48,7 @@ using ECommons.Configuration;
 using ECommons.ImGuiMethods;
 using ECommons.Reflection;
 using ECommons.SimpleGui;
+using FFXIVClientStructs;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using Lumina.Excel.Sheets;
 using Pictomancy;
@@ -76,15 +77,27 @@ public sealed class AutoDuty : IDalamudPlugin
     private Content? currentTerritoryContent = null;
     internal Content? CurrentTerritoryContent
     {
-        get => currentTerritoryContent;
+        get => this.Configuration.AutoDutyModeEnum switch
+        {
+            AutoDutyMode.Playlist when this.States.HasFlag(PluginState.Looping) || !this.InDungeon => (this.PlaylistCurrent.Count >= 0 && this.PlaylistIndex < this.PlaylistCurrent.Count && this.PlaylistIndex >= 0) ?
+                                                                                                                            this.PlaylistCurrent[this.PlaylistIndex].Content :
+                                                                                                                            null,
+            AutoDutyMode.Looping or _ => this.currentTerritoryContent
+        };
         set
         {
             CurrentPlayerItemLevelandClassJob = PlayerHelper.IsValid ? new(InventoryHelper.CurrentItemLevel, Player.Job) : new(0, null);
-            currentTerritoryContent = value;
+            currentTerritoryContent           = value;
         }
     }
+
     internal uint CurrentTerritoryType = 0;
     internal int CurrentPath = -1;
+
+    internal List<PlaylistEntry> PlaylistCurrent = [];
+    internal int                 PlaylistIndex   = 0;
+    internal PlaylistEntry?      PlaylistCurrentEntry => this.PlaylistIndex >= 0 && this.PlaylistIndex < this.PlaylistCurrent.Count ? 
+                                                             this.PlaylistCurrent[this.PlaylistIndex] : null;
 
     internal bool SupportLevelingEnabled => LevelingModeEnum == LevelingMode.Support;
     internal bool TrustLevelingEnabled => LevelingModeEnum.IsTrustLeveling();
@@ -242,7 +255,7 @@ public sealed class AutoDuty : IDalamudPlugin
             AssemblyDirectoryInfo = AssemblyFileInfo.Directory;
             
             Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 245) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 246) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!_configDirectory.Exists)
@@ -355,6 +368,17 @@ public sealed class AutoDuty : IDalamudPlugin
                                                              }
                                                          }),
                 (["movetoflag"], "moves to the flag map marker", _ => MapHelper.MoveToMapMarker()),
+                (["ttfull"], "opens packs, registers cards and sells the rest", _ =>
+                                                                                {
+                                                                                    this.TaskManager.Enqueue(CofferHelper.Invoke);
+                                                                                    this.TaskManager.Enqueue(() => CofferHelper.State == ActionState.None, 600000);
+                                                                                    this.TaskManager.Enqueue(TripleTriadCardUseHelper.Invoke);
+                                                                                    this.TaskManager.DelayNext(200);
+                                                                                    this.TaskManager.Enqueue(() => TripleTriadCardUseHelper.State == ActionState.None, 600000);
+                                                                                    this.TaskManager.DelayNext(200);
+                                                                                    this.TaskManager.Enqueue(TripleTriadCardSellHelper.Invoke);
+                                                                                    this.TaskManager.Enqueue(() => TripleTriadCardSellHelper.State == ActionState.None, 120000);
+                                                                                }),
                 (["run"], "starts auto duty in territory type specified", argsArray =>
                                                                           {
                                                                               const string failPreMessage  = "Run Error: Incorrect usage: ";
@@ -682,7 +706,14 @@ public sealed class AutoDuty : IDalamudPlugin
                 return;
             }
 
-            ContentPathsManager.DutyPath? path = CurrentPath < 0 ?
+            if (this.States.HasFlag(PluginState.Looping) && this.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
+            {
+                string? s = this.PlaylistCurrentEntry?.path ?? null;
+                if(s != null) 
+                    this.CurrentPath = container.Paths.IndexOf(dp => dp.FileName.Equals(s, StringComparison.InvariantCultureIgnoreCase));
+            }
+
+            ContentPathsManager.DutyPath? path = this.CurrentPath < 0 ?
                                                      container.SelectPath(out CurrentPath) :
                                                      container.Paths[CurrentPath > -1 ? CurrentPath : 0];
 
@@ -762,7 +793,7 @@ public sealed class AutoDuty : IDalamudPlugin
 
         if (t != CurrentTerritoryContent.TerritoryType)
         {
-            if (CurrentLoop < Configuration.LoopTimes)
+            if (CurrentLoop < Configuration.LoopTimes || this.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
             {
                 TaskManager.Abort();
                 TaskManager.Enqueue(() => Svc.Log.Debug($"Loop {CurrentLoop} of {Configuration.LoopTimes}"), "Loop-Debug");
@@ -845,6 +876,9 @@ public sealed class AutoDuty : IDalamudPlugin
 
     public void Run(uint territoryType = 0, int loops = 0, bool startFromZero = true, bool bareMode = false)
     {
+        if(this.InDungeon)
+            Plugin.Configuration.AutoDutyModeEnum = AutoDutyMode.Looping;
+
         Svc.Log.Debug($"Run: territoryType={territoryType} loops={loops} bareMode={bareMode}");
         if (territoryType > 0)
         {
@@ -990,13 +1024,12 @@ public sealed class AutoDuty : IDalamudPlugin
             if (Configuration.AutoGCTurnin && (!Configuration.AutoGCTurninSlotsLeftBool || InventoryManager.Instance()->GetEmptySlotsInBag() <= Configuration.AutoGCTurninSlotsLeft) && PlayerHelper.GetGrandCompanyRank() > 5)
                 EnqueueActiveHelper<GCTurninHelper>();
 
-            if (Configuration.TripleTriadEnabled)
-            {
-                if (Configuration.TripleTriadRegister) 
-                    EnqueueActiveHelper<TripleTriadCardUseHelper>();
-                if (Configuration.TripleTriadSell) 
-                    EnqueueActiveHelper<TripleTriadCardSellHelper>();
-            }
+            
+            if (Configuration.TripleTriadRegister) 
+                EnqueueActiveHelper<TripleTriadCardUseHelper>();
+            if (Configuration.TripleTriadSell) 
+                EnqueueActiveHelper<TripleTriadCardSellHelper>();
+        
 
             if (Configuration.DiscardItems) 
                 EnqueueActiveHelper<DiscardHelper>();
@@ -1032,6 +1065,18 @@ public sealed class AutoDuty : IDalamudPlugin
 
         ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true;
 
+        if (queue && this.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
+        {
+            Svc.Log.Debug("next entry on playlist");
+            Plugin.PlaylistIndex++;
+            if (Plugin.PlaylistIndex >= Plugin.PlaylistCurrent.Count)
+            {
+                Svc.Log.Debug("playlist done");
+                queue                = false;
+                Plugin.PlaylistIndex = 0;
+            }
+        }
+
         if (!queue)
         {
             LoopsCompleteActions();
@@ -1040,7 +1085,7 @@ public sealed class AutoDuty : IDalamudPlugin
 
         SchedulerHelper.ScheduleAction("LoopContinueTask", () =>
                                                            {
-                                                               if (LevelingEnabled)
+                                                               if (this.Configuration.AutoDutyModeEnum == AutoDutyMode.Looping && LevelingEnabled)
                                                                {
                                                                    Svc.Log.Info("Leveling Enabled");
                                                                    Content? duty = LevelingHelper.SelectHighestLevelingRelevantDuty(this.LevelingModeEnum);

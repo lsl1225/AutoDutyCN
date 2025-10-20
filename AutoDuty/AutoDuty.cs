@@ -242,7 +242,7 @@ public sealed class AutoDuty : IDalamudPlugin
             AssemblyDirectoryInfo = AssemblyFileInfo.Directory;
             
             Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 243) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 245) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!_configDirectory.Exists)
@@ -959,7 +959,7 @@ public sealed class AutoDuty : IDalamudPlugin
             if (Configuration.AutoOpenCoffers) 
                 EnqueueActiveHelper<CofferHelper>();
 
-            if (Configuration.EnableAutoRetainer && AutoRetainer_IPCSubscriber.IsEnabled && AutoRetainer_IPCSubscriber.AreAnyRetainersAvailableForCurrentChara())
+            if (AutoRetainer_IPCSubscriber.RetainersAvailable())
             {
                 TaskManager.Enqueue(() => Svc.Log.Debug($"AutoRetainer BetweenLoop Actions"));
                 if (Configuration.EnableAutoRetainer)
@@ -975,8 +975,6 @@ public sealed class AutoDuty : IDalamudPlugin
                     TaskManager.Enqueue(() => AutoRetainerHelper.ForceStop(), "Loop-AutoRetainerStop");
                 }
             }
-
-            AutoConsume();
 
             AutoEquipRecommendedGear();
 
@@ -1029,6 +1027,9 @@ public sealed class AutoDuty : IDalamudPlugin
             TaskManager.Enqueue(() => PlayerHelper.IsReadyFull, "Loop-WaitIsReadyFull");
         }
 
+        if(queue || ConfigurationMain.Instance is { MultiBox: true, host: false })
+            AutoConsume();
+
         ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true;
 
         if (!queue)
@@ -1036,7 +1037,6 @@ public sealed class AutoDuty : IDalamudPlugin
             LoopsCompleteActions();
             return;
         }
-
 
         SchedulerHelper.ScheduleAction("LoopContinueTask", () =>
                                                            {
@@ -1302,6 +1302,8 @@ public sealed class AutoDuty : IDalamudPlugin
             Indexer++;
             return;
         }
+
+        BossMod_IPCSubscriber.InBoss(this.PathAction.Name.Equals("Boss"));
 
         ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = false;
 
@@ -1689,8 +1691,10 @@ public sealed class AutoDuty : IDalamudPlugin
             Configuration.Save();
         }
 
+        ClassJob classJob = Player.Object.ClassJob.Value!;
+
         //RoleBased MaxDistanceToTarget
-        float maxDistanceToTarget = (Player.Object.ClassJob.Value.GetJobRole() is JobRole.Melee or JobRole.Tank ? 
+        float maxDistanceToTarget = (classJob.GetJobRole() is JobRole.Melee or JobRole.Tank ? 
                                          Plugin.Configuration.MaxDistanceToTargetRoleMelee : Plugin.Configuration.MaxDistanceToTargetRoleRanged);
         if (PlayerHelper.IsValid && Configuration.MaxDistanceToTargetRoleBased && Math.Abs(this.Configuration.MaxDistanceToTargetFloat - maxDistanceToTarget) > 0.01f)
         {
@@ -1699,7 +1703,8 @@ public sealed class AutoDuty : IDalamudPlugin
         }
 
         //RoleBased MaxDistanceToTargetAoE
-        float maxDistanceToTargetAoE = (Player.Object.ClassJob.Value!.GetJobRole() is JobRole.Melee or JobRole.Tank or JobRole.Ranged_Physical ?
+
+        float maxDistanceToTargetAoE = (classJob.GetJobRole() is JobRole.Melee or JobRole.Tank or JobRole.Ranged_Physical || (classJob.GetJobRole() == JobRole.Healer && classJob.RowId != (uint) ClassJobType.Astrologian) ?
                                             Plugin.Configuration.MaxDistanceToTargetRoleMelee : Plugin.Configuration.MaxDistanceToTargetRoleRanged);
         if (PlayerHelper.IsValid && Configuration.MaxDistanceToTargetRoleBased && Math.Abs(this.Configuration.MaxDistanceToTargetAoEFloat - maxDistanceToTargetAoE) > 0.01f)
         {

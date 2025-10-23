@@ -39,7 +39,7 @@ namespace AutoDuty.Helpers
                         823u,  // Qitana
                         822u,  // Mt. Gulg
                         952u,  // Tower of Zot
-                        // 969u,
+                        969u,  // Tower of Babil
                         // 970u,
                         974u,  // Ktisis Hyperboreia
                         // 978u,
@@ -91,7 +91,7 @@ namespace AutoDuty.Helpers
                         int memberIndex = 0;
                         foreach ((TrustMemberName _, TrustMember member) in TrustHelper.Members.OrderByDescending(tm => tm.Value.Level))
                         {
-                            if (member.LevelIsSet && memberTest.CanSelectMember(member, combatRole)) 
+                            if (member.LevelIsSet && memberTest.CanSelectMember(member, combatRole))
                                 memberTest[memberIndex++] = member;
                             Svc.Log.Debug($"Leveling Mode: Checking {member.Name} level which is {member.Level}");
 

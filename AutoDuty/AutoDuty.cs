@@ -464,59 +464,12 @@ public sealed class AutoDuty : IDalamudPlugin
             Svc.DutyState.DutyCompleted      += DutyState_DutyCompleted;
             Svc.Log.MinimumLogLevel          =  LogEventLevel.Debug;
             PluginInterface.UiBuilder.Draw   += UiBuilderOnDraw;
-            Migrate();
         }
         catch (Exception e)
         {
             Svc.Log.Info($"Failed loading plugin\n{e}");
         }
     }
-
-    private static async void Migrate()
-    {
-        try
-        {
-            using StreamReader reader    = new(await new HttpClient().GetStreamAsync(@"https://puni.sh/api/repository/erdelf"));
-            string             json      = await reader.ReadToEndAsync();
-            
-            if (json.Length > 800)
-            {
-                DalamudReflector.AddRepo(@"https://puni.sh/api/repository/erdelf", true);
-
-                Assembly assembly      = typeof(IDalamudPlugin).Assembly;
-                Type?    service       = assembly.GetType("Dalamud.Service`1");
-                Type?    managerType   = assembly.GetType("Dalamud.Plugin.Internal.PluginManager", true);
-                object?  manager       = service.MakeGenericType(managerType).GetMethod("Get").Invoke(null, null);
-                object?  pluginsUncast = manager.GetType().GetProperty("InstalledPlugins").GetMethod.Invoke(manager, null);
-                IList?   plugins       = pluginsUncast as IList;
-
-                if (plugins.Count > 0)
-                {
-                    MethodInfo? pluginGetName = plugins[0]!.GetType().GetProperty("InternalName")!.GetMethod;
-
-                    ReflectionHelper.InstanceStringMethod<object>? pluginName =
-                        ReflectionHelper.MethodDelegate<ReflectionHelper.InstanceStringMethod<object>>(pluginGetName, delegateInstanceType: pluginGetName.DeclaringType);
-
-                    foreach (object plugin in plugins)
-                        if (pluginName(plugin) == "AutoDuty" && !(bool)(plugin.GetType().GetProperty("IsDev")?.GetMethod?.Invoke(plugin, null) ?? false))
-                        {
-                            object?       manifest   = plugin.GetType().GetField("manifest", ReflectionHelper.All).GetValue(plugin);
-                            PropertyInfo? installUrl = manifest.GetType().GetProperty("InstalledFromUrl");
-                            if ((installUrl.GetMethod.Invoke(manifest, null) as string).Contains("herc"))
-                            {
-                                installUrl.SetMethod.Invoke(manifest, [@"https://puni.sh/api/repository/erdelf"]);
-                                plugin.GetType().GetMethod("SaveManifest", ReflectionHelper.All).Invoke(plugin, ["Migrated to new repository"]);
-                            }
-                        }
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Log.Error(e.ToStringFull());
-        }
-    }
-
 
     private unsafe void OnCommand(string command, string args)
     {
@@ -560,52 +513,52 @@ public sealed class AutoDuty : IDalamudPlugin
                 if (spewObj == null) 
                     return;
 
-                GameObject gObj = *spewObj.Struct();
-                try { Svc.Log.Info($"Spewing Object Information for: {gObj.NameString}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"Spewing Object Information for: {gObj.GetName()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                //DrawObject: {gObj.DrawObject}\n
-                //LayoutInstance: { gObj.LayoutInstance}\n
-                //EventHandler: { gObj.EventHandler}\n
-                //LuaActor: {gObj.LuaActor}\n
-                try { Svc.Log.Info($"DefaultPosition: {gObj.DefaultPosition}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"DefaultRotation: {gObj.DefaultRotation}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"EventState: {gObj.EventState}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"EntityId {gObj.EntityId}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"LayoutId: {gObj.LayoutId}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"BaseId {gObj.BaseId}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"OwnerId: {gObj.OwnerId}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"ObjectIndex: {gObj.ObjectIndex}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"ObjectKind {gObj.ObjectKind}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"SubKind: {gObj.SubKind}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"Sex: {gObj.Sex}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"YalmDistanceFromPlayerX: {gObj.YalmDistanceFromPlayerX}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"TargetStatus: {gObj.TargetStatus}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"YalmDistanceFromPlayerZ: {gObj.YalmDistanceFromPlayerZ}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"TargetableStatus: {gObj.TargetableStatus}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"Position: {gObj.Position}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"Rotation: {gObj.Rotation}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"Scale: {gObj.Scale}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"Height: {gObj.Height}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"VfxScale: {gObj.VfxScale}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"HitboxRadius: {gObj.HitboxRadius}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"DrawOffset: {gObj.DrawOffset}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"EventId: {gObj.EventId.Id}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"FateId: {gObj.FateId}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"NamePlateIconId: {gObj.NamePlateIconId}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"RenderFlags: {gObj.RenderFlags}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"GetGameObjectId().ObjectId: {gObj.GetGameObjectId().ObjectId}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"GetGameObjectId().Type: {gObj.GetGameObjectId().Type}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"GetObjectKind: {gObj.GetObjectKind()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"GetIsTargetable: {gObj.GetIsTargetable()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"GetName: {gObj.GetName()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"GetRadius: {gObj.GetRadius()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"GetHeight: {gObj.GetHeight()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"GetDrawObject: {*gObj.GetDrawObject()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"GetNameId: {gObj.GetNameId()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"IsDead: {gObj.IsDead()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"IsNotMounted: {gObj.IsNotMounted()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"IsCharacter: {gObj.IsCharacter()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
-                try { Svc.Log.Info($"IsReadyToDraw: {gObj.IsReadyToDraw()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                GameObject* gObj = spewObj.Struct();
+                try { Svc.Log.Info($"Spewing Object Information for: {gObj->NameString}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"Spewing Object Information for: {gObj->GetName()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                //DrawObject: {gObj->DrawObject}\n
+                //LayoutInstance: { gObj->LayoutInstance}\n
+                //EventHandler: { gObj->EventHandler}\n
+                //LuaActor: {gObj->LuaActor}\n
+                try { Svc.Log.Info($"DefaultPosition: {gObj->DefaultPosition}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"DefaultRotation: {gObj->DefaultRotation}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"EventState: {gObj->EventState}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"EntityId {gObj->EntityId}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"LayoutId: {gObj->LayoutId}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"BaseId {gObj->BaseId}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"OwnerId: {gObj->OwnerId}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"ObjectIndex: {gObj->ObjectIndex}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"ObjectKind {gObj->ObjectKind}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"SubKind: {gObj->SubKind}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"Sex: {gObj->Sex}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"YalmDistanceFromPlayerX: {gObj->YalmDistanceFromPlayerX}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"TargetStatus: {gObj->TargetStatus}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"YalmDistanceFromPlayerZ: {gObj->YalmDistanceFromPlayerZ}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"TargetableStatus: {gObj->TargetableStatus}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"Position: {gObj->Position}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"Rotation: {gObj->Rotation}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"Scale: {gObj->Scale}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"Height: {gObj->Height}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"VfxScale: {gObj->VfxScale}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"HitboxRadius: {gObj->HitboxRadius}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"DrawOffset: {gObj->DrawOffset}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"EventId: {gObj->EventId.Id}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"FateId: {gObj->FateId}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"NamePlateIconId: {gObj->NamePlateIconId}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"RenderFlags: {gObj->RenderFlags}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"GetGameObjectId().ObjectId: {gObj->GetGameObjectId().ObjectId}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"GetGameObjectId().Type: {gObj->GetGameObjectId().Type}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"GetObjectKind: {gObj->GetObjectKind()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"GetIsTargetable: {gObj->GetIsTargetable()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"GetName: {gObj->GetName()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"GetRadius: {gObj->GetRadius()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"GetHeight: {gObj->GetHeight()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"GetDrawObject: {*gObj->GetDrawObject()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"GetNameId: {gObj->GetNameId()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"IsDead: {gObj->IsDead()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"IsNotMounted: {gObj->IsNotMounted()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"IsCharacter: {gObj->IsCharacter()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
+                try { Svc.Log.Info($"IsReadyToDraw: {gObj->IsReadyToDraw()}"); } catch (Exception ex) { Svc.Log.Info($": {ex}"); };
                 break;
             default:
                 this.OpenMainUI();

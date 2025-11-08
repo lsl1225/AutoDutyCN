@@ -12,7 +12,7 @@ namespace AutoDuty.Windows
     internal static class InfoTab
     {
         static string infoUrl = "https://docs.google.com/spreadsheets/d/151RlpqRcCpiD_VbQn6Duf-u-S71EP7d0mx3j1PDNoNA";
-        static string gitIssueUrl = "https://github.com/ffxivcode/AutoDuty/issues";
+        static string gitIssueUrl = "https://github.com/erdelf/AutoDuty/issues";
         static string punishDiscordUrl = "https://discord.com/channels/1001823907193552978/1236757595738476725";
         
         private static Configuration Configuration = Plugin.Configuration;

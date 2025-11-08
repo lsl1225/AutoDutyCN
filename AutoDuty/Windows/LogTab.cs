@@ -228,7 +228,7 @@ namespace AutoDuty.Windows
             ImGui.NewLine();
             ImGui.TextWrapped("Please make sure someone else hasn't reported the same bug by going to the issues page and searching for a similar issue. If you find a similar issue, please react to the initial post with 👍 to increase its priority.");
             if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
-                GenericHelpers.ShellStart("https://github.com/ffxivcode/AutoDuty/issues");
+                GenericHelpers.ShellStart("https://github.com/erdelf/AutoDuty/issues");
             ImGui.NewLine();
             ImGui.TextWrapped("What Happened?");
             ImGui.SameLine(0, 5);

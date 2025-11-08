@@ -37,7 +37,7 @@ public class MainWindow : Window, IDisposable
         };
         
         TitleBarButtons.Add(new() { Icon = FontAwesomeIcon.Cog, IconOffset = new(1, 1), Click = _ => OpenTab("Config") });
-        TitleBarButtons.Add(new() { ShowTooltip = () => ImGui.SetTooltip("Support Herculezz on Ko-fi"), Icon = FontAwesomeIcon.Heart, IconOffset = new(1, 1), Click = _ => GenericHelpers.ShellStart("https://ko-fi.com/Herculezz") });
+        TitleBarButtons.Add(new() { ShowTooltip = () => ImGui.SetTooltip("Support erdelf on Ko-fi"), Icon = FontAwesomeIcon.Heart, IconOffset = new(1, 1), Click = _ => GenericHelpers.ShellStart("https://ko-fi.com/erdelf") });
     }
 
     internal static void SetCurrentTabName(string tabName)
@@ -406,7 +406,7 @@ public class MainWindow : Window, IDisposable
         {
             _ = new TickScheduler(delegate
             {
-                GenericHelpers.ShellStart("https://ko-fi.com/Herculezz");
+                GenericHelpers.ShellStart("https://ko-fi.com/erdelf");
             }, 500);
         }
     }

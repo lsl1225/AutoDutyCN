@@ -53,7 +53,7 @@ namespace AutoDuty.Updater
                 using HttpClient client = new(handler);
                 client.Timeout = TimeSpan.FromSeconds(20);
 
-                var md5List = await client.GetFromJsonAsync<Dictionary<string, string>>("https://raw.githubusercontent.com/ffxivcode/AutoDuty/refs/heads/master/AutoDuty/Resources/md5s.json");
+                var md5List = await client.GetFromJsonAsync<Dictionary<string, string>>("https://raw.githubusercontent.com/erdelf/AutoDuty/refs/heads/master/AutoDuty/Resources/md5s.json");
                 return md5List ?? [];
             }
             catch (Exception ex)
@@ -127,7 +127,7 @@ namespace AutoDuty.Updater
 
                 var content = new StringContent(json, Encoding.UTF8, "application/vnd.github+json");
 
-                var url = $"https://api.github.com/repos/ffxivcode/AutoDuty/issues";
+                var url = $"https://api.github.com/repos/erdelf/AutoDuty/issues";
                 var response = await _client.PostAsync(url, content);
 
                 var responseString = await response.Content.ReadAsStringAsync();

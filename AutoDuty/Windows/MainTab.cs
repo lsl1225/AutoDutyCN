@@ -28,7 +28,7 @@ namespace AutoDuty.Windows
         internal static readonly (string Normal, string GameFont) Digits = ("0123456789", "");
 
         private static int _currentStepIndex = -1;
-        private static readonly string _pathsURL = "https://github.com/ffxivcode/AutoDuty/tree/master/AutoDuty/Paths";
+        private static readonly string _pathsURL = "https://github.com/erdelf/AutoDuty/tree/master/AutoDuty/Paths";
 
         // New search text field for filtering duties
         private static string _searchText = string.Empty;

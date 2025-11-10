@@ -124,17 +124,20 @@ namespace AutoDuty.Helpers
                                     for (byte j = 0; j < num; j++)
                                     {
                                         foreach (RaptureGearsetModule.GearsetEntry entry in gearsetModule->Entries)
-                                            foreach (RaptureGearsetModule.GearsetItem gearsetItem in entry.Items) 
-                                                gearsetItemIds.Add(gearsetItem.ItemId);
+                                            foreach (RaptureGearsetModule.GearsetItem gearsetItem in entry.Items)
+                                            {
+                                                uint gearsetItemItemId = gearsetItem.ItemId;
+                                                if(gearsetItemItemId > 0) 
+                                                    gearsetItemIds.Add(gearsetItemItemId);
+                                            }
                                     }
                                 }
 
-                                if (gearsetItemIds.Contains(itemId))
+                                if (gearsetItemIds.Contains(inventoryItem->GetItemId()))
                                     continue;
                             }
 
-
-                            DebugLog($"Salvaging Item({i}): {itemSheetRow.Value.Name.ToString()} with iLvl {itemLevel} because our desynth level is {desynthLevel}");
+                            DebugLog($"Salvaging Item({i}): {itemSheetRow.Value.Name.ToString()} {inventoryItem->ItemId} {inventoryItem->GetItemId()} {inventoryItem->GetBaseItemId()} with iLvl {itemLevel} because our desynth level is {desynthLevel}");
                             foundOne = true;
                             AddonHelper.FireCallBack((AtkUnitBase*)addonSalvageItemSelector, true, 12, i);
                             return;

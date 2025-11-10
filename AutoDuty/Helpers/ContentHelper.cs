@@ -168,23 +168,24 @@ namespace AutoDuty.Helpers
             if (level < 0) 
                 level = PlayerHelper.GetCurrentLevelFromSheet();
 
-            if (content.ClassJobLevelRequired > level                                   ||
-                !ContentPathsManager.DictionaryPaths.ContainsKey(content.TerritoryType) ||
-                content.ItemLevelRequired > InventoryHelper.CurrentItemLevel)
-                return false;
-
-
             if (mode == DutyMode.None)
                 mode = Plugin.Configuration.DutyModeEnum;
-
-            if (mode.HasFlag(DutyMode.Trust))
-                if (!content.CanTrustRun(trustCheckLevels))
-                    return false;
 
             unsync ??= Plugin.Configuration.Unsynced && mode.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial);
 
             if (unsync.Value)
                 if (content.ExVersion == 5)
+                    return false;
+
+            if (content.ClassJobLevelRequired > level ||
+                !ContentPathsManager.DictionaryPaths.ContainsKey(content.TerritoryType))
+                return false;
+            
+            if (!unsync.Value && content.ItemLevelRequired > InventoryHelper.CurrentItemLevel)
+                return false;
+
+            if (mode.HasFlag(DutyMode.Trust))
+                if (!content.CanTrustRun(trustCheckLevels))
                     return false;
 
             return true;

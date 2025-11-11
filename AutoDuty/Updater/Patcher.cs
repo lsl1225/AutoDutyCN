@@ -12,7 +12,7 @@ namespace AutoDuty.Updater
     public class Patcher
     {
         internal static ActionState PatcherState => PatcherTask != null && !PatcherTask.IsCompleted && !PatcherTask.IsCanceled && !PatcherTask.IsFaulted ? ActionState.Running : ActionState.None;
-            
+
         internal static Task<bool>? PatcherTask = null;
 
         internal static void Patch(bool skipMD5 = false, bool startup = false)
@@ -52,7 +52,7 @@ namespace AutoDuty.Updater
 
                 foreach (var file in downloadList)
                 {
-                    var result = await GitHubHelper.DownloadFileAsync($"https://raw.githubusercontent.com/erdelf/AutoDuty/refs/heads/master/AutoDuty/Paths/{file.Key}",$"{Plugin.PathsDirectory.FullName}/{file.Key}");
+                    var result = await GitHubHelper.DownloadFileAsync($"https://raw.githubusercontent.com/lsl1225/AutoDutyCN/refs/heads/master/AutoDuty/Paths/{file.Key}", $"{Plugin.PathsDirectory.FullName}/{file.Key}");
                     var logger = result ? $"Succesfully downloaded: {file.Key}" : $"Failed to download: {file.Key}";
                     Svc.Log.Info(logger);
                 }

@@ -256,7 +256,7 @@ public sealed class AutoDuty : IDalamudPlugin
             AssemblyDirectoryInfo = AssemblyFileInfo.Directory;
             
             Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 257) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 258) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!_configDirectory.Exists)
@@ -1029,7 +1029,6 @@ public sealed class AutoDuty : IDalamudPlugin
             if (currentEntry != null && ++currentEntry.curCount < currentEntry.count)
             {
                 Svc.Log.Debug($"repeating the duty once more: {currentEntry.curCount+1} of {currentEntry.count}");
-                currentEntry.curCount++;
             }
             else
             {

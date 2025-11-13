@@ -17,6 +17,7 @@ namespace AutoDuty.Windows
     using Dalamud.Interface;
     using Dalamud.Interface.Utility;
     using Data;
+    using FFXIVClientStructs.FFXIV.Client.UI.Misc;
     using SharpDX;
     using static Data.Classes;
     using Vector2 = System.Numerics.Vector2;
@@ -543,123 +544,149 @@ namespace AutoDuty.Windows
 
                                     break;
                                 case AutoDutyMode.Playlist:
-                                    for (int i = 0; i < Plugin.PlaylistCurrent.Count; i++)
+                                    unsafe
                                     {
-                                        PlaylistEntry entry = Plugin.PlaylistCurrent[i];
-
-                                        ImGui.AlignTextToFramePadding();
-                                        ImGui.SetItemAllowOverlap();
-                                        if (ImGui.Selectable($"{i}:##Playlist{i+1}Entry", Plugin.PlaylistIndex == i, ImGuiSelectableFlags.AllowItemOverlap)) 
-                                            Plugin.PlaylistIndex = i;
-                                        ImGui.SameLine(0, 10);
-
-                                        //ImGui.AlignTextToFramePadding();
-                                        //ImGui.Text($"{i}:"); // {entry.dutyMode} {entry.id}");
-                                        //ImGui.SameLine(0, 0);
-
-                                        ContentPathsManager.ContentPathContainer entryContainer = ContentPathsManager.DictionaryPaths[entry.Id];
-                                        Content                                  entryContent   = ContentHelper.DictionaryContent[entry.Id];
-
-
-
-                                        ImGui.PushItemWidth(80f.Scale());
-                                        if (ImGui.InputInt($"##Playlist{i}Count", ref entry.count, step: 1, stepFast: 2, @"%dx")) 
-                                            entry.count = Math.Max(1, entry.count);
-
-                                        ImGui.PopItemWidth();
-                                        ImGui.SameLine();
-
-                                        ImGui.PushItemWidth(100f.Scale());
-                                        if (ImGui.BeginCombo($"##Playlist{i}DutyModeEnum", entry.DutyMode.ToCustomString()))
+                                        RaptureGearsetModule* gearsetModule = RaptureGearsetModule.Instance();
+                                        for (int i = 0; i < Plugin.PlaylistCurrent.Count; i++)
                                         {
-                                            foreach (DutyMode mode in Enum.GetValues(typeof(DutyMode)))
-                                            {
-                                                if (mode == DutyMode.None)
-                                                    continue;
+                                            PlaylistEntry entry = Plugin.PlaylistCurrent[i];
 
-                                                using (ImRaii.PushColor(ImGuiCol.Text, ImGuiHelper.StateGoodColor, entryContent.DutyModes.HasFlag(mode)))
-                                                {
-                                                    if (ImGui.Selectable(mode.ToCustomString(), entry.DutyMode == mode)) 
-                                                        entry.DutyMode = mode;
-                                                }
-                                            }
+                                            ImGui.AlignTextToFramePadding();
+                                            ImGui.SetItemAllowOverlap();
+                                            if (ImGui.Selectable($"{i}:##Playlist{i+1}Entry", Plugin.PlaylistIndex == i, ImGuiSelectableFlags.AllowItemOverlap)) 
+                                                Plugin.PlaylistIndex = i;
+                                            ImGui.SameLine(0, 10);
 
-                                            ImGui.EndCombo();
-                                        }
-                                        
-                                        ImGui.PopItemWidth();
-                                        ImGui.SameLine();
-                                        ImGui.PushItemWidth((entryContainer.Paths.Count > 1 ? (ImGui.GetContentRegionAvail().X - 107f.Scale()) / 2f : ImGui.GetContentRegionAvail().X - 100f.Scale()));
-                                        if (ImGui.BeginCombo($"##Playlist{i}DutySelection", $"({entry.Id}) {entryContent.Name}"))
-                                        {
-                                            short level = PlayerHelper.GetCurrentLevelFromSheet();
-                                            DrawSearchBar();
+                                            //ImGui.AlignTextToFramePadding();
+                                            //ImGui.Text($"{i}:"); // {entry.dutyMode} {entry.id}");
+                                            //ImGui.SameLine(0, 0);
 
-                                            foreach (uint key in ContentPathsManager.DictionaryPaths.Keys)
-                                            {
-                                                Content content = ContentHelper.DictionaryContent[key];
+                                            ContentPathsManager.ContentPathContainer entryContainer = ContentPathsManager.DictionaryPaths[entry.Id];
+                                            Content                                  entryContent   = ContentHelper.DictionaryContent[entry.Id];
 
-                                                if (!string.IsNullOrWhiteSpace(_searchText) && !(content.Name?.ToLower().Contains(_searchText) ?? false))
-                                                    continue;
 
-                                                if (content.DutyModes.HasFlag(entry.DutyMode) && content.CanRun(level, entry.DutyMode))
-                                                    if (ImGui.Selectable($"({key}) {content.Name}", entry.Id == key))
-                                                        entry.Id = key;
-                                            }
 
-                                            ImGui.EndCombo();
-                                        }
+                                            ImGui.PushItemWidth(80f.Scale());
+                                            if (ImGui.InputInt($"##Playlist{i}Count", ref entry.count, step: 1, stepFast: 2, @"%dx")) 
+                                                entry.count = Math.Max(1, entry.count);
 
-                                        if(entry.Id != entryContent.TerritoryType)
-                                            continue;
-
-                                        if (entryContainer.Paths.Count > 1)
-                                        {
+                                            ImGui.PopItemWidth();
                                             ImGui.SameLine();
-                                            if (ImGui.BeginCombo($"##Playlist{i}PathSelection", entryContainer.Paths.First(dp => dp.FileName == entry.path).Name))
+                                            ImGui.PushItemWidth(115f.Scale());
+                                            if (ImGui.BeginCombo($"##Playlist{i}GearsetSelection", entry.gearset != null ? gearsetModule->GetGearset(entry.gearset.Value)->NameString : "Current Gearset"))
                                             {
-                                                foreach (ContentPathsManager.DutyPath path in entryContainer.Paths)
-                                                    if(ImGui.Selectable(path.Name, path.FileName == entry.path)) 
-                                                        entry.path = path.FileName;
+                                                if (ImGui.Selectable("Current Gearset", entry.gearset == null)) 
+                                                    entry.gearset = null;
+
+                                                for (int g = 0; g < gearsetModule->NumGearsets; g++)
+                                                {
+                                                    RaptureGearsetModule.GearsetEntry* gearset = gearsetModule->GetGearset(g);
+                                                    if (((Job)gearset->ClassJob).GetCombatRole() == CombatRole.NonCombat)
+                                                        continue;
+
+                                                    if (ImGui.Selectable(gearset->NameString, entry.gearset == gearset->Id))
+                                                    {
+                                                        entry.gearset = gearset->Id;
+                                                    }
+                                                }
 
                                                 ImGui.EndCombo();
                                             }
-                                        }
+                                            ImGui.PopItemWidth();
+                                            ImGui.SameLine();
+
+                                            ImGui.PushItemWidth(80f.Scale());
+                                            if (ImGui.BeginCombo($"##Playlist{i}DutyModeEnum", entry.DutyMode.ToCustomString()))
+                                            {
+                                                foreach (DutyMode mode in Enum.GetValues(typeof(DutyMode)))
+                                                {
+                                                    if (mode == DutyMode.None)
+                                                        continue;
+
+                                                    using (ImRaii.PushColor(ImGuiCol.Text, ImGuiHelper.StateGoodColor, entryContent.DutyModes.HasFlag(mode)))
+                                                    {
+                                                        if (ImGui.Selectable(mode.ToCustomString(), entry.DutyMode == mode)) 
+                                                            entry.DutyMode = mode;
+                                                    }
+                                                }
+
+                                                ImGui.EndCombo();
+                                            }
+                                        
+                                            ImGui.PopItemWidth();
+                                            ImGui.SameLine();
+                                            ImGui.PushItemWidth((entryContainer.Paths.Count > 1 ? (ImGui.GetContentRegionAvail().X - 107f.Scale()) / 2f : ImGui.GetContentRegionAvail().X - 100f.Scale()));
+                                            if (ImGui.BeginCombo($"##Playlist{i}DutySelection", $"({entry.Id}) {entryContent.Name}"))
+                                            {
+                                                short level = PlayerHelper.GetCurrentLevelFromSheet();
+                                                DrawSearchBar();
+
+                                                foreach (uint key in ContentPathsManager.DictionaryPaths.Keys)
+                                                {
+                                                    Content content = ContentHelper.DictionaryContent[key];
+
+                                                    if (!string.IsNullOrWhiteSpace(_searchText) && !(content.Name?.ToLower().Contains(_searchText) ?? false))
+                                                        continue;
+
+                                                    if (content.DutyModes.HasFlag(entry.DutyMode) && content.CanRun(level, entry.DutyMode))
+                                                        if (ImGui.Selectable($"({key}) {content.Name}", entry.Id == key))
+                                                            entry.Id = key;
+                                                }
+
+                                                ImGui.EndCombo();
+                                            }
+
+                                            if(entry.Id != entryContent.TerritoryType)
+                                                continue;
+
+                                            if (entryContainer.Paths.Count > 1)
+                                            {
+                                                ImGui.SameLine();
+                                                if (ImGui.BeginCombo($"##Playlist{i}PathSelection", entryContainer.Paths.First(dp => dp.FileName == entry.path).Name))
+                                                {
+                                                    foreach (ContentPathsManager.DutyPath path in entryContainer.Paths)
+                                                        if(ImGui.Selectable(path.Name, path.FileName == entry.path)) 
+                                                            entry.path = path.FileName;
+
+                                                    ImGui.EndCombo();
+                                                }
+                                            }
                                     
 
-                                        ImGui.PopItemWidth();
-                                        ImGui.SameLine();
+                                            ImGui.PopItemWidth();
+                                            ImGui.SameLine();
 
-                                        using (ImRaii.Disabled(i <= 0))
-                                        {
-                                            if (ImGuiComponents.IconButton($"Playlist{i}Up", FontAwesomeIcon.ArrowUp))
+                                            using (ImRaii.Disabled(i <= 0))
                                             {
-                                                Plugin.PlaylistCurrent.Remove(entry);
-                                                Plugin.PlaylistCurrent.Insert(i - 1, entry);
+                                                if (ImGuiComponents.IconButton($"Playlist{i}Up", FontAwesomeIcon.ArrowUp))
+                                                {
+                                                    Plugin.PlaylistCurrent.Remove(entry);
+                                                    Plugin.PlaylistCurrent.Insert(i - 1, entry);
+                                                }
                                             }
+
+                                            ImGui.SameLine();
+
+                                            using(ImRaii.Disabled(Plugin.PlaylistCurrent.Count <= i+1))
+                                            {
+                                                if (ImGuiComponents.IconButton($"Playlist{i}Down", FontAwesomeIcon.ArrowDown))
+                                                {
+                                                    Plugin.PlaylistCurrent.Remove(entry);
+                                                    Plugin.PlaylistCurrent.Insert(i+1, entry);
+                                                }
+                                            }
+
+                                            ImGui.SameLine();
+
+                                            if (ImGuiComponents.IconButton($"Playlist{i}Trash", FontAwesomeIcon.TrashAlt))
+                                                Plugin.PlaylistCurrent.RemoveAt(i);
                                         }
 
-                                        ImGui.SameLine();
+                                        if (ImGuiComponents.IconButton("PlaylistAdd", FontAwesomeIcon.Plus)) 
+                                            Plugin.PlaylistCurrent.Add(new PlaylistEntry { DutyMode = Plugin.PlaylistCurrent.Any() ? Plugin.PlaylistCurrent.Last().DutyMode : DutyMode.Support });
 
-                                        using(ImRaii.Disabled(Plugin.PlaylistCurrent.Count <= i+1))
-                                        {
-                                            if (ImGuiComponents.IconButton($"Playlist{i}Down", FontAwesomeIcon.ArrowDown))
-                                            {
-                                                Plugin.PlaylistCurrent.Remove(entry);
-                                                Plugin.PlaylistCurrent.Insert(i+1, entry);
-                                            }
-                                        }
-
-                                        ImGui.SameLine();
-
-                                        if (ImGuiComponents.IconButton($"Playlist{i}Trash", FontAwesomeIcon.TrashAlt))
-                                            Plugin.PlaylistCurrent.RemoveAt(i);
+                                        break;
                                     }
-
-                                    if (ImGuiComponents.IconButton("PlaylistAdd", FontAwesomeIcon.Plus)) 
-                                        Plugin.PlaylistCurrent.Add(new PlaylistEntry { DutyMode = Plugin.PlaylistCurrent.Any() ? Plugin.PlaylistCurrent.Last().DutyMode : DutyMode.Support });
-
-                                    break;
                             }
                         }
                         else

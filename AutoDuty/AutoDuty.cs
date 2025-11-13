@@ -50,6 +50,7 @@ using ECommons.Reflection;
 using ECommons.SimpleGui;
 using FFXIVClientStructs;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using Lumina.Excel.Sheets;
 using Pictomancy;
 using Serilog;
@@ -1043,6 +1044,12 @@ public sealed class AutoDuty : IDalamudPlugin
                 else
                 {
                     Plugin.PlaylistCurrentEntry!.curCount = 0;
+
+                    if (Plugin.PlaylistCurrentEntry.gearset.HasValue && RaptureGearsetModule.Instance()->IsValidGearset(Plugin.PlaylistCurrentEntry.gearset.Value))
+                    {
+                        this.TaskManager.Enqueue(() => RaptureGearsetModule.Instance()->EquipGearset(Plugin.PlaylistCurrentEntry.gearset.Value));
+                        this.TaskManager.Enqueue(() => PlayerHelper.IsReadyFull);
+                    }
                 }
             }
         }

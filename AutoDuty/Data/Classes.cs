@@ -271,6 +271,8 @@ namespace AutoDuty.Data
 
             public int count    = 1;
             public int curCount = 0;
+
+            public byte? gearset;
         }
     }
 }

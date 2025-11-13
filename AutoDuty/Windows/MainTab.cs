@@ -183,7 +183,7 @@ namespace AutoDuty.Windows
                                 MainWindow.StopResumePause();
                             ImGui.SameLine(0, 15);
                         }
-                        ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
+                        ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("Times").X * 1.1f.Scale());
                         MainWindow.LoopsConfig();
                         ImGui.PopItemWidth();
 
@@ -292,7 +292,7 @@ namespace AutoDuty.Windows
                             using (ImRaii.Disabled(Plugin.CurrentTerritoryContent == null))
                             {
                                 ImGui.SameLine(0, 15);
-                                ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
+                                ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("Times").X * 1.1f.Scale());
                                 MainWindow.LoopsConfig();
                                 ImGui.PopItemWidth();
                             }

@@ -981,6 +981,37 @@ public sealed class AutoDuty : IDalamudPlugin
                 }
             }
 
+
+            if (queue && this.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
+            {
+                PlaylistEntry? currentEntry = Plugin.PlaylistCurrentEntry;
+                if (currentEntry != null && ++currentEntry.curCount < currentEntry.count)
+                {
+                    Svc.Log.Debug($"repeating the duty once more: {currentEntry.curCount + 1} of {currentEntry.count}");
+                }
+                else
+                {
+                    Svc.Log.Debug("next playlist entry");
+                    Plugin.PlaylistIndex++;
+                    if (Plugin.PlaylistIndex >= Plugin.PlaylistCurrent.Count)
+                    {
+                        Svc.Log.Debug("playlist done");
+                        queue                = false;
+                        Plugin.PlaylistIndex = 0;
+                    }
+                    else
+                    {
+                        Plugin.PlaylistCurrentEntry!.curCount = 0;
+
+                        if (Plugin.PlaylistCurrentEntry.gearset.HasValue && RaptureGearsetModule.Instance()->IsValidGearset(Plugin.PlaylistCurrentEntry.gearset.Value))
+                        {
+                            this.TaskManager.Enqueue(() => RaptureGearsetModule.Instance()->EquipGearset(Plugin.PlaylistCurrentEntry.gearset.Value));
+                            this.TaskManager.Enqueue(() => PlayerHelper.IsReadyFull);
+                        }
+                    }
+                }
+            }
+
             AutoEquipRecommendedGear();
 
             if (Configuration.AutoRepair && InventoryHelper.CanRepair()) 
@@ -1035,36 +1066,6 @@ public sealed class AutoDuty : IDalamudPlugin
             AutoConsume();
 
         ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true;
-
-        if (queue && this.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
-        {
-            PlaylistEntry? currentEntry = Plugin.PlaylistCurrentEntry;
-            if (currentEntry != null && ++currentEntry.curCount < currentEntry.count)
-            {
-                Svc.Log.Debug($"repeating the duty once more: {currentEntry.curCount+1} of {currentEntry.count}");
-            }
-            else
-            {
-                Svc.Log.Debug("next playlist entry");
-                Plugin.PlaylistIndex++;
-                if (Plugin.PlaylistIndex >= Plugin.PlaylistCurrent.Count)
-                {
-                    Svc.Log.Debug("playlist done");
-                    queue                = false;
-                    Plugin.PlaylistIndex = 0;
-                }
-                else
-                {
-                    Plugin.PlaylistCurrentEntry!.curCount = 0;
-
-                    if (Plugin.PlaylistCurrentEntry.gearset.HasValue && RaptureGearsetModule.Instance()->IsValidGearset(Plugin.PlaylistCurrentEntry.gearset.Value))
-                    {
-                        this.TaskManager.Enqueue(() => RaptureGearsetModule.Instance()->EquipGearset(Plugin.PlaylistCurrentEntry.gearset.Value));
-                        this.TaskManager.Enqueue(() => PlayerHelper.IsReadyFull);
-                    }
-                }
-            }
-        }
 
         if (!queue)
         {

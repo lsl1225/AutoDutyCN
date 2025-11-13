@@ -891,6 +891,18 @@ public sealed class AutoDuty : IDalamudPlugin
                     Configuration.CustomCommandsPreLoop.Each(x => TaskManager.Enqueue(() => Chat.ExecuteCommand(x), "Run-ExecuteCommandsPreLoop"));
                 }
 
+                if (this.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist && Plugin.PlaylistCurrentEntry != null)
+                {
+                    unsafe
+                    {
+                        if (Plugin.PlaylistCurrentEntry.gearset.HasValue && RaptureGearsetModule.Instance()->IsValidGearset(Plugin.PlaylistCurrentEntry.gearset.Value))
+                        {
+                            this.TaskManager.Enqueue(() => RaptureGearsetModule.Instance()->EquipGearset(Plugin.PlaylistCurrentEntry.gearset.Value));
+                            this.TaskManager.Enqueue(() => PlayerHelper.IsReadyFull);
+                        }
+                    }
+                }
+
                 AutoConsume();
 
                 if (LevelingModeEnum == LevelingMode.None)
@@ -927,10 +939,11 @@ public sealed class AutoDuty : IDalamudPlugin
         TaskManager.Enqueue(() => VNavmesh_IPCSubscriber.Nav_IsReady(), int.MaxValue, "Run-WaitNavIsReady");
         TaskManager.Enqueue(() => Svc.Log.Debug($"Start Navigation"));
         TaskManager.Enqueue(() => StartNavigation(startFromZero), "Run-StartNavigation");
+
         if (CurrentLoop == 0)
         {
             CurrentLoop = 1;
-            if (this.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
+            if (this.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist) 
                 Plugin.Configuration.LoopTimes = Plugin.PlaylistCurrentEntry?.count ?? Plugin.Configuration.LoopTimes;
         }
     }

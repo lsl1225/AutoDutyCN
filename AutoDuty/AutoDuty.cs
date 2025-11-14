@@ -50,6 +50,7 @@ using ECommons.Reflection;
 using ECommons.SimpleGui;
 using FFXIVClientStructs;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using Lumina.Excel.Sheets;
 using Pictomancy;
 using Serilog;
@@ -255,7 +256,7 @@ public sealed class AutoDuty : IDalamudPlugin
             AssemblyDirectoryInfo = AssemblyFileInfo.Directory;
             
             Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 254) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 258) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!_configDirectory.Exists)
@@ -890,6 +891,18 @@ public sealed class AutoDuty : IDalamudPlugin
                     Configuration.CustomCommandsPreLoop.Each(x => TaskManager.Enqueue(() => Chat.ExecuteCommand(x), "Run-ExecuteCommandsPreLoop"));
                 }
 
+                if (this.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist && Plugin.PlaylistCurrentEntry != null)
+                {
+                    unsafe
+                    {
+                        if (Plugin.PlaylistCurrentEntry.gearset.HasValue && RaptureGearsetModule.Instance()->IsValidGearset(Plugin.PlaylistCurrentEntry.gearset.Value))
+                        {
+                            this.TaskManager.Enqueue(() => RaptureGearsetModule.Instance()->EquipGearset(Plugin.PlaylistCurrentEntry.gearset.Value));
+                            this.TaskManager.Enqueue(() => PlayerHelper.IsReadyFull);
+                        }
+                    }
+                }
+
                 AutoConsume();
 
                 if (LevelingModeEnum == LevelingMode.None)
@@ -926,10 +939,11 @@ public sealed class AutoDuty : IDalamudPlugin
         TaskManager.Enqueue(() => VNavmesh_IPCSubscriber.Nav_IsReady(), int.MaxValue, "Run-WaitNavIsReady");
         TaskManager.Enqueue(() => Svc.Log.Debug($"Start Navigation"));
         TaskManager.Enqueue(() => StartNavigation(startFromZero), "Run-StartNavigation");
+
         if (CurrentLoop == 0)
         {
             CurrentLoop = 1;
-            if (this.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
+            if (this.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist) 
                 Plugin.Configuration.LoopTimes = Plugin.PlaylistCurrentEntry?.count ?? Plugin.Configuration.LoopTimes;
         }
     }
@@ -964,6 +978,37 @@ public sealed class AutoDuty : IDalamudPlugin
                     TaskManager.Enqueue(() => AutoRetainer_IPCSubscriber.IsBusy(), 15000, "Loop-AutoRetainerIntegrationDisabledWait15sRetainerSense");
                     TaskManager.Enqueue(() => !AutoRetainer_IPCSubscriber.IsBusy(), int.MaxValue, "Loop-AutoRetainerIntegrationDisabledWaitARNotBusy");
                     TaskManager.Enqueue(() => AutoRetainerHelper.ForceStop(), "Loop-AutoRetainerStop");
+                }
+            }
+
+
+            if (queue && this.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
+            {
+                PlaylistEntry? currentEntry = Plugin.PlaylistCurrentEntry;
+                if (currentEntry != null && ++currentEntry.curCount < currentEntry.count)
+                {
+                    Svc.Log.Debug($"repeating the duty once more: {currentEntry.curCount + 1} of {currentEntry.count}");
+                }
+                else
+                {
+                    Svc.Log.Debug("next playlist entry");
+                    Plugin.PlaylistIndex++;
+                    if (Plugin.PlaylistIndex >= Plugin.PlaylistCurrent.Count)
+                    {
+                        Svc.Log.Debug("playlist done");
+                        queue                = false;
+                        Plugin.PlaylistIndex = 0;
+                    }
+                    else
+                    {
+                        Plugin.PlaylistCurrentEntry!.curCount = 0;
+
+                        if (Plugin.PlaylistCurrentEntry.gearset.HasValue && RaptureGearsetModule.Instance()->IsValidGearset(Plugin.PlaylistCurrentEntry.gearset.Value))
+                        {
+                            this.TaskManager.Enqueue(() => RaptureGearsetModule.Instance()->EquipGearset(Plugin.PlaylistCurrentEntry.gearset.Value));
+                            this.TaskManager.Enqueue(() => PlayerHelper.IsReadyFull);
+                        }
+                    }
                 }
             }
 
@@ -1021,31 +1066,6 @@ public sealed class AutoDuty : IDalamudPlugin
             AutoConsume();
 
         ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true;
-
-        if (queue && this.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
-        {
-            PlaylistEntry? currentEntry = Plugin.PlaylistCurrentEntry;
-            if (currentEntry != null && ++currentEntry.curCount < currentEntry.count)
-            {
-                Svc.Log.Debug($"repeating the duty once more: {currentEntry.curCount+1} of {currentEntry.count}");
-                currentEntry.curCount++;
-            }
-            else
-            {
-                Svc.Log.Debug("next playlist entry");
-                Plugin.PlaylistIndex++;
-                if (Plugin.PlaylistIndex >= Plugin.PlaylistCurrent.Count)
-                {
-                    Svc.Log.Debug("playlist done");
-                    queue                = false;
-                    Plugin.PlaylistIndex = 0;
-                }
-                else
-                {
-                    Plugin.PlaylistCurrentEntry!.curCount = 0;
-                }
-            }
-        }
 
         if (!queue)
         {

@@ -10,6 +10,7 @@ namespace AutoDuty.Helpers
 {
     using static Data.Classes;
     using Dalamud.Utility;
+    using Lumina.Excel;
     using Lumina.Excel.Sheets;
 
     internal static class ContentHelper
@@ -63,19 +64,19 @@ namespace AutoDuty.Helpers
 
         internal static void PopulateDuties()
         {
-            var listContentFinderCondition     = Svc.Data.GameData.GetExcelSheet<ContentFinderCondition>();
-            var contentFinderConditionsEnglish = Svc.Data.GameData.GetExcelSheet<ContentFinderCondition>(Language.English);
+            ExcelSheet<ContentFinderCondition>? listContentFinderCondition     = Svc.Data.GameData.GetExcelSheet<ContentFinderCondition>();
+            ExcelSheet<ContentFinderCondition>? contentFinderConditionsEnglish = Svc.Data.GameData.GetExcelSheet<ContentFinderCondition>(Language.English);
 
-            var listDawnContent = Svc.Data.GameData.GetExcelSheet<DawnContent>();
+            ExcelSheet<DawnContent>? listDawnContent = Svc.Data.GameData.GetExcelSheet<DawnContent>();
 
-            var listDawnParticipableContent = Svc.Data.GameData.GetSubrowExcelSheet<DawnContentParticipable>();
+            SubrowExcelSheet<DawnContentParticipable>? listDawnParticipableContent = Svc.Data.GameData.GetSubrowExcelSheet<DawnContentParticipable>();
 
 
             if (listContentFinderCondition == null || listDawnContent == null || listDawnParticipableContent == null) return;
 
-            foreach (var contentFinderCondition in listContentFinderCondition)
+            foreach (ContentFinderCondition contentFinderCondition in listContentFinderCondition)
             {
-                if (contentFinderCondition.ContentType.ValueNullable == null || contentFinderCondition.TerritoryType.ValueNullable?.ExVersion.ValueNullable == null || (contentFinderCondition.ContentType.Value.RowId != 2 && contentFinderCondition.ContentType.Value.RowId != 4 && contentFinderCondition.ContentType.Value.RowId != 5 && contentFinderCondition.ContentType.Value.RowId != 30) || contentFinderCondition.Name.ToString().IsNullOrEmpty())
+                if (contentFinderCondition.ContentType.ValueNullable == null || contentFinderCondition.TerritoryType.ValueNullable?.ExVersion.ValueNullable == null || contentFinderCondition.ContentType.Value.RowId is not 2 and not 4 and not 5 and not 30 || contentFinderCondition.Name.ToString().IsNullOrEmpty())
                     continue;
 
                 static string CleanName(string name)
@@ -87,10 +88,10 @@ namespace AutoDuty.Helpers
                 DawnContent?           dawnContent      = listDawnContent.FirstOrDefault(x => x.Content.ValueNullable?.RowId == contentFinderCondition.RowId);
                 ContentFinderCondition englishCondition = contentFinderConditionsEnglish?.GetRow(contentFinderCondition.RowId) ?? contentFinderCondition;
 
-                var content = new Content
-                              {
-                                  UnlockQuest = dawnContent?.RowId != default(uint) ? dawnContent?.Unknown0 ?? 0 : 0
-                              };
+                Content? content = new Content
+                                   {
+                                       UnlockQuest = dawnContent?.RowId != default(uint) ? dawnContent?.Unknown0 ?? 0 : 0
+                                   };
                 content.Id                     = contentFinderCondition.Content.RowId;
                 content.RowId                  = contentFinderCondition.RowId;
                 content.Name                   = CleanName(contentFinderCondition.Name.ToDalamudString().TextValue);

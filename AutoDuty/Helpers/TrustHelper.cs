@@ -16,6 +16,7 @@ using System.Linq;
 
 namespace AutoDuty.Helpers
 {
+    using Lumina.Excel;
     using static Data.Classes;
 
     internal static class TrustHelper
@@ -62,14 +63,13 @@ namespace AutoDuty.Helpers
 
             int index = 0;
             foreach (TrustMember member in content.TrustMembers)
-            {
                 if (member.Level >= content.ClassJobLevelRequired && members.CanSelectMember(member, (Player.Available ? Player.Object.GetRole() : CombatRole.NonCombat)))
                 {
                     members[index++] = member;
                     if (index >= 3)
                         return true;
                 }
-            }
+
             return false;
         }
 
@@ -160,8 +160,8 @@ namespace AutoDuty.Helpers
 
         internal static void PopulateTrustMembers()
         {
-            var dawnSheet = Svc.Data.GetExcelSheet<DawnMemberUIParam>();
-            var jobSheet = Svc.Data.GetExcelSheet<ClassJob>();
+            ExcelSheet<DawnMemberUIParam>? dawnSheet = Svc.Data.GetExcelSheet<DawnMemberUIParam>();
+            ExcelSheet<ClassJob>?          jobSheet  = Svc.Data.GetExcelSheet<ClassJob>();
 
             if (dawnSheet == null || jobSheet == null) return;
 
@@ -313,7 +313,6 @@ namespace AutoDuty.Helpers
             AgentDawnInterface.DawnMemberData   memberData = agentDawn->Data->MemberData;
 
             foreach (AgentDawnInterface.DawnMemberEntry entry in memberData.Members)
-            {
                 if(entry.MemberId != 0 && MembersByMemberId.TryGetValue(entry.MemberId, out TrustMember? member) && !member.LevelIsSet)
                 {
                     Svc.Log.Debug($"TrustHelper - Setting {member.MemberName} aka {member.Name} {member.MemberId} level to {entry.Level}");
@@ -325,7 +324,6 @@ namespace AutoDuty.Helpers
                         return;
                     }
                 }
-            }
 
             Stop();
         }

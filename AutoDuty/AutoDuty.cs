@@ -961,7 +961,7 @@ public sealed class AutoDuty : IDalamudPlugin
                 TaskManager.DelayNext("Loop-DelayAfterCommands", 1000);
             }
 
-            if (Configuration.AutoOpenCoffers) 
+            if (Configuration.AutoOpenCoffers)
                 EnqueueActiveHelper<CofferHelper>();
 
             if (AutoRetainer_IPCSubscriber.RetainersAvailable())
@@ -975,43 +975,46 @@ public sealed class AutoDuty : IDalamudPlugin
                 }
                 else
                 {
-                    TaskManager.Enqueue(() => AutoRetainer_IPCSubscriber.IsBusy(), 15000, "Loop-AutoRetainerIntegrationDisabledWait15sRetainerSense");
+                    TaskManager.Enqueue(() => AutoRetainer_IPCSubscriber.IsBusy(),  15000,        "Loop-AutoRetainerIntegrationDisabledWait15sRetainerSense");
                     TaskManager.Enqueue(() => !AutoRetainer_IPCSubscriber.IsBusy(), int.MaxValue, "Loop-AutoRetainerIntegrationDisabledWaitARNotBusy");
-                    TaskManager.Enqueue(() => AutoRetainerHelper.ForceStop(), "Loop-AutoRetainerStop");
+                    TaskManager.Enqueue(() => AutoRetainerHelper.ForceStop(),       "Loop-AutoRetainerStop");
                 }
             }
+        }
 
 
-            if (queue && this.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
+        if (queue && this.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
+        {
+            PlaylistEntry? currentEntry = Plugin.PlaylistCurrentEntry;
+            if (currentEntry != null && ++currentEntry.curCount < currentEntry.count)
             {
-                PlaylistEntry? currentEntry = Plugin.PlaylistCurrentEntry;
-                if (currentEntry != null && ++currentEntry.curCount < currentEntry.count)
+                Svc.Log.Debug($"repeating the duty once more: {currentEntry.curCount + 1} of {currentEntry.count}");
+            }
+            else
+            {
+                Svc.Log.Debug("next playlist entry");
+                Plugin.PlaylistIndex++;
+                if (Plugin.PlaylistIndex >= Plugin.PlaylistCurrent.Count)
                 {
-                    Svc.Log.Debug($"repeating the duty once more: {currentEntry.curCount + 1} of {currentEntry.count}");
+                    Svc.Log.Debug("playlist done");
+                    queue                = false;
+                    Plugin.PlaylistIndex = 0;
                 }
                 else
                 {
-                    Svc.Log.Debug("next playlist entry");
-                    Plugin.PlaylistIndex++;
-                    if (Plugin.PlaylistIndex >= Plugin.PlaylistCurrent.Count)
-                    {
-                        Svc.Log.Debug("playlist done");
-                        queue                = false;
-                        Plugin.PlaylistIndex = 0;
-                    }
-                    else
-                    {
-                        Plugin.PlaylistCurrentEntry!.curCount = 0;
+                    Plugin.PlaylistCurrentEntry!.curCount = 0;
 
-                        if (Plugin.PlaylistCurrentEntry.gearset.HasValue && RaptureGearsetModule.Instance()->IsValidGearset(Plugin.PlaylistCurrentEntry.gearset.Value))
-                        {
-                            this.TaskManager.Enqueue(() => RaptureGearsetModule.Instance()->EquipGearset(Plugin.PlaylistCurrentEntry.gearset.Value));
-                            this.TaskManager.Enqueue(() => PlayerHelper.IsReadyFull);
-                        }
+                    if (Plugin.PlaylistCurrentEntry.gearset.HasValue && RaptureGearsetModule.Instance()->IsValidGearset(Plugin.PlaylistCurrentEntry.gearset.Value))
+                    {
+                        this.TaskManager.Enqueue(() => RaptureGearsetModule.Instance()->EquipGearset(Plugin.PlaylistCurrentEntry.gearset.Value));
+                        this.TaskManager.Enqueue(() => PlayerHelper.IsReadyFull);
                     }
                 }
             }
+        }
 
+        if (Configuration.EnableBetweenLoopActions)
+        {
             AutoEquipRecommendedGear();
 
             if (Configuration.AutoRepair && InventoryHelper.CanRepair()) 

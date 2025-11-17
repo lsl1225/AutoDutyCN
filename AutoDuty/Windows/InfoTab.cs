@@ -5,9 +5,7 @@ using System.Diagnostics;
 
 namespace AutoDuty.Windows
 {
-    using Dalamud.Interface.Utility.Raii;
     using global::AutoDuty.IPC;
-    using static Dalamud.Interface.Utility.Raii.ImRaii;
 
     internal static class InfoTab
     {

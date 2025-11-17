@@ -79,14 +79,14 @@ namespace AutoDuty.Windows
                         _imGuiWindowFlags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove;
                     }
                     _popupOpen = true;
-                    ImGui.SetNextWindowPos(ImGui.GetMainViewport().GetCenter(), ImGuiCond.None, new(0.5f, 0.5f));
+                    ImGui.SetNextWindowPos(ImGui.GetMainViewport().GetCenter(), ImGuiCond.None, new Vector2(0.5f, 0.5f));
                     ImGui.OpenPopup($"Create Issue");
                 }
             }
             if (_pollResponse != null && !_pollResponse.Access_Token.IsNullOrEmpty())
             {
                 ImGui.SetNextWindowSize(ImGui.GetMainViewport().Size);
-                ImGui.SetNextWindowPos(ImGui.GetMainViewport().GetCenter(), ImGuiCond.None, new(0.5f, 0.5f));
+                ImGui.SetNextWindowPos(ImGui.GetMainViewport().GetCenter(), ImGuiCond.None, new Vector2(0.5f, 0.5f));
                 _imGuiWindowFlags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove;
             }    
             if (ImGui.BeginPopupModal($"Create Issue", ref _popupOpen, _imGuiWindowFlags))
@@ -113,10 +113,7 @@ namespace AutoDuty.Windows
                 ImGui.SetTooltip("Filter log event level");
             ImGuiEx.Spacing();
 
-            if (Plugin.Configuration.LogEventLevel < LogEventLevel.Information)
-            {
-                ImGui.TextWrapped("AutoDuty can't change the log level dalamud uses. To see debug related things, you have to go in the dalamud log \"/xllog\" and set the appropriate level in the top left.");
-            }
+            if (Plugin.Configuration.LogEventLevel < LogEventLevel.Information) ImGui.TextWrapped("AutoDuty can't change the log level dalamud uses. To see debug related things, you have to go in the dalamud log \"/xllog\" and set the appropriate level in the top left.");
 
             ImGuiEx.Spacing();
             ImGui.BeginChild("scrolling", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y), true, ImGuiWindowFlags.HorizontalScrollbar);
@@ -124,15 +121,14 @@ namespace AutoDuty.Windows
             Plugin.DalamudLogEntries.Each(e => { if (e.LogEventLevel >= Plugin.Configuration.LogEventLevel) ImGui.TextColored(GetLogEntryColor(e.LogEventLevel), e.Message); });
 
             if (EzThrottler.Throttle("AddLogEntries", 25))
-            {
                 while (_logEntriesToAdd.Count != 0)
                 {
-                    var logEntry = _logEntriesToAdd.Dequeue();
+                    LogMessage? logEntry = _logEntriesToAdd.Dequeue();
                     if (logEntry == null)
                         return;
                     Plugin.DalamudLogEntries.Add(logEntry);
                 }
-            }
+
             if (Plugin.Configuration.AutoScroll && ImGui.GetScrollY() >= ImGui.GetScrollMaxY())
                 ImGui.SetScrollHereY(1.0f);
 
@@ -153,18 +149,18 @@ namespace AutoDuty.Windows
                 if (_taskPollResponse.IsCompletedSuccessfully)
                 {
                     _pollResponse = _taskPollResponse.Result;
-                    if ((_pollResponse == null || _pollResponse.Access_Token.IsNullOrEmpty()) && EzThrottler.Throttle("Polling", _pollResponse != null && _pollResponse.Interval != -1 ? _pollResponse.Interval * 1100 : _userCode!.Interval * 1100))
+                    if ((_pollResponse == null || _pollResponse.Access_Token.IsNullOrEmpty()) && EzThrottler.Throttle("Polling", _pollResponse is { Interval: not -1 } ? _pollResponse.Interval * 1100 : _userCode!.Interval * 1100))
                         _taskPollResponse = Task.Run(() => PollResponse(_userCode));
                 }
                 ImGui.TextColored(ImGuiColors.HealerGreen, $"Polling Github for User Authorization: {(_pollResponse != null ? (_pollResponse.Access_Token.IsNullOrEmpty() ? $"{_pollResponse.Error}" : $"{_pollResponse.Access_Token}") : "")}");
             }
-            else if (_taskUserCode != null && !_taskUserCode.IsCompletedSuccessfully)
+            else if (_taskUserCode is { IsCompletedSuccessfully: false })
             {
                 Vector4 vector4 = new(0, 1, 0, 1);
                 ImGui.TextColored(in vector4, "Waiting for Response from GitHub");
                 return;
             }
-            else if (_taskUserCode != null && _taskUserCode.IsCompletedSuccessfully)
+            else if (_taskUserCode is { IsCompletedSuccessfully: true })
             {
                 _userCode = _taskUserCode.Result;
                 _taskUserCode = null;
@@ -206,12 +202,12 @@ namespace AutoDuty.Windows
 
         private static void DrawIssuePopup()
         {
-            if (_taskSubmitIssue != null && !_taskSubmitIssue.IsCompletedSuccessfully)
+            if (_taskSubmitIssue is { IsCompletedSuccessfully: false })
             {
                 ImGui.TextColored(ImGuiColors.HealerGreen, "Submitting Issue");
                 return;
             }
-            else if (_taskSubmitIssue != null && _taskSubmitIssue.IsCompletedSuccessfully)
+            else if (_taskSubmitIssue is { IsCompletedSuccessfully: true })
             {
                 _popupOpen = false;
                 ImGui.CloseCurrentPopup();
@@ -245,12 +241,8 @@ namespace AutoDuty.Windows
             using (ImRaii.Disabled(_titleInput.Equals("[Bug] ") || _whatHappenedInput.IsNullOrEmpty() || _reproStepsInput.IsNullOrEmpty()))
             {
                 if (ImGui.Button("Submit Issue"))
-                {
                     if (_pollResponse != null)
-                    {
                         _taskSubmitIssue = Task.Run(static async () => await FileIssue(_titleInput, _whatHappenedInput, _reproStepsInput, _pollResponse.Access_Token));
-                    }
-                }
             }
         }
     }

@@ -1088,6 +1088,7 @@ public class Configuration
     public bool       RebuildNavmeshOnStuck          = true;
     public byte       RebuildNavmeshAfterStuckXTimes = 5;
     public int        MinStuckTime                   = 500;
+    public bool       StuckOnStep                    = true;
 
     public bool PathDrawEnabled   = false;
     public int  PathDrawStepCount = 5;
@@ -2087,6 +2088,11 @@ public static class ConfigTab
                 Configuration.MinStuckTime = Math.Max(250, Configuration.MinStuckTime);
                 Configuration.Save();
             }
+            ImGui.Indent();
+
+            if (ImGui.Checkbox("Reset stuck counter only on next step##StuckResetOnStep", ref Configuration.StuckOnStep))
+                Configuration.Save();
+
 
             if (ImGui.Checkbox("Rebuild Navmesh when stuck", ref Configuration.RebuildNavmeshOnStuck))
                 Configuration.Save();
@@ -2101,6 +2107,8 @@ public static class ConfigTab
                     Configuration.Save();
                 }
             }
+
+            ImGui.Unindent();
 
             if(ImGui.Checkbox("Draw next steps in Path", ref Configuration.PathDrawEnabled))
                 Configuration.Save();

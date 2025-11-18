@@ -253,7 +253,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.AssemblyDirectoryInfo = this.AssemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 259) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 260) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this._configDirectory.Exists)
@@ -833,10 +833,10 @@ public sealed class AutoDuty : IDalamudPlugin
             return;
         }
         //Svc.Log.Debug($"{flag} : {value}");
-        if (this.Stage is not Stage.Dead and not Stage.Revived && !this._recentlyWatchedCutscene && !Conditions.Instance()->WatchingCutscene && 
+        if (this.Stage is not Stage.Dead and not Stage.Revived and not Stage.Action && !this._recentlyWatchedCutscene && !Conditions.Instance()->WatchingCutscene && 
             flag is not ConditionFlag.WatchingCutscene and not ConditionFlag.WatchingCutscene78 and not ConditionFlag.OccupiedInCutSceneEvent and 
                 (ConditionFlag.BetweenAreas or ConditionFlag.BetweenAreas51 or ConditionFlag.Jumping61) && 
-            this.Stage != Stage.Action && value && this.States.HasFlag(PluginState.Navigating))
+            value && this.States.HasFlag(PluginState.Navigating))
         {
             Svc.Log.Info($"Condition_ConditionChange: Indexer Increase and Change Stage to Condition");
             this.Indexer++;

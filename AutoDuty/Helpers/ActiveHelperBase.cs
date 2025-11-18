@@ -8,9 +8,7 @@ namespace AutoDuty.Helpers
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Reflection;
-    using Serilog;
 
     public static class ActiveHelper
     {
@@ -160,10 +158,8 @@ namespace AutoDuty.Helpers
                 return false;
 
             if (GotoHelper.State == ActionState.Running)
-            {
                 //Svc.Log.Debug("Goto Running");
                 return false;
-            }
 
             return true;
         }

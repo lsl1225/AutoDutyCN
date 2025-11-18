@@ -44,10 +44,7 @@ namespace AutoDuty.Helpers
                 return true;
             }
 
-            if (Environment.TickCount64 - LastStuckPositionUpdate > Plugin.Configuration.MinStuckTime * 10)
-            {
-                count = counter = 0;
-            }
+            if (Environment.TickCount64 - LastStuckPositionUpdate > Plugin.Configuration.MinStuckTime * 10) count = counter = 0;
 
             return false;
         }

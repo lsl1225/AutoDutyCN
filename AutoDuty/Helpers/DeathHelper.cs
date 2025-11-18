@@ -10,7 +10,6 @@ using System;
 
 namespace AutoDuty.Helpers
 {
-    using System.Numerics;
     using Windows;
     using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 
@@ -119,12 +118,8 @@ namespace AutoDuty.Helpers
 
                 bool isBoss = Plugin.Actions[Plugin.Indexer].Name.Equals("Boss");
                 if (!revivalFound)
-                {
                     if (Plugin.Indexer > 0 && isBoss)
                         return Plugin.Indexer;
-                }
-
-
 
 
                 Svc.Log.Info($"Finding Revival Point starting at {Plugin.Indexer}. Using Revival Action: {revivalFound}");
@@ -153,14 +148,17 @@ namespace AutoDuty.Helpers
                 return;
             }
             
-            if (_gameObject == null || !_gameObject.IsTargetable)
+            if (_gameObject is not { IsTargetable: true })
             {
                 Svc.Log.Debug($"OnRevive: Couldn't find shortcut");
                 Plugin.Indexer = 0;
                 //Stop();
                 //return;
             } else
+            {
                 Svc.Log.Debug("OnRevive: Found shortcut");
+            }
+
             Svc.Framework.Update += OnRevive;
         }
 
@@ -181,7 +179,7 @@ namespace AutoDuty.Helpers
 
             float distanceToPlayer;
 
-            if (_gameObject == null || !_gameObject.IsTargetable || (distanceToPlayer = ObjectHelper.GetDistanceToPlayer(_gameObject)) > 50)
+            if (!(_gameObject?.IsTargetable ?? false) || (distanceToPlayer = ObjectHelper.GetDistanceToPlayer(_gameObject)) > 30)
             {
                 Svc.Log.Debug("OnRevive: Done");
                 if(Plugin.Indexer == 0) 
@@ -191,7 +189,7 @@ namespace AutoDuty.Helpers
             }
             if (_oldIndex == Plugin.Indexer)
                 Plugin.Indexer = FindWaypoint();
-
+            
             if (distanceToPlayer > 2)
             {
                 MovementHelper.Move(_gameObject, 0.25f, 2);

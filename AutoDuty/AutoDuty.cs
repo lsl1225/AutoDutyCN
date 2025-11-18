@@ -1429,13 +1429,53 @@ public sealed class AutoDuty : IDalamudPlugin
             return;
         }
 
-        if (StuckHelper.IsStuck(out byte stuckCount))
+        unsafe
         {
-            VNavmesh_IPCSubscriber.Path_Stop();
-            if (this.Configuration.RebuildNavmeshOnStuck && stuckCount >= this.Configuration.RebuildNavmeshAfterStuckXTimes)
-                VNavmesh_IPCSubscriber.Nav_Rebuild();
-            this.Stage = Stage.Reading_Path;
-            return;
+            if (ActionManager.Instance()->CastActionId == 6)
+                return;
+
+            if (StuckHelper.IsStuck(out byte stuckCount))
+            {
+                VNavmesh_IPCSubscriber.Path_Stop();
+                if (this.Configuration.StuckReturn && stuckCount >= this.Configuration.StuckReturnX)
+                {
+                    Svc.Log.Debug($"Using Stuck Return Action");
+                    if (ActionManager.Instance()->GetActionStatus(ActionType.Action, 6) == 0)
+                    {
+                        BossMod_IPCSubscriber.SetMovement(false);
+                        this.SetRotationPluginSettings(false, false, true);
+                        ActionManager.Instance()->UseAction(ActionType.Action, 6); // Chat.ExecuteCommand("/return");
+                        SchedulerHelper.ScheduleAction("StuckHelperReturnInsurance", () =>
+                                                                                     {
+                                                                                         VNavmesh_IPCSubscriber.Path_Stop();
+                                                                                         ActionManager.Instance()->UseAction(ActionType.Action, 6); //Chat.ExecuteCommand("/return");
+                                                                                     }, () => ActionManager.Instance()->CastActionId != 6 && 
+                                                                                              ActionManager.Instance()->GetActionStatus(ActionType.Action, 6) == 0 && PlayerHelper.IsReady, false);
+
+                        SchedulerHelper.ScheduleAction("StuckHelperReturn", () =>
+                                                                            {
+                                                                                VNavmesh_IPCSubscriber.Path_Stop();
+                                                                                Plugin.Stage           = Stage.Revived;
+                                                                                DeathHelper.DeathState = PlayerLifeState.Revived;
+
+                                                                                SchedulerHelper.ScheduleAction("StuckHelperUnschedule", () => SchedulerHelper.DescheduleAction("StuckHelperReturnInsurance"),
+                                                                                                               () => DeathHelper.DeathState == PlayerLifeState.Alive);
+                                                                            }, () => ActionManager.Instance()->CastActionId != 6 && PlayerHelper.IsReady);
+                        return;
+                    }
+                    else
+                    {
+                        Svc.Log.Debug("Return action not available");
+                    }
+                }
+                else if (this.Configuration.RebuildNavmeshOnStuck && stuckCount >= this.Configuration.RebuildNavmeshAfterStuckXTimes)
+                {
+                    VNavmesh_IPCSubscriber.Nav_Rebuild();
+                }
+
+                this.Stage = Stage.Reading_Path;
+                return;
+            }
         }
 
         if ((!VNavmesh_IPCSubscriber.SimpleMove_PathfindInProgress() && VNavmesh_IPCSubscriber.Path_NumWaypoints() == 0) || (!this.PathAction.Name.IsNullOrEmpty() && this.PathAction.Position != Vector3.Zero && ObjectHelper.GetDistanceToPlayer(this.PathAction.Position) <= (this.PathAction.Name.EqualsIgnoreCase("Interactable") ? 2f : 0.25f)))

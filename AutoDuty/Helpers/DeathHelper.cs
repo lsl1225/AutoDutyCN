@@ -179,7 +179,7 @@ namespace AutoDuty.Helpers
 
             float distanceToPlayer;
 
-            if (_gameObject is not { IsTargetable: true } || (distanceToPlayer = ObjectHelper.GetDistanceToPlayer(_gameObject)) > 50)
+            if (!(_gameObject?.IsTargetable ?? false) || (distanceToPlayer = ObjectHelper.GetDistanceToPlayer(_gameObject)) > 30)
             {
                 Svc.Log.Debug("OnRevive: Done");
                 if(Plugin.Indexer == 0) 
@@ -189,7 +189,7 @@ namespace AutoDuty.Helpers
             }
             if (_oldIndex == Plugin.Indexer)
                 Plugin.Indexer = FindWaypoint();
-
+            
             if (distanceToPlayer > 2)
             {
                 MovementHelper.Move(_gameObject, 0.25f, 2);

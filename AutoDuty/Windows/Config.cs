@@ -19,6 +19,7 @@ using static AutoDuty.Windows.ConfigTab;
 
 namespace AutoDuty.Windows;
 
+using Dalamud.Game.ClientState.Objects.Types;
 using Data;
 using ECommons.Automation;
 using ECommons.Configuration;
@@ -26,7 +27,9 @@ using ECommons.ExcelServices;
 using ECommons.PartyFunctions;
 using ECommons.UIHelpers.AddonMasterImplementations;
 using ECommons.UIHelpers.AtkReaderImplementations;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.System.String;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using FFXIVClientStructs.FFXIV.Component.GUI;
@@ -40,8 +43,6 @@ using System.IO;
 using System.IO.Pipes;
 using System.Numerics;
 using System.Text;
-using Dalamud.Game.ClientState.Objects.Types;
-using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using Achievement = Lumina.Excel.Sheets.Achievement;
 using ExitDutyHelper = Helpers.ExitDutyHelper;
 using Map = Lumina.Excel.Sheets.Map;
@@ -1089,6 +1090,8 @@ public class Configuration
     public byte       RebuildNavmeshAfterStuckXTimes = 5;
     public int        MinStuckTime                   = 500;
     public bool       StuckOnStep                    = true;
+    public bool       StuckReturn                    = true;
+    public int        StuckReturnX                   = 10;
 
     public bool PathDrawEnabled   = false;
     public int  PathDrawStepCount = 5;
@@ -1700,6 +1703,12 @@ public static class ConfigTab
                             }
                     }
 
+                if(ImGui.Button("Return?"))
+                    unsafe
+                    {
+                        VNavmesh_IPCSubscriber.Path_Stop();
+                        ActionManager.Instance()->UseAction(ActionType.Action, 6);
+                    }
 
                 if (ImGui.Button("Turn on rotation")) 
                     Plugin.SetRotationPluginSettings(true, ignoreConfig: true, ignoreTimer: true);
@@ -2093,7 +2102,6 @@ public static class ConfigTab
             if (ImGui.Checkbox("Reset stuck counter only on next step##StuckResetOnStep", ref Configuration.StuckOnStep))
                 Configuration.Save();
 
-
             if (ImGui.Checkbox("Rebuild Navmesh when stuck", ref Configuration.RebuildNavmeshOnStuck))
                 Configuration.Save();
 
@@ -2104,6 +2112,20 @@ public static class ConfigTab
                 if(ImGui.InputInt("times##RebuildNavmeshAfterStuckXTimes", ref rebuildX, 1))
                 {
                     Configuration.RebuildNavmeshAfterStuckXTimes = (byte) Math.Clamp(rebuildX, byte.MinValue+1, byte.MaxValue);
+                    Configuration.Save();
+                }
+            }
+
+            if (ImGui.Checkbox("Use return when stuck##StuckUseReturn", ref Configuration.StuckReturn))
+                Configuration.Save();
+
+            if (Configuration.StuckReturn)
+            {
+                ImGui.SameLine();
+                int returnX = Configuration.StuckReturnX;
+                if (ImGui.InputInt("times##StuckUseReturnXTimes", ref returnX, 1))
+                {
+                    Configuration.StuckReturnX = (byte)Math.Clamp(returnX, byte.MinValue + 1, byte.MaxValue);
                     Configuration.Save();
                 }
             }

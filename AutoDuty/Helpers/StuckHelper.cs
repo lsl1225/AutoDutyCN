@@ -51,7 +51,7 @@ namespace AutoDuty.Helpers
             if (Environment.TickCount64 - LastStuckPositionUpdate > Plugin.Configuration.MinStuckTime * 10)
             {
                 if (!Plugin.Configuration.StuckOnStep || Plugin.Indexer != index)
-                    count = counter = 0;
+                    ResetCounter();
             }
 
             return false;

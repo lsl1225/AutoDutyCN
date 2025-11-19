@@ -724,7 +724,9 @@ public sealed class AutoDuty : IDalamudPlugin
             if (!ConfigurationMain.Instance.host)
             {
                 if (isDuty)
+                {
                     this.Run(t, 1);
+                }
             } else
             {
                 if(!isDuty)
@@ -1098,14 +1100,14 @@ public sealed class AutoDuty : IDalamudPlugin
         if (queue || ConfigurationMain.Instance is { MultiBox: true, host: false }) 
             this.AutoConsume();
 
-        ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true;
+        this.TaskManager.Enqueue(() => ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true);
 
         if (!queue)
         {
             this.LoopsCompleteActions();
             return;
         }
-
+        
         SchedulerHelper.ScheduleAction("LoopContinueTask", () =>
                                                            {
                                                                if (this.Configuration.AutoDutyModeEnum == AutoDutyMode.Looping && this.LevelingEnabled)

@@ -136,7 +136,7 @@ public class ConfigurationMain
         private const string STEP_COMPLETED = "STEP_COMPLETED";
         private const string STEP_START     = "STEP_START";
 
-        private static bool stepBlock = false;
+        internal static bool stepBlock = false;
         public static bool MultiboxBlockingNextStep
         {
             get
@@ -148,6 +148,7 @@ public class ConfigurationMain
             }
             set
             {
+                DebugLog("blocking step: " + value + " from " + stepBlock);
                 if (!Instance.MultiBox)
                     return;
 
@@ -203,7 +204,7 @@ public class ConfigurationMain
             internal static readonly ClientInfo?[]   clients        = new ClientInfo?[MAX_SERVERS];
 
             internal static readonly DateTime[] keepAlives    = new DateTime[MAX_SERVERS];
-            private static readonly  bool[]     stepConfirms  = new bool[MAX_SERVERS];
+            internal static readonly bool[]     stepConfirms  = new bool[MAX_SERVERS];
             private static readonly  bool[]     deathConfirms = new bool[MAX_SERVERS];
 
             private static readonly NamedPipeServerStream?[] pipes = new NamedPipeServerStream[MAX_SERVERS];
@@ -321,6 +322,7 @@ public class ConfigurationMain
 
                                                                     ss.WriteString(PARTY_INVITE);
                                                                 }
+                                                                stepConfirms[index] = false;
                                                             }
                                                         });
 
@@ -406,12 +408,17 @@ public class ConfigurationMain
             {
                 DebugLog("exiting duty");
                 SendToAllClients(DUTY_EXIT_KEY);
+                for (int i = 0; i < stepConfirms.Length; i++)
+                    stepConfirms[i] = false;
             }
 
             public static void Queue()
             {
                 DebugLog("Queue initiated");
                 SendToAllClients(DUTY_QUEUE_KEY);
+                for (int i = 0; i < stepConfirms.Length; i++)
+                    stepConfirms[i] = false;
+                stepBlock = false;
             }
 
             private static void SendToAllClients(string message)
@@ -3055,12 +3062,13 @@ public static class ConfigTab
             if (ConfigurationMain.Instance is { MultiBox: true, host: true })
             {
                 ImGui.Indent();
+                ImGuiEx.Text(ConfigurationMain.MultiboxUtility.stepBlock.ToString());
+
                 for (int i = 0; i < ConfigurationMain.MultiboxUtility.Server.MAX_SERVERS; i++)
                 {
                     ConfigurationMain.MultiboxUtility.Server.ClientInfo? info = ConfigurationMain.MultiboxUtility.Server.clients[i];
-
                     ImGuiEx.Text(info != null ?
-                                     $"Client {i}: {(PartyHelper.IsPartyMember(info.CID) ? "in party" : "no party")} | {DateTime.Now.Subtract(ConfigurationMain.MultiboxUtility.Server.keepAlives[i]).TotalSeconds:F3}s ago" :
+                                     $"Client {i}: {(PartyHelper.IsPartyMember(info.CID) ? "in party" : "no party")} | {DateTime.Now.Subtract(ConfigurationMain.MultiboxUtility.Server.keepAlives[i]).TotalSeconds:F3}s ago | {ConfigurationMain.MultiboxUtility.Server.stepConfirms[i]}" :
                                      $"Client {i}: No Info");
                 }
 

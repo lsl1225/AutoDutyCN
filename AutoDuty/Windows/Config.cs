@@ -491,6 +491,7 @@ public class ConfigurationMain
                                     {
                                         Plugin.Indexer = step;
                                         stepBlock      = false;
+                                        Plugin.Stage   = Stage.Reading_Path;
                                     }
                                     break;
                                 case KEEPALIVE_RESPONSE_KEY:
@@ -1120,7 +1121,7 @@ public class Configuration
 
         unsync ??= this.Unsynced && this.DutyModeEnum.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial);
 
-        return unsync.Value && this.TreatUnsyncAsW2W;
+        return ConfigurationMain.Instance.MultiBox || unsync.Value && this.TreatUnsyncAsW2W;
     }
     #endregion
 
@@ -3059,18 +3060,19 @@ public static class ConfigTab
             if (ImGui.Checkbox(nameof(ConfigurationMain.host), ref ConfigurationMain.Instance.host))
                 Configuration.Save();
 
-            if (ConfigurationMain.Instance is { MultiBox: true, host: true })
+            if (ConfigurationMain.Instance.MultiBox)
             {
                 ImGui.Indent();
-                ImGuiEx.Text(ConfigurationMain.MultiboxUtility.stepBlock.ToString());
+                ImGuiEx.Text($"Blocking: {ConfigurationMain.MultiboxUtility.stepBlock}");
 
-                for (int i = 0; i < ConfigurationMain.MultiboxUtility.Server.MAX_SERVERS; i++)
-                {
-                    ConfigurationMain.MultiboxUtility.Server.ClientInfo? info = ConfigurationMain.MultiboxUtility.Server.clients[i];
-                    ImGuiEx.Text(info != null ?
-                                     $"Client {i}: {(PartyHelper.IsPartyMember(info.CID) ? "in party" : "no party")} | {DateTime.Now.Subtract(ConfigurationMain.MultiboxUtility.Server.keepAlives[i]).TotalSeconds:F3}s ago | {ConfigurationMain.MultiboxUtility.Server.stepConfirms[i]}" :
-                                     $"Client {i}: No Info");
-                }
+                if(ConfigurationMain.Instance.host)
+                    for (int i = 0; i < ConfigurationMain.MultiboxUtility.Server.MAX_SERVERS; i++)
+                    {
+                        ConfigurationMain.MultiboxUtility.Server.ClientInfo? info = ConfigurationMain.MultiboxUtility.Server.clients[i];
+                        ImGuiEx.Text(info != null ?
+                                         $"Client {i}: {(PartyHelper.IsPartyMember(info.CID) ? "in party" : "no party")} | {DateTime.Now.Subtract(ConfigurationMain.MultiboxUtility.Server.keepAlives[i]).TotalSeconds:F3}s ago | {ConfigurationMain.MultiboxUtility.Server.stepConfirms[i]}" :
+                                         $"Client {i}: No Info");
+                    }
 
                 ImGui.Unindent();
             }

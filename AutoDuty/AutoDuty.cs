@@ -147,7 +147,7 @@ public sealed class AutoDuty : IDalamudPlugin
                 default:
                     break;
             }
-
+            Svc.Log.Debug($"Stage from {this._stage.ToCustomString()} to {value.ToCustomString()}");
             this._stage = value;
             Svc.Log.Debug($"Stage={this._stage.ToCustomString()}");
         }
@@ -1350,6 +1350,8 @@ public sealed class AutoDuty : IDalamudPlugin
         this.Action = $"{(this.Actions.Count >= this.Indexer ? Plugin.Actions[this.Indexer].ToCustomString() : "")}";
 
         this.PathAction = this.Actions[this.Indexer];
+
+        Svc.Log.Debug($"Starting Action {this.PathAction.ToCustomString()}");
 
         bool sync = !this.Configuration.Unsynced || !this.Configuration.DutyModeEnum.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial);
         if (this.PathAction.Tag.HasFlag(ActionTag.Unsynced) && sync)

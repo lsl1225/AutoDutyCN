@@ -1437,7 +1437,7 @@ public sealed class AutoDuty : IDalamudPlugin
             if (ActionManager.Instance()->CastActionId == 6)
                 return;
 
-            if (StuckHelper.IsStuck(out byte stuckCount))
+            if (!PlayerHelper.IsCasting && StuckHelper.IsStuck(out byte stuckCount))
             {
                 VNavmesh_IPCSubscriber.Path_Stop();
                 if (this.Configuration.StuckReturn && stuckCount >= this.Configuration.StuckReturnX)

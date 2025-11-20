@@ -491,6 +491,7 @@ public class ConfigurationMain
                                     {
                                         Plugin.Indexer = step;
                                         stepBlock      = false;
+                                        Plugin.Stage   = Stage.Reading_Path;
                                     }
                                     break;
                                 case KEEPALIVE_RESPONSE_KEY:

@@ -148,7 +148,7 @@ public class ConfigurationMain
             }
             set
             {
-                DebugLog("blocking step: " + value + " from " + stepBlock);
+                DebugLog($"blocking step: {stepBlock} to {value}");
                 if (!Instance.MultiBox)
                     return;
 
@@ -3051,6 +3051,14 @@ public static class ConfigTab
         {
             ImGui.TextColored(GradientColor.Get(ImGuiHelper.ExperimentalColor, ImGuiHelper.ExperimentalColor2, 500), "EXTREMELY EXPERIMENTAL");
 
+            ImGuiEx.TextWrapped("Step 1: Have 4 clients logged in and ready with AD open on the same data center not in a party");
+            ImGuiEx.TextWrapped("Step 2: One of the clients becomes the host. The host will lead the others. Select host below on the client you want to become host");
+            ImGuiEx.TextWrapped("Step 3: Select Multibox on the host");
+            ImGuiEx.TextWrapped("Step 4: Select Multibox on the 3 clients. Each of them should be invited to the party. Below will be current information about them. if it says \"no info\" they are not connected");
+            ImGuiEx.TextWrapped("Step 5: On the host, select which dungeon you want to run and how often. Click run");
+
+
+
             bool multiBox = ConfigurationMain.Instance.multiBox;
             if (ImGui.Checkbox(nameof(ConfigurationMain.MultiBox), ref multiBox))
             {
@@ -3058,8 +3066,11 @@ public static class ConfigTab
                 Configuration.Save();
             }
 
-            if (ImGui.Checkbox(nameof(ConfigurationMain.host), ref ConfigurationMain.Instance.host))
-                Configuration.Save();
+            using(ImRaii.Disabled(ConfigurationMain.Instance.MultiBox))
+            {
+                if (ImGui.Checkbox(nameof(ConfigurationMain.host), ref ConfigurationMain.Instance.host))
+                    Configuration.Save();
+            }
 
             if (ConfigurationMain.Instance.MultiBox)
             {
@@ -3067,6 +3078,7 @@ public static class ConfigTab
                 ImGuiEx.Text($"Blocking: {ConfigurationMain.MultiboxUtility.stepBlock}");
 
                 if(ConfigurationMain.Instance.host)
+                {
                     for (int i = 0; i < ConfigurationMain.MultiboxUtility.Server.MAX_SERVERS; i++)
                     {
                         ConfigurationMain.MultiboxUtility.Server.ClientInfo? info = ConfigurationMain.MultiboxUtility.Server.clients[i];
@@ -3074,6 +3086,12 @@ public static class ConfigTab
                                          $"Client {i}: {(PartyHelper.IsPartyMember(info.CID) ? "in party" : "no party")} | {DateTime.Now.Subtract(ConfigurationMain.MultiboxUtility.Server.keepAlives[i]).TotalSeconds:F3}s ago | {ConfigurationMain.MultiboxUtility.Server.stepConfirms[i]}" :
                                          $"Client {i}: No Info");
                     }
+                    using(ImRaii.Disabled(!Plugin.InDungeon))
+                    {
+                        if(ImGui.Button("Resynchronize"))
+                            ConfigurationMain.MultiboxUtility.Server.SendStepStart();
+                    }
+                }
 
                 ImGui.Unindent();
             }

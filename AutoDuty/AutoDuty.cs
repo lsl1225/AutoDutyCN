@@ -1408,7 +1408,7 @@ public sealed class AutoDuty : IDalamudPlugin
         BossMod_IPCSubscriber.InBoss(this.PathAction.Name.Equals("Boss"));
 
         if(ConfigurationMain.Instance.host)
-        ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = false;
+            ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = false;
 
         if (this.PathAction.Position == Vector3.Zero)
         {

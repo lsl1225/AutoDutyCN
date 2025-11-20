@@ -149,7 +149,6 @@ public sealed class AutoDuty : IDalamudPlugin
             }
             Svc.Log.Debug($"Stage from {this._stage.ToCustomString()} to {value.ToCustomString()}");
             this._stage = value;
-            Svc.Log.Debug($"Stage={this._stage.ToCustomString()}");
         }
     }
     internal LevelingMode LevelingModeEnum

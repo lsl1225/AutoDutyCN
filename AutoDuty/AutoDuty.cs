@@ -136,8 +136,12 @@ public sealed class AutoDuty : IDalamudPlugin
                     BossMod_IPCSubscriber.SetRange(Plugin.Configuration.MaxDistanceToTargetFloat);
                     break;
                 case Stage.Reading_Path:
-                    if(this._stage is not Stage.Waiting_For_Combat and not Stage.Revived and not Stage.Looping)
+                    if(this._stage is not Stage.Waiting_For_Combat and not Stage.Revived and not Stage.Looping and not Stage.Idle)
                         ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true;
+                    break;
+                case Stage.Idle:
+                    if (VNavmesh_IPCSubscriber.Path_NumWaypoints() > 0)
+                        VNavmesh_IPCSubscriber.Path_Stop();
                     break;
                 case Stage.Looping:
                 case Stage.Moving:
@@ -1403,6 +1407,7 @@ public sealed class AutoDuty : IDalamudPlugin
 
         BossMod_IPCSubscriber.InBoss(this.PathAction.Name.Equals("Boss"));
 
+        if(ConfigurationMain.Instance.host)
         ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = false;
 
         if (this.PathAction.Position == Vector3.Zero)
@@ -1967,6 +1972,7 @@ public sealed class AutoDuty : IDalamudPlugin
             case Stage.Dead:
             case Stage.Revived:
             case Stage.Interactable:
+            case Stage.Idle:
             default:
                 break;
         }

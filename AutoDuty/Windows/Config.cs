@@ -383,8 +383,7 @@ public class ConfigurationMain
 
             public static void CheckStepProgress()
             {
-                if((Plugin.Stage != Stage.Looping && Plugin.Indexer >= 0 && Plugin.Indexer < Plugin.Actions.Count && Plugin.Actions[Plugin.Indexer].Tag == ActionTag.Treasure || stepConfirms.All(x => x)) &&
-                   stepBlock)
+                if((Plugin.Stage != Stage.Looping && Plugin.Indexer >= 0 && Plugin.Indexer < Plugin.Actions.Count && Plugin.Actions[Plugin.Indexer].Tag == ActionTag.Treasure || stepConfirms.All(x => x)) && stepBlock)
                 {
                     for (int i = 0; i < stepConfirms.Length; i++)
                         stepConfirms[i] = false;
@@ -491,6 +490,7 @@ public class ConfigurationMain
                                     {
                                         Plugin.Indexer = step;
                                         stepBlock      = false;
+                                        Plugin.Stage   = Stage.Idle;
                                         Plugin.Stage   = Stage.Reading_Path;
                                     }
                                     break;
@@ -500,6 +500,7 @@ public class ConfigurationMain
                                     QueueHelper.InvokeAcceptOnly();
                                     break;
                                 case DUTY_EXIT_KEY:
+                                    stepBlock = false;
                                     ExitDutyHelper.Invoke();
                                     break;
                                 case PARTY_INVITE:

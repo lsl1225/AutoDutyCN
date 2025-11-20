@@ -1100,7 +1100,13 @@ public sealed class AutoDuty : IDalamudPlugin
         if (queue || ConfigurationMain.Instance is { MultiBox: true, host: false }) 
             this.AutoConsume();
 
-        this.TaskManager.Enqueue(() => ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true);
+        if (ConfigurationMain.Instance.MultiBox)
+        {
+            if (ConfigurationMain.Instance.host)
+                ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true;
+            else
+                this.TaskManager.Enqueue(() => ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true);
+        }
 
         if (!queue)
         {

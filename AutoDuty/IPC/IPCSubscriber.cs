@@ -44,6 +44,7 @@ namespace AutoDuty.IPC
             if (Plugin.Configuration.EnableAutoRetainer && IsEnabled)
             {
                 long? remaining = GetClosestRetainerVentureSecondsRemaining(Player.CID);
+                Svc.Log.Debug($"AutoRetainer IPC - Closest Retainer Venture Remaining Time: {remaining}");
                 return remaining.HasValue && remaining < Plugin.Configuration.AutoRetainer_RemainingTime;
             }
 

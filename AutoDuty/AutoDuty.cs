@@ -256,7 +256,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.AssemblyDirectoryInfo = this.AssemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 262) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 263) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this._configDirectory.Exists)
@@ -669,26 +669,33 @@ public sealed class AutoDuty : IDalamudPlugin
                 }
             }
 
-            this.Actions.Clear();
-            if (!ContentPathsManager.DictionaryPaths.TryGetValue(Svc.ClientState.TerritoryType, out ContentPathsManager.ContentPathContainer? container))
+            if (!ConfigurationMain.Instance.MultiBox || !ConfigurationMain.Instance.multiBoxSynchronizePath || ConfigurationMain.Instance.host)
             {
-                this.PathFile = $"{this.PathsDirectory.FullName}{Path.DirectorySeparatorChar}({Svc.ClientState.TerritoryType}) {this.CurrentTerritoryContent?.EnglishName?.Replace(":", "")}.json";
-                return;
+                this.Actions.Clear();
+                if (!ContentPathsManager.DictionaryPaths.TryGetValue(Svc.ClientState.TerritoryType, out ContentPathsManager.ContentPathContainer? container))
+                {
+                    this.PathFile = $"{this.PathsDirectory.FullName}{Path.DirectorySeparatorChar}({Svc.ClientState.TerritoryType}) {this.CurrentTerritoryContent?.EnglishName?.Replace(":", "")}.json";
+                    return;
+                }
+
+                if (this.States.HasFlag(PluginState.Looping) && this.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
+                {
+                    string? s = this.PlaylistCurrentEntry?.path ?? null;
+                    if (s != null)
+                        this.CurrentPath = container.Paths.IndexOf(dp => dp.FileName.Equals(s, StringComparison.InvariantCultureIgnoreCase));
+                }
+
+                ContentPathsManager.DutyPath? path = this.CurrentPath < 0 ?
+                                                         container.SelectPath(out this.CurrentPath) :
+                                                         container.Paths[this.CurrentPath > -1 ? this.CurrentPath : 0];
+
+                this.PathFile = path?.FilePath ?? "";
+                this.Actions  = [..path?.Actions];
+
+                if(ConfigurationMain.Instance.MultiBox && ConfigurationMain.Instance.multiBoxSynchronizePath && ConfigurationMain.Instance.host)
+                    ConfigurationMain.MultiboxUtility.Server.SendPath();
             }
 
-            if (this.States.HasFlag(PluginState.Looping) && this.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
-            {
-                string? s = this.PlaylistCurrentEntry?.path ?? null;
-                if(s != null) 
-                    this.CurrentPath = container.Paths.IndexOf(dp => dp.FileName.Equals(s, StringComparison.InvariantCultureIgnoreCase));
-            }
-
-            ContentPathsManager.DutyPath? path = this.CurrentPath < 0 ?
-                                                     container.SelectPath(out this.CurrentPath) :
-                                                     container.Paths[this.CurrentPath > -1 ? this.CurrentPath : 0];
-
-            this.PathFile = path?.FilePath ?? "";
-            this.Actions     = [.. path?.Actions];
             //Svc.Log.Info($"Loading Path: {CurrentPath} {ListBoxPOSText.Count}");
         }
         catch (Exception e)

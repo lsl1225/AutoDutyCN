@@ -1357,6 +1357,16 @@ public sealed class AutoDuty : IDalamudPlugin
                 if (this.Configuration is { AutoManageRotationPluginState: true, UsingAlternativeRotationPlugin: false })
                     this.SetRotationPluginSettings(true);
                 VNavmesh_IPCSubscriber.Path_Stop();
+
+                if (EzThrottler.Throttle("BossChecker", 25) && this.PathAction.Name.Equals("Boss") && this.PathAction.Position != Vector3.Zero && ObjectHelper.BelowDistanceToPlayer(this.PathAction.Position, 50, 10))
+                {
+                    this.BossObject = ObjectHelper.GetBossObject(25);
+                    if (this.BossObject != null)
+                    {
+                        this.Stage = Stage.Action;
+                        return;
+                    }
+                }
                 this.Stage = Stage.Waiting_For_Combat;
             }
             return;

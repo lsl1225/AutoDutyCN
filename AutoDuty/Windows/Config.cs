@@ -116,6 +116,8 @@ public class ConfigurationMain
     internal bool host = false;
     [JsonProperty]
     internal bool multiBoxSynchronizePath = true;
+    [JsonProperty]
+    internal bool multiBoxScrambleNames = false;
 
     public class MultiboxUtility
     {
@@ -207,7 +209,7 @@ public class ConfigurationMain
             public const             int             MAX_SERVERS = 3;
             private static readonly  Thread?[]       threads     = new Thread?[MAX_SERVERS];
             private static readonly  StreamString?[] streams     = new StreamString?[MAX_SERVERS];
-            internal static readonly ClientInfo?[]   clients        = new ClientInfo?[MAX_SERVERS];
+            internal static readonly ClientInfo?[]   clients     = new ClientInfo?[MAX_SERVERS];
 
             internal static readonly DateTime[] keepAlives    = new DateTime[MAX_SERVERS];
             internal static readonly bool[]     stepConfirms  = new bool[MAX_SERVERS];
@@ -305,7 +307,6 @@ public class ConfigurationMain
                         string   message = ss.ReadString().Trim();
                         string[] split   = message.Split("|");
 
-
                         switch (split[0])
                         {
                             case CLIENT_CID_KEY:
@@ -313,7 +314,6 @@ public class ConfigurationMain
 
                                 Svc.Framework.RunOnTick(() =>
                                                         {
-
                                                             unsafe
                                                             {
                                                                 ClientInfo client = clients[index]!;
@@ -335,7 +335,6 @@ public class ConfigurationMain
                                 break;
                             case KEEPALIVE_KEY:
                                 ss.WriteString(KEEPALIVE_RESPONSE_KEY);
-                                keepAlives[index] = DateTime.Now;
                                 break;
                             case STEP_COMPLETED:
                                 stepConfirms[index] = true;
@@ -350,8 +349,9 @@ public class ConfigurationMain
                                 break;
                             default:
                                 ss.WriteString($"Unknown Message: {message}");
-                                break;
+                                continue;
                         }
+                        keepAlives[index] = DateTime.Now;
                     }
                 }
                 catch (Exception e)
@@ -1735,6 +1735,7 @@ public static class ConfigTab
 
                 if (ImGui.CollapsingHeader("Partycheck##DevPartyInfo"))
                 {
+                    ImGui.Indent();
                     unsafe
                     {
                         ImGui.Text("Party Size: " + Svc.Party.Count);
@@ -1793,6 +1794,7 @@ public static class ConfigTab
                             Svc.Log.Error(ex.ToString());
                         }
                     }
+                    ImGui.Unindent();
                 }
 
                 if(ImGui.Button("Return?##DevReturnButton"))
@@ -3166,21 +3168,68 @@ public static class ConfigTab
 
                 if(ConfigurationMain.Instance.host)
                 {
-                    ImGui.Separator();
+                    unsafe
+                    {
+                        ImGui.Separator();
 
-                    for (int i = 0; i < ConfigurationMain.MultiboxUtility.Server.MAX_SERVERS; i++)
-                    {
-                        ConfigurationMain.MultiboxUtility.Server.ClientInfo? info = ConfigurationMain.MultiboxUtility.Server.clients[i];
-                        ImGuiEx.Text(info != null ?
-                                         $"Client {i}: {(PartyHelper.IsPartyMember(info.CID) ? "in party" : "no party")} | {DateTime.Now.Subtract(ConfigurationMain.MultiboxUtility.Server.keepAlives[i]).TotalSeconds:F3}s ago | {ConfigurationMain.MultiboxUtility.Server.stepConfirms[i]}" :
-                                         $"Client {i}: No Info");
+                        if (ImGui.Checkbox("Scramble names", ref ConfigurationMain.Instance.multiBoxScrambleNames))
+                            Configuration.Save();
+
+                        ImGui.Columns(5);
+
+                        ImGuiEx.Text("Name");
+                        ImGui.NextColumn();
+                        ImGuiEx.Text("In Party?");
+                        ImGui.NextColumn();
+                        ImGuiEx.Text("Job");
+                        ImGui.NextColumn();
+                        ImGuiEx.Text("Blocking?");
+                        ImGui.NextColumn();
+                        ImGuiEx.Text("Last heard");
+                        ImGui.Separator();
+                        ImGui.NextColumn();
+
+                        InfoProxyPartyMember* partyMembers = InfoProxyPartyMember.Instance();
+
+                        for (int i = 0; i < ConfigurationMain.MultiboxUtility.Server.MAX_SERVERS; i++)
+                        {
+                            ConfigurationMain.MultiboxUtility.Server.ClientInfo? info = ConfigurationMain.MultiboxUtility.Server.clients[i];
+
+                            if(info != null)
+                            {
+                                ImGuiEx.Text(ConfigurationMain.Instance.multiBoxScrambleNames ? i.ToString() : info.CName);
+                                ImGui.NextColumn();
+                                ImGuiEx.Text((PartyHelper.IsPartyMember(info.CID) ? "in party" : "no party"));
+                                ImGui.NextColumn();
+                                if(partyMembers != null)
+                                {
+                                    InfoProxyCommonList.CharacterData* data = partyMembers->GetEntryByContentId(info.CID);
+                                    if(data != null)
+                                        ImGuiEx.Text(((Job) data->Job).ToCustomString());
+                                }
+
+                                ImGui.NextColumn();
+                                ImGuiEx.Text(ConfigurationMain.MultiboxUtility.Server.stepConfirms[i].ToString());
+                                ImGui.NextColumn();
+                                ImGuiEx.Text($"{DateTime.Now.Subtract(ConfigurationMain.MultiboxUtility.Server.keepAlives[i]).TotalSeconds:F3}s ago");
+                                ImGui.NextColumn();
+                            }
+                            else
+                            {
+                                ImGui.Text($"{i}: No Info");
+                                for (int j = 0; j < 5; j++)
+                                    ImGui.NextColumn();
+                            }
+                        }
+                        ImGui.Columns(1);
+
+                        using(ImRaii.Disabled(!Plugin.InDungeon))
+                        {
+                            if(ImGui.Button("Resynchronize Step##MultiboxSynchronizeStep"))
+                                ConfigurationMain.MultiboxUtility.Server.SendStepStart();
+                        }
+                        ImGui.Separator();
                     }
-                    using(ImRaii.Disabled(!Plugin.InDungeon))
-                    {
-                        if(ImGui.Button("Resynchronize Step##MultiboxSynchronizeStep"))
-                            ConfigurationMain.MultiboxUtility.Server.SendStepStart();
-                    }
-                    ImGui.Separator();
                 }
 
                 ImGui.Unindent();

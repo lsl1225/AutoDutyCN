@@ -112,6 +112,8 @@ public class ConfigurationMain
 
     [JsonProperty]
     internal bool host = false;
+    [JsonProperty]
+    internal bool multiBoxSynchronizePath = true;
 
     public class MultiboxUtility
     {
@@ -132,6 +134,8 @@ public class ConfigurationMain
         private const string DEATH_KEY   = "DEATH";
         private const string UNDEATH_KEY = "UNDEATH";
         private const string DEATH_RESET_KEY = "DEATH_RESET";
+
+        private const string PATH_STEPS = "PATH_STEPS";
 
         private const string STEP_COMPLETED = "STEP_COMPLETED";
         private const string STEP_START     = "STEP_START";
@@ -420,6 +424,11 @@ public class ConfigurationMain
                 stepBlock = false;
             }
 
+            public static void SendPath()
+            {
+                SendToAllClients($"{PATH_STEPS}|{JsonConvert.SerializeObject(Plugin.Actions, ConfigurationMain.jsonSerializerSettings)}");
+            }
+
             private static void SendToAllClients(string message)
             {
                 foreach (StreamString? ss in streams) 
@@ -529,6 +538,15 @@ public class ConfigurationMain
                                                                                                                 }
                                                                                                             }
                                                                                                         }, 500, false);
+                                    break;
+                                case PATH_STEPS:
+                                    List<PathAction>? steps = JsonConvert.DeserializeObject<List<PathAction>>(message[(split[0].Length+1)..]);
+                                    if (steps != null && steps.Any())
+                                    {
+                                        DebugLog("setting steps from host");
+                                        Plugin.Actions = steps;
+                                    }
+
                                     break;
                                 default:
                                     ErrorLog("Unknown response: " + message);
@@ -3071,6 +3089,10 @@ public static class ConfigTab
                 if (ImGui.Checkbox($"Host##MultiboxHost", ref ConfigurationMain.Instance.host))
                     Configuration.Save();
             }
+
+            if (ImGui.Checkbox("Synchronize Paths##MultiboxSynchronizePaths", ref ConfigurationMain.Instance.multiBoxSynchronizePath))
+                Configuration.Save();
+            ImGuiComponents.HelpMarker($"Sends the path from the host to the clients");
 
             if (ConfigurationMain.Instance.MultiBox)
             {

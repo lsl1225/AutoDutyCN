@@ -1442,9 +1442,22 @@ public sealed class AutoDuty : IDalamudPlugin
             return;
 
         this.Action = $"{Plugin.Actions[this.Indexer].ToCustomString()}";
+
+        if (EzThrottler.Throttle("BossChecker", 25) && this.PathAction.Name.Equals("Boss") && this.PathAction.Position != Vector3.Zero && ObjectHelper.BelowDistanceToPlayer(this.PathAction.Position, 50, 10))
+        {
+            this.BossObject = ObjectHelper.GetBossObject(25);
+            if (this.BossObject != null)
+            {
+                VNavmesh_IPCSubscriber.Path_Stop();
+                this.Stage = Stage.Action;
+                return;
+            }
+        }
+
         if (PartyHelper.PartyInCombat() && Plugin.StopForCombat)
         {
-            if (this.Configuration is { AutoManageRotationPluginState: true, UsingAlternativeRotationPlugin: false }) this.SetRotationPluginSettings(true);
+            if (this.Configuration is { AutoManageRotationPluginState: true, UsingAlternativeRotationPlugin: false }) 
+                this.SetRotationPluginSettings(true);
             VNavmesh_IPCSubscriber.Path_Stop();
             this.Stage = Stage.Waiting_For_Combat;
             return;
@@ -1513,17 +1526,6 @@ public sealed class AutoDuty : IDalamudPlugin
             }
 
             return;
-        }
-
-        if (EzThrottler.Throttle("BossChecker", 25) && this.PathAction.Equals("Boss") && this.PathAction.Position != Vector3.Zero && ObjectHelper.BelowDistanceToPlayer(this.PathAction.Position, 50, 10))
-        {
-            this.BossObject = ObjectHelper.GetBossObject(25);
-            if (this.BossObject != null)
-            {
-                VNavmesh_IPCSubscriber.Path_Stop();
-                this.Stage = Stage.Action;
-                return;
-            }
         }
     }
 

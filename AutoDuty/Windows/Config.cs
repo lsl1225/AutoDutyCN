@@ -3068,7 +3068,7 @@ public static class ConfigTab
 
             using(ImRaii.Disabled(ConfigurationMain.Instance.MultiBox))
             {
-                if (ImGui.Checkbox(nameof(ConfigurationMain.host), ref ConfigurationMain.Instance.host))
+                if (ImGui.Checkbox($"Host##MultiboxHost", ref ConfigurationMain.Instance.host))
                     Configuration.Save();
             }
 
@@ -3079,6 +3079,8 @@ public static class ConfigTab
 
                 if(ConfigurationMain.Instance.host)
                 {
+                    ImGui.Separator();
+
                     for (int i = 0; i < ConfigurationMain.MultiboxUtility.Server.MAX_SERVERS; i++)
                     {
                         ConfigurationMain.MultiboxUtility.Server.ClientInfo? info = ConfigurationMain.MultiboxUtility.Server.clients[i];
@@ -3088,9 +3090,10 @@ public static class ConfigTab
                     }
                     using(ImRaii.Disabled(!Plugin.InDungeon))
                     {
-                        if(ImGui.Button("Resynchronize"))
+                        if(ImGui.Button("Resynchronize Step##MultiboxSynchronizeStep"))
                             ConfigurationMain.MultiboxUtility.Server.SendStepStart();
                     }
+                    ImGui.Separator();
                 }
 
                 ImGui.Unindent();

@@ -1363,6 +1363,9 @@ public sealed class AutoDuty : IDalamudPlugin
                     this.BossObject = ObjectHelper.GetBossObject(25);
                     if (this.BossObject != null)
                     {
+
+                        if (ConfigurationMain.Instance.host)
+                            ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = false;
                         this.Stage = Stage.Action;
                         return;
                     }

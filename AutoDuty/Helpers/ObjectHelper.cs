@@ -1,21 +1,26 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
+﻿using AutoDuty.IPC;
+using Dalamud.Game.ClientState.Objects.Types;
+using ECommons;
 using ECommons.DalamudServices;
+using ECommons.Throttlers;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using FFXIVClientStructs.FFXIV.Component.GUI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using FFXIVClientStructs.FFXIV.Client.Game.Control;
-using System;
-using ECommons;
-using FFXIVClientStructs.FFXIV.Component.GUI;
-using ECommons.Throttlers;
-using AutoDuty.IPC;
-using FFXIVClientStructs.FFXIV.Client.Game.UI;
 
 namespace AutoDuty.Helpers
 {
+    using Dalamud.Bindings.ImGui;
     using Dalamud.Game.ClientState.Objects.SubKinds;
     using Dalamud.Game.ClientState.Party;
+    using ECommons.ExcelServices;
+    using ECommons.GameFunctions;
+    using ECommons.PartyFunctions;
     using FFXIVClientStructs.FFXIV.Client.Game.Object;
+    using FFXIVClientStructs.FFXIV.Client.UI.Info;
     using Lumina.Excel.Sheets;
     using Buddy = FFXIVClientStructs.FFXIV.Client.Game.UI.Buddy;
     using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
@@ -67,9 +72,11 @@ namespace AutoDuty.Helpers
 
         internal static unsafe IGameObject? GetPartyMemberFromRole(string role)
         {
-            if (Player.Object != null && Player.Object.ClassJob.Value.GetJobRole().ToString().Contains(role, StringComparison.InvariantCultureIgnoreCase)) return Player.Object;
+            if (Player.Object != null && Player.Object.ClassJob.Value.GetJobRole().ToString().Contains(role, StringComparison.InvariantCultureIgnoreCase)) 
+                return Player.Object;
 
-            if (Svc.Party.PartyId != 0) return Svc.Party.FirstOrDefault(x => x.ClassJob.Value.GetJobRole().ToString().Contains(role, StringComparison.InvariantCultureIgnoreCase))?.GameObject;
+            if (Svc.Party.PartyId != 0) 
+                return Svc.Party.FirstOrDefault(x => x.ClassJob.Value.GetJobRole().ToString().Contains(role, StringComparison.InvariantCultureIgnoreCase))?.GameObject;
 
             IEnumerable<Buddy.BuddyMember>? buddies = UIState.Instance()->Buddy.BattleBuddies.ToArray().Where(x => x.DataId != 0);
             foreach (Buddy.BuddyMember buddy in buddies)
@@ -160,32 +167,37 @@ namespace AutoDuty.Helpers
             return false;
         }
 
-        internal static bool PartyValidation()
+        internal static unsafe bool PartyValidation()
         {
-            if (Svc.Party.Count < 4)
+            if (UniversalParty.Length < 4)
                 return false;
 
             bool healer = false;
             bool tank = false;
             int dpsCount = 0;
 
-            foreach (IPartyMember? item in Svc.Party)
-                switch (item.ClassJob.ValueNullable?.Role)
+            InfoProxyPartyMember* instance = InfoProxyPartyMember.Instance();
+            
+            for (uint i = 0; i < instance->GetEntryCount(); i++)
+            {
+                InfoProxyCommonList.CharacterData* characterData = instance->GetEntry(i);
+                
+                switch(((Job)characterData->Job).GetCombatRole())
                 {
-                    case 1:
+                    case CombatRole.Tank:
                         tank = true;
                         break;
-                    case 2:
-                    case 3:
-                        dpsCount++;
-                        break;
-                    case 4:
+                    case CombatRole.Healer:
                         healer = true;
                         break;
+                    case CombatRole.DPS:
+                        dpsCount++;
+                        break;
+                    case CombatRole.NonCombat:
                     default:
                         break;
                 }
-
+            }
             return (tank && healer && dpsCount > 1);
         }
     }

@@ -43,6 +43,8 @@ using System.IO;
 using System.IO.Pipes;
 using System.Numerics;
 using System.Text;
+using Dalamud.Game.ClientState.Party;
+using FFXIVClientStructs.FFXIV.Client.Game.Group;
 using Achievement = Lumina.Excel.Sheets.Achievement;
 using ExitDutyHelper = Helpers.ExitDutyHelper;
 using Map = Lumina.Excel.Sheets.Map;
@@ -1570,17 +1572,17 @@ public static class ConfigTab
 
             if (devHeaderSelected)
             {
-                if (ImGui.Checkbox("Update Paths on startup", ref ConfigurationMain.Instance.updatePathsOnStartup))
+                if (ImGui.Checkbox("Update Paths on startup##DevUpdatePathsOnStartup", ref ConfigurationMain.Instance.updatePathsOnStartup))
                     Configuration.Save();
 
-                if (ImGui.Button("Print mod list")) 
+                if (ImGui.Button("Print mod list##DevPrintModList")) 
                     Svc.Log.Info(string.Join("\n", PluginInterface.InstalledPlugins.Where(pl => pl.IsLoaded).GroupBy(pl => pl.Manifest.InstalledFromUrl).OrderByDescending(g => g.Count()).Select(g => g.Key+"\n\t"+string.Join("\n\t", g.Select(pl => pl.Name)))));
                 unsafe
                 {
                     ImGuiEx.Text("Invited by: " + InfoProxyPartyInvite.Instance()->InviterName + " | " + InfoProxyPartyInvite.Instance()->InviterWorldId);
                 }
 
-                if (ImGui.CollapsingHeader("Available Duty Support")) //ImGui.Button("check duty support?"))
+                if (ImGui.CollapsingHeader("Available Duty Support##DevDutySupport")) //ImGui.Button("check duty support?"))
                     if(GenericHelpers.TryGetAddonMaster<AddonMaster.DawnStory>(out AddonMaster.DawnStory? m))
                         if (m.IsAddonReady)
                         {
@@ -1590,17 +1592,18 @@ public static class ConfigTab
                             foreach (AddonMaster.DawnStory.Entry? x in m.Entries)
                             {
                                 ImGuiEx.Text($"{x.Name} / {x.ReaderEntry.Callback} / {x.Index}");
-                                if (ImGuiEx.HoveredAndClicked() && x.Status != 2) x.Select();
+                                if (ImGuiEx.HoveredAndClicked() && x.Status != 2)
+                                    x.Select();
                             }
                         }
 
-                if (ImGui.CollapsingHeader("Available Squadron stuff"))
+                if (ImGui.CollapsingHeader("Available Squadron stuff##DevSquadron"))
                     unsafe
                     {
                         if (GenericHelpers.TryGetAddonByName("GcArmyCapture", out AtkUnitBase* armyCaptureAtk) && GenericHelpers.IsAddonReady(armyCaptureAtk))
                         {
                             ImGui.Indent();
-                            if (ImGui.CollapsingHeader("Duties"))
+                            if (ImGui.CollapsingHeader("Duties##DevSquadronDuties"))
                             {
                                 ReaderGCArmyCapture armyCapture = new ReaderGCArmyCapture(armyCaptureAtk);
                                 ImGui.Text($"{armyCapture.PlayerCharLvl} ({armyCapture.PlayerCharIlvl}) {armyCapture.PlayerCharName}");
@@ -1640,7 +1643,7 @@ public static class ConfigTab
                                 }
                                 ImGui.Columns(1);
                             }
-                            if (ImGui.CollapsingHeader("Available Members"))
+                            if (ImGui.CollapsingHeader("Available Members##DevGCArmyMembers"))
                                 if (GenericHelpers.TryGetAddonByName("GcArmyMemberList", out AtkUnitBase* armyMemberListAtk) && GenericHelpers.IsAddonReady(armyMemberListAtk))
                                 {
                                     ReaderGCArmyMemberList armyMemberList = new ReaderGCArmyMemberList(armyMemberListAtk);
@@ -1710,7 +1713,7 @@ public static class ConfigTab
                         }
                     }
 
-                if (ImGui.CollapsingHeader("Available TT cards"))
+                if (ImGui.CollapsingHeader("Available TT cards##DevAvailableTTShop"))
                     unsafe
                     {
                         if (GenericHelpers.TryGetAddonByName("TripleTriadCoinExchange", out AtkUnitBase* exchangeAddon))
@@ -1730,18 +1733,80 @@ public static class ConfigTab
                             }
                     }
 
-                if(ImGui.Button("Return?"))
+                if (ImGui.CollapsingHeader("Partycheck##DevPartyInfo"))
+                {
+                    unsafe
+                    {
+                        ImGui.Text("Party Size: " + Svc.Party.Count);
+                    
+                        bool healer   = false;
+                        bool tank     = false;
+                        int  dpsCount = 0;
+
+                        foreach (IPartyMember? item in Svc.Party)
+                        {
+                            ImGui.Text($"{item.ClassJob.ValueNullable?.Role} {((Job) item.ClassJob.RowId)} {((Job)item.ClassJob.RowId).GetCombatRole()}");
+                            switch (item.ClassJob.ValueNullable?.Role)
+                            {
+                                case 1:
+                                    tank = true;
+                                    break;
+                                case 2:
+                                case 3:
+                                    dpsCount++;
+                                    break;
+                                case 4:
+                                    healer = true;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        ImGui.NewLine();
+                        ImGui.Text($"valid: {tank && healer && dpsCount > 1}");
+                        ImGui.NewLine();
+                        foreach (UniversalPartyMember member in UniversalParty.Members)
+                        {
+                            ImGui.Text($"{member.ClassJob} {member.ClassJob.GetCombatRole()}");
+                        }
+                        ImGui.NewLine();
+
+                        foreach (PartyMember member in GroupManager.Instance()->MainGroup.PartyMembers)
+                        {
+                            ImGui.Text($"{(Job) member.ClassJob} {((Job) member.ClassJob).GetCombatRole()}");
+                        }
+                        ImGui.NewLine();
+                        try
+                        {
+                            InfoProxyPartyMember* instance = InfoProxyPartyMember.Instance();
+                            ImGui.Text(instance->EntryCount.ToString());
+                            ImGui.Text(instance->GetEntryCount().ToString());
+
+                            for (uint i = 0; i < instance->GetEntryCount(); i++)
+                            {
+                                InfoProxyCommonList.CharacterData* characterData = instance->GetEntry(i);
+                                ImGui.Text($"{(Job) characterData->Job} {((Job)characterData->Job).GetCombatRole()}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Svc.Log.Error(ex.ToString());
+                        }
+                    }
+                }
+
+                if(ImGui.Button("Return?##DevReturnButton"))
                     unsafe
                     {
                         VNavmesh_IPCSubscriber.Path_Stop();
                         ActionManager.Instance()->UseAction(ActionType.Action, 6);
                     }
 
-                if (ImGui.Button("Turn on rotation")) 
+                if (ImGui.Button("Turn on rotation##DevRotationOn")) 
                     Plugin.SetRotationPluginSettings(true, ignoreConfig: true, ignoreTimer: true);
 
                 ImGui.SameLine();
-                if (ImGui.Button("Turn off rotation"))
+                if (ImGui.Button("Turn off rotation##DevRotationoff"))
                 {
                     Plugin.SetRotationPluginSettings(false, ignoreConfig: true, ignoreTimer: true);
                     if(Wrath_IPCSubscriber.IsEnabled)
@@ -1762,10 +1827,10 @@ public static class ConfigTab
                     Svc.Log.Debug(treasures.Count() + "\n" + string.Join("\n", treasures.Select(igo => igo.Position.ToString())));
                 }
 
-                if (ImGui.CollapsingHeader("teleport playthings"))
+                if (ImGui.CollapsingHeader("teleport playthings##DevTPPlay"))
                 {
                     ImGui.Indent();
-                    if (ImGui.CollapsingHeader("Warps"))
+                    if (ImGui.CollapsingHeader("Warps##DevWarps"))
                     {
                         ImGui.Indent();
                         foreach (Warp warp in Svc.Data.GameData.GetExcelSheet<Warp>())

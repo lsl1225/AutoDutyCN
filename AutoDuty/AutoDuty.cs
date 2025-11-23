@@ -256,7 +256,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.AssemblyDirectoryInfo = this.AssemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 263) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 265) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this._configDirectory.Exists)
@@ -1350,6 +1350,10 @@ public sealed class AutoDuty : IDalamudPlugin
         if (!PlayerHelper.IsValid || !EzThrottler.Check("PathFindFailure") || this.Indexer == -1 || this.Indexer >= this.Actions.Count)
             return;
 
+        this.Action = $"{(this.Actions.Count >= this.Indexer ? Plugin.Actions[this.Indexer].ToCustomString() : "")}";
+
+        this.PathAction = this.Actions[this.Indexer];
+
         if (ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep)
         {
             if (PartyHelper.PartyInCombat() && Plugin.StopForCombat)
@@ -1358,7 +1362,7 @@ public sealed class AutoDuty : IDalamudPlugin
                     this.SetRotationPluginSettings(true);
                 VNavmesh_IPCSubscriber.Path_Stop();
 
-                if (EzThrottler.Throttle("BossChecker", 25) && this.PathAction.Name.Equals("Boss") && this.PathAction.Position != Vector3.Zero && ObjectHelper.BelowDistanceToPlayer(this.PathAction.Position, 50, 10))
+                if (this.PathAction.Name.Equals("Boss") && this.PathAction.Position != Vector3.Zero && ObjectHelper.BelowDistanceToPlayer(this.PathAction.Position, 50, 10))
                 {
                     this.BossObject = ObjectHelper.GetBossObject(25);
                     if (this.BossObject != null)
@@ -1374,11 +1378,6 @@ public sealed class AutoDuty : IDalamudPlugin
             }
             return;
         }
-
-
-        this.Action = $"{(this.Actions.Count >= this.Indexer ? Plugin.Actions[this.Indexer].ToCustomString() : "")}";
-
-        this.PathAction = this.Actions[this.Indexer];
 
         Svc.Log.Debug($"Starting Action {this.PathAction.ToCustomString()}");
 

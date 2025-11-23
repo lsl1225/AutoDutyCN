@@ -44,6 +44,7 @@ using System.IO.Pipes;
 using System.Numerics;
 using System.Text;
 using Dalamud.Game.ClientState.Party;
+using ECommons.GameFunctions;
 using FFXIVClientStructs.FFXIV.Client.Game.Group;
 using Achievement = Lumina.Excel.Sheets.Achievement;
 using ExitDutyHelper = Helpers.ExitDutyHelper;
@@ -3199,19 +3200,30 @@ public static class ConfigTab
                             {
                                 ImGuiEx.Text(ConfigurationMain.Instance.multiBoxScrambleNames ? i.ToString() : info.CName);
                                 ImGui.NextColumn();
-                                ImGuiEx.Text((PartyHelper.IsPartyMember(info.CID) ? "in party" : "no party"));
+                                bool inParty = PartyHelper.IsPartyMember(info.CID);
+                                ImGuiEx.Text(inParty ? ImGuiHelper.StateGoodColor : ImGuiHelper.StateBadColor, inParty ? "in party" : "no party");
                                 ImGui.NextColumn();
                                 if(partyMembers != null)
                                 {
                                     InfoProxyCommonList.CharacterData* data = partyMembers->GetEntryByContentId(info.CID);
                                     if(data != null)
-                                        ImGuiEx.Text(((Job) data->Job).ToCustomString());
+                                    {
+                                        Job job = (Job) data->Job;
+                                        ImGuiEx.Text(job.GetCombatRole() switch
+                                        {
+                                            CombatRole.Tank => ImGuiHelper.RoleTankColor,
+                                            CombatRole.Healer => ImGuiHelper.RoleHealerColor,
+                                            CombatRole.DPS => ImGuiHelper.RoleDPSColor,
+                                            _ => ImGuiHelper.StateBadColor
+                                        }, job.ToCustomString());
+                                    }
                                 }
 
                                 ImGui.NextColumn();
                                 ImGuiEx.Text(ConfigurationMain.MultiboxUtility.Server.stepConfirms[i].ToString());
                                 ImGui.NextColumn();
-                                ImGuiEx.Text($"{DateTime.Now.Subtract(ConfigurationMain.MultiboxUtility.Server.keepAlives[i]).TotalSeconds:F3}s ago");
+                                double totalSeconds = DateTime.Now.Subtract(ConfigurationMain.MultiboxUtility.Server.keepAlives[i]).TotalSeconds;
+                                ImGuiEx.Text(totalSeconds < 10 ? ImGuiHelper.StateGoodColor : ImGuiHelper.StateBadColor, $"{totalSeconds:F3}s ago");
                                 ImGui.NextColumn();
                             }
                             else

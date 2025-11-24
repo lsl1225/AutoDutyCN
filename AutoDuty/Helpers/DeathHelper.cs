@@ -79,9 +79,9 @@ namespace AutoDuty.Helpers
             }
         }
 
-        private static int _oldIndex = 0;
-        private static IGameObject? _gameObject => ObjectHelper.GetObjectByDataId(2000700);
-        private static int _findShortcutStartTime = 0;
+        private static int          _oldIndex = 0;
+        private static IGameObject? _gameObject => ObjectHelper.GetObjectByDataIds(2000700, 2000789);
+        private static int          _findShortcutStartTime = 0;
 
         private static int FindWaypoint()
         {

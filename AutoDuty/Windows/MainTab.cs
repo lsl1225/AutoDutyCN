@@ -371,6 +371,10 @@ namespace AutoDuty.Windows
                                     if (ImGui.Checkbox("Prefer Trust over Support Leveling", ref Plugin.Configuration.PreferTrustOverSupportLeveling))
                                         Plugin.Configuration.Save();
 
+                                if (Plugin.Configuration.DutyModeEnum == DutyMode.Squadron)
+                                    if (ImGui.Checkbox("Use lowest members", ref Plugin.Configuration.SquadronAssignLowestMembers))
+                                        Plugin.Configuration.Save();
+
                                 if (Plugin.Configuration.DutyModeEnum == DutyMode.Trust && Player.Available)
                                 {
                                     ImGui.Separator();

@@ -65,59 +65,65 @@ namespace AutoDuty.Managers
             ReaderGCArmyMemberList armyMemberList = null!;
             _taskManager.Enqueue(() => armyMemberList = new ReaderGCArmyMemberList(memberListAddon), "RegisterSquadron-GetReader");
 
-            // disable active members
-            _taskManager.Enqueue(() =>
-                                 {
-                                     IEnumerable<(ReaderGCArmyMemberList.MemberInfo Value, int Index)> activeMembers = armyMemberList.Entries.WithIndex().Where((tuple) => tuple.Value.Selected);
+            if (Plugin.Configuration.SquadronAssignLowestMembers)
+            {
+                // disable active members
+                _taskManager.Enqueue(() =>
+                                     {
+                                         IEnumerable<(ReaderGCArmyMemberList.MemberInfo Value, int Index)> activeMembers = armyMemberList.Entries.WithIndex().Where((tuple) => tuple.Value.Selected);
 
-                                     foreach ((ReaderGCArmyMemberList.MemberInfo? mi, int index) in activeMembers) 
-                                         _taskManager.EnqueueImmediate(() => AddonHelper.FireCallBack(memberListAddon, true, 11, index));
-                                 }, "RegisterSquadron-DisableMembers");
+                                         foreach ((ReaderGCArmyMemberList.MemberInfo? mi, int index) in activeMembers)
+                                             _taskManager.EnqueueImmediate(() => AddonHelper.FireCallBack(memberListAddon, true, 11, index));
+                                     }, "RegisterSquadron-DisableMembers");
 
-            // select lowest fitting members
-            _taskManager.Enqueue(() =>
-                                 {
-                                     CombatRole role = Player.Job.GetCombatRole();
+                // select lowest fitting members
+                _taskManager.Enqueue(() =>
+                                     {
+                                         CombatRole role = Player.Job.GetCombatRole();
 
-                                     int neededTanks = role == CombatRole.Tank ? 0 : 1;
-                                     int neededDPS   = role == CombatRole.DPS ? 1 : 2;
-                                     int neededHeal  = role == CombatRole.Healer ? 0 : 1;
+                                         int neededTanks = role == CombatRole.Tank ? 0 : 1;
+                                         int neededDPS   = role == CombatRole.DPS ? 1 : 2;
+                                         int neededHeal  = role == CombatRole.Healer ? 0 : 1;
 
-                                     foreach ((ReaderGCArmyMemberList.MemberInfo? member, int index) in armyMemberList.Entries.WithIndex().OrderBy(tu => tu.Value.Level).Where(tu => tu.Value.Level >= content.ClassJobLevelRequired))
-                                         switch (member.ClassType)
-                                         {
-                                             case ReaderGCArmyMemberList.SquadronClassType.Marauder:
-                                             case ReaderGCArmyMemberList.SquadronClassType.Gladiator:
-                                                 if(neededTanks > 0)
-                                                 {
-                                                     _taskManager.EnqueueImmediate(() => AddonHelper.FireCallBack(memberListAddon, true, 11, index));
-                                                     neededTanks--;
-                                                 }
-                                                 break;
-                                             case ReaderGCArmyMemberList.SquadronClassType.Pugilist:
-                                             case ReaderGCArmyMemberList.SquadronClassType.Lancer:
-                                             case ReaderGCArmyMemberList.SquadronClassType.Archer:
-                                             case ReaderGCArmyMemberList.SquadronClassType.Thaumaturge:
-                                             case ReaderGCArmyMemberList.SquadronClassType.Arcanist:
-                                             case ReaderGCArmyMemberList.SquadronClassType.Rogue:
-                                                 if (neededDPS > 0)
-                                                 {
-                                                     _taskManager.EnqueueImmediate(() => AddonHelper.FireCallBack(memberListAddon, true, 11, index));
-                                                     neededDPS--;
-                                                 }
-                                                 break;
-                                             case ReaderGCArmyMemberList.SquadronClassType.Conjurer:
-                                                 if (neededHeal > 0)
-                                                 {
-                                                     _taskManager.EnqueueImmediate(() => AddonHelper.FireCallBack(memberListAddon, true, 11, index));
-                                                     neededHeal--;
-                                                 }
-                                                 break;
-                                             default:
-                                                 throw new ArgumentOutOfRangeException();
-                                         }
-                                 }, "RegisterSquadron-SelectMembers");
-            
+                                         foreach ((ReaderGCArmyMemberList.MemberInfo? member, int index) in armyMemberList.Entries.WithIndex().OrderBy(tu => tu.Value.Level).Where(tu => tu.Value.Level >= content.ClassJobLevelRequired))
+                                             switch (member.ClassType)
+                                             {
+                                                 case ReaderGCArmyMemberList.SquadronClassType.Marauder:
+                                                 case ReaderGCArmyMemberList.SquadronClassType.Gladiator:
+                                                     if (neededTanks > 0)
+                                                     {
+                                                         _taskManager.EnqueueImmediate(() => AddonHelper.FireCallBack(memberListAddon, true, 11, index));
+                                                         neededTanks--;
+                                                     }
+
+                                                     break;
+                                                 case ReaderGCArmyMemberList.SquadronClassType.Pugilist:
+                                                 case ReaderGCArmyMemberList.SquadronClassType.Lancer:
+                                                 case ReaderGCArmyMemberList.SquadronClassType.Archer:
+                                                 case ReaderGCArmyMemberList.SquadronClassType.Thaumaturge:
+                                                 case ReaderGCArmyMemberList.SquadronClassType.Arcanist:
+                                                 case ReaderGCArmyMemberList.SquadronClassType.Rogue:
+                                                     if (neededDPS > 0)
+                                                     {
+                                                         _taskManager.EnqueueImmediate(() => AddonHelper.FireCallBack(memberListAddon, true, 11, index));
+                                                         neededDPS--;
+                                                     }
+
+                                                     break;
+                                                 case ReaderGCArmyMemberList.SquadronClassType.Conjurer:
+                                                     if (neededHeal > 0)
+                                                     {
+                                                         _taskManager.EnqueueImmediate(() => AddonHelper.FireCallBack(memberListAddon, true, 11, index));
+                                                         neededHeal--;
+                                                     }
+
+                                                     break;
+                                                 default:
+                                                     throw new ArgumentOutOfRangeException();
+                                             }
+                                     }, "RegisterSquadron-SelectMembers");
+            }
+
             // click ok
             _taskManager.Enqueue(() => AddonHelper.FireCallBack(captureAddon, true, 13), "RegisterSquadron-Queue");
 

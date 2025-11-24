@@ -956,6 +956,7 @@ public class Configuration
     public bool Unsynced                       = false;
     public bool HideUnavailableDuties          = false;
     public bool PreferTrustOverSupportLeveling = false;
+    public bool SquadronAssignLowestMembers    = true;
 
     public bool ShowMainWindowOnStartup = false;
 

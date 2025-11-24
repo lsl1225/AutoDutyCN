@@ -1126,6 +1126,9 @@ public sealed class AutoDuty : IDalamudPlugin
         
         SchedulerHelper.ScheduleAction("LoopContinueTask", () =>
                                                            {
+                                                               if (Plugin.States is PluginState.None)
+                                                                   return;
+
                                                                if (this.Configuration.AutoDutyModeEnum == AutoDutyMode.Looping && this.LevelingEnabled)
                                                                {
                                                                    Svc.Log.Info("Leveling Enabled");

@@ -136,8 +136,12 @@ public sealed class AutoDuty : IDalamudPlugin
                     BossMod_IPCSubscriber.SetRange(Plugin.Configuration.MaxDistanceToTargetFloat);
                     break;
                 case Stage.Reading_Path:
-                    if(this._stage is not Stage.Waiting_For_Combat and not Stage.Revived and not Stage.Looping)
+                    if(this._stage is not Stage.Waiting_For_Combat and not Stage.Revived and not Stage.Looping and not Stage.Idle)
                         ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true;
+                    break;
+                case Stage.Idle:
+                    if (VNavmesh_IPCSubscriber.Path_NumWaypoints() > 0)
+                        VNavmesh_IPCSubscriber.Path_Stop();
                     break;
                 case Stage.Looping:
                 case Stage.Moving:
@@ -147,9 +151,8 @@ public sealed class AutoDuty : IDalamudPlugin
                 default:
                     break;
             }
-
+            Svc.Log.Debug($"Stage from {this._stage.ToCustomString()} to {value.ToCustomString()}");
             this._stage = value;
-            Svc.Log.Debug($"Stage={this._stage.ToCustomString()}");
         }
     }
     internal LevelingMode LevelingModeEnum
@@ -253,7 +256,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.AssemblyDirectoryInfo = this.AssemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 259) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 266) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this._configDirectory.Exists)
@@ -605,7 +608,7 @@ public sealed class AutoDuty : IDalamudPlugin
                 BuildTab.DrawHelper(drawList);
 
                 if (Plugin.Configuration.PathDrawEnabled && this.CurrentTerritoryContent?.TerritoryType == Svc.ClientState.TerritoryType && this.Actions.Any() && 
-                    (this.Indexer < 0 || !this.Actions[this.Indexer].Name.Equals("Boss") || this.Stage != Stage.Action))
+                    (this.Indexer < 0 || this.Indexer >= this.Actions.Count || !this.Actions[this.Indexer].Name.Equals("Boss") || this.Stage != Stage.Action))
                 {
                     Vector3 lastPos         = Player.Position;
                     float   stepCountFactor = (1f / this.Configuration.PathDrawStepCount);
@@ -666,26 +669,33 @@ public sealed class AutoDuty : IDalamudPlugin
                 }
             }
 
-            this.Actions.Clear();
-            if (!ContentPathsManager.DictionaryPaths.TryGetValue(Svc.ClientState.TerritoryType, out ContentPathsManager.ContentPathContainer? container))
+            if (!ConfigurationMain.Instance.MultiBox || !ConfigurationMain.Instance.multiBoxSynchronizePath || ConfigurationMain.Instance.host)
             {
-                this.PathFile = $"{this.PathsDirectory.FullName}{Path.DirectorySeparatorChar}({Svc.ClientState.TerritoryType}) {this.CurrentTerritoryContent?.EnglishName?.Replace(":", "")}.json";
-                return;
+                this.Actions.Clear();
+                if (!ContentPathsManager.DictionaryPaths.TryGetValue(Svc.ClientState.TerritoryType, out ContentPathsManager.ContentPathContainer? container))
+                {
+                    this.PathFile = $"{this.PathsDirectory.FullName}{Path.DirectorySeparatorChar}({Svc.ClientState.TerritoryType}) {this.CurrentTerritoryContent?.EnglishName?.Replace(":", "")}.json";
+                    return;
+                }
+
+                if (this.States.HasFlag(PluginState.Looping) && this.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
+                {
+                    string? s = this.PlaylistCurrentEntry?.path ?? null;
+                    if (s != null)
+                        this.CurrentPath = container.Paths.IndexOf(dp => dp.FileName.Equals(s, StringComparison.InvariantCultureIgnoreCase));
+                }
+
+                ContentPathsManager.DutyPath? path = this.CurrentPath < 0 ?
+                                                         container.SelectPath(out this.CurrentPath) :
+                                                         container.Paths[this.CurrentPath > -1 ? this.CurrentPath : 0];
+
+                this.PathFile = path?.FilePath ?? "";
+                this.Actions  = [..path?.Actions];
+
+                if(ConfigurationMain.Instance.MultiBox && ConfigurationMain.Instance.multiBoxSynchronizePath && ConfigurationMain.Instance.host)
+                    ConfigurationMain.MultiboxUtility.Server.SendPath();
             }
 
-            if (this.States.HasFlag(PluginState.Looping) && this.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
-            {
-                string? s = this.PlaylistCurrentEntry?.path ?? null;
-                if(s != null) 
-                    this.CurrentPath = container.Paths.IndexOf(dp => dp.FileName.Equals(s, StringComparison.InvariantCultureIgnoreCase));
-            }
-
-            ContentPathsManager.DutyPath? path = this.CurrentPath < 0 ?
-                                                     container.SelectPath(out this.CurrentPath) :
-                                                     container.Paths[this.CurrentPath > -1 ? this.CurrentPath : 0];
-
-            this.PathFile = path?.FilePath ?? "";
-            this.Actions     = [.. path?.Actions];
             //Svc.Log.Info($"Loading Path: {CurrentPath} {ListBoxPOSText.Count}");
         }
         catch (Exception e)
@@ -724,7 +734,9 @@ public sealed class AutoDuty : IDalamudPlugin
             if (!ConfigurationMain.Instance.host)
             {
                 if (isDuty)
+                {
                     this.Run(t, 1);
+                }
             } else
             {
                 if(!isDuty)
@@ -833,10 +845,10 @@ public sealed class AutoDuty : IDalamudPlugin
             return;
         }
         //Svc.Log.Debug($"{flag} : {value}");
-        if (this.Stage is not Stage.Dead and not Stage.Revived && !this._recentlyWatchedCutscene && !Conditions.Instance()->WatchingCutscene && 
+        if (this.Stage is not Stage.Dead and not Stage.Revived and not Stage.Action && !this._recentlyWatchedCutscene && !Conditions.Instance()->WatchingCutscene && 
             flag is not ConditionFlag.WatchingCutscene and not ConditionFlag.WatchingCutscene78 and not ConditionFlag.OccupiedInCutSceneEvent and 
                 (ConditionFlag.BetweenAreas or ConditionFlag.BetweenAreas51 or ConditionFlag.Jumping61) && 
-            this.Stage != Stage.Action && value && this.States.HasFlag(PluginState.Navigating))
+            value && this.States.HasFlag(PluginState.Navigating))
         {
             Svc.Log.Info($"Condition_ConditionChange: Indexer Increase and Change Stage to Condition");
             this.Indexer++;
@@ -1098,16 +1110,25 @@ public sealed class AutoDuty : IDalamudPlugin
         if (queue || ConfigurationMain.Instance is { MultiBox: true, host: false }) 
             this.AutoConsume();
 
-        ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true;
+        if (ConfigurationMain.Instance.MultiBox)
+        {
+            if (ConfigurationMain.Instance.host)
+                ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true;
+            else
+                this.TaskManager.Enqueue(() => ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true);
+        }
 
         if (!queue)
         {
             this.LoopsCompleteActions();
             return;
         }
-
+        
         SchedulerHelper.ScheduleAction("LoopContinueTask", () =>
                                                            {
+                                                               if (Plugin.States is PluginState.None)
+                                                                   return;
+
                                                                if (this.Configuration.AutoDutyModeEnum == AutoDutyMode.Looping && this.LevelingEnabled)
                                                                {
                                                                    Svc.Log.Info("Leveling Enabled");
@@ -1332,6 +1353,10 @@ public sealed class AutoDuty : IDalamudPlugin
         if (!PlayerHelper.IsValid || !EzThrottler.Check("PathFindFailure") || this.Indexer == -1 || this.Indexer >= this.Actions.Count)
             return;
 
+        this.Action = $"{(this.Actions.Count >= this.Indexer ? Plugin.Actions[this.Indexer].ToCustomString() : "")}";
+
+        this.PathAction = this.Actions[this.Indexer];
+
         if (ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep)
         {
             if (PartyHelper.PartyInCombat() && Plugin.StopForCombat)
@@ -1339,15 +1364,25 @@ public sealed class AutoDuty : IDalamudPlugin
                 if (this.Configuration is { AutoManageRotationPluginState: true, UsingAlternativeRotationPlugin: false })
                     this.SetRotationPluginSettings(true);
                 VNavmesh_IPCSubscriber.Path_Stop();
+
+                if (this.PathAction.Name.Equals("Boss") && this.PathAction.Position != Vector3.Zero && ObjectHelper.BelowDistanceToPlayer(this.PathAction.Position, 50, 10))
+                {
+                    this.BossObject = ObjectHelper.GetBossObject(25);
+                    if (this.BossObject != null)
+                    {
+
+                        if (ConfigurationMain.Instance.host)
+                            ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = false;
+                        this.Stage = Stage.Action;
+                        return;
+                    }
+                }
                 this.Stage = Stage.Waiting_For_Combat;
             }
             return;
         }
 
-
-        this.Action = $"{(this.Actions.Count >= this.Indexer ? Plugin.Actions[this.Indexer].ToCustomString() : "")}";
-
-        this.PathAction = this.Actions[this.Indexer];
+        Svc.Log.Debug($"Starting Action {this.PathAction.ToCustomString()}");
 
         bool sync = !this.Configuration.Unsynced || !this.Configuration.DutyModeEnum.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial);
         if (this.PathAction.Tag.HasFlag(ActionTag.Unsynced) && sync)
@@ -1394,7 +1429,8 @@ public sealed class AutoDuty : IDalamudPlugin
 
         BossMod_IPCSubscriber.InBoss(this.PathAction.Name.Equals("Boss"));
 
-        ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = false;
+        if(ConfigurationMain.Instance.host)
+            ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = false;
 
         if (this.PathAction.Position == Vector3.Zero)
         {
@@ -1421,21 +1457,75 @@ public sealed class AutoDuty : IDalamudPlugin
             return;
 
         this.Action = $"{Plugin.Actions[this.Indexer].ToCustomString()}";
+
+        if (EzThrottler.Throttle("BossChecker", 25) && this.PathAction.Name.Equals("Boss") && this.PathAction.Position != Vector3.Zero && ObjectHelper.BelowDistanceToPlayer(this.PathAction.Position, 50, 10))
+        {
+            this.BossObject = ObjectHelper.GetBossObject(25);
+            if (this.BossObject != null)
+            {
+                VNavmesh_IPCSubscriber.Path_Stop();
+                this.Stage = Stage.Action;
+                return;
+            }
+        }
+
         if (PartyHelper.PartyInCombat() && Plugin.StopForCombat)
         {
-            if (this.Configuration is { AutoManageRotationPluginState: true, UsingAlternativeRotationPlugin: false }) this.SetRotationPluginSettings(true);
+            if (this.Configuration is { AutoManageRotationPluginState: true, UsingAlternativeRotationPlugin: false }) 
+                this.SetRotationPluginSettings(true);
             VNavmesh_IPCSubscriber.Path_Stop();
             this.Stage = Stage.Waiting_For_Combat;
             return;
         }
 
-        if (StuckHelper.IsStuck(out byte stuckCount))
+        unsafe
         {
-            VNavmesh_IPCSubscriber.Path_Stop();
-            if (this.Configuration.RebuildNavmeshOnStuck && stuckCount >= this.Configuration.RebuildNavmeshAfterStuckXTimes)
-                VNavmesh_IPCSubscriber.Nav_Rebuild();
-            this.Stage = Stage.Reading_Path;
-            return;
+            if (ActionManager.Instance()->CastActionId == 6)
+                return;
+
+            if (!PlayerHelper.IsCasting && StuckHelper.IsStuck(out byte stuckCount))
+            {
+                VNavmesh_IPCSubscriber.Path_Stop();
+                if (this.Configuration.StuckReturn && stuckCount >= this.Configuration.StuckReturnX)
+                {
+                    Svc.Log.Debug($"Using Stuck Return Action");
+                    if (ActionManager.Instance()->GetActionStatus(ActionType.Action, 6) == 0)
+                    {
+                        BossMod_IPCSubscriber.SetMovement(false);
+                        this.SetRotationPluginSettings(false, false, true);
+                        ActionManager.Instance()->UseAction(ActionType.Action, 6); // Chat.ExecuteCommand("/return");
+                        SchedulerHelper.ScheduleAction("StuckHelperReturnInsurance", () =>
+                                                                                     {
+                                                                                         VNavmesh_IPCSubscriber.Path_Stop();
+                                                                                         ActionManager.Instance()->UseAction(ActionType.Action, 6); //Chat.ExecuteCommand("/return");
+                                                                                     }, () => ActionManager.Instance()->CastActionId != 6 && 
+                                                                                              ActionManager.Instance()->GetActionStatus(ActionType.Action, 6) == 0 && PlayerHelper.IsReady, false);
+
+                        SchedulerHelper.ScheduleAction("StuckHelperReturn", () =>
+                                                                            {
+                                                                                VNavmesh_IPCSubscriber.Path_Stop();
+                                                                                Plugin.Stage           = Stage.Revived;
+                                                                                DeathHelper.DeathState = PlayerLifeState.Revived;
+
+                                                                                SchedulerHelper.ScheduleAction("StuckHelperUnschedule", () => SchedulerHelper.DescheduleAction("StuckHelperReturnInsurance"),
+                                                                                                               () => DeathHelper.DeathState == PlayerLifeState.Alive);
+                                                                            }, () => ActionManager.Instance()->CastActionId != 6 && PlayerHelper.IsReady);
+                        return;
+                    }
+                    else
+                    {
+                        Svc.Log.Debug("Return action not available");
+                    }
+                }
+                else if (this.Configuration.RebuildNavmeshOnStuck && stuckCount >= this.Configuration.RebuildNavmeshAfterStuckXTimes)
+                {
+                    VNavmesh_IPCSubscriber.Nav_Rebuild();
+                }
+
+                this.Stage = Stage.Idle;
+                this.Stage = Stage.Reading_Path;
+                return;
+            }
         }
 
         if ((!VNavmesh_IPCSubscriber.SimpleMove_PathfindInProgress() && VNavmesh_IPCSubscriber.Path_NumWaypoints() == 0) || (!this.PathAction.Name.IsNullOrEmpty() && this.PathAction.Position != Vector3.Zero && ObjectHelper.GetDistanceToPlayer(this.PathAction.Position) <= (this.PathAction.Name.EqualsIgnoreCase("Interactable") ? 2f : 0.25f)))
@@ -1452,17 +1542,6 @@ public sealed class AutoDuty : IDalamudPlugin
             }
 
             return;
-        }
-
-        if (EzThrottler.Throttle("BossChecker", 25) && this.PathAction.Equals("Boss") && this.PathAction.Position != Vector3.Zero && ObjectHelper.BelowDistanceToPlayer(this.PathAction.Position, 50, 10))
-        {
-            this.BossObject = ObjectHelper.GetBossObject(25);
-            if (this.BossObject != null)
-            {
-                VNavmesh_IPCSubscriber.Path_Stop();
-                this.Stage = Stage.Action;
-                return;
-            }
         }
     }
 
@@ -1918,6 +1997,7 @@ public sealed class AutoDuty : IDalamudPlugin
             case Stage.Dead:
             case Stage.Revived:
             case Stage.Interactable:
+            case Stage.Idle:
             default:
                 break;
         }

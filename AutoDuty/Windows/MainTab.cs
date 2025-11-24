@@ -16,6 +16,7 @@ namespace AutoDuty.Windows
 {
     using Dalamud.Interface;
     using Data;
+    using ECommons.PartyFunctions;
     using FFXIVClientStructs.FFXIV.Client.UI.Misc;
     using static Data.Classes;
     using Vector2 = System.Numerics.Vector2;
@@ -265,7 +266,7 @@ namespace AutoDuty.Windows
                                 MainWindow.ShowPopup("Error", "You must select a version\nof the dungeon to run");
                             else if (Svc.Party.PartyId > 0 && Plugin.Configuration.DutyModeEnum is DutyMode.Support or DutyMode.Squadron or DutyMode.Trust)
                                 MainWindow.ShowPopup("Error", "You must not be in a party to run Support, Squadron or Trust");
-                            else if (Plugin.Configuration is { DutyModeEnum: DutyMode.Regular, Unsynced: false, OverridePartyValidation: false } && Svc.Party.PartyId == 0)
+                            else if (Plugin.Configuration is { DutyModeEnum: DutyMode.Regular, Unsynced: false, OverridePartyValidation: false } && UniversalParty.Length < 4)
                                 MainWindow.ShowPopup("Error", "You must be in a group of 4 to run Regular Duties");
                             else if (Plugin.Configuration is { DutyModeEnum: DutyMode.Regular, Unsynced: false, OverridePartyValidation: false } && !ObjectHelper.PartyValidation())
                                 MainWindow.ShowPopup("Error", "You must have the correct party makeup to run Regular Duties");

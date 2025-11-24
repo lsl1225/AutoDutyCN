@@ -79,9 +79,9 @@ namespace AutoDuty.Helpers
             }
         }
 
-        private static int _oldIndex = 0;
-        private static IGameObject? _gameObject => ObjectHelper.GetObjectByDataId(2000700);
-        private static int _findShortcutStartTime = 0;
+        private static int          _oldIndex = 0;
+        private static IGameObject? _gameObject => ObjectHelper.GetObjectByDataIds(2000700, 2000789);
+        private static int          _findShortcutStartTime = 0;
 
         private static int FindWaypoint()
         {
@@ -112,21 +112,32 @@ namespace AutoDuty.Helpers
 
             if (Plugin.Indexer != -1)
             {
-                ContentPathsManager.ContentPathContainer container     = ContentPathsManager.DictionaryPaths[Plugin.CurrentTerritoryType];
-                ContentPathsManager.DutyPath             dutyPath = container.Paths[Plugin.CurrentPath];
-                bool                                     revivalFound  = dutyPath.RevivalFound;
+                ContentPathsManager.ContentPathContainer container    = ContentPathsManager.DictionaryPaths[Plugin.CurrentTerritoryType];
+                ContentPathsManager.DutyPath             dutyPath     = container.Paths[Plugin.CurrentPath];
+                bool                                     revivalFound = dutyPath.RevivalFound;
 
                 bool isBoss = Plugin.Actions[Plugin.Indexer].Name.Equals("Boss");
                 if (!revivalFound)
                     if (Plugin.Indexer > 0 && isBoss)
                         return Plugin.Indexer;
 
-
                 Svc.Log.Info($"Finding Revival Point starting at {Plugin.Indexer}. Using Revival Action: {revivalFound}");
                 for (int i = Plugin.Indexer; i >= 0; i--)
                 {
-                    if (Plugin.Actions[i].Name.Equals(isBoss ? "Revival" : "Boss", StringComparison.InvariantCultureIgnoreCase) && i != Plugin.Indexer)
-                        return isBoss ? i : i + 1;
+                    string name = Plugin.Actions[i].Name;
+
+
+                    bool found = name.Equals("Revival", StringComparison.InvariantCultureIgnoreCase);
+
+                    if(!found && !isBoss)
+                        found = name.Equals("Boss", StringComparison.InvariantCultureIgnoreCase);
+
+                    if (found && i != Plugin.Indexer)
+                    {
+                        int waypoint = isBoss ? i : i + 1;
+                        Svc.Log.Debug($"Revival Point: {i}");
+                        return waypoint;
+                    }
                     /* Pre 7.2
                     else
                     {
@@ -167,6 +178,7 @@ namespace AutoDuty.Helpers
             Svc.Framework.Update -= OnRevive;
             if (VNavmesh_IPCSubscriber.Path_IsRunning())
                 VNavmesh_IPCSubscriber.Path_Stop();
+            BossMod_IPCSubscriber.SetMovement(true);
             Plugin.Stage = Stage.Reading_Path;
             Svc.Log.Debug("DeathHelper - Player is Alive, and we are done with Revived Actions, changing state to Alive");
             _deathState               = PlayerLifeState.Alive;
@@ -175,7 +187,15 @@ namespace AutoDuty.Helpers
 
         private static unsafe void OnRevive(IFramework _)
         {
-            if (!EzThrottler.Throttle("OnRevive", 500) || (!PlayerHelper.IsReady && !Conditions.Instance()->OccupiedInQuestEvent) || PlayerHelper.IsCasting) return;
+            if (!EzThrottler.Throttle("OnRevive", 500) || (!PlayerHelper.IsReady && !Conditions.Instance()->OccupiedInQuestEvent) || PlayerHelper.IsCasting) 
+                return;
+
+            if (PlayerHelper.HasStatusAny([43, 44], 90) || PlayerHelper.HasStatusAny([148, 1140]))
+            {
+                Plugin.Indexer = _oldIndex;
+                Stop();
+                return ;
+            }
 
             float distanceToPlayer;
 

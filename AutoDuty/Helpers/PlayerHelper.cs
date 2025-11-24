@@ -154,5 +154,6 @@ namespace AutoDuty.Helpers
         }
 
         internal static bool HasStatus(uint statusID, float minTime = 0) => Svc.ClientState.LocalPlayer != null && Player.Object.StatusList.Any(x => x.StatusId == statusID && (minTime <= 0 || x.RemainingTime > minTime));
+        internal static bool HasStatusAny(uint[] statusIDs, float minTime = 0) => Svc.ClientState.LocalPlayer != null && Player.Object.StatusList.Any(x => statusIDs.Contains(x.StatusId) && (minTime <= 0 || x.RemainingTime > minTime));
     }
 }

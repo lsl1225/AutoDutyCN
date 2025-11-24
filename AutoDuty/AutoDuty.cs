@@ -256,7 +256,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.AssemblyDirectoryInfo = this.AssemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 265) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 266) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this._configDirectory.Exists)
@@ -608,7 +608,7 @@ public sealed class AutoDuty : IDalamudPlugin
                 BuildTab.DrawHelper(drawList);
 
                 if (Plugin.Configuration.PathDrawEnabled && this.CurrentTerritoryContent?.TerritoryType == Svc.ClientState.TerritoryType && this.Actions.Any() && 
-                    (this.Indexer < 0 || !this.Actions[this.Indexer].Name.Equals("Boss") || this.Stage != Stage.Action))
+                    (this.Indexer < 0 || this.Indexer >= this.Actions.Count || !this.Actions[this.Indexer].Name.Equals("Boss") || this.Stage != Stage.Action))
                 {
                     Vector3 lastPos         = Player.Position;
                     float   stepCountFactor = (1f / this.Configuration.PathDrawStepCount);

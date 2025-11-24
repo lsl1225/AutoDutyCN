@@ -1519,6 +1519,7 @@ public sealed class AutoDuty : IDalamudPlugin
                     VNavmesh_IPCSubscriber.Nav_Rebuild();
                 }
 
+                this.Stage = Stage.Idle;
                 this.Stage = Stage.Reading_Path;
                 return;
             }

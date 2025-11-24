@@ -187,7 +187,15 @@ namespace AutoDuty.Helpers
 
         private static unsafe void OnRevive(IFramework _)
         {
-            if (!EzThrottler.Throttle("OnRevive", 500) || (!PlayerHelper.IsReady && !Conditions.Instance()->OccupiedInQuestEvent) || PlayerHelper.IsCasting) return;
+            if (!EzThrottler.Throttle("OnRevive", 500) || (!PlayerHelper.IsReady && !Conditions.Instance()->OccupiedInQuestEvent) || PlayerHelper.IsCasting) 
+                return;
+
+            if (PlayerHelper.HasStatusAny([43, 44], 90) || PlayerHelper.HasStatusAny([148, 1140]))
+            {
+                Plugin.Indexer = _oldIndex;
+                Stop();
+                return ;
+            }
 
             float distanceToPlayer;
 

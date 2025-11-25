@@ -796,7 +796,7 @@ public sealed class AutoDuty : IDalamudPlugin
                                              if (this.StopLoop)
                                              {
                                                  this.TaskManager.Enqueue(() => Svc.Log.Info($"Loop Stop Condition Encountered, Stopping Loop"));
-                                                 this.LoopsCompleteActions();
+                                                 this.LoopTasks(false, this.Configuration.ExecuteBetweenLoopActionLastLoop);
                                              }
                                              else
                                              {
@@ -813,10 +813,7 @@ public sealed class AutoDuty : IDalamudPlugin
                 this.TaskManager.Enqueue(() => Svc.Log.Debug($"Loop {this.CurrentLoop} == {this.Configuration.LoopTimes} we are done Looping, Invoking LoopsCompleteActions"), "Loop-Debug");
                 this.TaskManager.Enqueue(() =>
                                          {
-                                             if (this.Configuration.ExecuteBetweenLoopActionLastLoop)
-                                                 this.LoopTasks(false);
-                                             else
-                                                 this.LoopsCompleteActions();
+                                             this.LoopTasks(false, this.Configuration.ExecuteBetweenLoopActionLastLoop);
                                          },     "Loop-LoopCompleteActions");
             }
         }
@@ -981,11 +978,15 @@ public sealed class AutoDuty : IDalamudPlugin
         }
     }
 
-    internal unsafe void LoopTasks(bool queue = true)
+    internal unsafe void LoopTasks(bool queue = true, bool between = true)
     {
-        if (this.CurrentTerritoryContent == null) return;
+        if (this.CurrentTerritoryContent == null)
+        {
+            queue   = false;
+            between = false;
+        }
 
-        if (this.Configuration.EnableBetweenLoopActions)
+        if (between)
         {
             if (this.Configuration.ExecuteCommandsBetweenLoop)
             {
@@ -1046,7 +1047,7 @@ public sealed class AutoDuty : IDalamudPlugin
             }
         }
 
-        if (this.Configuration.EnableBetweenLoopActions)
+        if (between)
         {
             this.AutoEquipRecommendedGear();
 

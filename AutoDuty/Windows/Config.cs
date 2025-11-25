@@ -1226,6 +1226,7 @@ public class Configuration
                 this.AutoDesynth = false;
         }
     }
+
     public int  AutoGCTurninSlotsLeft     = 5;
     public bool AutoGCTurninSlotsLeftBool = false;
     public bool AutoGCTurninUseTicket     = false;

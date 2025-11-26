@@ -256,7 +256,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.AssemblyDirectoryInfo = this.AssemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 266) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 267) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this._configDirectory.Exists)
@@ -810,7 +810,7 @@ public sealed class AutoDuty : IDalamudPlugin
                 this.TaskManager.Enqueue(() => Svc.Log.Debug($"Loops Done"),                                                                                                   "Loop-Debug");
                 this.TaskManager.Enqueue(() => { this.States &= ~PluginState.Navigating; },                                                                                    "Loop-RemoveNavigationState");
                 this.TaskManager.Enqueue(() => PlayerHelper.IsReady,                                                                                                           int.MaxValue, "Loop-WaitPlayerReady");
-                this.TaskManager.Enqueue(() => Svc.Log.Debug($"Loop {this.CurrentLoop} == {this.Configuration.LoopTimes} we are done Looping, Invoking LoopsCompleteActions"), "Loop-Debug");
+                this.TaskManager.Enqueue(() => Svc.Log.Debug($"Loop {this.CurrentLoop} == {this.Configuration.LoopTimes} we are done Looping, Invoking Loop Actions"), "Loop-Debug");
                 this.TaskManager.Enqueue(() =>
                                          {
                                              this.LoopTasks(false, this.Configuration.ExecuteBetweenLoopActionLastLoop);
@@ -980,11 +980,7 @@ public sealed class AutoDuty : IDalamudPlugin
 
     internal unsafe void LoopTasks(bool queue = true, bool between = true)
     {
-        if (this.CurrentTerritoryContent == null)
-        {
-            queue   = false;
-            between = false;
-        }
+        this.TaskManager.Enqueue(() => this.CurrentTerritoryContent != null, "Loop-WaitTillTerritory");
 
         if (between)
         {

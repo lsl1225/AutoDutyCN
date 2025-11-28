@@ -66,7 +66,10 @@ public class MainWindow : Window, IDisposable
 
     internal static void LoopsConfig()
     {
-        if ((Plugin.Configuration.UseSliderInputs && ImGui.SliderInt("Times", ref Plugin.Configuration.LoopTimes, 0, 100)) || (!Plugin.Configuration.UseSliderInputs && ImGui.InputInt("Times", ref Plugin.Configuration.LoopTimes, 1)))
+        using ImRaii.IEndObject _ = ImRaii.Disabled(ConfigurationMain.Instance.MultiBox && !ConfigurationMain.Instance.host);
+
+        if ((Plugin.Configuration.UseSliderInputs  && ImGui.SliderInt("Times", ref Plugin.Configuration.LoopTimes, 0, 100)) || 
+            (!Plugin.Configuration.UseSliderInputs && ImGui.InputInt("Times", ref Plugin.Configuration.LoopTimes, 1)))
         {
             if (Plugin.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
                 if (Plugin.PlaylistCurrentEntry != null)

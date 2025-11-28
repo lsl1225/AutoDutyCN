@@ -1122,8 +1122,13 @@ public class Configuration
     public byte       RebuildNavmeshAfterStuckXTimes = 5;
     public int        MinStuckTime                   = 500;
     public bool       StuckOnStep                    = true;
-    public bool       StuckReturn                    = true;
+    public bool       stuckReturn                    = true;
     public int        StuckReturnX                   = 10;
+    public bool StuckReturn
+    {
+        get => this.stuckReturn && !ConfigurationMain.Instance.MultiBox;
+        set => this.stuckReturn = value;
+    }
 
     public bool PathDrawEnabled   = false;
     public int  PathDrawStepCount = 5;
@@ -2217,7 +2222,7 @@ public static class ConfigTab
                 }
             }
 
-            if (ImGui.Checkbox("Use return when stuck##StuckUseReturn", ref Configuration.StuckReturn))
+            if (ImGui.Checkbox("Use return when stuck##StuckUseReturn", ref Configuration.stuckReturn))
                 Configuration.Save();
 
             if (Configuration.StuckReturn)

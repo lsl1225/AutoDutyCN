@@ -58,8 +58,8 @@ namespace AutoDuty.Helpers
             if (VNavmesh_IPCSubscriber.Path_IsRunning())
                 VNavmesh_IPCSubscriber.Path_Stop();
 
-            if (Plugin.TaskManager.IsBusy)
-                Plugin.TaskManager.Abort();
+            if (Plugin.taskManager.IsBusy)
+                Plugin.taskManager.Abort();
             
             if (Plugin.Configuration.DutyModeEnum.EqualsAny(DutyMode.Regular, DutyMode.Trial, DutyMode.Raid, DutyMode.Variant))
             {

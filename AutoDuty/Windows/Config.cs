@@ -16,18 +16,22 @@ using System.Globalization;
 using System.Linq;
 using static AutoDuty.Helpers.RepairNPCHelper;
 using static AutoDuty.Windows.ConfigTab;
+using static FFXIVClientStructs.FFXIV.Client.System.Input.PadDevice.Delegates;
 
 namespace AutoDuty.Windows;
 
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Game.ClientState.Party;
 using Data;
 using ECommons.Automation;
 using ECommons.Configuration;
 using ECommons.ExcelServices;
+using ECommons.GameFunctions;
 using ECommons.PartyFunctions;
 using ECommons.UIHelpers.AddonMasterImplementations;
 using ECommons.UIHelpers.AtkReaderImplementations;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Group;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
@@ -43,9 +47,6 @@ using System.IO;
 using System.IO.Pipes;
 using System.Numerics;
 using System.Text;
-using Dalamud.Game.ClientState.Party;
-using ECommons.GameFunctions;
-using FFXIVClientStructs.FFXIV.Client.Game.Group;
 using Achievement = Lumina.Excel.Sheets.Achievement;
 using ExitDutyHelper = Helpers.ExitDutyHelper;
 using Map = Lumina.Excel.Sheets.Map;
@@ -1244,23 +1245,26 @@ public class Configuration
     #endregion
 
     #region Termination
-    public bool                                        EnableTerminationActions   = true;
-    public bool                                        StopLevel                  = false;
-    public int                                         StopLevelInt               = 1;
-    public bool                                        StopNoRestedXP             = false;
-    public bool                                        StopItemQty                = false;
-    public bool                                        StopItemAll                = false;
-    public Dictionary<uint, KeyValuePair<string, int>> StopItemQtyItemDictionary  = [];
-    public int                                         StopItemQtyInt             = 1;
-    public bool                                        ExecuteCommandsTermination = false;
-    public List<string>                                CustomCommandsTermination  = [];
-    public bool                                        PlayEndSound               = false;
-    public bool                                        CustomSound                = false;
-    public float                                       CustomSoundVolume          = 0.5f;
-    public Sounds                                      SoundEnum                  = Sounds.None;
-    public string                                      SoundPath                  = "";
-    public TerminationMode                             TerminationMethodEnum      = TerminationMode.Do_Nothing;
-    public bool                                        TerminationKeepActive      = true;
+    public bool                                        EnableTerminationActions    = true;
+    public bool                                        StopLevel                   = false;
+    public int                                         StopLevelInt                = 1;
+    public bool                                        StopNoRestedXP              = false;
+    public bool                                        StopItemQty                 = false;
+    public bool                                        StopItemAll                 = false;
+    public Dictionary<uint, KeyValuePair<string, int>> StopItemQtyItemDictionary   = [];
+    public int                                         StopItemQtyInt              = 1;
+    public bool                                        TerminationBLUSpellsEnabled = false;
+    public List<uint>                                  TerminationBLUSpells        = [];
+    public bool                                        TerminationBLUSpellsAll     = false;
+    public bool                                        ExecuteCommandsTermination  = false;
+    public List<string>                                CustomCommandsTermination   = [];
+    public bool                                        PlayEndSound                = false;
+    public bool                                        CustomSound                 = false;
+    public float                                       CustomSoundVolume           = 0.5f;
+    public Sounds                                      SoundEnum                   = Sounds.None;
+    public string                                      SoundPath                   = "";
+    public TerminationMode                             TerminationMethodEnum       = TerminationMode.Do_Nothing;
+    public bool                                        TerminationKeepActive       = true;
     #endregion
 
     public void Save()
@@ -3068,7 +3072,8 @@ public static class ConfigTab
                         }
                     }
                     ImGui.PopItemWidth();
-                    if (!ImGui.BeginListBox("##ItemList", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, (ImGui.GetTextLineHeightWithSpacing() * Configuration.StopItemQtyItemDictionary.Count) + 5))) return;
+                    if (!ImGui.BeginListBox("##ItemList", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, (ImGui.GetTextLineHeightWithSpacing() * Configuration.StopItemQtyItemDictionary.Count) + 5)))
+                        return;
 
                     foreach (KeyValuePair<uint, KeyValuePair<string, int>> item in Configuration.StopItemQtyItemDictionary)
                     {
@@ -3082,6 +3087,50 @@ public static class ConfigTab
                     ImGui.EndListBox();
                     if (ImGui.Checkbox("Stop Looping Only When All Items Obtained", ref Configuration.StopItemAll))
                         Configuration.Save();
+                }
+
+                if (ImGui.Checkbox("Stop Looping when BLU spell unlocked", ref Configuration.TerminationBLUSpellsEnabled))
+                    Configuration.Save();
+
+                if (Configuration.TerminationBLUSpellsEnabled)
+                {
+                    ImGui.Indent();
+
+                    if(ImGui.BeginCombo("##TerminationBlueSpell", "Select BLU spell"))
+                    {
+                        foreach (BLUHelper.BLUSpell bluSpell in BLUHelper.spells)
+                        {
+                            if (!BLUHelper.SpellUnlocked(bluSpell))
+                                if (ImGui.Selectable($"({bluSpell.Entry}) {bluSpell.Name}"))
+                                {
+                                    Configuration.TerminationBLUSpells.Add(bluSpell.ID);
+                                    Configuration.TerminationBLUSpells = Configuration.TerminationBLUSpells.OrderBy(sp => BLUHelper.spellDict[sp].Entry).ToList();
+                                    Configuration.Save();
+                                }
+                        }
+
+                        ImGui.EndCombo();
+                    }
+
+                    if (ImGui.BeginListBox("##TerminationBluSpellList", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, (ImGui.GetTextLineHeightWithSpacing() * Configuration.TerminationBLUSpells.Count) + 5)))
+                    {
+                        foreach (uint bluSpell in Configuration.TerminationBLUSpells)
+                        {
+                            BLUHelper.BLUSpell spell = BLUHelper.spellDict[bluSpell];
+                            ImGui.Selectable($"({spell.Entry}) {spell.Name}");
+                            if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+                            {
+                                Configuration.TerminationBLUSpells.Remove(bluSpell);
+                                Configuration.Save();
+                                return;
+                            }
+                        }
+                        ImGui.EndListBox();
+                    }
+                    if (ImGui.Checkbox("Stop Looping Only When All Spells Unlocked", ref Configuration.TerminationBLUSpellsAll))
+                        Configuration.Save();
+
+                    ImGui.Unindent();
                 }
 
                 MakeCommands("Execute commands on termination of all loops",

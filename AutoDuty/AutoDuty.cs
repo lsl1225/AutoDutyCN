@@ -710,6 +710,9 @@ public sealed class AutoDuty : IDalamudPlugin
         (this.CurrentTerritoryContent == null                                                                               ||
          (this.Configuration.StopLevel      && Player.Level                             >= this.Configuration.StopLevelInt) ||
          (this.Configuration.StopNoRestedXP && AgentHUD.Instance()->ExpRestedExperience == 0)                               ||
+         (this.Configuration.TerminationBLUSpellsEnabled && (this.Configuration.TerminationBLUSpellsEnabled ?
+                                                                 this.Configuration.TerminationBLUSpells.All(BLUHelper.SpellUnlocked) :
+                                                                 this.Configuration.TerminationBLUSpells.Any(BLUHelper.SpellUnlocked))) ||
          (this.Configuration.StopItemQty && (this.Configuration.StopItemAll ?
                                                  this.Configuration.StopItemQtyItemDictionary.All(x => InventoryManager.Instance()->GetInventoryItemCount(x.Key) >= x.Value.Value) :
                                                  this.Configuration.StopItemQtyItemDictionary.Any(x => InventoryManager.Instance()->GetInventoryItemCount(x.Key) >= x.Value.Value))));

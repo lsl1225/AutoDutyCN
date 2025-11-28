@@ -97,7 +97,7 @@ public class MainWindow : Window, IDisposable
             {
                 if (ImGui.Button("Resume"))
                 {
-                    Plugin.TaskManager.SetStepMode(false);
+                    Plugin.taskManager.StepMode = false;
                     Plugin.Stage = Plugin.PreviousStage;
                     Plugin.States &= ~PluginState.Paused;
                 }

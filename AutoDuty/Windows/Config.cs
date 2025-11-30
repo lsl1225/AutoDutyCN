@@ -16,6 +16,7 @@ using System.Globalization;
 using System.Linq;
 using static AutoDuty.Helpers.RepairNPCHelper;
 using static AutoDuty.Windows.ConfigTab;
+using static Dalamud.Interface.Utility.Raii.ImRaii;
 using static FFXIVClientStructs.FFXIV.Client.System.Input.PadDevice.Delegates;
 
 namespace AutoDuty.Windows;
@@ -1809,7 +1810,77 @@ public static class ConfigTab
                     ImGui.Unindent();
                 }
 
-                if(ImGui.Button("Return?##DevReturnButton"))
+                if (ImGui.CollapsingHeader("BLU loadout##DevBlueLoadout"))
+                {
+                    unsafe
+                    {
+                        Span<uint> blu = ActionManager.Instance()->BlueMageActions;
+                        foreach (uint u in blu)
+                        {
+                            if (u != 0)
+                            {
+                                if (BLUHelper.spellsById.TryGetValue(BLUHelper.NormalToAoz(u), out BLUHelper.BLUSpell spell))
+                                {
+                                    ImGui.AlignTextToFramePadding();
+                                    ImGui.Text($"{u}: {BLUHelper.NormalToAoz(u)} {spell.Entry} {spell.Name}");
+                                    ImGui.SameLine();
+                                    if (ImGui.Button($"Unload##DevBlueLoadoutUnload_{u}"))
+                                        BLUHelper.SpellLoadoutOut(spell.Entry);
+                                }
+
+                            } else
+                            {
+                                ImGui.Text("Nothing loaded");
+                                ImGui.SameLine();
+                                if (ImGui.Button($"Load##DevBlueLoadoutLoad"))
+                                {
+                                    BLUHelper.SpellLoadoutIn((byte)Random.Shared.Next(1, 124));
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (ImGui.CollapsingHeader("RetainerInventoryPrices##DevRetainerPricesCheck"))
+                {
+                    unsafe
+                    {
+                        ImGui.Indent();
+
+
+                        InventoryContainer* container = InventoryManager.Instance()->GetInventoryContainer(InventoryType.RetainerMarket);
+                        Span<ulong>         prices    = InventoryManager.Instance()->RetainerMarketPrices;
+                        ImGui.Columns(2);
+
+                        for (int i = 0; i < container->Size; i++)
+                        {
+                            InventoryItem item = container->Items[i];
+                            ImGui.Text(item.Quantity.ToString());
+                            ImGui.NextColumn();
+                            ulong price = prices[i];
+                            ImGuiEx.Text(price.ToString());
+                            ImGui.NextColumn();
+                        }
+
+                        ImGui.Columns();
+                        ImGui.Unindent();
+                    }
+                }
+
+                if(ImGui.Button("CheckAction##DevCheckActionStatus"))
+                    unsafe
+                    {
+                        Svc.Log.Warning(ActionManager.Instance()->GetActionStatus(ActionType.Action, 23282).ToString());
+                    }
+                ImGui.SameLine();
+                if (ImGui.Button("CheckAction2##DevCheckActionStatus2"))
+                    unsafe
+                    {
+                        Svc.Log.Warning(ActionManager.Instance()->GetActionStatus(ActionType.Action, 23277).ToString());
+                    }
+
+                if (ImGui.Button("Return?##DevReturnButton"))
                     unsafe
                     {
                         VNavmesh_IPCSubscriber.Path_Stop();
@@ -3109,7 +3180,7 @@ public static class ConfigTab
                                 if (ImGui.Selectable($"({bluSpell.Entry}) {bluSpell.Name}"))
                                 {
                                     Configuration.TerminationBLUSpells.Add(bluSpell.ID);
-                                    Configuration.TerminationBLUSpells = Configuration.TerminationBLUSpells.OrderBy(sp => BLUHelper.spellDict[sp].Entry).ToList();
+                                    Configuration.TerminationBLUSpells = Configuration.TerminationBLUSpells.OrderBy(sp => BLUHelper.spellsById[sp].Entry).ToList();
                                     Configuration.Save();
                                 }
                         }
@@ -3121,7 +3192,7 @@ public static class ConfigTab
                     {
                         foreach (uint bluSpell in Configuration.TerminationBLUSpells)
                         {
-                            BLUHelper.BLUSpell spell = BLUHelper.spellDict[bluSpell];
+                            BLUHelper.BLUSpell spell = BLUHelper.spellsById[bluSpell];
                             ImGui.Selectable($"({spell.Entry}) {spell.Name}");
                             if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
                             {

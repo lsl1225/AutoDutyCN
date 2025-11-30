@@ -18,11 +18,13 @@ using System.Linq;
 using System.Numerics;
 using static AutoDuty.Helpers.ObjectHelper;
 using static AutoDuty.Helpers.PlayerHelper;
+using static FFXIVClientStructs.FFXIV.Client.System.Input.PadDevice.Delegates;
 
 namespace AutoDuty.Managers
 {
-    using System.Reflection;
+    using ECommons.ExcelServices;
     using FFXIVClientStructs.FFXIV.Client.Game.Object;
+    using System.Reflection;
 
     internal class ActionsManager(AutoDuty _plugin, TaskManager _taskManager)
     {
@@ -51,7 +53,9 @@ namespace AutoDuty.Managers
             ("CameraFacing", "Face which Coords?", "Adds a CameraFacing step to the path; after moving to the position, AutoDuty will face the coordinates specified.\nExample: CameraFacing|720.66, 57.24, 9.18|722.05, 62.47, 15.55"),
             ("ClickTalk", "false", "Adds a ClickTalk step to the path; after moving to the position, AutoDuty will click the talk addon."),
             ("ConditionAction","condition;args,action;args", "Adds a ConditionAction step to the path; after moving to the position, AutoDuty will check the condition specified and invoke Action."),
-            ("ModifyIndex", "what number (0-based)", "Adds a ModifyIndex step to the path; after moving to the position, AutoDuty will modify the index to the number specified.")
+            ("ModifyIndex", "what number (0-based)", "Adds a ModifyIndex step to the path; after moving to the position, AutoDuty will modify the index to the number specified."),
+            ("Action", "", "Run any action"),
+            ("BLULoad", "enable?;which spell", "Enables or disables a spell from the current BLU loadout")
         ];
 
         public void InvokeAction(PathAction action)
@@ -92,6 +96,7 @@ namespace AutoDuty.Managers
                 conditionActionArray = action.Arguments[0].Split("&");
             }
             Plugin.Action = $"ConditionAction: {conditionActionArray[0]}, {conditionActionArray[1]}";
+
             string? condition = conditionActionArray[0];
             string[] conditionArray = [];
             if (condition.Any(x => x.EqualsAny(';')))
@@ -172,13 +177,20 @@ namespace AutoDuty.Managers
                         }
                     }
                     break;
+                case "Job":
+                    if (conditionArray.Length > 1)
+                        if (Enum.TryParse(conditionArray[1], out JobWithRole jwr))
+                            if (jwr.HasJob(PlayerHelper.GetJob()))
+                                invokeAction = true;
+
+                    break;
             }
             if (invokeAction)
             {
                 string? actionActual = actionArray[0];
-                string actionArguments = actionArray.Length > 1 ? actionArray[1] : "";
+                List<string> actionArguments = (actionArray.Length > 1 ? actionArray[1..] : [string.Empty]).ToList();
                 Svc.Log.Debug($"ConditionAction: Invoking Action: {actionActual} with Arguments: {actionArguments}");
-                this.InvokeAction(new PathAction() { Name = actionActual, Arguments = [actionArguments] });
+                this.InvokeAction(new PathAction() { Name = actionActual, Arguments = actionArguments });
             }
         }
 
@@ -629,6 +641,38 @@ namespace AutoDuty.Managers
 
                 _taskManager.Enqueue(() => treasureCofferObjects = GetObjectsByObjectKind(Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure)?.Where(x => BelowDistanceToPoint(x.Position, lootPos, lootRange, 10)).ToList(), "Boss-GetTreasureChestsBounded");
                 _taskManager.Enqueue(() => this.BossLoot(treasureCofferObjects, index),                                                                                                                                                  "Boss-LootCheck");
+            }
+        }
+
+        public void BLULoad(PathAction action)
+        {
+            if(PlayerHelper.GetJob() == Job.BLU)
+                if (bool.TryParse(action.Arguments[0], out bool enable))
+                    if (byte.TryParse(action.Arguments[1], out byte spell))
+                    {
+                        _taskManager.Enqueue(() => !Svc.Condition.Any(ConditionFlag.InCombat, ConditionFlag.Casting));
+
+                        if(enable)
+                            _taskManager.Enqueue(() => BLUHelper.SpellLoadoutIn(spell));
+                        else
+                            _taskManager.Enqueue(() => BLUHelper.SpellLoadoutOut(spell));
+                    }
+        }
+
+        public unsafe void Action(PathAction action)
+        {
+            Svc.Log.Debug($"Action: {action.Arguments[0]}");
+            if (Enum.TryParse(action.Arguments[0], out ActionType type))
+            {
+                Svc.Log.Debug($"Action: {type} {action.Arguments[1]}");
+                if (uint.TryParse(action.Arguments[1], out uint id))
+                {
+                    if (ActionManager.Instance()->GetActionStatus(type, id) != 573)
+                    {
+                        _taskManager.Enqueue(() => ActionManager.Instance()->GetActionStatus(type, id) == 0, "Action_WaitTillReady");
+                        _taskManager.Enqueue(() => ActionManager.Instance()->UseAction(type, id),            "Action_UsingAction");
+                    }
+                }
             }
         }
 

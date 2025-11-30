@@ -109,7 +109,8 @@ namespace AutoDuty.Data
             Summoner    = 1 << 18,
             Red_Mage    = 1 << 19,
             Pictomancer = 1 << 20,
-            Casters     = Black_Mage | Summoner | Red_Mage | Pictomancer,
+            Blue_Mage   = 1 << 21,
+            Casters     = Black_Mage | Summoner | Red_Mage | Pictomancer | Blue_Mage,
             DPS         = Melee      | Aiming   | Casters,
             All         = Tanks      | Healers  | DPS 
         }
@@ -426,6 +427,7 @@ namespace AutoDuty.Data
                 Job.ACN or Job.SMN => JobWithRole.Summoner,
                 Job.RDM => JobWithRole.Red_Mage,
                 Job.PCT => JobWithRole.Pictomancer,
+                Job.BLU => JobWithRole.Blue_Mage,
                 _ => JobWithRole.None
             };
 

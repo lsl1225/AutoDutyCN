@@ -49,6 +49,7 @@ namespace AutoDuty.Managers
             ("Revival", "false", "Adds a Revive flag to the path; this is just a flag to mark the positions of Revival Points, AutoDuty will ignore this step during navigation.\nUse this if the Revive Teleporter does not take you directly to the arena of the last boss you killed, such as Sohm Al.\nExample: Revival|33.57, -202.93, -70.30|"),
             ("ForceAttack",  "false", "Adds a ForceAttack step to the path; after moving to the position, AutoDuty will ForceAttack the closest mob.\nExample: ForceAttack|-174.24, 6.56, -301.67|"),
             ("Jump", "automove for how long before", "Adds a Jump step to the path; after AutoMoving, AutoDuty will jump.\nExample: Jump|0, 0, 0|200"),
+            ("JumpTo", "jump where? [how long before jump?]", "Move towards point with no mesh then jump\nExample: JumpTo|720.55, 57.24, 8.89|720.637, 57.242, 9.762[|100]"),
             //("PausePandora", "Which feature | how long"),
             ("CameraFacing", "Face which Coords?", "Adds a CameraFacing step to the path; after moving to the position, AutoDuty will face the coordinates specified.\nExample: CameraFacing|720.66, 57.24, 9.18|722.05, 62.47, 15.55"),
             ("ClickTalk", "false", "Adds a ClickTalk step to the path; after moving to the position, AutoDuty will click the talk addon."),
@@ -276,6 +277,24 @@ namespace AutoDuty.Managers
                 _taskManager.Enqueue(() => EzThrottler.Check("AutoMove"), "AutoMove", new TaskManagerConfiguration(Convert.ToInt32(100)));
                 _taskManager.Enqueue(() => Chat.ExecuteCommand("/automove off"), "Jump");
             }
+        }
+
+        public unsafe void JumpTo(PathAction action)
+        {
+            Plugin.Action = $"Jumping To {action.Arguments[0]}";
+            if (!action.Arguments[0].TryGetVector3(out Vector3 position))
+                return;
+            int wait = 100;
+            if (action.Arguments.Count > 1 && int.TryParse(action.Arguments[1], out int parsedWait) && parsedWait > 0)
+                wait = parsedWait;
+            _taskManager.Enqueue(() => VNavmesh_IPCSubscriber.Path_MoveTo([position], false), "Start-JumpTo-Move");
+            if (wait > 0)
+            {
+                _taskManager.Enqueue(() => EzThrottler.Throttle("JumpTo", Convert.ToInt32(wait)), "JumpTo-Wait");
+                _taskManager.Enqueue(() => EzThrottler.Check("JumpTo"), "JumpTo-Wait", new TaskManagerConfiguration(Convert.ToInt32(wait)));
+            }
+            _taskManager.Enqueue(() => ActionManager.Instance()->UseAction(ActionType.GeneralAction, 2), "JumpTo");
+            _taskManager.Enqueue(() => MovementHelper.Move(position, useMesh:false), "Finish-JumpTo-Move");
         }
 
         public void ChatCommand(PathAction action)

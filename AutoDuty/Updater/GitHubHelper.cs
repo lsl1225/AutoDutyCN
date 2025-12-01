@@ -41,7 +41,7 @@ namespace AutoDuty.Updater
             }
         }
 
-        internal static async Task<Dictionary<string, string>?> GetPathFileListAsync()
+        internal static async Task<(Dictionary<string, string>?, Dictionary<string, string>?)> GetPathUpdateInfoAsync()
         {
             try
             {
@@ -53,12 +53,13 @@ namespace AutoDuty.Updater
                 client.Timeout = TimeSpan.FromSeconds(20);
 
                 Dictionary<string, string>? md5List = await client.GetFromJsonAsync<Dictionary<string, string>>("https://raw.githubusercontent.com/erdelf/AutoDuty/refs/heads/master/AutoDuty/Resources/md5s.json");
-                return md5List ?? [];
+                Dictionary<string, string>? delList = await client.GetFromJsonAsync<Dictionary<string, string>>("https://raw.githubusercontent.com/erdelf/AutoDuty/refs/heads/master/AutoDuty/Resources/md5s_Removed.json");
+                return (md5List ?? [], delList ?? []);
             }
             catch (Exception ex)
             {
                 Svc.Log.Error($"{ex}");
-                return null;
+                return (null, null);
             }
         }
 

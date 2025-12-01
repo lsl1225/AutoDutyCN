@@ -43,19 +43,33 @@ namespace AutoDuty.Updater
                                                                                                fileInfo => fileInfo.Name,
                                                                                                fileInfo => BitConverter.ToString(FileHelper.CalculateMD5(fileInfo.FullName)).Replace("-", "")
                                                                                               );
-                Dictionary<string, string>? list = await GitHubHelper.GetPathFileListAsync();
-                if (list == null) return false;
+                (Dictionary<string, string>? md5, Dictionary<string, string>? del) list                 = await GitHubHelper.GetPathUpdateInfoAsync();
 
                 HashSet<string> doNotUpdatePathFiles = ConfigurationMain.Instance.GetCurrentConfig.DoNotUpdatePathFiles;
-
-                IEnumerable<KeyValuePair<string, string>>? downloadList = list.Where(kvp => !doNotUpdatePathFiles.Contains(kvp.Key) && (!localFilesDictionary.ContainsKey(kvp.Key) || !localFilesDictionary[kvp.Key].Equals(kvp.Value, StringComparison.OrdinalIgnoreCase)));
-
-                foreach (KeyValuePair<string, string> file in downloadList)
+                if (list.md5 != null)
                 {
-                    bool    result = await GitHubHelper.DownloadFileAsync($"https://raw.githubusercontent.com/erdelf/AutoDuty/refs/heads/master/AutoDuty/Paths/{file.Key}",$"{Plugin.PathsDirectory.FullName}/{file.Key}");
-                    string? logger = result ? $"Succesfully downloaded: {file.Key}" : $"Failed to download: {file.Key}";
-                    Svc.Log.Info(logger);
+                    IEnumerable<KeyValuePair<string, string>>? downloadList =
+                        list.md5.Where(kvp => !doNotUpdatePathFiles.Contains(kvp.Key) && (!localFilesDictionary.ContainsKey(kvp.Key) || !localFilesDictionary[kvp.Key].Equals(kvp.Value, StringComparison.OrdinalIgnoreCase)));
+
+                    foreach (KeyValuePair<string, string> file in downloadList)
+                    {
+                        bool    result = await GitHubHelper.DownloadFileAsync($"https://raw.githubusercontent.com/erdelf/AutoDuty/refs/heads/master/AutoDuty/Paths/{file.Key}", $"{Plugin.PathsDirectory.FullName}/{file.Key}");
+                        Svc.Log.Info(result ? $"Succesfully downloaded: {file.Key}" : $"Failed to download: {file.Key}");
+                    }
                 }
+
+                if (list.del != null)
+                {
+                    IEnumerable<KeyValuePair<string, string>>? deleteList =
+                        list.del.Where(kvp => !doNotUpdatePathFiles.Contains(kvp.Key) && localFilesDictionary.ContainsKey(kvp.Key) && localFilesDictionary[kvp.Key].Equals(kvp.Value, StringComparison.OrdinalIgnoreCase));
+
+                    foreach (KeyValuePair<string, string> file in deleteList)
+                    {
+                        File.Delete($"{Plugin.PathsDirectory.FullName}/{file.Key}");
+                        Svc.Log.Info("Deleted " + file.Key);
+                    }
+                }
+
                 return true;
             }
             catch (Exception ex)

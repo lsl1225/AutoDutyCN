@@ -2,6 +2,20 @@
   "Actions": [
     {
       "Tag": "None",
+      "Name": "BLULoad",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "false",
+        "92"
+      ],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
       "Name": "Interactable",
       "Position": {
         "X": 196.44,
@@ -36,6 +50,183 @@
       },
       "Arguments": [
         "false"
+      ],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "ConditionAction",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "Job;Blue_Mage",
+        "Rotation;off"
+      ],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "BLULoad",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "true",
+        "92"
+      ],
+      "Note": ""
+    },
+    {
+      "Tag": "W2W",
+      "Name": "ConditionAction",
+      "Position": {
+        "X": 175.41466,
+        "Y": 154.67581,
+        "Z": -68.05216
+      },
+      "Arguments": [
+        "ActionStatus;Action;23282;573",
+        "Wait;2500"
+      ],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "ConditionAction",
+      "Position": {
+        "X": 181.5,
+        "Y": 154.1,
+        "Z": -72.2
+      },
+      "Arguments": [
+        "Job;Blue_Mage",
+        "Action;Action;7559"
+      ],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "WaitFor",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "IsReady"
+      ],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "ConditionAction",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "Job;Blue_Mage",
+        "Action;Action;23282"
+      ],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "WaitFor",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "ConditionFlag;Casting;false"
+      ],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "ConditionAction",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "Job;Blue_Mage",
+        "Action;Action;11419"
+      ],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "WaitFor",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "ConditionFlag;Casting;false"
+      ],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "WaitFor",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "IsReady"
+      ],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "ConditionAction",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "Job;Blue_Mage",
+        "Action;Action;23277"
+      ],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "WaitFor",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "ConditionFlag;Casting;false"
+      ],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "ConditionAction",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "Job;Blue_Mage",
+        "Rotation;on"
       ],
       "Note": ""
     },
@@ -366,7 +557,7 @@
     }
   ],
   "Meta": {
-    "CreatedAt": 106,
+    "CreatedAt": 269,
     "Changelog": [
       {
         "Version": 114,
@@ -403,6 +594,10 @@
       {
         "Version": 262,
         "Change": "Added W2W and replaced mech arms WaitFor Combat with simple Waits"
+      },
+      {
+        "Version": 269,
+        "Change": "Adjusting Wait W2W steps"
       }
     ],
     "Notes": []

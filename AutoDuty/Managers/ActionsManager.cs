@@ -18,6 +18,7 @@ using System.Linq;
 using System.Numerics;
 using static AutoDuty.Helpers.ObjectHelper;
 using static AutoDuty.Helpers.PlayerHelper;
+using static Dalamud.Interface.Utility.Raii.ImRaii;
 using static FFXIVClientStructs.FFXIV.Client.System.Input.PadDevice.Delegates;
 
 namespace AutoDuty.Managers
@@ -183,6 +184,13 @@ namespace AutoDuty.Managers
                         if (Enum.TryParse(conditionArray[1], out JobWithRole jwr))
                             if (jwr.HasJob(PlayerHelper.GetJob()))
                                 invokeAction = true;
+                    break;
+                case "ActionStatus":
+                    if (Enum.TryParse(conditionArray[1], out ActionType type))
+                        if (uint.TryParse(conditionArray[2], out uint id))
+                            if (uint.TryParse(conditionArray[3], out uint status))
+                                if (ActionManager.Instance()->GetActionStatus(type, id) == status)
+                                    invokeAction = true;
 
                     break;
             }

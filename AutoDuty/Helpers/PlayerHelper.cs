@@ -11,7 +11,6 @@ using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 namespace AutoDuty.Helpers
 {
     using System;
-    using Dalamud.Plugin.Services;
     using Dalamud.Utility;
     using FFXIVClientStructs.FFXIV.Client.Game.Control;
     using Lumina.Excel.Sheets;
@@ -154,7 +153,7 @@ namespace AutoDuty.Helpers
             };
         }
 
-        internal static bool HasStatus(uint statusID, float minTime = 0) => Svc.Objects.LocalPlayer != null && Player.Object.StatusList.Any(x => x.StatusId == statusID && (minTime <= 0 || x.RemainingTime > minTime));
-        internal static bool HasStatusAny(uint[] statusIDs, float minTime = 0) => Svc.Objects.LocalPlayer != null && Player.Object.StatusList.Any(x => statusIDs.Contains(x.StatusId) && (minTime <= 0 || x.RemainingTime > minTime));
+        internal static bool HasStatus(uint      statusID,  float minTime = 0) => Svc.ClientState.LocalPlayer != null && Player.Object.StatusList.Any(x => x.StatusId == statusID         && (minTime <= 0 || x.RemainingTime > minTime));
+        internal static bool HasStatusAny(uint[] statusIDs, float minTime = 0) => Svc.ClientState.LocalPlayer != null && Player.Object.StatusList.Any(x => statusIDs.Contains(x.StatusId) && (minTime <= 0 || x.RemainingTime > minTime));
     }
 }

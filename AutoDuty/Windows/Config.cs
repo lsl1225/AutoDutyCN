@@ -124,8 +124,8 @@ public class ConfigurationMain
 
     public class MultiboxUtility
     {
-        private const int    BUFFER_SIZE            = 4096;
-        private const string PIPE_NAME              = "AutoDutyPipe";
+        private const int    BUFFER_SIZE = 4096;
+        public static string pipeName   = "AutoDutyPipe";
 
         private const string SERVER_AUTH_KEY = "AD_Server_Auth!";
         private const string CLIENT_AUTH_KEY = "AD_Client_Auth!";
@@ -136,10 +136,10 @@ public class ConfigurationMain
         private const string KEEPALIVE_RESPONSE_KEY = "KEEP_ALIVE received";
 
         private const string DUTY_QUEUE_KEY = "DUTY_QUEUE";
-        private const string DUTY_EXIT_KEY = "DUTY_EXIT";
+        private const string DUTY_EXIT_KEY  = "DUTY_EXIT";
 
-        private const string DEATH_KEY   = "DEATH";
-        private const string UNDEATH_KEY = "UNDEATH";
+        private const string DEATH_KEY       = "DEATH";
+        private const string UNDEATH_KEY     = "UNDEATH";
         private const string DEATH_RESET_KEY = "DEATH_RESET";
 
         private const string PATH_STEPS = "PATH_STEPS";
@@ -285,7 +285,7 @@ public class ConfigurationMain
                 {
                     int index = (int)(data ?? throw new ArgumentNullException(nameof(data)));
 
-                    NamedPipeServerStream pipeServer = new(PIPE_NAME, PipeDirection.InOut, MAX_SERVERS, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
+                    NamedPipeServerStream pipeServer = new(pipeName, PipeDirection.InOut, MAX_SERVERS, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
                     pipes[index] = pipeServer;
 
                     int threadId = Thread.CurrentThread.ManagedThreadId;
@@ -443,8 +443,9 @@ public class ConfigurationMain
             internal record ClientInfo(ulong CID, string CName, ushort WorldId);
         }
 
-        private static class Client
+        internal static class Client
         {
+            public static  string                 serverName = ".";
             private static Thread?                thread;
             private static NamedPipeClientStream? pipe;
             private static StreamString?          clientSS;
@@ -470,7 +471,7 @@ public class ConfigurationMain
             {
                 try
                 {
-                    NamedPipeClientStream pipeClient = new(".", PIPE_NAME, PipeDirection.InOut, PipeOptions.Asynchronous);
+                    NamedPipeClientStream pipeClient = new(serverName, pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
 
                     pipe = pipeClient;
 
@@ -849,8 +850,8 @@ public class ConfigurationMain
                               this.profileByCID.Add(cid, this.ActiveProfileName);
                               this.charByCID[cid] = new CharData
                                                     {
-                                                        CID  = cid,
-                                                        Name = Player.Name,
+                                                        CID   = cid,
+                                                        Name  = Player.Name,
                                                         World = Player.CurrentWorld
                               };
 
@@ -3266,11 +3267,11 @@ public static class ConfigTab
 
             ImGuiEx.TextWrapped("Step 1: Have 4 clients logged in and ready with AD open on the same data center not in a party");
             ImGuiEx.TextWrapped("Step 2: One of the clients becomes the host. The host will lead the others. Select host below on the client you want to become host");
-            ImGuiEx.TextWrapped("Step 3: Select Multibox on the host");
-            ImGuiEx.TextWrapped("Step 4: Select Multibox on the 3 clients. Each of them should be invited to the party. Below will be current information about them. if it says \"no info\" they are not connected");
-            ImGuiEx.TextWrapped("Step 5: On the host, select which dungeon you want to run and how often. Click run");
-
-
+            ImGuiEx.TextWrapped("Step 3: The pipe name needs to match between clients and host");
+            ImGuiEx.TextWrapped("Step 4: Select Multibox on the host");
+            ImGuiEx.TextWrapped("Step 5: On the clients, the server name can be used to connect to hosts on other computers. The default of \".\" is the local computer.");
+            ImGuiEx.TextWrapped("Step 6: Select Multibox on the 3 clients. Each of them should be invited to the party. Below will be current information about them. if it says \"no info\" they are not connected");
+            ImGuiEx.TextWrapped("Step 7: On the host, select which dungeon you want to run and how often. Click run");
 
             bool multiBox = ConfigurationMain.Instance.multiBox;
             if (ImGui.Checkbox(nameof(ConfigurationMain.MultiBox), ref multiBox))
@@ -3281,8 +3282,31 @@ public static class ConfigTab
 
             using(ImRaii.Disabled(ConfigurationMain.Instance.MultiBox))
             {
+                ImGui.Indent();
+                if(ImGui.InputText("Pipe Name", ref ConfigurationMain.MultiboxUtility.pipeName))
+                    Configuration.Save();
+                ImGui.SameLine();
+                if (ImGui.Button("Reset##MultiboxResetPipeName"))
+                {
+                    ConfigurationMain.MultiboxUtility.pipeName = "AutoDutyPipe";
+                    Configuration.Save();
+                }
+
                 if (ImGui.Checkbox($"Host##MultiboxHost", ref ConfigurationMain.Instance.host))
                     Configuration.Save();
+
+                if (!ConfigurationMain.Instance.host)
+                {
+                    if (ImGui.InputText("Server Name", ref ConfigurationMain.MultiboxUtility.Client.serverName))
+                        Configuration.Save();
+                    ImGui.SameLine();
+                    if (ImGui.Button("Reset##MultiboxResetServerName"))
+                    {
+                        ConfigurationMain.MultiboxUtility.Client.serverName = ".";
+                        Configuration.Save();
+            }
+                }
+                ImGui.Unindent();
             }
 
             if (ImGui.Checkbox("Synchronize Paths##MultiboxSynchronizePaths", ref ConfigurationMain.Instance.multiBoxSynchronizePath))

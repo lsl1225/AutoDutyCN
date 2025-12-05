@@ -61,9 +61,12 @@ namespace AutoDuty.Managers
                             {
                                 int pInx = this.Paths.IndexOf(dp => dp.FileName.Equals(pathName));
 
-                                if (pInx < this.Paths.Count)
+                                if (pInx >= 0 && pInx < this.Paths.Count)
                                 {
                                     pathIndex = pInx;
+
+                                    Svc.Log.Debug($"Selecting path {pathIndex} from {this.Paths.Count}");
+
                                     return this.Paths[pathIndex];
                                 }
                             }

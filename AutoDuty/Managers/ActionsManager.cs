@@ -136,12 +136,17 @@ namespace AutoDuty.Managers
                     }
                 case "ObjectDistanceToPoint":
                     {
-                        if (conditionArray.Length < 5) return;
-                        if (!conditionArray[2].TryGetVector3(out Vector3 vector3)) return;
-                        if (!float.TryParse(conditionArray[4], out float distance)) return;
-                        if (!(operatorValue = conditionArray[3]).EqualsAny(operation.Keys)) return;
+                        if (conditionArray.Length < 5) 
+                            return;
+                        if (!conditionArray[2].TryGetVector3(out Vector3 vector3)) 
+                            return;
+                        if (!float.TryParse(conditionArray[4], out float distance)) 
+                            return;
+                        if (!(operatorValue = conditionArray[3]).EqualsAny(operation.Keys)) 
+                            return;
                         IGameObject? targetObject = null;
-                        if ((targetObject = GetObjectByDataId(uint.TryParse(conditionArray[1], out uint dataId) ? dataId : 0)) == null) return;
+                        if ((targetObject = GetObjectByDataId(uint.TryParse(conditionArray[1], out uint dataId) ? dataId : 0)) == null) 
+                            return;
                         float getDistance = Vector3.Distance(vector3, targetObject.Position);
                         if (operationResult = operation[operatorValue](getDistance, distance))
                             invokeAction = true;
@@ -149,10 +154,14 @@ namespace AutoDuty.Managers
                         break;
                     }
                 case "ItemCount":
-                    if (conditionArray.Length < 4) return;
-                    if (!uint.TryParse(conditionArray[1], out uint itemId)) return;
-                    if (!uint.TryParse(conditionArray[3], out uint quantity)) return;
-                    if (!operation.TryGetValue(operatorValue = conditionArray[2], out Func<object, object, bool>? operationFunc)) return;
+                    if (conditionArray.Length < 4) 
+                        return;
+                    if (!uint.TryParse(conditionArray[1], out uint itemId)) 
+                        return;
+                    if (!uint.TryParse(conditionArray[3], out uint quantity)) 
+                        return;
+                    if (!operation.TryGetValue(operatorValue = conditionArray[2], out Func<object, object, bool>? operationFunc)) 
+                        return;
                     int itemCount = InventoryHelper.ItemCount(itemId);
                     if (operationResult = operationFunc(itemCount, quantity))
                         invokeAction = true;
@@ -191,7 +200,6 @@ namespace AutoDuty.Managers
                             if (uint.TryParse(conditionArray[3], out uint status))
                                 if (ActionManager.Instance()->GetActionStatus(type, id) == status)
                                     invokeAction = true;
-
                     break;
             }
             if (invokeAction)

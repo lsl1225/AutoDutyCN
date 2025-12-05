@@ -378,6 +378,30 @@ namespace AutoDuty.Data
             Pandora
         }
 
+        public enum ConditionType
+        {
+            None,
+            Distance,
+            ItemCount,
+            ObjectData,
+            Job,
+            ActionStatus
+        }
+
+        public enum ObjectDataProperty
+        {
+            EventState,
+            IsTargetable
+        }
+
+        public enum DistanceLocationTypes
+        {
+            Player,
+            Object,
+            Location
+        }
+
+
         public static bool HasAnyFlag<T>(this T instance, params T[] parameter) where T : Enum
         {
             return parameter.Any(enu => instance.HasFlag(enu));

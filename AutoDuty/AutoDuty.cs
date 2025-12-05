@@ -257,7 +257,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.AssemblyDirectoryInfo = this.AssemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 272) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 273) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this._configDirectory.Exists)
@@ -1427,6 +1427,13 @@ public sealed class AutoDuty : IDalamudPlugin
         if ((this.SkipTreasureCoffer || !this.Configuration.LootTreasure || this.Configuration.LootBossTreasureOnly) && this.PathAction.Tag.HasFlag(ActionTag.Treasure))
         {
             Svc.Log.Debug($"Skipping path entry {this.Actions[this.Indexer].Name} because we are either in revival mode, LootTreasure is off or BossOnly");
+            this.Indexer++;
+            return;
+        }
+
+        if (this.PathAction.Conditions.Any(pac => !pac.IsFulfilled()))
+        {
+            Svc.Log.Debug($"Skipping path entry {this.PathAction.Name} because one of the conditions is not fulfilled");
             this.Indexer++;
             return;
         }

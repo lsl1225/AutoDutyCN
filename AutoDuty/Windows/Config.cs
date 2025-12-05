@@ -16,8 +16,6 @@ using System.Globalization;
 using System.Linq;
 using static AutoDuty.Helpers.RepairNPCHelper;
 using static AutoDuty.Windows.ConfigTab;
-using static Dalamud.Interface.Utility.Raii.ImRaii;
-using static FFXIVClientStructs.FFXIV.Client.System.Input.PadDevice.Delegates;
 
 namespace AutoDuty.Windows;
 
@@ -44,10 +42,12 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using Properties;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Numerics;
 using System.Text;
+using System.Threading.Tasks;
 using Achievement = Lumina.Excel.Sheets.Achievement;
 using ExitDutyHelper = Helpers.ExitDutyHelper;
 using Map = Lumina.Excel.Sheets.Map;
@@ -209,10 +209,12 @@ public class ConfigurationMain
 
         internal static class Server
         {
-            public const             int             MAX_SERVERS = 3;
-            private static readonly  Thread?[]       threads     = new Thread?[MAX_SERVERS];
-            private static readonly  StreamString?[] streams     = new StreamString?[MAX_SERVERS];
-            internal static readonly ClientInfo?[]   clients     = new ClientInfo?[MAX_SERVERS];
+            public const             int             MAX_SERVERS   = 3;
+            private static readonly  Thread?[]       threadsSend   = new Thread?[MAX_SERVERS];
+            private static readonly  Thread?[]       threads       = new Thread?[MAX_SERVERS];
+            private static readonly  StreamString?[] streams       = new StreamString?[MAX_SERVERS];
+            internal static readonly ClientInfo?[]   clients       = new ClientInfo?[MAX_SERVERS];
+            private static readonly  Queue<string>[] messageQueues = [new(), new(), new()];
 
             internal static readonly DateTime[] keepAlives    = new DateTime[MAX_SERVERS];
             internal static readonly bool[]     stepConfirms  = new bool[MAX_SERVERS];
@@ -237,39 +239,45 @@ public class ConfigurationMain
                                 pipes[i]?.Disconnect();
                             pipes[i]?.Close();
                             pipes[i]?.Dispose();
-                            threads[i] = null;
-                            streams[i] = null;
-                            clients[i] = null;
+                            threads[i]     = null;
+                            threadsSend[i] = null;
+                            streams[i]     = null;
+                            clients[i]     = null;
+                            messageQueues[i].Clear();
 
                             keepAlives[i]   = DateTime.MinValue;
                             stepConfirms[i] = false;
 
-                            Chat.ExecuteCommand("/partycmd breakup");
 
-                            SchedulerHelper.ScheduleAction("MultiboxServer PartyBreakup Accept", () =>
-                                                                                                 {
-                                                                                                     unsafe
+                            if (!Plugin.InDungeon)
+                            {
+                                Chat.ExecuteCommand("/partycmd breakup");
+
+                                SchedulerHelper.ScheduleAction("MultiboxServer PartyBreakup Accept", () =>
                                                                                                      {
-                                                                                                         Utf8String inviterName = InfoProxyPartyInvite.Instance()->InviterName;
-
-                                                                                                         if(UniversalParty.Length <= 1)
+                                                                                                         unsafe
                                                                                                          {
-                                                                                                             SchedulerHelper.DescheduleAction("MultiboxServer PartyBreakup Accept");
-                                                                                                             return;
-                                                                                                         }
+                                                                                                             Utf8String inviterName = InfoProxyPartyInvite.Instance()->InviterName;
+
+                                                                                                             if (UniversalParty.Length <= 1)
+                                                                                                             {
+                                                                                                                 SchedulerHelper.DescheduleAction("MultiboxServer PartyBreakup Accept");
+                                                                                                                 return;
+                                                                                                             }
 
 
-                                                                                                         if (GenericHelpers.TryGetAddonByName("SelectYesno", out AtkUnitBase* addonSelectYesno) &&
-                                                                                                             GenericHelpers.IsAddonReady(addonSelectYesno))
-                                                                                                         {
-                                                                                                             AddonMaster.SelectYesno yesno = new(addonSelectYesno);
-                                                                                                             if (yesno.Text.Contains(inviterName.ToString()))
-                                                                                                                 yesno.Yes();
-                                                                                                             else
-                                                                                                                 yesno.No();
+                                                                                                             if (GenericHelpers.TryGetAddonByName("SelectYesno", out AtkUnitBase* addonSelectYesno) &&
+                                                                                                                 GenericHelpers.IsAddonReady(addonSelectYesno))
+                                                                                                             {
+                                                                                                                 AddonMaster.SelectYesno yesno = new(addonSelectYesno);
+                                                                                                                 if (yesno.Text.Contains(inviterName.ToString()))
+                                                                                                                     yesno.Yes();
+                                                                                                                 else
+                                                                                                                     yesno.No();
+                                                                                                             }
                                                                                                          }
-                                                                                                     }
-                                                                                                 }, 500, false);
+                                                                                                     }, 500, false);
+                            }
                         }
                 }
                 catch (Exception ex)
@@ -305,8 +313,12 @@ public class ConfigurationMain
                     DebugLog($"Client authenticated on ID: {threadId}");
                     streams[index] = ss;
 
+                    threadsSend[index] = new Thread(ServerSendThread);
+                    threadsSend[index]?.Start(index);
+
                     while (pipes[index]?.IsConnected ?? false)
                     {
+                        Thread.Sleep(100);
                         string   message = ss.ReadString().Trim();
                         string[] split   = message.Split("|");
 
@@ -354,12 +366,35 @@ public class ConfigurationMain
                                 ss.WriteString($"Unknown Message: {message}");
                                 continue;
                         }
-                        keepAlives[index] = DateTime.Now;
+                        keepAlives[index] = DateTime.Now; 
                     }
                 }
                 catch (Exception e)
                 {
                     DebugLog($"SERVER ERROR: {e.Message}\n{e.StackTrace}");
+                }
+            }
+
+            private static void ServerSendThread(object? data)
+            {
+                try
+                {
+                    int index = (int)(data ?? throw new ArgumentNullException(nameof(data)));
+                    DebugLog("SEND Initialized with " + index);
+
+                    while (pipes[index]?.IsConnected ?? false)
+                    {
+                        if (messageQueues[index].Count > 0)
+                        {
+                            string message = messageQueues[index].Dequeue();
+                            streams[index]?.WriteString(message);
+                        }
+                        Thread.Sleep(100);
+                    }
+                }
+                catch (Exception e)
+                {
+                    DebugLog("SERVER SEND ERROR: " + e);
                 }
             }
 
@@ -436,8 +471,9 @@ public class ConfigurationMain
 
             private static void SendToAllClients(string message)
             {
-                foreach (StreamString? ss in streams) 
-                    ss?.WriteString(message);
+                DebugLog("Enqueuing to send: " + message);
+                foreach (Queue<string> queue in messageQueues)
+                    queue.Enqueue(message);
             }
 
             internal record ClientInfo(ulong CID, string CName, ushort WorldId);
@@ -546,8 +582,8 @@ public class ConfigurationMain
                                                                                                         }, 500, false);
                                     break;
                                 case PATH_STEPS:
-                                    List<PathAction>? steps = JsonConvert.DeserializeObject<List<PathAction>>(message[(split[0].Length+1)..]);
-                                    if (steps != null && steps.Any())
+                                    List<PathAction>? steps = JsonConvert.DeserializeObject<List<PathAction>>(message[(split[0].Length+1)..], jsonSerializerSettings);
+                                    if (steps is { Count: > 0 })
                                     {
                                         DebugLog("setting steps from host");
                                         Plugin.Actions = steps;
@@ -621,15 +657,14 @@ public class ConfigurationMain
 
         private class StreamString(Stream ioStream)
         {
-            private readonly Stream          ioStream       = ioStream;
             private readonly UnicodeEncoding streamEncoding = new();
 
             public string ReadString()
             {
-                int b1 = this.ioStream.ReadByte();
-                int b2 = this.ioStream.ReadByte();
+                int b1 = ioStream.ReadByte();
+                int b2 = ioStream.ReadByte();
 
-                if(b1 == -1)
+                if (b1 == -1)
                 {
                     DebugLog("End of stream reached.");
                     return string.Empty;
@@ -637,11 +672,11 @@ public class ConfigurationMain
 
                 int    len      = b1 * 256 + b2;
                 byte[] inBuffer = new byte[len];
-                this.ioStream.Read(inBuffer, 0, len);
+                _ = ioStream.Read(inBuffer, 0, len);
+
                 string readString = this.streamEncoding.GetString(inBuffer);
 
                 DebugLog("Reading: " + readString);
-
                 return readString;
             }
 
@@ -651,12 +686,12 @@ public class ConfigurationMain
 
                 byte[] outBuffer = this.streamEncoding.GetBytes(outString);
                 int    len       = outBuffer.Length;
-                if (len > ushort.MaxValue) 
+                if (len > ushort.MaxValue)
                     len = (int)ushort.MaxValue;
-                this.ioStream.WriteByte((byte)(len / 256));
-                this.ioStream.WriteByte((byte)(len & 255));
-                this.ioStream.Write(outBuffer, 0, len);
-                this.ioStream.Flush();
+                ioStream.WriteByte((byte)(len / 256));
+                ioStream.WriteByte((byte)(len & 255));
+                ioStream.Write(outBuffer, 0, len);
+                ioStream.Flush();
 
                 return outBuffer.Length + 2;
             }
@@ -853,7 +888,7 @@ public class ConfigurationMain
                                                         CID   = cid,
                                                         Name  = Player.Name,
                                                         World = Player.CurrentWorld
-                              };
+                                                    };
 
                               EzConfig.Save();
                           });
@@ -881,13 +916,28 @@ public class ConfigurationMain
     }
 
     public static JsonSerializerSettings jsonSerializerSettings = new()
-                                                                   {
-                                                                       Formatting           = Formatting.Indented,
-                                                                       DefaultValueHandling = DefaultValueHandling.Include,
-                                                                       Converters           = [new StringEnumConverter(new DefaultNamingStrategy())],
-                                                                       
-                                                                   };
+                                                                  {
+                                                                      Formatting                     = Formatting.Indented,
+                                                                      DefaultValueHandling           = DefaultValueHandling.Include,
+                                                                      Converters                     = [new StringEnumConverter(new DefaultNamingStrategy())],
+                                                                      TypeNameHandling               = TypeNameHandling.Auto,
+                                                                      TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+                                                                      Culture                        = CultureInfo.InvariantCulture,
+                                                                      SerializationBinder            = new AutoDutySerializationBinder()
+                                                                  };
+
+    public class AutoDutySerializationBinder : DefaultSerializationBinder
+    {
+        public override Type BindToType(string assemblyName, string typeName) =>
+            assemblyName.StartsWith("AutoDuty") ? 
+                typeof(Configuration).Assembly.GetType(typeName) : 
+                base.BindToType(assemblyName, typeName);
+    }
 }
+
+
+
+
 
 [JsonObject(MemberSerialization.OptOut)]
 public class ProfileData
@@ -3304,7 +3354,7 @@ public static class ConfigTab
                     {
                         ConfigurationMain.MultiboxUtility.Client.serverName = ".";
                         Configuration.Save();
-            }
+                    }
                 }
                 ImGui.Unindent();
             }

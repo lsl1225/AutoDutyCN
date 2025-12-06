@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AutoDuty.Helpers
 {
-    using Dalamud.Game.ClientState.Objects.SubKinds;
     using Dalamud.Game.ClientState.Objects.Types;
-    using Dalamud.Game.ClientState.Party;
-    using ECommons;
     using ECommons.DalamudServices;
     using ECommons.GameFunctions;
     using ECommons.PartyFunctions;
-    using FFXIVClientStructs.FFXIV.Client.UI.Misc;
+    using FFXIVClientStructs.FFXIV.Client.UI.Arrays;
 
     public static class PartyHelper
     {
@@ -68,6 +63,26 @@ namespace AutoDuty.Helpers
 
             if (DateTime.Now.Subtract(partyCombatCheckTime).TotalSeconds < partyCombatCheckInterval.TotalSeconds)
                 return partyInCombat;
+
+            var inCombatEnemies = EnemyListNumberArray.Instance()->Enemies.ToArray().Where(x => x.MaxHPPercent > 0).ToArray();
+
+            if (inCombatEnemies.Length > 0 && inCombatEnemies.All(x =>
+            {
+                var e = Svc.Objects.FirstOrDefault(y => y.EntityId == x.EntityId);
+                if (e == null)
+                    return false;
+
+                if (!e.IsTargetable || ObjectHelper.GetDistanceToPlayer(e) > 25)
+                    return true;
+
+                return false;
+            }))
+            {
+                Svc.Log.Debug($"Technically in combat but all enemies untargetable.");
+                partyInCombat = false;
+                partyCombatCheckTime = DateTime.Now;
+                return partyInCombat;
+            }
 
             List<IBattleChara> members = GetPartyMembers();
             if (!partyInCombat && members.Any(x => !x.Struct()->IsDead() && x.Struct()->InCombat))

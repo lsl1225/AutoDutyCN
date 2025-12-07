@@ -9,6 +9,7 @@ namespace AutoDuty.Helpers
     using ECommons.GameFunctions;
     using ECommons.PartyFunctions;
     using FFXIVClientStructs.FFXIV.Client.UI.Arrays;
+    using Lumina.Excel.Sheets;
 
     public static class PartyHelper
     {
@@ -69,10 +70,14 @@ namespace AutoDuty.Helpers
             if (inCombatEnemies.Length > 0 && inCombatEnemies.All(x =>
             {
                 var e = Svc.Objects.FirstOrDefault(y => y.EntityId == x.EntityId);
-                if (e == null)
+                if (e == null || e is not IBattleChara chara)
                     return false;
 
-                if (!e.IsTargetable || ObjectHelper.GetDistanceToPlayer(e) > 25)
+                var isBoss = Svc.Data.GetExcelSheet<BNpcBase>().GetRow(chara.BaseId).Rank is 2 or 6;
+                if (isBoss)
+                    return false;   
+
+                if (!chara.IsTargetable || ObjectHelper.GetDistanceToPlayer(chara) > 25)
                     return true;
 
                 return false;

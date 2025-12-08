@@ -486,7 +486,7 @@ namespace AutoDuty.Windows
                                         }
                                         else
                                         {
-                                            ImGuiEx.TextWrapped(new Vector4(0, 1, 0, 1), $"Leveling Mode: L{Player.Level} (i{ilvl})");
+                                            ImGuiEx.TextWrapped(new Vector4(0, 1, 0, 1), $"Leveling Mode: L{Svc.ClientState.LocalPlayer?.Level ?? 0} (i{ilvl})");
                                             foreach ((Content Value, int Index) item in LevelingHelper.LevelingDuties.Select((Value, Index) => (Value, Index)))
                                             {
                                                 if (Plugin.Configuration.DutyModeEnum == DutyMode.Trust && !item.Value.DutyModes.HasFlag(DutyMode.Trust))

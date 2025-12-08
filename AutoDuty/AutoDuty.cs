@@ -39,6 +39,7 @@ namespace AutoDuty;
 
 using System.Text.RegularExpressions;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Game.ClientState.Objects.Enums;
 using Data;
 using ECommons.Automation.NeoTaskManager;
 using ECommons.Configuration;
@@ -257,7 +258,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.AssemblyDirectoryInfo = this.AssemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 273) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 274) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this._configDirectory.Exists)
@@ -711,7 +712,7 @@ public sealed class AutoDuty : IDalamudPlugin
     private unsafe bool StopLoop =>
         this.Configuration.EnableTerminationActions &&
         (this.CurrentTerritoryContent == null                                                                               ||
-         (this.Configuration.StopLevel      && Player.Level                             >= this.Configuration.StopLevelInt) ||
+         (this.Configuration.StopLevel      && (Svc.ClientState.LocalPlayer?.Level ?? 0) >= this.Configuration.StopLevelInt) ||
          (this.Configuration.StopNoRestedXP && AgentHUD.Instance()->ExpRestedExperience == 0)                               ||
          (this.Configuration.TerminationBLUSpellsEnabled && (this.Configuration.TerminationBLUSpellsEnabled ?
                                                                  this.Configuration.TerminationBLUSpells.All(BLUHelper.SpellUnlocked) :
@@ -1403,7 +1404,7 @@ public sealed class AutoDuty : IDalamudPlugin
             return;
         }
 
-        if (this.PathAction.Tag.HasFlag(ActionTag.Synced) && this.Configuration.Unsynced)
+        if (this.PathAction.Tag.HasFlag(ActionTag.Synced) && !sync)
         {
             Svc.Log.Debug($"Skipping path entry {this.Actions[this.Indexer]} because we are unsynced");
             this.Indexer++;
@@ -1644,13 +1645,39 @@ public sealed class AutoDuty : IDalamudPlugin
         if (ContentHelper.DictionaryContent.TryGetValue(Svc.ClientState.TerritoryType, out Content? content))
         {
             this.CurrentTerritoryContent = content;
-            this.PathFile                   = $"{Plugin.PathsDirectory.FullName}/({Svc.ClientState.TerritoryType}) {content.EnglishName?.Replace(":", "")}.json";
+            this.PathFile                = $"{Plugin.PathsDirectory.FullName}/({Svc.ClientState.TerritoryType}) {content.EnglishName?.Replace(":", "")}.json";
             this.LoadPath();
+
+            if (content.DutyModes != DutyMode.None)
+            {
+                Svc.Log.Info("Identifying duty mode");
+                if (PartyHelper.PartyMember2?.ObjectKind == ObjectKind.BattleNpc)
+                    unsafe
+                    {
+                        Span<FFXIVClientStructs.FFXIV.Client.Game.UI.Buddy.BuddyMember> span = new(UIState.Instance()->Buddy.DutyHelperInfo.DutyHelpers, 7);
+
+                         if (span[0].Synced == 0)
+                         {
+                             this.Configuration.dutyModeEnum = DutyMode.Trust;
+                         }
+                         else
+                         {
+                             this.Configuration.dutyModeEnum = content.DutyModes.HasFlag(DutyMode.Support) ? 
+                                                                   DutyMode.Support : DutyMode.Squadron;
+                        }
+                    }
+                else
+                    this.Configuration.dutyModeEnum = content.DutyModes.GetFlags().FirstOrDefault(dm => dm is not (DutyMode.None or DutyMode.Squadron or DutyMode.Support or DutyMode.Trust));
+
+                byte level = (Svc.ClientState.LocalPlayer?.Level ?? 0);
+                this.Configuration.Unsynced = level == PlayerHelper.GetCurrentLevelFromSheet() && level - content.ClassJobLevelRequired > 3;
+                Svc.Log.Info("DUTYMODE: " + this.Configuration.DutyModeEnum + " out of " + content.DutyModes + " - " + string.Join("|",content.DutyModes.GetFlags().Select(dm => dm.ToString())));
+            }
         }
         else
         {
             this.CurrentTerritoryContent = null;
-            this.PathFile                   = "";
+            this.PathFile                = "";
             MainWindow.ShowPopup("Error", "Unable to load content for Territory");
             return;
         }
@@ -1662,7 +1689,7 @@ public sealed class AutoDuty : IDalamudPlugin
         this.MainListClicked =  false;
         this.Stage           =  Stage.Reading_Path;
         this.States          |= PluginState.Navigating;
-        this.StopForCombat      =  true;
+        this.StopForCombat   =  true;
         if (this.Configuration.AutoManageVnavAlignCamera && !VNavmesh_IPCSubscriber.Path_GetAlignCamera())
             VNavmesh_IPCSubscriber.Path_SetAlignCamera(true);
 
@@ -1672,8 +1699,11 @@ public sealed class AutoDuty : IDalamudPlugin
             BossMod_IPCSubscriber.RefreshPreset("AutoDuty Passive", Resources.AutoDutyPassivePreset);
         }
 
-        if (this.Configuration.AutoManageBossModAISettings) this.SetBMSettings();
-        if (this.Configuration is { AutoManageRotationPluginState: true, UsingAlternativeRotationPlugin: false }) this.SetRotationPluginSettings(true);
+        if (this.Configuration.AutoManageBossModAISettings) 
+            this.SetBMSettings();
+        if (this.Configuration is { AutoManageRotationPluginState: true, UsingAlternativeRotationPlugin: false }) 
+            this.SetRotationPluginSettings(true);
+
         if (this.Configuration.LootTreasure)
         {
             if (PandorasBox_IPCSubscriber.IsEnabled)
@@ -1687,7 +1717,8 @@ public sealed class AutoDuty : IDalamudPlugin
             this._lootTreasure = false;
         }
         Svc.Log.Info("Starting Navigation");
-        if (startFromZero) this.Indexer = 0;
+        if (startFromZero) 
+            this.Indexer = 0;
     }
 
     private void DoneNavigating()

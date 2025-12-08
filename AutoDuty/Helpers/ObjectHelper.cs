@@ -1,22 +1,28 @@
-﻿using Dalamud.Game.ClientState.Conditions;
+﻿using AutoDuty.IPC;
 using Dalamud.Game.ClientState.Objects.Types;
+using ECommons;
 using ECommons.DalamudServices;
-using ECommons.GameFunctions;
+using ECommons.Throttlers;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using FFXIVClientStructs.FFXIV.Component.GUI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using FFXIVClientStructs.FFXIV.Client.Game.Control;
-using System;
-using ECommons;
-using FFXIVClientStructs.FFXIV.Component.GUI;
-using ECommons.Throttlers;
-using AutoDuty.IPC;
-using FFXIVClientStructs.FFXIV.Client.Game.UI;
 
 namespace AutoDuty.Helpers
 {
+    using Dalamud.Bindings.ImGui;
+    using Dalamud.Game.ClientState.Objects.SubKinds;
+    using Dalamud.Game.ClientState.Party;
+    using ECommons.ExcelServices;
+    using ECommons.GameFunctions;
+    using ECommons.PartyFunctions;
     using FFXIVClientStructs.FFXIV.Client.Game.Object;
+    using FFXIVClientStructs.FFXIV.Client.UI.Info;
     using Lumina.Excel.Sheets;
+    using Buddy = FFXIVClientStructs.FFXIV.Client.Game.UI.Buddy;
     using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
     internal static class ObjectHelper
@@ -36,7 +42,8 @@ namespace AutoDuty.Helpers
 
         internal static IGameObject? GetObjectByName(string name) => Svc.Objects.OrderBy(GetDistanceToPlayer).FirstOrDefault(o => o.Name.TextValue.Equals(name, StringComparison.CurrentCultureIgnoreCase));
 
-        internal static IGameObject? GetObjectByDataId(uint id) => Svc.Objects.OrderBy(GetDistanceToPlayer).FirstOrDefault(o => o.DataId == id);
+        internal static IGameObject? GetObjectByDataId(uint id) => Svc.Objects.OrderBy(GetDistanceToPlayer).FirstOrDefault(o => o.BaseId == id);
+        internal static IGameObject? GetObjectByDataIds(params uint[] ids) => Svc.Objects.OrderBy(GetDistanceToPlayer).FirstOrDefault(o => ids.Contains(o.BaseId));
 
         internal static List<IGameObject>? GetObjectsByPartialName(string name) => [.. Svc.Objects.OrderBy(GetDistanceToPlayer).Where(o => o.Name.TextValue.Contains(name, StringComparison.CurrentCultureIgnoreCase))];
 
@@ -66,25 +73,21 @@ namespace AutoDuty.Helpers
 
         internal static unsafe IGameObject? GetPartyMemberFromRole(string role)
         {
-            if (Player.Object != null && Player.Object.ClassJob.Value.GetJobRole().ToString().Contains(role, StringComparison.InvariantCultureIgnoreCase))
-            {
+            if (Player.Object != null && Player.Object.ClassJob.Value.GetJobRole().ToString().Contains(role, StringComparison.InvariantCultureIgnoreCase)) 
                 return Player.Object;
-            }
 
-            if (Svc.Party.PartyId != 0)
-            {
+            if (Svc.Party.PartyId != 0) 
                 return Svc.Party.FirstOrDefault(x => x.ClassJob.Value.GetJobRole().ToString().Contains(role, StringComparison.InvariantCultureIgnoreCase))?.GameObject;
-            }
 
-            var buddies = UIState.Instance()->Buddy.BattleBuddies.ToArray().Where(x => x.DataId != 0);
-            foreach (var buddy in buddies)
+            IEnumerable<Buddy.BuddyMember>? buddies = UIState.Instance()->Buddy.BattleBuddies.ToArray().Where(x => x.DataId != 0);
+            foreach (Buddy.BuddyMember buddy in buddies)
             {
-                var gameObject = Svc.Objects.FirstOrDefault(x => x.EntityId == buddy.EntityId);
+                IGameObject? gameObject = Svc.Objects.FirstOrDefault(x => x.EntityId == buddy.EntityId);
 
                 if (gameObject == null) 
                     continue;
 
-                var classJob = ((ICharacter)gameObject).ClassJob.ValueNullable;
+                ClassJob? classJob = ((ICharacter)gameObject).ClassJob.ValueNullable;
 
                 if (classJob == null) 
                     continue;
@@ -103,10 +106,10 @@ namespace AutoDuty.Helpers
         internal static unsafe float GetBattleDistanceToPlayer(IGameObject gameObject)
         {
             if (gameObject == null) return float.MaxValue;
-            var player = Player.Object;
+            IPlayerCharacter? player = Player.Object;
             if (player == null) return float.MaxValue;
 
-            var distance = Vector3.Distance(player.Position, gameObject.Position) - player.HitboxRadius;
+            float distance = Vector3.Distance(player.Position, gameObject.Position) - player.HitboxRadius;
             distance -= gameObject.HitboxRadius;
             return distance;
         }
@@ -120,11 +123,11 @@ namespace AutoDuty.Helpers
         {
             try
             {
-                if (gameObject == null || !gameObject.IsTargetable) 
+                if (gameObject is not { IsTargetable: true }) 
                     return;
                 if (face) 
                     Plugin.OverrideCamera.Face(gameObject.Position);
-                var gameObjectPointer = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)gameObject.Address;
+                GameObject* gameObjectPointer = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)gameObject.Address;
                 TargetSystem.Instance()->InteractWithObject(gameObjectPointer, false);
             }
             catch (Exception ex)
@@ -134,7 +137,7 @@ namespace AutoDuty.Helpers
         }
         internal static unsafe AtkUnitBase* InteractWithObjectUntilAddon(IGameObject? gameObject, string addonName)
         {
-            if (GenericHelpers.TryGetAddonByName<AtkUnitBase>(addonName, out var addon) && GenericHelpers.IsAddonReady(addon))
+            if (GenericHelpers.TryGetAddonByName<AtkUnitBase>(addonName, out AtkUnitBase* addon) && GenericHelpers.IsAddonReady(addon))
                 return addon;
 
             if (EzThrottler.Throttle("InteractWithObjectUntilAddon"))
@@ -156,7 +159,7 @@ namespace AutoDuty.Helpers
 
         internal static unsafe bool InteractWithObjectUntilNotTargetable(IGameObject? gameObject)
         {
-            if (gameObject == null || !gameObject.IsTargetable)
+            if (gameObject is not { IsTargetable: true })
                 return true;
 
             if (EzThrottler.Throttle("InteractWithObjectUntilNotTargetable"))
@@ -165,29 +168,33 @@ namespace AutoDuty.Helpers
             return false;
         }
 
-        internal static bool PartyValidation()
+        internal static unsafe bool PartyValidation()
         {
-            if (Svc.Party.Count < 4)
+            if (UniversalParty.Length < 4)
                 return false;
 
-            var healer = false;
-            var tank = false;
-            var dpsCount = 0;
+            bool healer = false;
+            bool tank = false;
+            int dpsCount = 0;
 
-            foreach (var item in Svc.Party)
+            InfoProxyPartyMember* instance = InfoProxyPartyMember.Instance();
+            
+            for (uint i = 0; i < instance->GetEntryCount(); i++)
             {
-                switch (item.ClassJob.ValueNullable?.Role)
+                InfoProxyCommonList.CharacterData* characterData = instance->GetEntry(i);
+                
+                switch(((Job)characterData->Job).GetCombatRole())
                 {
-                    case 1:
+                    case CombatRole.Tank:
                         tank = true;
                         break;
-                    case 2:
-                    case 3:
-                        dpsCount++;
-                        break;
-                    case 4:
+                    case CombatRole.Healer:
                         healer = true;
                         break;
+                    case CombatRole.DPS:
+                        dpsCount++;
+                        break;
+                    case CombatRole.NonCombat:
                     default:
                         break;
                 }

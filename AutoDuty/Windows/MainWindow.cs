@@ -30,14 +30,14 @@ public class MainWindow : Window, IDisposable
     public MainWindow() : base(
         $"AutoDuty v0.0.0.{Plugin.Version}###Autoduty")
     {
-        SizeConstraints = new WindowSizeConstraints
-        {
-            MinimumSize = new Vector2(10, 10),
-            MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
-        };
-        
-        TitleBarButtons.Add(new() { Icon = FontAwesomeIcon.Cog, IconOffset = new(1, 1), Click = _ => OpenTab("Config") });
-        TitleBarButtons.Add(new() { ShowTooltip = () => ImGui.SetTooltip("Support Herculezz on Ko-fi"), Icon = FontAwesomeIcon.Heart, IconOffset = new(1, 1), Click = _ => GenericHelpers.ShellStart("https://ko-fi.com/Herculezz") });
+        this.SizeConstraints = new WindowSizeConstraints
+                               {
+                                   MinimumSize = new Vector2(10, 10),
+                                   MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
+                               };
+
+        this.TitleBarButtons.Add(new TitleBarButton { Icon        = FontAwesomeIcon.Cog, IconOffset                         = new Vector2(1, 1), Click          = _ => OpenTab("Config") });
+        this.TitleBarButtons.Add(new TitleBarButton { ShowTooltip = () => ImGui.SetTooltip("Support erdelf on Ko-fi"), Icon = FontAwesomeIcon.Heart, IconOffset = new Vector2(1, 1), Click = _ => GenericHelpers.ShellStart("https://ko-fi.com/erdelf") });
     }
 
     internal static void SetCurrentTabName(string tabName)
@@ -66,7 +66,10 @@ public class MainWindow : Window, IDisposable
 
     internal static void LoopsConfig()
     {
-        if ((Plugin.Configuration.UseSliderInputs && ImGui.SliderInt("Times", ref Plugin.Configuration.LoopTimes, 0, 100)) || (!Plugin.Configuration.UseSliderInputs && ImGui.InputInt("Times", ref Plugin.Configuration.LoopTimes, 1)))
+        using ImRaii.IEndObject _ = ImRaii.Disabled(ConfigurationMain.Instance.MultiBox && !ConfigurationMain.Instance.host);
+
+        if ((Plugin.Configuration.UseSliderInputs  && ImGui.SliderInt("Times", ref Plugin.Configuration.LoopTimes, 0, 100)) || 
+            (!Plugin.Configuration.UseSliderInputs && ImGui.InputInt("Times", ref Plugin.Configuration.LoopTimes, 1)))
         {
             if (Plugin.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
                 if (Plugin.PlaylistCurrentEntry != null)
@@ -80,7 +83,7 @@ public class MainWindow : Window, IDisposable
     {
         using (ImRaii.Disabled(!Plugin.States.HasFlag(PluginState.Looping) && !Plugin.States.HasFlag(PluginState.Navigating) && RepairHelper.State != ActionState.Running && GotoHelper.State != ActionState.Running && GotoInnHelper.State != ActionState.Running && GotoBarracksHelper.State != ActionState.Running && GCTurninHelper.State != ActionState.Running && ExtractHelper.State != ActionState.Running && DesynthHelper.State != ActionState.Running))
         {
-            if (ImGui.Button("Stop"))
+            if (ImGui.Button($"Stop###Stop2"))
             {
                 Plugin.Stage = Stage.Stopped;
                 return;
@@ -94,17 +97,14 @@ public class MainWindow : Window, IDisposable
             {
                 if (ImGui.Button("Resume"))
                 {
-                    Plugin.TaskManager.SetStepMode(false);
+                    Plugin.taskManager.StepMode = false;
                     Plugin.Stage = Plugin.PreviousStage;
                     Plugin.States &= ~PluginState.Paused;
                 }
             }
             else
             {
-                if (ImGui.Button("Pause"))
-                {
-                    Plugin.Stage = Stage.Paused;
-                }
+                if (ImGui.Button("Pause")) Plugin.Stage = Stage.Paused;
             }
         }
     }
@@ -113,7 +113,7 @@ public class MainWindow : Window, IDisposable
     {
         if(Plugin.States.HasFlag(PluginState.Other))
         {
-            if(ImGui.Button("Stop"))
+            if(ImGui.Button("Stop###Stop1"))
                 Plugin.Stage = Stage.Stopped;
             ImGui.SameLine(0,5);
         }
@@ -122,207 +122,126 @@ public class MainWindow : Window, IDisposable
         {
             using (ImRaii.Disabled(Plugin.Configuration is { OverrideOverlayButtons: true, GotoButton: false }))
             {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other) && GotoHelper.State != ActionState.Running))
+                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
-                    if ((GotoHelper.State == ActionState.Running && GCTurninHelper.State != ActionState.Running && RepairHelper.State != ActionState.Running) || MapHelper.State == ActionState.Running || GotoHousingHelper.State == ActionState.Running)
+                    if (ImGui.Button("Goto"))
                     {
-                        if (ImGui.Button("Stop"))
-                            Plugin.Stage = Stage.Stopped;
-                    }
-                    else
-                    {
-                        if (ImGui.Button("Goto"))
-                        {
-                            ImGui.OpenPopup("GotoPopup");
-                        }
-                    }
+                        ImGui.OpenPopup("GotoPopup");
+                    }   
                 }
             }
 
             if (ImGui.BeginPopup("GotoPopup"))
             {
-                if (ImGui.Selectable("Barracks"))
-                {
-                    GotoBarracksHelper.Invoke();
-                }
-                if (ImGui.Selectable("Inn"))
-                {
-                    GotoInnHelper.Invoke();
-                }
-                if (ImGui.Selectable("GCSupply"))
-                {
-                    GotoHelper.Invoke(PlayerHelper.GetGrandCompanyTerritoryType(PlayerHelper.GetGrandCompany()), [GCTurninHelper.GCSupplyLocation], 0.25f, 3f);
-                }
-                if (ImGui.Selectable("Flag Marker"))
-                {
-                    MapHelper.MoveToMapMarker();
-                }
-                if (ImGui.Selectable("Summoning Bell"))
-                {
-                    SummoningBellHelper.Invoke(Plugin.Configuration.PreferredSummoningBellEnum);
-                }
-                if (ImGui.Selectable("Apartment"))
-                {
-                    GotoHousingHelper.Invoke(Housing.Apartment);
-                }
-                if (ImGui.Selectable("Personal Home"))
-                {
-                    GotoHousingHelper.Invoke(Housing.Personal_Home);
-                }
-                if (ImGui.Selectable("FC Estate"))
-                {
-                    GotoHousingHelper.Invoke(Housing.FC_Estate);
-                }
+                if (ImGui.Selectable("Barracks")) GotoBarracksHelper.Invoke();
+                if (ImGui.Selectable("Inn")) GotoInnHelper.Invoke();
+                if (ImGui.Selectable("GCSupply")) GotoHelper.Invoke(PlayerHelper.GetGrandCompanyTerritoryType(PlayerHelper.GetGrandCompany()), [GCTurninHelper.GCSupplyLocation], 0.25f, 3f);
+                if (ImGui.Selectable("Flag Marker")) MapHelper.MoveToMapMarker();
+                if (ImGui.Selectable("Summoning Bell")) SummoningBellHelper.Invoke(Plugin.Configuration.PreferredSummoningBellEnum);
+                if (ImGui.Selectable("Apartment")) GotoHousingHelper.Invoke(Housing.Apartment);
+                if (ImGui.Selectable("Personal Home")) GotoHousingHelper.Invoke(Housing.Personal_Home);
+                if (ImGui.Selectable("FC Estate")) GotoHousingHelper.Invoke(Housing.FC_Estate);
 
-                if (ImGui.Selectable("Triple Triad Trader"))
-                {
-                    GotoHelper.Invoke(TripleTriadCardSellHelper.GoldSaucerTerritoryType, TripleTriadCardSellHelper.TripleTriadCardVendorLocation);
-                }
+                if (ImGui.Selectable("Triple Triad Trader")) GotoHelper.Invoke(TripleTriadCardSellHelper.GoldSaucerTerritoryType, TripleTriadCardSellHelper.TripleTriadCardVendorLocation);
                 ImGui.EndPopup();
             }
 
 
 
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(!Plugin.Configuration.AutoGCTurnin && !Plugin.Configuration.OverrideOverlayButtons || !Plugin.Configuration.TurninButton))
+            using (ImRaii.Disabled(Plugin.Configuration is { AutoGCTurnin: false, OverrideOverlayButtons: false } || !Plugin.Configuration.TurninButton))
             {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other) && GCTurninHelper.State != ActionState.Running))
+                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
-                    if (GCTurninHelper.State == ActionState.Running)
+                    if (ImGui.Button("TurnIn"))
                     {
-                        if (ImGui.Button("Stop"))
-                            Plugin.Stage = Stage.Stopped;
-                    }
-                    else
-                    {
-                        if (ImGui.Button("TurnIn"))
-                        {
-                            if (AutoRetainer_IPCSubscriber.IsEnabled)
-                                GCTurninHelper.Invoke();
-                            else
-                                ShowPopup("Missing Plugin", "GC Turnin Requires AutoRetainer plugin. Get @ https://love.puni.sh/ment.json");
-                        }
                         if (AutoRetainer_IPCSubscriber.IsEnabled)
-                            ToolTip("Click to Goto GC Turnin and Invoke AutoRetainer's GC Turnin");
+                            GCTurninHelper.Invoke();
                         else
-                            ToolTip("GC Turnin Requires AutoRetainer plugin. Get @ https://love.puni.sh/ment.json");
+                            ShowPopup("Missing Plugin", "GC Turnin Requires AutoRetainer plugin. Get @ https://love.puni.sh/ment.json");
                     }
+                    if (AutoRetainer_IPCSubscriber.IsEnabled)
+                        ToolTip("Click to Goto GC Turnin and Invoke AutoRetainer's GC Turnin");
+                    else
+                        ToolTip("GC Turnin Requires AutoRetainer plugin. Get @ https://love.puni.sh/ment.json");
                 }
             }
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(!Plugin.Configuration.AutoDesynth && !Plugin.Configuration.OverrideOverlayButtons || !Plugin.Configuration.DesynthButton))
+            using (ImRaii.Disabled(Plugin.Configuration is { AutoDesynth: false, OverrideOverlayButtons: false } || !Plugin.Configuration.DesynthButton))
             {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other) && DesynthHelper.State != ActionState.Running))
+                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
-                    if (DesynthHelper.State == ActionState.Running)
-                    {
-                        if (ImGui.Button("Stop"))
-                            Plugin.Stage = Stage.Stopped;
-                    }
-                    else
-                    {
-                        if (ImGui.Button("Desynth"))
-                            DesynthHelper.Invoke();
-                        ToolTip("Click to Desynth all Items in Inventory");
-                    }
+                    if (ImGui.Button("Desynth"))
+                        DesynthHelper.Invoke();
+                    ToolTip("Click to Desynth all Items in Inventory");
+                    
                 }
             }
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(!Plugin.Configuration.AutoExtract && !Plugin.Configuration.OverrideOverlayButtons || !Plugin.Configuration.ExtractButton))
+            using (ImRaii.Disabled(Plugin.Configuration is { AutoExtract: false, OverrideOverlayButtons: false } || !Plugin.Configuration.ExtractButton))
             {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other) && ExtractHelper.State != ActionState.Running))
+                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
-                    if (ExtractHelper.State == ActionState.Running)
+                    if (ImGui.Button("Extract"))
                     {
-                        if (ImGui.Button("Stop"))
-                            Plugin.Stage = Stage.Stopped;
-                    }
-                    else
-                    {
-                        if (ImGui.Button("Extract"))
-                        {
-                            if (QuestManager.IsQuestComplete(66174))
-                                ExtractHelper.Invoke();
-                            else
-                                ShowPopup("Missing Quest Completion", "Materia Extraction requires having completed quest: Forging the Spirit");
-                        }
                         if (QuestManager.IsQuestComplete(66174))
-                            ToolTip("Click to Extract Materia");
+                            ExtractHelper.Invoke();
                         else
-                            ToolTip("Materia Extraction requires having completed quest: Forging the Spirit");
+                            ShowPopup("Missing Quest Completion", "Materia Extraction requires having completed quest: Forging the Spirit");
                     }
+                    if (QuestManager.IsQuestComplete(66174))
+                        ToolTip("Click to Extract Materia");
+                    else
+                        ToolTip("Materia Extraction requires having completed quest: Forging the Spirit");
                 }
             }
             
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(!Plugin.Configuration.AutoRepair && !Plugin.Configuration.OverrideOverlayButtons || !Plugin.Configuration.RepairButton))
+            using (ImRaii.Disabled(Plugin.Configuration is { AutoRepair: false, OverrideOverlayButtons: false } || !Plugin.Configuration.RepairButton))
             {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other) && RepairHelper.State != ActionState.Running))
+                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
-                    if (RepairHelper.State == ActionState.Running)
+                    if (ImGui.Button("Repair"))
                     {
-                        if (ImGui.Button("Stop"))
-                            Plugin.Stage = Stage.Stopped;
-                    }
-                    else
-                    {
-                        if (ImGui.Button("Repair"))
-                        {
-                            if (InventoryHelper.CanRepair(100))
-                                RepairHelper.Invoke();
-                            //else
-                                //ShowPopup("", "");
-                        }
-                        //if ()
-                            ToolTip("Click to Repair");
+                        if (InventoryHelper.CanRepair(100))
+                            RepairHelper.Invoke();
                         //else
-                            //ToolTip("");
+                            //ShowPopup("", "");
                     }
+                    //if ()
+                        ToolTip("Click to Repair");
+                    //else
+                        //ToolTip("");
+                    
                 }
             }
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(!Plugin.Configuration.AutoEquipRecommendedGear && !Plugin.Configuration.OverrideOverlayButtons || !Plugin.Configuration.EquipButton))
+            using (ImRaii.Disabled(Plugin.Configuration is { AutoEquipRecommendedGear: false, OverrideOverlayButtons: false } || !Plugin.Configuration.EquipButton))
             {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other) && AutoEquipHelper.State != ActionState.Running))
+                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
-                    if (AutoEquipHelper.State == ActionState.Running)
+                    if (ImGui.Button("Equip"))
                     {
-                        if (ImGui.Button("Stop"))
-                            Plugin.Stage = Stage.Stopped;
-                    }
-                    else
-                    {
-                        if (ImGui.Button("Equip"))
-                        {
-                            AutoEquipHelper.Invoke();
-                            //else
-                            //ShowPopup("", "");
-                        }
-
-                        //if ()
-                        ToolTip("Click to Equip Gear");
+                        AutoEquipHelper.Invoke();
                         //else
-                        //ToolTip("");
+                        //ShowPopup("", "");
                     }
+
+                    //if ()
+                    ToolTip("Click to Equip Gear");
+                    //else
+                    //ToolTip("");
                 }
             }
 
             ImGui.SameLine(0, 5);
             using (ImRaii.Disabled(Plugin.Configuration is { AutoOpenCoffers: false, OverrideOverlayButtons: false } || !Plugin.Configuration.CofferButton))
             {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other) && CofferHelper.State != ActionState.Running))
+                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
-                    if (CofferHelper.State == ActionState.Running)
-                    {
-                        if (ImGui.Button("Stop"))
-                            Plugin.Stage = Stage.Stopped;
-                    }
-                    else
-                    {
-                        if (ImGui.Button("Coffers")) 
-                            CofferHelper.Invoke();
-                        ToolTip("Click to open coffers");
-                    }
+                    if (ImGui.Button("Coffers")) 
+                        CofferHelper.Invoke();
+                    ToolTip("Click to open coffers");
                 }
             }
             ImGui.SameLine(0, 5);
@@ -331,16 +250,9 @@ public class MainWindow : Window, IDisposable
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
-                    if ((GotoHelper.State == ActionState.Running && TripleTriadCardUseHelper.State != ActionState.Running && TripleTriadCardSellHelper.State != ActionState.Running))
-                    {
-                        if (ImGui.Button("Stop"))
-                            Plugin.Stage = Stage.Stopped;
-                    }
-                    else
-                    {
-                        if (ImGui.Button("Triple Triad"))
-                            ImGui.OpenPopup("TTPopup");
-                    }
+                    if (ImGui.Button("Triple Triad"))
+                        ImGui.OpenPopup("TTPopup");
+                    
                 }
             }
 
@@ -384,7 +296,7 @@ public class MainWindow : Window, IDisposable
             ImGui.OpenPopup($"{_popupTitle}###Popup");
 
         Vector2 textSize = ImGui.CalcTextSize(_popupText);
-        ImGui.SetNextWindowSize(new(textSize.X + 25, textSize.Y + 100));
+        ImGui.SetNextWindowSize(new Vector2(textSize.X + 25, textSize.Y + 100));
         if (ImGui.BeginPopupModal($"{_popupTitle}###Popup", ref _showPopup, ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoMove))
         {
             ImGuiEx.TextCentered(_popupText);
@@ -403,12 +315,10 @@ public class MainWindow : Window, IDisposable
     {
         OpenTab(CurrentTabName);
         if (EzThrottler.Throttle("KofiLink", 15000))
-        {
             _ = new TickScheduler(delegate
-            {
-                GenericHelpers.ShellStart("https://ko-fi.com/Herculezz");
-            }, 500);
-        }
+                                  {
+                                      GenericHelpers.ShellStart("https://ko-fi.com/erdelf");
+                                  }, 500);
     }
 
     //ECommons
@@ -416,15 +326,12 @@ public class MainWindow : Window, IDisposable
     {
         get
         {
-            var vector1 = ImGuiEx.Vector4FromRGB(0x022594);
-            var vector2 = ImGuiEx.Vector4FromRGB(0x940238);
+            Vector4 vector1 = ImGuiEx.Vector4FromRGB(0x022594);
+            Vector4 vector2 = ImGuiEx.Vector4FromRGB(0x940238);
 
-            var gen = GradientColor.Get(vector1, vector2).ToUint();
-            var data = EzSharedData.GetOrCreate<uint[]>("ECommonsPatreonBannerRandomColor", [gen]);
-            if (!GradientColor.IsColorInRange(data[0].ToVector4(), vector1, vector2))
-            {
-                data[0] = gen;
-            }
+            uint    gen                                                                       = GradientColor.Get(vector1, vector2).ToUint();
+            uint[]? data                                                                      = EzSharedData.GetOrCreate<uint[]>("ECommonsPatreonBannerRandomColor", [gen]);
+            if (!GradientColor.IsColorInRange(data[0].ToVector4(), vector1, vector2)) data[0] = gen;
             return data[0];
         }
     }

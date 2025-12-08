@@ -41,10 +41,7 @@ namespace AutoDuty.Helpers
             {
                 IGameObject? member = PronounHelper.GetIGameObjectFromPronounID(42 + i);
 
-                if (member is IBattleChara battleChara)
-                {
-                    party.Add(battleChara);
-                }
+                if (member is IBattleChara battleChara) party.Add(battleChara);
             }
 
             return party;

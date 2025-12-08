@@ -11,7 +11,6 @@ using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 namespace AutoDuty.Helpers
 {
     using System;
-    using System.Diagnostics;
     using Dalamud.Utility;
     using FFXIVClientStructs.FFXIV.Client.Game.Control;
     using Lumina.Excel.Sheets;
@@ -75,10 +74,9 @@ namespace AutoDuty.Helpers
 
         internal static JobRole GetJobRole(this ClassJob job)
         {
-            var role = (JobRole)job.Role;
+            JobRole role = (JobRole)job.Role;
 
             if (role is JobRole.Ranged or JobRole.None)
-            {
                 role = job.ClassJobCategory.RowId switch
                 {
                     30 => JobRole.Ranged_Physical,
@@ -87,7 +85,6 @@ namespace AutoDuty.Helpers
                     33 => JobRole.Disciple_Of_The_Hand,
                     _ => JobRole.None,
                 };
-            }
             return role;
         }
 
@@ -156,6 +153,7 @@ namespace AutoDuty.Helpers
             };
         }
 
-        internal static bool HasStatus(uint statusID, float minTime = 0) => Svc.ClientState.LocalPlayer != null && Player.Object.StatusList.Any(x => x.StatusId == statusID && (minTime <= 0 || x.RemainingTime > minTime));
+        internal static bool HasStatus(uint      statusID,  float minTime = 0) => Svc.ClientState.LocalPlayer != null && Player.Object.StatusList.Any(x => x.StatusId == statusID         && (minTime <= 0 || x.RemainingTime > minTime));
+        internal static bool HasStatusAny(uint[] statusIDs, float minTime = 0) => Svc.ClientState.LocalPlayer != null && Player.Object.StatusList.Any(x => statusIDs.Contains(x.StatusId) && (minTime <= 0 || x.RemainingTime > minTime));
     }
 }

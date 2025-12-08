@@ -30,14 +30,14 @@ public class MainWindow : Window, IDisposable
     public MainWindow() : base(
         $"AutoDuty v0.0.0.{Plugin.Version}###Autoduty")
     {
-        SizeConstraints = new WindowSizeConstraints
-        {
-            MinimumSize = new Vector2(10, 10),
-            MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
-        };
-        
-        TitleBarButtons.Add(new() { Icon = FontAwesomeIcon.Cog, IconOffset = new(1, 1), Click = _ => OpenTab("Config") });
-        TitleBarButtons.Add(new() { ShowTooltip = () => ImGui.SetTooltip("Support Herculezz on Ko-fi"), Icon = FontAwesomeIcon.Heart, IconOffset = new(1, 1), Click = _ => GenericHelpers.ShellStart("https://ko-fi.com/Herculezz") });
+        this.SizeConstraints = new WindowSizeConstraints
+                               {
+                                   MinimumSize = new Vector2(10, 10),
+                                   MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
+                               };
+
+        this.TitleBarButtons.Add(new TitleBarButton { Icon        = FontAwesomeIcon.Cog, IconOffset                         = new Vector2(1, 1), Click          = _ => OpenTab("Config") });
+        this.TitleBarButtons.Add(new TitleBarButton { ShowTooltip = () => ImGui.SetTooltip("Support erdelf on Ko-fi"), Icon = FontAwesomeIcon.Heart, IconOffset = new Vector2(1, 1), Click = _ => GenericHelpers.ShellStart("https://ko-fi.com/erdelf") });
     }
 
     internal static void SetCurrentTabName(string tabName)
@@ -66,7 +66,10 @@ public class MainWindow : Window, IDisposable
 
     internal static void LoopsConfig()
     {
-        if ((Plugin.Configuration.UseSliderInputs && ImGui.SliderInt("Times", ref Plugin.Configuration.LoopTimes, 0, 100)) || (!Plugin.Configuration.UseSliderInputs && ImGui.InputInt("Times", ref Plugin.Configuration.LoopTimes, 1)))
+        using ImRaii.IEndObject _ = ImRaii.Disabled(ConfigurationMain.Instance.MultiBox && !ConfigurationMain.Instance.host);
+
+        if ((Plugin.Configuration.UseSliderInputs  && ImGui.SliderInt("Times", ref Plugin.Configuration.LoopTimes, 0, 100)) || 
+            (!Plugin.Configuration.UseSliderInputs && ImGui.InputInt("Times", ref Plugin.Configuration.LoopTimes, 1)))
         {
             if (Plugin.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
                 if (Plugin.PlaylistCurrentEntry != null)
@@ -94,17 +97,14 @@ public class MainWindow : Window, IDisposable
             {
                 if (ImGui.Button("Resume"))
                 {
-                    Plugin.TaskManager.SetStepMode(false);
+                    Plugin.taskManager.StepMode = false;
                     Plugin.Stage = Plugin.PreviousStage;
                     Plugin.States &= ~PluginState.Paused;
                 }
             }
             else
             {
-                if (ImGui.Button("Pause"))
-                {
-                    Plugin.Stage = Stage.Paused;
-                }
+                if (ImGui.Button("Pause")) Plugin.Stage = Stage.Paused;
             }
         }
     }
@@ -133,50 +133,23 @@ public class MainWindow : Window, IDisposable
 
             if (ImGui.BeginPopup("GotoPopup"))
             {
-                if (ImGui.Selectable("Barracks"))
-                {
-                    GotoBarracksHelper.Invoke();
-                }
-                if (ImGui.Selectable("Inn"))
-                {
-                    GotoInnHelper.Invoke();
-                }
-                if (ImGui.Selectable("GCSupply"))
-                {
-                    GotoHelper.Invoke(PlayerHelper.GetGrandCompanyTerritoryType(PlayerHelper.GetGrandCompany()), [GCTurninHelper.GCSupplyLocation], 0.25f, 3f);
-                }
-                if (ImGui.Selectable("Flag Marker"))
-                {
-                    MapHelper.MoveToMapMarker();
-                }
-                if (ImGui.Selectable("Summoning Bell"))
-                {
-                    SummoningBellHelper.Invoke(Plugin.Configuration.PreferredSummoningBellEnum);
-                }
-                if (ImGui.Selectable("Apartment"))
-                {
-                    GotoHousingHelper.Invoke(Housing.Apartment);
-                }
-                if (ImGui.Selectable("Personal Home"))
-                {
-                    GotoHousingHelper.Invoke(Housing.Personal_Home);
-                }
-                if (ImGui.Selectable("FC Estate"))
-                {
-                    GotoHousingHelper.Invoke(Housing.FC_Estate);
-                }
+                if (ImGui.Selectable("Barracks")) GotoBarracksHelper.Invoke();
+                if (ImGui.Selectable("Inn")) GotoInnHelper.Invoke();
+                if (ImGui.Selectable("GCSupply")) GotoHelper.Invoke(PlayerHelper.GetGrandCompanyTerritoryType(PlayerHelper.GetGrandCompany()), [GCTurninHelper.GCSupplyLocation], 0.25f, 3f);
+                if (ImGui.Selectable("Flag Marker")) MapHelper.MoveToMapMarker();
+                if (ImGui.Selectable("Summoning Bell")) SummoningBellHelper.Invoke(Plugin.Configuration.PreferredSummoningBellEnum);
+                if (ImGui.Selectable("Apartment")) GotoHousingHelper.Invoke(Housing.Apartment);
+                if (ImGui.Selectable("Personal Home")) GotoHousingHelper.Invoke(Housing.Personal_Home);
+                if (ImGui.Selectable("FC Estate")) GotoHousingHelper.Invoke(Housing.FC_Estate);
 
-                if (ImGui.Selectable("Triple Triad Trader"))
-                {
-                    GotoHelper.Invoke(TripleTriadCardSellHelper.GoldSaucerTerritoryType, TripleTriadCardSellHelper.TripleTriadCardVendorLocation);
-                }
+                if (ImGui.Selectable("Triple Triad Trader")) GotoHelper.Invoke(TripleTriadCardSellHelper.GoldSaucerTerritoryType, TripleTriadCardSellHelper.TripleTriadCardVendorLocation);
                 ImGui.EndPopup();
             }
 
 
 
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(!Plugin.Configuration.AutoGCTurnin && !Plugin.Configuration.OverrideOverlayButtons || !Plugin.Configuration.TurninButton))
+            using (ImRaii.Disabled(Plugin.Configuration is { AutoGCTurnin: false, OverrideOverlayButtons: false } || !Plugin.Configuration.TurninButton))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
@@ -194,7 +167,7 @@ public class MainWindow : Window, IDisposable
                 }
             }
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(!Plugin.Configuration.AutoDesynth && !Plugin.Configuration.OverrideOverlayButtons || !Plugin.Configuration.DesynthButton))
+            using (ImRaii.Disabled(Plugin.Configuration is { AutoDesynth: false, OverrideOverlayButtons: false } || !Plugin.Configuration.DesynthButton))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
@@ -205,7 +178,7 @@ public class MainWindow : Window, IDisposable
                 }
             }
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(!Plugin.Configuration.AutoExtract && !Plugin.Configuration.OverrideOverlayButtons || !Plugin.Configuration.ExtractButton))
+            using (ImRaii.Disabled(Plugin.Configuration is { AutoExtract: false, OverrideOverlayButtons: false } || !Plugin.Configuration.ExtractButton))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
@@ -224,7 +197,7 @@ public class MainWindow : Window, IDisposable
             }
             
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(!Plugin.Configuration.AutoRepair && !Plugin.Configuration.OverrideOverlayButtons || !Plugin.Configuration.RepairButton))
+            using (ImRaii.Disabled(Plugin.Configuration is { AutoRepair: false, OverrideOverlayButtons: false } || !Plugin.Configuration.RepairButton))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
@@ -243,7 +216,7 @@ public class MainWindow : Window, IDisposable
                 }
             }
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(!Plugin.Configuration.AutoEquipRecommendedGear && !Plugin.Configuration.OverrideOverlayButtons || !Plugin.Configuration.EquipButton))
+            using (ImRaii.Disabled(Plugin.Configuration is { AutoEquipRecommendedGear: false, OverrideOverlayButtons: false } || !Plugin.Configuration.EquipButton))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
@@ -323,7 +296,7 @@ public class MainWindow : Window, IDisposable
             ImGui.OpenPopup($"{_popupTitle}###Popup");
 
         Vector2 textSize = ImGui.CalcTextSize(_popupText);
-        ImGui.SetNextWindowSize(new(textSize.X + 25, textSize.Y + 100));
+        ImGui.SetNextWindowSize(new Vector2(textSize.X + 25, textSize.Y + 100));
         if (ImGui.BeginPopupModal($"{_popupTitle}###Popup", ref _showPopup, ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoMove))
         {
             ImGuiEx.TextCentered(_popupText);
@@ -342,12 +315,10 @@ public class MainWindow : Window, IDisposable
     {
         OpenTab(CurrentTabName);
         if (EzThrottler.Throttle("KofiLink", 15000))
-        {
             _ = new TickScheduler(delegate
-            {
-                GenericHelpers.ShellStart("https://ko-fi.com/Herculezz");
-            }, 500);
-        }
+                                  {
+                                      GenericHelpers.ShellStart("https://ko-fi.com/erdelf");
+                                  }, 500);
     }
 
     //ECommons
@@ -355,15 +326,12 @@ public class MainWindow : Window, IDisposable
     {
         get
         {
-            var vector1 = ImGuiEx.Vector4FromRGB(0x022594);
-            var vector2 = ImGuiEx.Vector4FromRGB(0x940238);
+            Vector4 vector1 = ImGuiEx.Vector4FromRGB(0x022594);
+            Vector4 vector2 = ImGuiEx.Vector4FromRGB(0x940238);
 
-            var gen = GradientColor.Get(vector1, vector2).ToUint();
-            var data = EzSharedData.GetOrCreate<uint[]>("ECommonsPatreonBannerRandomColor", [gen]);
-            if (!GradientColor.IsColorInRange(data[0].ToVector4(), vector1, vector2))
-            {
-                data[0] = gen;
-            }
+            uint    gen                                                                       = GradientColor.Get(vector1, vector2).ToUint();
+            uint[]? data                                                                      = EzSharedData.GetOrCreate<uint[]>("ECommonsPatreonBannerRandomColor", [gen]);
+            if (!GradientColor.IsColorInRange(data[0].ToVector4(), vector1, vector2)) data[0] = gen;
             return data[0];
         }
     }

@@ -147,6 +147,13 @@ namespace AutoDuty.Windows
                                 showJobSelection = false;
                             }
 
+                            if (path.PathFile == null)
+                            {
+                                ImGui.SameLine(20);
+                                ImGui.TextColored(ImGuiHelper.StateBadColor, "BROKEN");
+                                return;
+                            }
+
                             if (ImGui.IsItemHovered() && path.PathFile.Meta.Notes.Count > 0)
                                 ImGui.SetTooltip(string.Join("\n", path.PathFile.Meta.Notes));
                             ImGui.SetItemAllowOverlap();

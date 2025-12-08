@@ -53,7 +53,7 @@ namespace AutoDuty.Helpers
 
         internal static IGameObject? GetObjectByNameAndRadius(string objectName) => Svc.Objects.OrderBy(GetDistanceToPlayer).FirstOrDefault(g => g.Name.TextValue.Equals(objectName, StringComparison.CurrentCultureIgnoreCase) && Vector3.Distance(Player.Object.Position, g.Position) <= 10);
 
-        internal static IBattleChara? GetBossObject(int radius = 100) => GetObjectsByRadius(radius)?.OfType<IBattleChara>().FirstOrDefault(b => IsBossFromIcon(b) || BossMod_IPCSubscriber.HasModuleByDataId(b.DataId));
+        internal static IBattleChara? GetBossObject(int radius = 100) => GetObjectsByRadius(radius)?.OfType<IBattleChara>().FirstOrDefault(IsBoss);
 
         internal static unsafe float GetDistanceToPlayer(IGameObject gameObject) => GetDistanceToPlayer(gameObject.Position);
 
@@ -118,6 +118,8 @@ namespace AutoDuty.Helpers
 
         //From RotationSolver
         internal static bool IsBossFromIcon(IGameObject gameObject) => GetObjectNPC(gameObject)?.Rank is 1 or 2 or 6;
+
+        internal static bool IsBoss(IGameObject gameObject) => IsBossFromIcon(gameObject) || BossMod_IPCSubscriber.HasModuleByDataId(gameObject.BaseId);
 
         internal static unsafe void InteractWithObject(IGameObject? gameObject, bool face = true)
         {

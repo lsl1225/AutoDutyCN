@@ -9,7 +9,6 @@ namespace AutoDuty.Helpers
     using ECommons.GameFunctions;
     using ECommons.PartyFunctions;
     using FFXIVClientStructs.FFXIV.Client.UI.Arrays;
-    using Lumina.Excel.Sheets;
 
     public static class PartyHelper
     {
@@ -62,28 +61,21 @@ namespace AutoDuty.Helpers
             if (DateTime.Now.Subtract(partyCombatCheckTime).TotalSeconds < partyCombatCheckInterval.TotalSeconds)
                 return partyInCombat;
 
-            var inCombatEnemies = EnemyListNumberArray.Instance()->Enemies.ToArray().Where(x => x.MaxHPPercent > 0).ToArray();
 
-            if (inCombatEnemies.Length > 0 && inCombatEnemies.All(x =>
+            if (Plugin.PathAction?.Name != "Boss")
             {
-                var e = Svc.Objects.FirstOrDefault(y => y.EntityId == x.EntityId);
-                if (e == null || e is not IBattleChara chara)
-                    return false;
+                EnemyListNumberArray.EnemyListEnemyNumberArray[] inCombatEnemies = EnemyListNumberArray.Instance()->Enemies.ToArray().Where(x => x.MaxHPPercent > 0).ToArray();
 
-                var isBoss = Svc.Data.GetExcelSheet<BNpcBase>().GetRow(chara.BaseId).Rank is 2 or 6;
-                if (isBoss)
-                    return false;   
-
-                if (!chara.IsTargetable || ObjectHelper.GetDistanceToPlayer(chara) > 25)
-                    return true;
-
-                return false;
-            }))
-            {
-                Svc.Log.Debug($"Technically in combat but all enemies untargetable.");
-                partyInCombat = false;
-                partyCombatCheckTime = DateTime.Now;
-                return partyInCombat;
+                if (inCombatEnemies.Length > 0 && inCombatEnemies.All(x =>
+                                                                          Svc.Objects.FirstOrDefault(y => y.EntityId == x.EntityId) is IBattleChara chara &&
+                                                                          !ObjectHelper.IsBoss(chara)                                                     &&
+                                                                          (!chara.IsTargetable || ObjectHelper.GetDistanceToPlayer(chara) > 25)))
+                {
+                    Svc.Log.Debug($"Technically in combat but all enemies untargetable.");
+                    partyInCombat        = false;
+                    partyCombatCheckTime = DateTime.Now;
+                    return partyInCombat;
+                }
             }
 
             List<IBattleChara> members = GetPartyMembers();

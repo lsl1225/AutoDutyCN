@@ -31,6 +31,7 @@ using ECommons.UIHelpers.AddonMasterImplementations;
 using ECommons.UIHelpers.AtkReaderImplementations;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Group;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
@@ -48,7 +49,9 @@ using System.IO.Pipes;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using Achievement = Lumina.Excel.Sheets.Achievement;
+using Buddy = FFXIVClientStructs.FFXIV.Client.Game.UI.Buddy;
 using ExitDutyHelper = Helpers.ExitDutyHelper;
 using Map = Lumina.Excel.Sheets.Map;
 using Thread = System.Threading.Thread;
@@ -1918,6 +1921,37 @@ public static class ConfigTab
                         ImGui.Unindent();
                     }
                 }
+
+                if (ImGui.CollapsingHeader("BuddyChecks##DevBuddyChecks"))
+                {
+                    unsafe
+                    {
+                        Span<Buddy.BuddyMember> span = new(UIState.Instance()->Buddy.DutyHelperInfo.DutyHelpers, 7);
+                        ImGui.Columns(3);
+                        foreach (Buddy.BuddyMember member in span)
+                        {
+                            ImGui.Text(member.DataId.ToString());
+                            ImGui.NextColumn();
+                            ImGui.Text(member.EntityId.ToString());
+                            ImGui.NextColumn();
+                            ImGui.Text(member.Synced.ToString());
+                            ImGui.NextColumn();
+                        }
+                        ImGui.Columns(1);
+                        ImGui.Text($"Party {Svc.Party.Length}");
+                        ImGui.Text($"Party {PartyHelper.GetPartyMembers().Count}");
+                        ImGui.Text($"Party {PartyHelper.GetPartyMembers().Skip(1).FirstOrDefault()?.ObjectKind}");
+                        ImGui.Text($"Party {PartyHelper.GetPartyMembers().Skip(1).FirstOrDefault()?.DataId}");
+                        ImGui.Text($"Party {PartyHelper.GetPartyMembers().Skip(2).FirstOrDefault()?.DataId}");
+                        ImGui.Text($"Party {PartyHelper.GetPartyMembers().Skip(3).FirstOrDefault()?.DataId}");
+                        ImGui.Text($"Buddies: {Svc.Buddies.Length}");
+                        ImGui.Text($"Buddies: {Svc.Buddies.Count}");
+                        ImGui.Text($"Pet: {Svc.Buddies.PetBuddy?.GameObject?.Name}");
+                        ImGui.Text($"Pet: {Svc.Buddies.PetBuddy?.GameObject?.Name}");
+                        ImGui.Text($"Companion: {Svc.Buddies.CompanionBuddy?.GameObject?.Name}");
+                    }
+                }
+
 
                 if(ImGui.Button("CheckAction##DevCheckActionStatus"))
                     unsafe

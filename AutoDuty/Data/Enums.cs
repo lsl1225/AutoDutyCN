@@ -402,10 +402,11 @@ namespace AutoDuty.Data
         }
 
 
-        public static bool HasAnyFlag<T>(this T instance, params T[] parameter) where T : Enum
-        {
-            return parameter.Any(enu => instance.HasFlag(enu));
-        }
+        public static bool HasAnyFlag<T>(this T instance, params T[] parameter) where T : Enum => 
+            parameter.Any(enu => instance.HasFlag(enu));
+
+        public static T[] GetFlags<T>(this T input) where T : Enum => 
+            Enum.GetValues(typeof(T)).Cast<T>().Where(t => input.HasFlag(t)).ToArray();
     }
 
     public static class JobWithRoleHelper

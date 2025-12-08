@@ -1658,13 +1658,13 @@ public sealed class AutoDuty : IDalamudPlugin
 
                          if (span[0].Synced == 0)
                          {
-                             this.Configuration.dutyModeEnum = DutyMode.Trust;
+                             this.Configuration.dutyModeEnum = content.DutyModes.HasFlag(DutyMode.Squadron) ?
+                                                                   DutyMode.Squadron : DutyMode.Trust;
                          }
                          else
                          {
-                             this.Configuration.dutyModeEnum = content.DutyModes.HasFlag(DutyMode.Support) ? 
-                                                                   DutyMode.Support : DutyMode.Squadron;
-                        }
+                             this.Configuration.dutyModeEnum = DutyMode.Support;
+                         }
                     }
                 else
                     this.Configuration.dutyModeEnum = content.DutyModes.GetFlags().FirstOrDefault(dm => dm is not (DutyMode.None or DutyMode.Squadron or DutyMode.Support or DutyMode.Trust));

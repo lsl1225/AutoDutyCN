@@ -13,10 +13,14 @@ namespace AutoDuty.Managers
         private readonly int port;
         private TcpListener? listener;
 
-        // Single constructor for both server and client modes
         public TcpTransport(string address, int port)
         {
             this.address = IPAddress.Parse(address);
+            this.port = port;
+        }
+        public TcpTransport(int port)
+        {
+            this.address = IPAddress.Any;
             this.port = port;
         }
 

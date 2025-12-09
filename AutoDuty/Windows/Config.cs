@@ -60,6 +60,7 @@ using ExitDutyHelper = Helpers.ExitDutyHelper;
 using Map = Lumina.Excel.Sheets.Map;
 using Thread = System.Threading.Thread;
 using Vector2 = FFXIVClientStructs.FFXIV.Common.Math.Vector2;
+using System.Text.RegularExpressions;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class ConfigurationMain
@@ -133,11 +134,10 @@ public class ConfigurationMain
     {
         private const int    BUFFER_SIZE = 4096;
         public static string pipeName   = "AutoDutyPipe";
-
-        // Transport configuration
-        public static TransportType MultiboxTransport = TransportType.NamedPipe;
-        public static string MultiboxServerAddress = "0.0.0.0";
-        public static int MultiboxServerPort = 12345;
+        public static string serverName = ".";
+        public static TransportType transportType = TransportType.NamedPipe;
+        public static string serverAddress = "0.0.0.0";
+        public static int serverPort = 12345;
 
         private const string SERVER_AUTH_KEY = "AD_Server_Auth!";
 
@@ -223,7 +223,6 @@ public class ConfigurationMain
         internal static class Server
         {
             public const             int             MAX_SERVERS   = 3;
-            private static readonly  Thread?[]       threadsSend   = new Thread?[MAX_SERVERS];
             private static readonly  StreamString?[] streams       = new StreamString?[MAX_SERVERS];
             internal static readonly ClientInfo?[]   clients       = new ClientInfo?[MAX_SERVERS];
             private static readonly  Queue<string>[] messageQueues = [new(), new(), new()];
@@ -259,20 +258,17 @@ public class ConfigurationMain
                 try
                 {
                     if (transport != null) return;
-
-                    if (MultiboxTransport == TransportType.Tcp)
-                    {
-                        transport = new TcpTransport(MultiboxServerAddress, MultiboxServerPort);
-                    }
-                    else
-                    {
-                        transport = new NamedPipeTransport(pipeName);
-                    }
+                    
+                    transport = transportType switch {
+                        TransportType.NamedPipe => new NamedPipeTransport(pipeName),
+                        TransportType.Tcp => new TcpTransport(serverPort),
+                        _ => throw new NotImplementedException(transportType.ToString()),
+                    };
 
                     transport.StartServer(MAX_SERVERS);
                     transportCts = new CancellationTokenSource();
                     new Thread(() => AcceptLoop(transportCts.Token)) { IsBackground = true }.Start();
-                    DebugLog($"Server started with {MultiboxTransport} transport");
+                    DebugLog($"Server started with {transportType} transport");
                 }
                 catch (Exception ex)
                 {
@@ -292,7 +288,6 @@ public class ConfigurationMain
 
                     for (int i = 0; i < MAX_SERVERS; i++)
                     {
-                        threadsSend[i] = null;
                         streams[i] = null;
                         clients[i] = null;
                         messageQueues[i].Clear();
@@ -383,8 +378,7 @@ public class ConfigurationMain
 
                     DebugLog($"Client {idx} authenticated");
                     streams[idx] = ss;
-                    threadsSend[idx] = new Thread(() => ServerSendThread(idx, ct));
-                    threadsSend[idx]?.Start();
+                    new Thread(() => ServerSendThread(idx, ct)) { IsBackground = true }.Start();
 
                     while (!ct.IsCancellationRequested)
                     {
@@ -393,6 +387,8 @@ public class ConfigurationMain
 
                         switch (split[0])
                         {
+                            case "":
+                                return;
                             case CLIENT_CID_KEY:
                                 clients[idx] = new ClientInfo(ulong.Parse(split[1]), split[2], ushort.Parse(split[3]));
 
@@ -414,7 +410,7 @@ public class ConfigurationMain
                                                                 }
                                                                 stepConfirms[idx] = false;
                                                             }
-                                                        });
+                                                        }, cancellationToken: ct);
                                 break;
                             case KEEPALIVE_KEY:
                                 ss.WriteString(KEEPALIVE_RESPONSE_KEY);
@@ -446,12 +442,8 @@ public class ConfigurationMain
                     try { stream.Close(); stream.Dispose(); } catch { }
                     streams[idx] = null;
                     clients[idx] = null;
-                    threadsSend[idx] = null;
                 }
             }
-
-
-
 
             private static void ServerSendThread(int index, CancellationToken ct)
             {
@@ -459,14 +451,14 @@ public class ConfigurationMain
                 {
                     DebugLog("SEND Initialized with " + index);
 
-                    while (!ct.IsCancellationRequested && streams[index]?.GetType() != null)
+                    while (!ct.IsCancellationRequested && streams[index] != null)
                     {
                         if (messageQueues[index].Count > 0)
                         {
                             string message = messageQueues[index].Dequeue();
                             streams[index]?.WriteString(message);
                         }
-                        Thread.Sleep(100);
+                        ct.WaitHandle.WaitOne(100);
                     }
                 }
                 catch (Exception e)
@@ -558,11 +550,7 @@ public class ConfigurationMain
 
         internal static class Client
         {
-            public static  string       serverName = ".";
-            private static Thread?      thread;
             private static StreamString? clientSS;
-            private static Stream?      clientStream;
-            private static ITransport?  transport;
             private static CancellationTokenSource? clientCts;
 
             public static void Set(bool on)
@@ -570,39 +558,29 @@ public class ConfigurationMain
                 if (on)
                 {
                     clientCts = new CancellationTokenSource();
-                    thread = new Thread(ClientConnectionThread);
-                    thread.Start();
+                    new Thread(ClientConnectionThread) { IsBackground=true }.Start();
                 }
                 else
                 {
                     try { clientCts?.Cancel(); } catch { }
-                    clientStream?.Close();
-                    clientStream?.Dispose();
-                    transport?.Dispose();
-                    transport = null;
                     clientSS = null;
-                    clientStream = null;
                     clientCts = null;
-                    thread = null;
                 }
             }
 
-            private static void ClientConnectionThread(object? data)
+            private static void ClientConnectionThread()
             {
                 try
                 {
-                    if (MultiboxTransport == TransportType.Tcp)
-                    {
-                        transport = new TcpTransport(MultiboxServerAddress, MultiboxServerPort);
-                    }
-                    else
-                    {
-                        transport = new NamedPipeTransport(pipeName, serverName);
-                    }
+                    using ITransport transport = transportType switch {
+                        TransportType.NamedPipe => new NamedPipeTransport(pipeName, serverName),
+                        TransportType.Tcp => new TcpTransport(serverAddress, serverPort),
+                        _ => throw new NotImplementedException(transportType.ToString()),
+                    };
 
-                    DebugLog($"Connecting to server ({MultiboxTransport})...\n");
+                    DebugLog($"Connecting to server ({transportType})...\n");
                     var ct = clientCts?.Token ?? CancellationToken.None;
-                    clientStream = transport.ConnectToServerAsync(ct).GetAwaiter().GetResult();
+                    using var clientStream = transport.ConnectToServerAsync(ct).GetAwaiter().GetResult();
 
                     clientSS = new StreamString(clientStream);
 
@@ -617,7 +595,7 @@ public class ConfigurationMain
                                                 });
 
                         new Thread(() => ClientKeepAliveThread(ct)).Start();
-                        while (!ct.IsCancellationRequested && clientStream != null && clientStream.CanRead)
+                        while (!ct.IsCancellationRequested && clientSS != null)
                         {
                             string   message = clientSS.ReadString().Trim();
                             string[] split   = message.Split("|");
@@ -691,22 +669,17 @@ public class ConfigurationMain
                 {
                     DebugLog($"Client ERROR: {e.Message}\n{e.StackTrace}");
                 }
-                finally
-                {
-                    clientStream?.Close();
-                    clientStream?.Dispose();
-                }
             }
 
             private static void ClientKeepAliveThread(CancellationToken ct)
             {
                 try
                 {
-                    Thread.Sleep(1000);
-                    while (!ct.IsCancellationRequested && clientStream != null && clientStream.CanRead)
+                    ct.WaitHandle.WaitOne(1000);
+                    while (!ct.IsCancellationRequested && clientSS != null)
                     {
                         clientSS?.WriteString(KEEPALIVE_KEY);
-                        Thread.Sleep(10000);
+                        ct.WaitHandle.WaitOne(10000);
                     }
                 }
                 catch (Exception e)
@@ -717,7 +690,7 @@ public class ConfigurationMain
 
             public static void SendStepCompleted()
             {
-                if (clientSS == null || clientStream == null || !clientStream.CanWrite)
+                if (clientSS == null || clientSS == null)
                 {
                     DebugLog("Client not connected, cannot send step completed.");
                     return;
@@ -729,7 +702,7 @@ public class ConfigurationMain
 
             public static void SendDeath(bool dead)
             {
-                if (clientSS == null || clientStream == null || !clientStream.CanWrite)
+                if (clientSS == null || clientSS == null)
                 {
                     DebugLog("Client not connected, cannot send death.");
                     return;
@@ -758,7 +731,7 @@ public class ConfigurationMain
                 int b1 = ioStream.ReadByte();
                 int b2 = ioStream.ReadByte();
 
-                if (b1 == -1)
+                if (b1 == -1 || b2 == -1)
                 {
                     DebugLog("End of stream reached.");
                     return string.Empty;
@@ -768,7 +741,15 @@ public class ConfigurationMain
                 byte[] inBuffer = new byte[len];
                 int n = 0;
                 while (n < len)
-                    n += ioStream.Read(inBuffer, n, len-n);
+                {
+                    int c = ioStream.Read(inBuffer, n, len-n);
+                    if (c == 0)
+                    {
+                        ErrorLog("Stream closed unexpectedly");
+                        return string.Empty;
+                    }
+                    n += c;
+                }
 
                 string readString = this.streamEncoding.GetString(inBuffer);
 
@@ -783,7 +764,7 @@ public class ConfigurationMain
                 byte[] outBuffer = this.streamEncoding.GetBytes(outString);
                 int    len       = outBuffer.Length;
                 if (len > ushort.MaxValue)
-                    len = (int)ushort.MaxValue;
+                    throw new ArgumentException("String too long to write to stream");
                 ioStream.WriteByte((byte)(len / 256));
                 ioStream.WriteByte((byte)(len & 255));
                 ioStream.Write(outBuffer, 0, len);
@@ -3462,16 +3443,16 @@ public static class ConfigTab
                 ImGui.Indent();
                 
                 // Transport selection
-                int transportType = (int)ConfigurationMain.MultiboxUtility.MultiboxTransport;
+                int transportType = (int)ConfigurationMain.MultiboxUtility.transportType;
                 if (ImGui.Combo("Transport Type", ref transportType, "Named Pipe\0TCP\0"))
                 {
-                    ConfigurationMain.MultiboxUtility.MultiboxTransport = (TransportType)transportType;
+                    ConfigurationMain.MultiboxUtility.transportType = (TransportType)transportType;
                     Configuration.Save();
                 }
-                ImGuiComponents.HelpMarker("Named Pipe: Local/same network only. TCP: Can connect across networks with proper firewall rules.");
+                ImGuiComponents.HelpMarker("Named Pipe: Local only. TCP: Can connect across networks with proper firewall rules.");
 
                 // Conditional fields based on transport type
-                if (ConfigurationMain.MultiboxUtility.MultiboxTransport == TransportType.NamedPipe)
+                if (ConfigurationMain.MultiboxUtility.transportType == TransportType.NamedPipe)
                 {
                     if(ImGui.InputText("Pipe Name", ref ConfigurationMain.MultiboxUtility.pipeName))
                         Configuration.Save();
@@ -3481,24 +3462,39 @@ public static class ConfigTab
                         ConfigurationMain.MultiboxUtility.pipeName = "AutoDutyPipe";
                         Configuration.Save();
                     }
-                }
-                else if (ConfigurationMain.MultiboxUtility.MultiboxTransport == TransportType.Tcp)
-                {
-                    if (ImGui.InputText("Server Address", ref ConfigurationMain.MultiboxUtility.MultiboxServerAddress))
-                        Configuration.Save();
-                    ImGui.SameLine();
-                    if (ImGui.Button("Reset##MultiboxResetServerAddress"))
+
+                    if (!ConfigurationMain.Instance.host)
                     {
-                        ConfigurationMain.MultiboxUtility.MultiboxServerAddress = "127.0.0.1";
-                        Configuration.Save();
+                        if (ImGui.InputText("Server Name", ref ConfigurationMain.MultiboxUtility.serverName))
+                            Configuration.Save();
+                        ImGui.SameLine();
+                        if (ImGui.Button("Reset##MultiboxResetServerName"))
+                        {
+                            ConfigurationMain.MultiboxUtility.serverName = ".";
+                            Configuration.Save();
+                        }
+                    }
+                }
+                else if (ConfigurationMain.MultiboxUtility.transportType == TransportType.Tcp)
+                {
+                    if (!ConfigurationMain.Instance.host)
+                    {
+                        if (ImGui.InputText("Server Address", ref ConfigurationMain.MultiboxUtility.serverAddress))
+                            Configuration.Save();
+                        ImGui.SameLine();
+                        if (ImGui.Button("Reset##MultiboxResetServerAddress"))
+                        {
+                            ConfigurationMain.MultiboxUtility.serverAddress = "0.0.0.0";
+                            Configuration.Save();
+                        }
                     }
 
-                    if (ImGui.InputInt("Server Port", ref ConfigurationMain.MultiboxUtility.MultiboxServerPort))
+                    if (ImGui.InputInt("Server Port", ref ConfigurationMain.MultiboxUtility.serverPort))
                         Configuration.Save();
                     ImGui.SameLine();
                     if (ImGui.Button("Reset##MultiboxResetServerPort"))
                     {
-                        ConfigurationMain.MultiboxUtility.MultiboxServerPort = 12345;
+                        ConfigurationMain.MultiboxUtility.serverPort = 12345;
                         Configuration.Save();
                     }
                 }
@@ -3506,17 +3502,6 @@ public static class ConfigTab
                 if (ImGui.Checkbox($"Host##MultiboxHost", ref ConfigurationMain.Instance.host))
                     Configuration.Save();
 
-                if (!ConfigurationMain.Instance.host)
-                {
-                    if (ImGui.InputText("Server Name", ref ConfigurationMain.MultiboxUtility.Client.serverName))
-                        Configuration.Save();
-                    ImGui.SameLine();
-                    if (ImGui.Button("Reset##MultiboxResetServerName"))
-                    {
-                        ConfigurationMain.MultiboxUtility.Client.serverName = ".";
-                        Configuration.Save();
-                    }
-                }
                 ImGui.Unindent();
             }
 

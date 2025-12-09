@@ -1648,7 +1648,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.PathFile                = $"{Plugin.PathsDirectory.FullName}/({Svc.ClientState.TerritoryType}) {content.EnglishName?.Replace(":", "")}.json";
             this.LoadPath();
 
-            if (content.DutyModes != DutyMode.None)
+            if (false && content.DutyModes != DutyMode.None)
             {
                 Svc.Log.Info("Identifying duty mode");
                 if (PartyHelper.PartyMember2?.ObjectKind == ObjectKind.BattleNpc)

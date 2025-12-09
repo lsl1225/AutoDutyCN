@@ -1,5 +1,6 @@
 using AutoDuty.Helpers;
 using AutoDuty.IPC;
+using AutoDuty.Managers;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
@@ -46,8 +47,11 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
+using System.Net;
+using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using Achievement = Lumina.Excel.Sheets.Achievement;
@@ -130,7 +134,13 @@ public class ConfigurationMain
         private const int    BUFFER_SIZE = 4096;
         public static string pipeName   = "AutoDutyPipe";
 
+        // Transport configuration
+        public static TransportType MultiboxTransport = TransportType.NamedPipe;
+        public static string MultiboxServerAddress = "0.0.0.0";
+        public static int MultiboxServerPort = 12345;
+
         private const string SERVER_AUTH_KEY = "AD_Server_Auth!";
+
         private const string CLIENT_AUTH_KEY = "AD_Client_Auth!";
         private const string CLIENT_CID_KEY  = "CLIENT_CID";
         private const string PARTY_INVITE    = "PARTY_INVITE";
@@ -214,7 +224,6 @@ public class ConfigurationMain
         {
             public const             int             MAX_SERVERS   = 3;
             private static readonly  Thread?[]       threadsSend   = new Thread?[MAX_SERVERS];
-            private static readonly  Thread?[]       threads       = new Thread?[MAX_SERVERS];
             private static readonly  StreamString?[] streams       = new StreamString?[MAX_SERVERS];
             internal static readonly ClientInfo?[]   clients       = new ClientInfo?[MAX_SERVERS];
             private static readonly  Queue<string>[] messageQueues = [new(), new(), new()];
@@ -223,65 +232,21 @@ public class ConfigurationMain
             internal static readonly bool[]     stepConfirms  = new bool[MAX_SERVERS];
             private static readonly  bool[]     deathConfirms = new bool[MAX_SERVERS];
 
-            private static readonly NamedPipeServerStream?[] pipes = new NamedPipeServerStream[MAX_SERVERS];
+            private static ITransport? transport;
+            private static CancellationTokenSource? transportCts;
 
             public static void Set(bool on)
             {
                 try
                 {
                     if (on)
-                        for (int i = 0; i < MAX_SERVERS; i++)
-                        {
-                            threads[i] = new Thread(ServerThread);
-                            threads[i]?.Start(i);
-                        }
+                    {
+                        StartServer();
+                    }
                     else
-                        for (int i = 0; i < MAX_SERVERS; i++)
-                        {
-                            if (pipes[i]?.IsConnected ?? false)
-                                pipes[i]?.Disconnect();
-                            pipes[i]?.Close();
-                            pipes[i]?.Dispose();
-                            threads[i]     = null;
-                            threadsSend[i] = null;
-                            streams[i]     = null;
-                            clients[i]     = null;
-                            messageQueues[i].Clear();
-
-                            keepAlives[i]   = DateTime.MinValue;
-                            stepConfirms[i] = false;
-
-
-                            if (!Plugin.InDungeon)
-                            {
-                                Chat.ExecuteCommand("/partycmd breakup");
-
-                                SchedulerHelper.ScheduleAction("MultiboxServer PartyBreakup Accept", () =>
-                                                                                                     {
-                                                                                                         unsafe
-                                                                                                         {
-                                                                                                             Utf8String inviterName = InfoProxyPartyInvite.Instance()->InviterName;
-
-                                                                                                             if (UniversalParty.Length <= 1)
-                                                                                                             {
-                                                                                                                 SchedulerHelper.DescheduleAction("MultiboxServer PartyBreakup Accept");
-                                                                                                                 return;
-                                                                                                             }
-
-
-                                                                                                             if (GenericHelpers.TryGetAddonByName("SelectYesno", out AtkUnitBase* addonSelectYesno) &&
-                                                                                                                 GenericHelpers.IsAddonReady(addonSelectYesno))
-                                                                                                             {
-                                                                                                                 AddonMaster.SelectYesno yesno = new(addonSelectYesno);
-                                                                                                                 if (yesno.Text.Contains(inviterName.ToString()))
-                                                                                                                     yesno.Yes();
-                                                                                                                 else
-                                                                                                                     yesno.No();
-                                                                                                             }
-                                                                                                         }
-                                                                                                     }, 500, false);
-                            }
-                        }
+                    {
+                        StopServer();
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -289,52 +254,153 @@ public class ConfigurationMain
                 }
             }
 
-
-            private static void ServerThread(object? data)
+            private static void StartServer()
             {
                 try
                 {
-                    int index = (int)(data ?? throw new ArgumentNullException(nameof(data)));
+                    if (transport != null) return;
 
-                    NamedPipeServerStream pipeServer = new(pipeName, PipeDirection.InOut, MAX_SERVERS, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
-                    pipes[index] = pipeServer;
-
-                    int threadId = Thread.CurrentThread.ManagedThreadId;
-
-                    DebugLog($"Server thread started with ID: {threadId}");
-                    pipeServer.WaitForConnection();
-
-                    DebugLog($"Client connected on ID: {threadId}");
-
-
-                    StreamString ss = new(pipeServer);
-                    ss.WriteString(SERVER_AUTH_KEY);
-
-                    if (ss.ReadString() != CLIENT_AUTH_KEY)
-                        return;
-
-                    DebugLog($"Client authenticated on ID: {threadId}");
-                    streams[index] = ss;
-
-                    threadsSend[index] = new Thread(ServerSendThread);
-                    threadsSend[index]?.Start(index);
-
-                    while (pipes[index]?.IsConnected ?? false)
+                    if (MultiboxTransport == TransportType.Tcp)
                     {
-                        Thread.Sleep(100);
-                        string   message = ss.ReadString().Trim();
-                        string[] split   = message.Split("|");
+                        transport = new TcpTransport(MultiboxServerAddress, MultiboxServerPort);
+                    }
+                    else
+                    {
+                        transport = new NamedPipeTransport(pipeName);
+                    }
+
+                    transport.StartServer(MAX_SERVERS);
+                    transportCts = new CancellationTokenSource();
+                    new Thread(() => AcceptLoop(transportCts.Token)) { IsBackground = true }.Start();
+                    DebugLog($"Server started with {MultiboxTransport} transport");
+                }
+                catch (Exception ex)
+                {
+                    ErrorLog($"StartServer error: {ex}");
+                }
+            }
+
+            private static void StopServer()
+            {
+                try
+                {
+                    transportCts?.Cancel();
+                    transport?.StopServer();
+                    transport?.Dispose();
+                    transport = null;
+                    transportCts = null;
+
+                    for (int i = 0; i < MAX_SERVERS; i++)
+                    {
+                        threadsSend[i] = null;
+                        streams[i] = null;
+                        clients[i] = null;
+                        messageQueues[i].Clear();
+                        keepAlives[i] = DateTime.MinValue;
+                        stepConfirms[i] = false;
+                    }
+                        if (!Plugin.InDungeon)
+                        {
+                            Chat.ExecuteCommand("/partycmd breakup");
+
+                            SchedulerHelper.ScheduleAction("MultiboxServer PartyBreakup Accept", () =>
+                                                                                                 {
+                                                                                                     unsafe
+                                                                                                     {
+                                                                                                         Utf8String inviterName = InfoProxyPartyInvite.Instance()->InviterName;
+
+                                                                                                         if (UniversalParty.Length <= 1)
+                                                                                                         {
+                                                                                                             SchedulerHelper.DescheduleAction("MultiboxServer PartyBreakup Accept");
+                                                                                                             return;
+                                                                                                         }
+
+                                                                                                         if (GenericHelpers.TryGetAddonByName("SelectYesno", out AtkUnitBase* addonSelectYesno) &&
+                                                                                                             GenericHelpers.IsAddonReady(addonSelectYesno))
+                                                                                                         {
+                                                                                                             AddonMaster.SelectYesno yesno = new(addonSelectYesno);
+                                                                                                             if (yesno.Text.Contains(inviterName.ToString()))
+                                                                                                                 yesno.Yes();
+                                                                                                             else
+                                                                                                                 yesno.No();
+                                                                                                         }
+                                                                                                     }
+                                                                                                 }, 500, false);
+                        }
+
+                    DebugLog("Server stopped");
+                }
+                catch (Exception ex)
+                {
+                    ErrorLog($"StopServer error: {ex}");
+                }
+            }
+
+            private static void AcceptLoop(CancellationToken ct)
+            {
+                try
+                {
+                    while (!ct.IsCancellationRequested)
+                    {
+                        Stream s = transport!.AcceptConnectionAsync(ct).GetAwaiter().GetResult();
+                        int idx = -1;
+                        for (int i = 0; i < MAX_SERVERS; i++)
+                        {
+                            if (streams[i] == null)
+                            {
+                                idx = i;
+                                break;
+                            }
+                        }
+                        if (idx == -1 || idx >= MAX_SERVERS)
+                        {
+                            try { s.Close(); s.Dispose(); } catch { }
+                            continue;
+                        }
+
+                        int capturedIdx = idx;
+                        new Thread(() => ConnectionHandler(s, capturedIdx, ct)) { IsBackground = true }.Start();
+                    }
+                }
+                catch (OperationCanceledException) { }
+                catch (Exception ex)
+                {
+                    ErrorLog($"AcceptLoop error: {ex}");
+                }
+            }
+
+            private static void ConnectionHandler(Stream stream, int idx, CancellationToken ct)
+            {
+                try
+                {
+                    StreamString ss = new(stream);
+                    ss.WriteString(SERVER_AUTH_KEY);
+                    if (ss.ReadString() != CLIENT_AUTH_KEY)
+                    {
+                        try { stream.Close(); stream.Dispose(); } catch { }
+                        return;
+                    }
+
+                    DebugLog($"Client {idx} authenticated");
+                    streams[idx] = ss;
+                    threadsSend[idx] = new Thread(() => ServerSendThread(idx, ct));
+                    threadsSend[idx]?.Start();
+
+                    while (!ct.IsCancellationRequested)
+                    {
+                        string message = ss.ReadString().Trim();
+                        string[] split = message.Split("|");
 
                         switch (split[0])
                         {
                             case CLIENT_CID_KEY:
-                                clients[index] = new ClientInfo(ulong.Parse(split[1]), split[2], ushort.Parse(split[3]));
+                                clients[idx] = new ClientInfo(ulong.Parse(split[1]), split[2], ushort.Parse(split[3]));
 
                                 Svc.Framework.RunOnTick(() =>
                                                         {
                                                             unsafe
                                                             {
-                                                                ClientInfo client = clients[index]!;
+                                                                ClientInfo client = clients[idx]!;
                                                                 DebugLog($"Client Identification received: {client.CID} {client.CName} {client.WorldId}");
 
                                                                 if (!PartyHelper.IsPartyMember(client.CID))
@@ -346,46 +412,54 @@ public class ConfigurationMain
 
                                                                     ss.WriteString(PARTY_INVITE);
                                                                 }
-                                                                stepConfirms[index] = false;
+                                                                stepConfirms[idx] = false;
                                                             }
                                                         });
-
                                 break;
                             case KEEPALIVE_KEY:
                                 ss.WriteString(KEEPALIVE_RESPONSE_KEY);
                                 break;
                             case STEP_COMPLETED:
-                                stepConfirms[index] = true;
+                                stepConfirms[idx] = true;
                                 CheckStepProgress();
                                 break;
                             case DEATH_KEY:
-                                deathConfirms[index] = true;
+                                deathConfirms[idx] = true;
                                 CheckDeaths();
                                 break;
                             case UNDEATH_KEY:
-                                deathConfirms[index] = false;
+                                deathConfirms[idx] = false;
                                 break;
                             default:
                                 ss.WriteString($"Unknown Message: {message}");
                                 continue;
                         }
-                        keepAlives[index] = DateTime.Now; 
+                        keepAlives[idx] = DateTime.Now;
                     }
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    DebugLog($"SERVER ERROR: {e.Message}\n{e.StackTrace}");
+                    DebugLog($"ConnectionHandler error: {ex.Message}");
+                }
+                finally
+                {
+                    try { stream.Close(); stream.Dispose(); } catch { }
+                    streams[idx] = null;
+                    clients[idx] = null;
+                    threadsSend[idx] = null;
                 }
             }
 
-            private static void ServerSendThread(object? data)
+
+
+
+            private static void ServerSendThread(int index, CancellationToken ct)
             {
                 try
                 {
-                    int index = (int)(data ?? throw new ArgumentNullException(nameof(data)));
                     DebugLog("SEND Initialized with " + index);
 
-                    while (pipes[index]?.IsConnected ?? false)
+                    while (!ct.IsCancellationRequested && streams[index]?.GetType() != null)
                     {
                         if (messageQueues[index].Count > 0)
                         {
@@ -484,40 +558,53 @@ public class ConfigurationMain
 
         internal static class Client
         {
-            public static  string                 serverName = ".";
-            private static Thread?                thread;
-            private static NamedPipeClientStream? pipe;
-            private static StreamString?          clientSS;
+            public static  string       serverName = ".";
+            private static Thread?      thread;
+            private static StreamString? clientSS;
+            private static Stream?      clientStream;
+            private static ITransport?  transport;
+            private static CancellationTokenSource? clientCts;
 
             public static void Set(bool on)
             {
                 if (on)
                 {
-                    thread = new Thread(ClientThread);
+                    clientCts = new CancellationTokenSource();
+                    thread = new Thread(ClientConnectionThread);
                     thread.Start();
                 }
                 else
                 {
-                    pipe?.Close();
-                    pipe?.Dispose();
+                    try { clientCts?.Cancel(); } catch { }
+                    clientStream?.Close();
+                    clientStream?.Dispose();
+                    transport?.Dispose();
+                    transport = null;
                     clientSS = null;
-                    thread   = null;
+                    clientStream = null;
+                    clientCts = null;
+                    thread = null;
                 }
             }
 
-
-            private static void ClientThread(object? data)
+            private static void ClientConnectionThread(object? data)
             {
                 try
                 {
-                    NamedPipeClientStream pipeClient = new(serverName, pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+                    if (MultiboxTransport == TransportType.Tcp)
+                    {
+                        transport = new TcpTransport(MultiboxServerAddress, MultiboxServerPort);
+                    }
+                    else
+                    {
+                        transport = new NamedPipeTransport(pipeName, serverName);
+                    }
 
-                    pipe = pipeClient;
+                    DebugLog($"Connecting to server ({MultiboxTransport})...\n");
+                    var ct = clientCts?.Token ?? CancellationToken.None;
+                    clientStream = transport.ConnectToServerAsync(ct).GetAwaiter().GetResult();
 
-                    DebugLog("Connecting to server...\n");
-                    pipeClient.Connect();
-
-                    clientSS = new StreamString(pipeClient);
+                    clientSS = new StreamString(clientStream);
 
                     if (clientSS.ReadString() == SERVER_AUTH_KEY)
                     {
@@ -529,16 +616,16 @@ public class ConfigurationMain
                                                         clientSS.WriteString($"{CLIENT_CID_KEY}|{Player.CID}|{Player.Name}|{Player.CurrentWorldId}");
                                                 });
 
-
-                        new Thread(ClientKeepAliveThread).Start();
-
-                        while (pipe?.IsConnected ?? false)
+                        new Thread(() => ClientKeepAliveThread(ct)).Start();
+                        while (!ct.IsCancellationRequested && clientStream != null && clientStream.CanRead)
                         {
                             string   message = clientSS.ReadString().Trim();
                             string[] split   = message.Split("|");
 
                             switch (split[0])
                             {
+                                case "":
+                                    return;
                                 case STEP_START:
                                     if (int.TryParse(split[1], out int step))
                                     {
@@ -599,20 +686,24 @@ public class ConfigurationMain
                             }
                         }
                     }
-
                 }
                 catch (Exception e)
                 {
                     DebugLog($"Client ERROR: {e.Message}\n{e.StackTrace}");
                 }
+                finally
+                {
+                    clientStream?.Close();
+                    clientStream?.Dispose();
+                }
             }
 
-            private static void ClientKeepAliveThread(object? data)
+            private static void ClientKeepAliveThread(CancellationToken ct)
             {
                 try
                 {
                     Thread.Sleep(1000);
-                    while (pipe?.IsConnected ?? false)
+                    while (!ct.IsCancellationRequested && clientStream != null && clientStream.CanRead)
                     {
                         clientSS?.WriteString(KEEPALIVE_KEY);
                         Thread.Sleep(10000);
@@ -626,7 +717,7 @@ public class ConfigurationMain
 
             public static void SendStepCompleted()
             {
-                if (clientSS == null || !(pipe?.IsConnected ?? false))
+                if (clientSS == null || clientStream == null || !clientStream.CanWrite)
                 {
                     DebugLog("Client not connected, cannot send step completed.");
                     return;
@@ -638,7 +729,7 @@ public class ConfigurationMain
 
             public static void SendDeath(bool dead)
             {
-                if (clientSS == null || !(pipe?.IsConnected ?? false))
+                if (clientSS == null || clientStream == null || !clientStream.CanWrite)
                 {
                     DebugLog("Client not connected, cannot send death.");
                     return;
@@ -675,7 +766,9 @@ public class ConfigurationMain
 
                 int    len      = b1 * 256 + b2;
                 byte[] inBuffer = new byte[len];
-                _ = ioStream.Read(inBuffer, 0, len);
+                int n = 0;
+                while (n < len)
+                    n += ioStream.Read(inBuffer, n, len-n);
 
                 string readString = this.streamEncoding.GetString(inBuffer);
 
@@ -3367,13 +3460,47 @@ public static class ConfigTab
             using(ImRaii.Disabled(ConfigurationMain.Instance.MultiBox))
             {
                 ImGui.Indent();
-                if(ImGui.InputText("Pipe Name", ref ConfigurationMain.MultiboxUtility.pipeName))
-                    Configuration.Save();
-                ImGui.SameLine();
-                if (ImGui.Button("Reset##MultiboxResetPipeName"))
+                
+                // Transport selection
+                int transportType = (int)ConfigurationMain.MultiboxUtility.MultiboxTransport;
+                if (ImGui.Combo("Transport Type", ref transportType, "Named Pipe\0TCP\0"))
                 {
-                    ConfigurationMain.MultiboxUtility.pipeName = "AutoDutyPipe";
+                    ConfigurationMain.MultiboxUtility.MultiboxTransport = (TransportType)transportType;
                     Configuration.Save();
+                }
+                ImGuiComponents.HelpMarker("Named Pipe: Local/same network only. TCP: Can connect across networks with proper firewall rules.");
+
+                // Conditional fields based on transport type
+                if (ConfigurationMain.MultiboxUtility.MultiboxTransport == TransportType.NamedPipe)
+                {
+                    if(ImGui.InputText("Pipe Name", ref ConfigurationMain.MultiboxUtility.pipeName))
+                        Configuration.Save();
+                    ImGui.SameLine();
+                    if (ImGui.Button("Reset##MultiboxResetPipeName"))
+                    {
+                        ConfigurationMain.MultiboxUtility.pipeName = "AutoDutyPipe";
+                        Configuration.Save();
+                    }
+                }
+                else if (ConfigurationMain.MultiboxUtility.MultiboxTransport == TransportType.Tcp)
+                {
+                    if (ImGui.InputText("Server Address", ref ConfigurationMain.MultiboxUtility.MultiboxServerAddress))
+                        Configuration.Save();
+                    ImGui.SameLine();
+                    if (ImGui.Button("Reset##MultiboxResetServerAddress"))
+                    {
+                        ConfigurationMain.MultiboxUtility.MultiboxServerAddress = "127.0.0.1";
+                        Configuration.Save();
+                    }
+
+                    if (ImGui.InputInt("Server Port", ref ConfigurationMain.MultiboxUtility.MultiboxServerPort))
+                        Configuration.Save();
+                    ImGui.SameLine();
+                    if (ImGui.Button("Reset##MultiboxResetServerPort"))
+                    {
+                        ConfigurationMain.MultiboxUtility.MultiboxServerPort = 12345;
+                        Configuration.Save();
+                    }
                 }
 
                 if (ImGui.Checkbox($"Host##MultiboxHost", ref ConfigurationMain.Instance.host))

@@ -262,13 +262,14 @@ namespace AutoDuty.Windows
                     {
                         if (ImGui.Button("Run"))
                         {
+                            bool synced = !QueueHelper.ShouldBeUnSynced();
                             if (Plugin.Configuration.DutyModeEnum == DutyMode.None)
                                 MainWindow.ShowPopup("Error", "You must select a version\nof the dungeon to run");
                             else if (Svc.Party.PartyId > 0 && Plugin.Configuration.DutyModeEnum is DutyMode.Support or DutyMode.Squadron or DutyMode.Trust)
                                 MainWindow.ShowPopup("Error", "You must not be in a party to run Support, Squadron or Trust");
-                            else if (Plugin.Configuration is { DutyModeEnum: DutyMode.Regular, Unsynced: false, OverridePartyValidation: false } && UniversalParty.Length < 4)
+                            else if (Plugin.Configuration is { DutyModeEnum: DutyMode.Regular, OverridePartyValidation: false } && synced && UniversalParty.Length < 4)
                                 MainWindow.ShowPopup("Error", "You must be in a group of 4 to run Regular Duties");
-                            else if (Plugin.Configuration is { DutyModeEnum: DutyMode.Regular, Unsynced: false, OverridePartyValidation: false } && !ObjectHelper.PartyValidation())
+                            else if (Plugin.Configuration is { DutyModeEnum: DutyMode.Regular, OverridePartyValidation: false } && synced && !ObjectHelper.PartyValidation())
                                 MainWindow.ShowPopup("Error", "You must have the correct party makeup to run Regular Duties");
                             else if (ContentPathsManager.DictionaryPaths.ContainsKey(Plugin.CurrentTerritoryContent?.TerritoryType ?? 0))
                                 Plugin.Run();
@@ -604,7 +605,7 @@ namespace AutoDuty.Windows
                                         
                                             ImGui.PopItemWidth();
                                             ImGui.SameLine();
-                                            ImGui.PushItemWidth((entryContainer.Paths.Count > 1 ? (ImGui.GetContentRegionAvail().X - 107f.Scale()) / 2f : ImGui.GetContentRegionAvail().X - 100f.Scale()));
+                                            ImGui.PushItemWidth((entryContainer.Paths.Count > 1 ? (ImGui.GetContentRegionAvail().X - 107f.Scale()) / 2f : ImGui.GetContentRegionAvail().X - 200f.Scale()));
                                             if (ImGui.BeginCombo($"##Playlist{i}DutySelection", $"({entry.Id}) {entryContent.Name}"))
                                             {
                                                 short level = PlayerHelper.GetCurrentLevelFromSheet();
@@ -640,11 +641,14 @@ namespace AutoDuty.Windows
                                                     ImGui.EndCombo();
                                                 }
                                             }
-                                    
+
 
                                             ImGui.PopItemWidth();
                                             ImGui.SameLine();
 
+                                            if (entry.DutyMode is DutyMode.Regular or DutyMode.Trial or DutyMode.Raid)
+                                                ImGuiEx.CheckboxWrapped($"Unsynced###Unsync{i}", ref entry.unsynced);
+                                            ImGui.SameLine();
                                             using (ImRaii.Disabled(i <= 0))
                                             {
                                                 if (ImGuiComponents.IconButton($"Playlist{i}Up", FontAwesomeIcon.ArrowUp))
@@ -670,6 +674,7 @@ namespace AutoDuty.Windows
                                             if (ImGuiComponents.IconButton($"Playlist{i}Trash", FontAwesomeIcon.TrashAlt))
                                                 Plugin.PlaylistCurrent.RemoveAt(i);
                                         }
+
 
                                         if (ImGuiComponents.IconButton("PlaylistAdd", FontAwesomeIcon.Plus)) 
                                             Plugin.PlaylistCurrent.Add(new PlaylistEntry { DutyMode = Plugin.PlaylistCurrent.Any() ? Plugin.PlaylistCurrent.Last().DutyMode : DutyMode.Support });

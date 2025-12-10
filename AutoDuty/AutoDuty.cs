@@ -1389,7 +1389,8 @@ public sealed class AutoDuty : IDalamudPlugin
 
         Svc.Log.Debug($"Starting Action {this.PathAction.ToCustomString()}");
 
-        bool sync = !this.Configuration.Unsynced || !this.Configuration.DutyModeEnum.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial);
+        bool sync = !QueueHelper.ShouldBeUnSynced();
+
         if (this.PathAction.Tag.HasFlag(ActionTag.Unsynced) && sync)
         {
             Svc.Log.Debug($"Skipping path entry {this.Actions[this.Indexer]} because we are synced");

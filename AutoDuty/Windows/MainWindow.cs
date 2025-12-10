@@ -85,7 +85,7 @@ public class MainWindow : Window, IDisposable
         {
             if (ImGui.Button($"Stop###Stop2"))
             {
-                Plugin.Stage = Stage.Stopped;
+                StopAndReset();
                 return;
             }
             ImGui.SameLine(0, 5);
@@ -109,12 +109,18 @@ public class MainWindow : Window, IDisposable
         }
     }
 
+    private static void StopAndReset()
+    {
+        Plugin.PlaylistIndex = 0;
+        Plugin.Stage = Stage.Stopped;
+    }
+
     internal static void GotoAndActions()
     {
         if(Plugin.States.HasFlag(PluginState.Other))
         {
             if(ImGui.Button("Stop###Stop1"))
-                Plugin.Stage = Stage.Stopped;
+                StopAndReset();
             ImGui.SameLine(0,5);
         }
 

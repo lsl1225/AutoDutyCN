@@ -48,11 +48,11 @@ using System.IO;
 using System.Numerics;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Achievement = Lumina.Excel.Sheets.Achievement;
 using Buddy = FFXIVClientStructs.FFXIV.Client.Game.UI.Buddy;
 using ExitDutyHelper = Helpers.ExitDutyHelper;
 using Map = Lumina.Excel.Sheets.Map;
-using Thread = System.Threading.Thread;
 using Vector2 = FFXIVClientStructs.FFXIV.Common.Math.Vector2;
 
 [JsonObject(MemberSerialization.OptIn)]
@@ -223,7 +223,7 @@ public class ConfigurationMain
             private static readonly  bool[]     deathConfirms = new bool[MAX_SERVERS];
 
             private static ITransport? transport;
-            private static CancellationTokenSource? transportCts;
+            private static CancellationTokenSource? serverCts;
 
             public static void Set(bool on)
             {
@@ -257,8 +257,8 @@ public class ConfigurationMain
                     };
 
                     transport.StartServer(MAX_SERVERS);
-                    transportCts = new CancellationTokenSource();
-                    new Thread(() => AcceptLoop(transportCts.Token)) { IsBackground = true }.Start();
+                    serverCts = new CancellationTokenSource();
+                    Task.Run(() => AcceptLoop(serverCts.Token), serverCts.Token);
                     DebugLog($"Server started with {transportType} transport");
                 }
                 catch (Exception ex)
@@ -271,11 +271,11 @@ public class ConfigurationMain
             {
                 try
                 {
-                    transportCts?.Cancel();
+                    serverCts?.Cancel();
                     transport?.StopServer();
                     transport?.Dispose();
                     transport = null;
-                    transportCts = null;
+                    serverCts = null;
 
                     for (int i = 0; i < MAX_SERVERS; i++)
                     {
@@ -330,13 +330,13 @@ public class ConfigurationMain
                 }
             }
 
-            private static void AcceptLoop(CancellationToken ct)
+            private static async void AcceptLoop(CancellationToken ct)
             {
                 try
                 {
                     while (!ct.IsCancellationRequested)
                     {
-                        Stream s = transport!.AcceptConnectionAsync(ct).GetAwaiter().GetResult();
+                        Stream s = await transport!.AcceptConnectionAsync(ct);
                         int idx = -1;
                         for (int i = 0; i < MAX_SERVERS; i++)
                         {
@@ -355,17 +355,20 @@ public class ConfigurationMain
                         streams[idx] = new(s);
 
                         int capturedIdx = idx;
-                        new Thread(() => ConnectionHandler(s, capturedIdx, ct)) { IsBackground = true }.Start();
+                        _ = Task.Run(() => ConnectionHandler(s, capturedIdx, ct), ct);
                     }
                 }
-                catch (OperationCanceledException) { }
+                catch (OperationCanceledException)
+                {
+                    DebugLog("AcceptLoop ended due to cancelation");
+                }
                 catch (Exception ex)
                 {
                     ErrorLog($"AcceptLoop error: {ex}");
                 }
             }
 
-            private static void ConnectionHandler(Stream stream, int index, CancellationToken ct)
+            private static async void ConnectionHandler(Stream stream, int index, CancellationToken ct)
             {
                 try
                 {
@@ -378,11 +381,12 @@ public class ConfigurationMain
                         return;
 
                     DebugLog($"Client {index} authenticated");
-                    new Thread(() => ServerSendThread(index, ct)) { IsBackground = true }.Start();
+                    keepAlives[index] = DateTime.Now;
+                    var sendTask = Task.Run(async () => await ServerSendThread(index, ct), ct);
 
-                    while (!ct.IsCancellationRequested)
+                    while (!ct.IsCancellationRequested && !sendTask.IsCompleted)
                     {
-                        ct.WaitHandle.WaitOne(100);
+                        await Task.Delay(100, ct);
                         string message = ss.ReadString().Trim();
                         string[] split = message.Split("|");
 
@@ -393,7 +397,7 @@ public class ConfigurationMain
                             case CLIENT_CID_KEY:
                                 clients[index] = new ClientInfo(ulong.Parse(split[1]), split[2], ushort.Parse(split[3]));
 
-                                Svc.Framework.RunOnTick(() =>
+                                _ = Svc.Framework.RunOnTick(() =>
                                                         {
                                                             unsafe
                                                             {
@@ -416,6 +420,8 @@ public class ConfigurationMain
                             case KEEPALIVE_KEY:
                                 ss.WriteString(KEEPALIVE_RESPONSE_KEY);
                                 break;
+                            case KEEPALIVE_RESPONSE_KEY:
+                                break;
                             case STEP_COMPLETED:
                                 stepConfirms[index] = true;
                                 CheckStepProgress();
@@ -434,9 +440,13 @@ public class ConfigurationMain
                         keepAlives[index] = DateTime.Now;
                     }
                 }
+                catch (OperationCanceledException)
+                {
+                    DebugLog("Connection handler ended due to cancelation");
+                }
                 catch (Exception e)
                 {
-                    DebugLog($"ConnectionHandler error: {e.Message}\n{e.StackTrace}");
+                    ErrorLog($"ConnectionHandler error: {e.Message}\n{e.StackTrace}");
                 }
                 finally
                 {
@@ -445,7 +455,7 @@ public class ConfigurationMain
                 }
             }
 
-            private static void ServerSendThread(int index, CancellationToken ct)
+            private static async Task ServerSendThread(int index, CancellationToken ct)
             {
                 try
                 {
@@ -457,13 +467,23 @@ public class ConfigurationMain
                         {
                             string message = messageQueues[index].Dequeue();
                             streams[index]?.WriteString(message);
+                        } 
+                        else if ((DateTime.Now - keepAlives[index]).TotalSeconds > 15)
+                        {
+                            // if no messages to send and the connection is stale, send a keepalive to check. (Usually this is the clients job but the tcp socket doesnt die immediately)
+                            streams[index]?.WriteString(KEEPALIVE_KEY);
+                            await Task.Delay(1000, ct);
                         }
-                        ct.WaitHandle.WaitOne(100);
+                        await Task.Delay(100, ct);
                     }
+                }
+                catch (OperationCanceledException)
+                {
+                    DebugLog("SendLoop ended due to cancelation");
                 }
                 catch (Exception e)
                 {
-                    DebugLog("SERVER SEND ERROR: " + e);
+                    ErrorLog("SERVER SEND ERROR: " + e);
                 }
             }
 
@@ -558,7 +578,7 @@ public class ConfigurationMain
                 if (on)
                 {
                     clientCts = new CancellationTokenSource();
-                    new Thread(ClientConnectionThread) { IsBackground=true }.Start();
+                    Task.Run(() => ClientConnectionThread(clientCts.Token), clientCts.Token);
                 }
                 else
                 {
@@ -568,7 +588,7 @@ public class ConfigurationMain
                 }
             }
 
-            private static void ClientConnectionThread()
+            private static async void ClientConnectionThread(CancellationToken ct)
             {
                 try
                 {
@@ -579,8 +599,7 @@ public class ConfigurationMain
                     };
 
                     DebugLog($"Connecting to server ({transportType})...\n");
-                    var ct = clientCts?.Token ?? CancellationToken.None;
-                    using var clientStream = transport.ConnectToServerAsync(ct).GetAwaiter().GetResult();
+                    using var clientStream = await transport.ConnectToServerAsync(ct);
 
                     clientSS = new StreamString(clientStream);
 
@@ -588,13 +607,13 @@ public class ConfigurationMain
                     {
                         clientSS.WriteString(CLIENT_AUTH_KEY);
 
-                        Svc.Framework.RunOnTick(() =>
+                        _ = Svc.Framework.RunOnTick(() =>
                                                 {
                                                     if (Player.CID != 0)
                                                         clientSS.WriteString($"{CLIENT_CID_KEY}|{Player.CID}|{Player.Name}|{Player.CurrentWorldId}");
-                                                });
+                                                }, cancellationToken: ct);
 
-                        new Thread(() => ClientKeepAliveThread(ct)).Start();
+                        _ = Task.Run(() => ClientKeepAliveThread(ct), ct);
                         while (!ct.IsCancellationRequested && clientSS != null)
                         {
                             string   message = clientSS.ReadString().Trim();
@@ -612,6 +631,9 @@ public class ConfigurationMain
                                         Plugin.Stage   = Stage.Idle;
                                         Plugin.Stage   = Stage.Reading_Path;
                                     }
+                                    break;
+                                case KEEPALIVE_KEY:
+                                    clientSS.WriteString(KEEPALIVE_RESPONSE_KEY);
                                     break;
                                 case KEEPALIVE_RESPONSE_KEY:
                                     break;
@@ -665,30 +687,38 @@ public class ConfigurationMain
                         }
                     }
                 }
+                catch (OperationCanceledException)
+                {
+                    DebugLog("ClientConnection ended due to cancelation");
+                }
                 catch (Exception e)
                 {
-                    DebugLog($"Client ERROR: {e.Message}\n{e.StackTrace}");
+                    ErrorLog($"Client ERROR: {e.Message}\n{e.StackTrace}");
                 }
                 finally
                 {
-                    Set(false);
+                    Instance.MultiBox = false;
                 }
             }
 
-            private static void ClientKeepAliveThread(CancellationToken ct)
+            private static async void ClientKeepAliveThread(CancellationToken ct)
             {
                 try
                 {
-                    ct.WaitHandle.WaitOne(1000);
+                    await Task.Delay(1000, ct);
                     while (!ct.IsCancellationRequested && clientSS != null)
                     {
                         clientSS?.WriteString(KEEPALIVE_KEY);
-                        ct.WaitHandle.WaitOne(10000);
+                        await Task.Delay(10000, ct);
                     }
+                }
+                catch (OperationCanceledException)
+                {
+                    DebugLog("ClientKeepalive ended due to cancelation");
                 }
                 catch (Exception e)
                 {
-                    DebugLog("Client KEEPALIVE Error: " + e);
+                    ErrorLog("Client KEEPALIVE Error: " + e);
                 }
             }
 

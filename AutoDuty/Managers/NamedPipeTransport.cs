@@ -86,7 +86,7 @@ namespace AutoDuty.Managers
             var connectTask = client.ConnectAsync(ct);
             using (ct.Register(() => { try { client.Close(); } catch { } }))
             {
-                await connectTask.ConfigureAwait(false);
+                await connectTask;
             }
             
             return client;

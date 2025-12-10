@@ -44,7 +44,7 @@ namespace AutoDuty.Managers
         public async Task<Stream> AcceptConnectionAsync(CancellationToken ct)
         {
             if (listener == null) throw new InvalidOperationException("Listener not started");
-            TcpClient client = await listener.AcceptTcpClientAsync(ct).ConfigureAwait(false);
+            TcpClient client = await listener.AcceptTcpClientAsync(ct);
             client.NoDelay = true;
             return client.GetStream();
         }
@@ -52,11 +52,10 @@ namespace AutoDuty.Managers
         public async Task<Stream> ConnectToServerAsync(CancellationToken ct)
         {
             TcpClient client = new TcpClient();
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            var connectTask = client.ConnectAsync(address, port);
-            using (cts.Token.Register(() => { try { client.Close(); } catch { } }))
+            var connectTask = client.ConnectAsync(address, port, ct);
+            using (ct.Register(() => { try { client.Close(); } catch { } }))
             {
-                await connectTask.ConfigureAwait(false);
+                await connectTask;
             }
             client.NoDelay = true;
             return client.GetStream();

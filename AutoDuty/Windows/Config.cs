@@ -3452,7 +3452,7 @@ public static class ConfigTab
                     ConfigurationMain.MultiboxUtility.transportType = (TransportType)transportType;
                     Configuration.Save();
                 }
-                ImGuiComponents.HelpMarker("Named Pipe: Network connectivity depends on system settings. TCP: Network connectivity depends on firewall settings. Use Named Pipe in cases where it works.");
+                ImGuiComponents.HelpMarker("Named Pipe: Network connectivity depends on system settings.\nTCP: Network connectivity depends on firewall settings.\nIn most cases Named Pipe should work with no changes.");
 
                 // Conditional fields based on transport type
                 if (ConfigurationMain.MultiboxUtility.transportType == TransportType.NamedPipe)

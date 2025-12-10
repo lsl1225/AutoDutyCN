@@ -21,7 +21,7 @@ namespace AutoDuty.Managers
             this.serverName = serverName;
         }
 
-        public void StartServer(int backlog = 5)
+        public void StartServer(int backlog = 3)
         {
             if (isRunning) return;
             isRunning = true;
@@ -66,7 +66,7 @@ namespace AutoDuty.Managers
                 pipeToWaitOn = new NamedPipeServerStream(pipeName, PipeDirection.InOut, maxInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
             }
             
-            await pipeToWaitOn.WaitForConnectionAsync(ct).ConfigureAwait(false);
+            await pipeToWaitOn.WaitForConnectionAsync(ct);
             
             // Create a new pipe for the next connection and queue it
             var nextPipe = new NamedPipeServerStream(pipeName, PipeDirection.InOut, maxInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
@@ -83,9 +83,8 @@ namespace AutoDuty.Managers
             // For named pipes, we use the configured serverName and pipeName
             NamedPipeClientStream client = new(serverName, pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
             
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            var connectTask = client.ConnectAsync(cts.Token);
-            using (cts.Token.Register(() => { try { client.Close(); } catch { } }))
+            var connectTask = client.ConnectAsync(ct);
+            using (ct.Register(() => { try { client.Close(); } catch { } }))
             {
                 await connectTask.ConfigureAwait(false);
             }

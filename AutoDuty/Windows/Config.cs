@@ -1,6 +1,5 @@
 using AutoDuty.Helpers;
 using AutoDuty.IPC;
-using AutoDuty.Managers;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
@@ -46,21 +45,15 @@ using Properties;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Pipes;
-using System.Net;
-using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using Achievement = Lumina.Excel.Sheets.Achievement;
 using Buddy = FFXIVClientStructs.FFXIV.Client.Game.UI.Buddy;
 using ExitDutyHelper = Helpers.ExitDutyHelper;
 using Map = Lumina.Excel.Sheets.Map;
 using Thread = System.Threading.Thread;
 using Vector2 = FFXIVClientStructs.FFXIV.Common.Math.Vector2;
-using System.Text.RegularExpressions;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class ConfigurationMain
@@ -132,15 +125,13 @@ public class ConfigurationMain
 
     public class MultiboxUtility
     {
-        private const int    BUFFER_SIZE = 4096;
         public static string pipeName   = "AutoDutyPipe";
         public static string serverName = ".";
         public static TransportType transportType = TransportType.NamedPipe;
-        public static string serverAddress = "0.0.0.0";
+        public static string serverAddress = "127.0.0.1";
         public static int serverPort = 12345;
 
         private const string SERVER_AUTH_KEY = "AD_Server_Auth!";
-
         private const string CLIENT_AUTH_KEY = "AD_Client_Auth!";
         private const string CLIENT_CID_KEY  = "CLIENT_CID";
         private const string PARTY_INVITE    = "PARTY_INVITE";
@@ -294,34 +285,42 @@ public class ConfigurationMain
                         keepAlives[i] = DateTime.MinValue;
                         stepConfirms[i] = false;
                     }
-                        if (!Plugin.InDungeon)
-                        {
-                            Chat.ExecuteCommand("/partycmd breakup");
+                    if (!Plugin.InDungeon)
+                    {
+                        Chat.ExecuteCommand("/partycmd breakup");
 
-                            SchedulerHelper.ScheduleAction("MultiboxServer PartyBreakup Accept", () =>
-                                                                                                 {
-                                                                                                     unsafe
-                                                                                                     {
-                                                                                                         Utf8String inviterName = InfoProxyPartyInvite.Instance()->InviterName;
+                        SchedulerHelper.ScheduleAction("MultiboxServer PartyBreakup Accept", () =>
+                                                                                                {
+                                                                                                    unsafe
+                                                                                                    {
+                                                                                                        Utf8String inviterName = InfoProxyPartyInvite.Instance()->InviterName;
 
-                                                                                                         if (UniversalParty.Length <= 1)
-                                                                                                         {
-                                                                                                             SchedulerHelper.DescheduleAction("MultiboxServer PartyBreakup Accept");
-                                                                                                             return;
-                                                                                                         }
+                                                                                                        if (UniversalParty.Length <= 1)
+                                                                                                        {
+                                                                                                            SchedulerHelper.DescheduleAction("MultiboxServer PartyBreakup Accept");
+                                                                                                            return;
+                                                                                                        }
 
-                                                                                                         if (GenericHelpers.TryGetAddonByName("SelectYesno", out AtkUnitBase* addonSelectYesno) &&
-                                                                                                             GenericHelpers.IsAddonReady(addonSelectYesno))
-                                                                                                         {
-                                                                                                             AddonMaster.SelectYesno yesno = new(addonSelectYesno);
-                                                                                                             if (yesno.Text.Contains(inviterName.ToString()))
-                                                                                                                 yesno.Yes();
-                                                                                                             else
-                                                                                                                 yesno.No();
-                                                                                                         }
-                                                                                                     }
-                                                                                                 }, 500, false);
-                        }
+                                                                                                        if (GenericHelpers.TryGetAddonByName("SelectYesno", out AtkUnitBase* addonSelectYesno) &&
+                                                                                                            GenericHelpers.IsAddonReady(addonSelectYesno))
+                                                                                                        {
+                                                                                                            AddonMaster.SelectYesno yesno = new(addonSelectYesno);
+                                                                                                            if (yesno.Text.Contains(inviterName.ToString()))
+                                                                                                                yesno.Yes();
+                                                                                                            else
+                                                                                                                yesno.No();
+                                                                                                        }
+
+                                                                                                        if (GenericHelpers.TryGetAddonByName("Social", out AtkUnitBase* addonSocial) &&
+                                                                                                            GenericHelpers.IsAddonReady(addonSocial))
+                                                                                                        {
+                                                                                                            ErrorLog("/partycmd breakup opened the party menu instead");
+                                                                                                            SchedulerHelper.DescheduleAction("MultiboxServer PartyBreakup Accept");
+                                                                                                            return;
+                                                                                                        }
+                                                                                                    }
+                                                                                                }, 500, false);
+                    }
 
                     DebugLog("Server stopped");
                 }
@@ -347,11 +346,13 @@ public class ConfigurationMain
                                 break;
                             }
                         }
-                        if (idx == -1 || idx >= MAX_SERVERS)
+                        if (idx == -1)
                         {
-                            try { s.Close(); s.Dispose(); } catch { }
+                            try { s.Dispose(); } catch { }
                             continue;
                         }
+
+                        streams[idx] = new(s);
 
                         int capturedIdx = idx;
                         new Thread(() => ConnectionHandler(s, capturedIdx, ct)) { IsBackground = true }.Start();
@@ -364,24 +365,24 @@ public class ConfigurationMain
                 }
             }
 
-            private static void ConnectionHandler(Stream stream, int idx, CancellationToken ct)
+            private static void ConnectionHandler(Stream stream, int index, CancellationToken ct)
             {
                 try
                 {
-                    StreamString ss = new(stream);
+                    using Stream s = stream;
+                    if (streams[index] == null)
+                        return;
+                    StreamString ss = streams[index]!;
                     ss.WriteString(SERVER_AUTH_KEY);
                     if (ss.ReadString() != CLIENT_AUTH_KEY)
-                    {
-                        try { stream.Close(); stream.Dispose(); } catch { }
                         return;
-                    }
 
-                    DebugLog($"Client {idx} authenticated");
-                    streams[idx] = ss;
-                    new Thread(() => ServerSendThread(idx, ct)) { IsBackground = true }.Start();
+                    DebugLog($"Client {index} authenticated");
+                    new Thread(() => ServerSendThread(index, ct)) { IsBackground = true }.Start();
 
                     while (!ct.IsCancellationRequested)
                     {
+                        ct.WaitHandle.WaitOne(100);
                         string message = ss.ReadString().Trim();
                         string[] split = message.Split("|");
 
@@ -390,13 +391,13 @@ public class ConfigurationMain
                             case "":
                                 return;
                             case CLIENT_CID_KEY:
-                                clients[idx] = new ClientInfo(ulong.Parse(split[1]), split[2], ushort.Parse(split[3]));
+                                clients[index] = new ClientInfo(ulong.Parse(split[1]), split[2], ushort.Parse(split[3]));
 
                                 Svc.Framework.RunOnTick(() =>
                                                         {
                                                             unsafe
                                                             {
-                                                                ClientInfo client = clients[idx]!;
+                                                                ClientInfo client = clients[index]!;
                                                                 DebugLog($"Client Identification received: {client.CID} {client.CName} {client.WorldId}");
 
                                                                 if (!PartyHelper.IsPartyMember(client.CID))
@@ -408,7 +409,7 @@ public class ConfigurationMain
 
                                                                     ss.WriteString(PARTY_INVITE);
                                                                 }
-                                                                stepConfirms[idx] = false;
+                                                                stepConfirms[index] = false;
                                                             }
                                                         }, cancellationToken: ct);
                                 break;
@@ -416,32 +417,31 @@ public class ConfigurationMain
                                 ss.WriteString(KEEPALIVE_RESPONSE_KEY);
                                 break;
                             case STEP_COMPLETED:
-                                stepConfirms[idx] = true;
+                                stepConfirms[index] = true;
                                 CheckStepProgress();
                                 break;
                             case DEATH_KEY:
-                                deathConfirms[idx] = true;
+                                deathConfirms[index] = true;
                                 CheckDeaths();
                                 break;
                             case UNDEATH_KEY:
-                                deathConfirms[idx] = false;
+                                deathConfirms[index] = false;
                                 break;
                             default:
                                 ss.WriteString($"Unknown Message: {message}");
                                 continue;
                         }
-                        keepAlives[idx] = DateTime.Now;
+                        keepAlives[index] = DateTime.Now;
                     }
                 }
-                catch (Exception ex)
+                catch (Exception e)
                 {
-                    DebugLog($"ConnectionHandler error: {ex.Message}");
+                    DebugLog($"ConnectionHandler error: {e.Message}\n{e.StackTrace}");
                 }
                 finally
                 {
-                    try { stream.Close(); stream.Dispose(); } catch { }
-                    streams[idx] = null;
-                    clients[idx] = null;
+                    streams[index] = null;
+                    clients[index] = null;
                 }
             }
 
@@ -669,6 +669,10 @@ public class ConfigurationMain
                 {
                     DebugLog($"Client ERROR: {e.Message}\n{e.StackTrace}");
                 }
+                finally
+                {
+                    Set(false);
+                }
             }
 
             private static void ClientKeepAliveThread(CancellationToken ct)
@@ -690,7 +694,7 @@ public class ConfigurationMain
 
             public static void SendStepCompleted()
             {
-                if (clientSS == null || clientSS == null)
+                if (clientSS == null)
                 {
                     DebugLog("Client not connected, cannot send step completed.");
                     return;
@@ -702,7 +706,7 @@ public class ConfigurationMain
 
             public static void SendDeath(bool dead)
             {
-                if (clientSS == null || clientSS == null)
+                if (clientSS == null)
                 {
                     DebugLog("Client not connected, cannot send death.");
                     return;
@@ -3442,14 +3446,13 @@ public static class ConfigTab
             {
                 ImGui.Indent();
                 
-                // Transport selection
                 int transportType = (int)ConfigurationMain.MultiboxUtility.transportType;
                 if (ImGui.Combo("Transport Type", ref transportType, "Named Pipe\0TCP\0"))
                 {
                     ConfigurationMain.MultiboxUtility.transportType = (TransportType)transportType;
                     Configuration.Save();
                 }
-                ImGuiComponents.HelpMarker("Named Pipe: Local only. TCP: Can connect across networks with proper firewall rules.");
+                ImGuiComponents.HelpMarker("Named Pipe: Network connectivity depends on system settings. TCP: Network connectivity depends on firewall settings. Use Named Pipe in cases where it works.");
 
                 // Conditional fields based on transport type
                 if (ConfigurationMain.MultiboxUtility.transportType == TransportType.NamedPipe)
@@ -3484,7 +3487,7 @@ public static class ConfigTab
                         ImGui.SameLine();
                         if (ImGui.Button("Reset##MultiboxResetServerAddress"))
                         {
-                            ConfigurationMain.MultiboxUtility.serverAddress = "0.0.0.0";
+                            ConfigurationMain.MultiboxUtility.serverAddress = "127.0.0.1";
                             Configuration.Save();
                         }
                     }

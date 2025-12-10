@@ -13,7 +13,7 @@ namespace AutoDuty.Managers
 
     public interface ITransport : IDisposable
     {
-        void StartServer(int backlog = 5);
+        void StartServer(int backlog = 3);
         void StopServer();
         Task<Stream> AcceptConnectionAsync(CancellationToken ct);
         Task<Stream> ConnectToServerAsync(CancellationToken ct);

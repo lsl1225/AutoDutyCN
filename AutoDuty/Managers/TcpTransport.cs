@@ -24,7 +24,7 @@ namespace AutoDuty.Managers
             this.port = port;
         }
 
-        public void StartServer(int backlog = 5)
+        public void StartServer(int backlog = 3)
         {
             if (listener != null) return;
             listener = new TcpListener(address, port);

@@ -46,6 +46,7 @@ namespace AutoDuty.Managers
             if (listener == null) throw new InvalidOperationException("Listener not started");
             TcpClient client = await listener.AcceptTcpClientAsync(ct);
             client.NoDelay = true;
+            ct.Register(client.Dispose);
             return client.GetStream();
         }
 
@@ -58,6 +59,7 @@ namespace AutoDuty.Managers
                 await connectTask;
             }
             client.NoDelay = true;
+            ct.Register(client.Dispose);
             return client.GetStream();
         }
 

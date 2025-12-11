@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ECommons;
 
 namespace AutoDuty.Managers
 {
@@ -11,7 +13,10 @@ namespace AutoDuty.Managers
     {
         private readonly string pipeName;
         private readonly string serverName;
-        private readonly Queue<NamedPipeServerStream> availablePipes = new();
+        private readonly List<NamedPipeServerStream> availablePipes = [];
+        private readonly List<Task> connectTasks = [];
+        private readonly List<NamedPipeServerStream> usedPipes = [];
+        private CancellationTokenSource? cts;
         private bool isRunning = false;
         private int maxInstances;
 
@@ -26,56 +31,66 @@ namespace AutoDuty.Managers
             if (isRunning) return;
             isRunning = true;
             maxInstances = backlog;
+            cts = new CancellationTokenSource();
             
-            // Pre-create the first pipe instance
-            var pipe = new NamedPipeServerStream(pipeName, PipeDirection.InOut, maxInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
-            availablePipes.Enqueue(pipe);
+            for (int i = 0; i < backlog; i++)
+            {
+                var pipe = new NamedPipeServerStream(pipeName, PipeDirection.InOut, maxInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
+                availablePipes.Add(pipe);
+                connectTasks.Add(pipe.WaitForConnectionAsync(cts.Token));
+            }
         }
 
         public void StopServer()
         {
             isRunning = false;
-            try
-            {
-                while (availablePipes.Count > 0)
-                {
-                    var pipe = availablePipes.Dequeue();
-                    pipe?.Close();
-                    pipe?.Dispose();
-                }
-            }
-            catch { }
+            cts?.Cancel();
+            Task.WaitAll(connectTasks);
+            connectTasks.Clear();
+            availablePipes.ForEach(pipe => pipe?.Dispose());
+            availablePipes.Clear();
+            usedPipes.ForEach(pipe => pipe?.Dispose());
+            usedPipes.Clear();
+            cts?.Dispose();
+            cts = null;
         }
 
         public async Task<Stream> AcceptConnectionAsync(CancellationToken ct)
         {
             if (!isRunning) throw new InvalidOperationException("Server not started");
-            
-            // Get or create a pipe to wait on
-            NamedPipeServerStream? pipeToWaitOn = null;
-            lock (availablePipes)
+
+            if (availablePipes.Count == 0)
             {
-                if (availablePipes.Count > 0)
-                {
-                    pipeToWaitOn = availablePipes.Dequeue();
-                }
+                await Task.Run(async () => {
+                    while (usedPipes.All(pipe => pipe.IsConnected)) {
+                        await Task.Delay(100, ct);
+                        ct.ThrowIfCancellationRequested();
+                    }
+                }, cancellationToken: ct);
+                ct.ThrowIfCancellationRequested();
+                var closedPipes = usedPipes.Where(pipe => !pipe.IsConnected).ToList();
+                closedPipes.Each(pipe =>
+                { 
+                    pipe.Dispose(); 
+                    usedPipes.Remove(pipe);
+                    var newPipe = new NamedPipeServerStream(pipeName, PipeDirection.InOut, maxInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
+                    availablePipes.Add(newPipe);
+                    connectTasks.Add(newPipe.WaitForConnectionAsync(cts!.Token));
+                });
             }
-            
-            if (pipeToWaitOn == null)
-            {
-                pipeToWaitOn = new NamedPipeServerStream(pipeName, PipeDirection.InOut, maxInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
+
+            Task? connectedTask = null;
+            using (ct.Register(() => cts?.Cancel())) {
+                connectedTask = await Task.WhenAny(connectTasks);
             }
-            
-            await pipeToWaitOn.WaitForConnectionAsync(ct);
-            
-            // Create a new pipe for the next connection and queue it
-            var nextPipe = new NamedPipeServerStream(pipeName, PipeDirection.InOut, maxInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
-            lock (availablePipes)
-            {
-                availablePipes.Enqueue(nextPipe);
-            }
-            
-            return pipeToWaitOn;
+            ct.ThrowIfCancellationRequested();
+            int index = connectTasks.IndexOf(connectedTask);
+            connectTasks.RemoveAt(index);
+            var pipe = availablePipes[index];
+            availablePipes.RemoveAt(index);
+            usedPipes.Add(pipe);
+            ct.Register(pipe.Dispose);
+            return pipe;
         }
 
         public async Task<Stream> ConnectToServerAsync(CancellationToken ct)
@@ -89,6 +104,7 @@ namespace AutoDuty.Managers
                 await connectTask;
             }
             
+            ct.Register(client.Dispose);
             return client;
         }
 

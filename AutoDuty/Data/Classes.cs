@@ -507,6 +507,8 @@ namespace AutoDuty.Data
             public int curCount = 0;
 
             public byte? gearset;
+
+            public bool unsynced;
         }
     }
 }

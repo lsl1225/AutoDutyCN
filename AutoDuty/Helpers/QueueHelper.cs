@@ -192,20 +192,19 @@ namespace AutoDuty.Helpers
             }
         }
 
-        public static bool ShouldBeUnSynced()
-        {
-            return Plugin.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist ? (Plugin.PlaylistCurrentEntry?.unsynced == true && Plugin.PlaylistCurrentEntry?.DutyMode.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial) == true)
-                                                        : Plugin.Configuration.Unsynced && Plugin.Configuration.DutyModeEnum.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial);
-        }
+        public static bool ShouldBeUnSynced() =>
+            Plugin.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist ? 
+                (Plugin.PlaylistCurrentEntry?.unsynced == true && Plugin.PlaylistCurrentEntry?.DutyMode.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial) == true) : 
+                Plugin.Configuration.Unsynced && Plugin.Configuration.DutyModeEnum.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial);
 
         private void QueueRegular()
         {
-            bool sync = ShouldBeUnSynced();
-            Svc.Log.Debug($"Sync check: {sync}");
-            if (ContentsFinder.Instance()->IsUnrestrictedParty != sync)
+            bool unsync = ShouldBeUnSynced();
+            Svc.Log.Debug($"Sync check: {unsync}");
+            if (ContentsFinder.Instance()->IsUnrestrictedParty != unsync)
             {
                 Svc.Log.Debug("Queue Helper - Setting UnrestrictedParty");
-                ContentsFinder.Instance()->IsUnrestrictedParty = sync;
+                ContentsFinder.Instance()->IsUnrestrictedParty = unsync;
                 return;
             }
 

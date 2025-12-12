@@ -1389,23 +1389,23 @@ public sealed class AutoDuty : IDalamudPlugin
 
         Svc.Log.Debug($"Starting Action {this.PathAction.ToCustomString()}");
 
-        bool sync = !QueueHelper.ShouldBeUnSynced();
+        bool unsync = QueueHelper.ShouldBeUnSynced();
 
-        if (this.PathAction.Tag.HasFlag(ActionTag.Unsynced) && sync)
+        if (this.PathAction.Tag.HasFlag(ActionTag.Unsynced) && !unsync)
         {
             Svc.Log.Debug($"Skipping path entry {this.Actions[this.Indexer]} because we are synced");
             this.Indexer++;
             return;
         }
 
-        if (this.PathAction.Tag.HasFlag(ActionTag.W2W) && !this.Configuration.IsW2W(unsync: !sync))
+        if (this.PathAction.Tag.HasFlag(ActionTag.W2W) && !this.Configuration.IsW2W(unsync: unsync))
         {
             Svc.Log.Debug($"Skipping path entry {this.Actions[this.Indexer]} because we are not W2W-ing");
             this.Indexer++;
             return;
         }
 
-        if (this.PathAction.Tag.HasFlag(ActionTag.Synced) && !sync)
+        if (this.PathAction.Tag.HasFlag(ActionTag.Synced) && unsync)
         {
             Svc.Log.Debug($"Skipping path entry {this.Actions[this.Indexer]} because we are unsynced");
             this.Indexer++;

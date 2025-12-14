@@ -1,3 +1,5 @@
+using ECommons;
+using ECommons.DalamudServices;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -5,90 +7,85 @@ using System.IO.Pipes;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ECommons;
 
 namespace AutoDuty.Managers
 {
-    public class NamedPipeTransport : ITransport
+    public sealed class NamedPipeTransport(string pipeName, string serverName = ".") : ITransport
     {
-        private readonly string pipeName;
-        private readonly string serverName;
         private readonly List<NamedPipeServerStream> availablePipes = [];
-        private readonly List<Task> connectTasks = [];
-        private readonly List<NamedPipeServerStream> usedPipes = [];
-        private CancellationTokenSource? cts;
-        private bool isRunning = false;
-        private int maxInstances;
-
-        public NamedPipeTransport(string pipeName, string serverName = ".")
-        {
-            this.pipeName = pipeName;
-            this.serverName = serverName;
-        }
+        private readonly List<Task>                  connectTasks   = [];
+        private readonly List<NamedPipeServerStream> usedPipes      = [];
+        private          CancellationTokenSource?    cts;
+        private          bool                        isRunning = false;
+        private          int                         maxInstances;
 
         public void StartServer(int backlog = 3)
         {
-            if (isRunning) return;
-            isRunning = true;
-            maxInstances = backlog;
-            cts = new CancellationTokenSource();
-            
+            if (this.isRunning)
+                return;
+            this.isRunning    = true;
+            this.maxInstances = backlog;
+            this.cts          = new CancellationTokenSource();
+
             for (int i = 0; i < backlog; i++)
             {
-                var pipe = new NamedPipeServerStream(pipeName, PipeDirection.InOut, maxInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
-                availablePipes.Add(pipe);
-                connectTasks.Add(pipe.WaitForConnectionAsync(cts.Token));
+                NamedPipeServerStream pipe = new(pipeName, PipeDirection.InOut, this.maxInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
+                this.availablePipes.Add(pipe);
+                this.connectTasks.Add(pipe.WaitForConnectionAsync(this.cts.Token));
             }
         }
 
         public void StopServer()
         {
-            isRunning = false;
-            cts?.Cancel();
-            Task.WaitAll(connectTasks);
-            connectTasks.Clear();
-            availablePipes.ForEach(pipe => pipe?.Dispose());
-            availablePipes.Clear();
-            usedPipes.ForEach(pipe => pipe?.Dispose());
-            usedPipes.Clear();
-            cts?.Dispose();
-            cts = null;
+            this.isRunning = false;
+            this.cts?.Cancel();
+            Task.WaitAll(this.connectTasks);
+            this.connectTasks.Clear();
+            this.availablePipes.ForEach(pipe => pipe?.Dispose());
+            this.availablePipes.Clear();
+            this.usedPipes.ForEach(pipe => pipe?.Dispose());
+            this.usedPipes.Clear();
+            this.cts?.Dispose();
+            this.cts = null;
         }
 
         public async Task<Stream> AcceptConnectionAsync(CancellationToken ct)
         {
-            if (!isRunning) throw new InvalidOperationException("Server not started");
+            if (!this.isRunning)
+                throw new InvalidOperationException("Server not started");
 
-            if (availablePipes.Count == 0)
+            if (this.availablePipes.Count == 0)
             {
-                await Task.Run(async () => {
-                    while (usedPipes.All(pipe => pipe.IsConnected)) {
-                        await Task.Delay(100, ct);
-                        ct.ThrowIfCancellationRequested();
-                    }
-                }, cancellationToken: ct);
+                await Task.Run(async () =>
+                               {
+                                   while (this.usedPipes.All(pipe => pipe.IsConnected))
+                                   {
+                                       await Task.Delay(100, ct);
+                                       ct.ThrowIfCancellationRequested();
+                                   }
+                               }, cancellationToken: ct);
                 ct.ThrowIfCancellationRequested();
-                var closedPipes = usedPipes.Where(pipe => !pipe.IsConnected).ToList();
+                List<NamedPipeServerStream> closedPipes = this.usedPipes.Where(pipe => !pipe.IsConnected).ToList();
                 closedPipes.Each(pipe =>
-                { 
-                    pipe.Dispose(); 
-                    usedPipes.Remove(pipe);
-                    var newPipe = new NamedPipeServerStream(pipeName, PipeDirection.InOut, maxInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
-                    availablePipes.Add(newPipe);
-                    connectTasks.Add(newPipe.WaitForConnectionAsync(cts!.Token));
-                });
+                                 {
+                                     pipe.Dispose();
+                                     this.usedPipes.Remove(pipe);
+                                     NamedPipeServerStream newPipe = new(pipeName, PipeDirection.InOut, this.maxInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
+                                     this.availablePipes.Add(newPipe);
+                                     this.connectTasks.Add(newPipe.WaitForConnectionAsync(this.cts!.Token));
+                                 });
             }
 
-            Task? connectedTask = null;
-            using (ct.Register(() => cts?.Cancel())) {
-                connectedTask = await Task.WhenAny(connectTasks);
-            }
+            Task? connectedTask;
+            await using (ct.Register(() => this.cts?.Cancel()))
+                connectedTask = await Task.WhenAny(this.connectTasks);
+
             ct.ThrowIfCancellationRequested();
-            int index = connectTasks.IndexOf(connectedTask);
-            connectTasks.RemoveAt(index);
-            var pipe = availablePipes[index];
-            availablePipes.RemoveAt(index);
-            usedPipes.Add(pipe);
+            int index = this.connectTasks.IndexOf(connectedTask);
+            this.connectTasks.RemoveAt(index);
+            NamedPipeServerStream pipe = this.availablePipes[index];
+            this.availablePipes.RemoveAt(index);
+            this.usedPipes.Add(pipe);
             ct.Register(pipe.Dispose);
             return pipe;
         }
@@ -97,20 +94,37 @@ namespace AutoDuty.Managers
         {
             // For named pipes, we use the configured serverName and pipeName
             NamedPipeClientStream client = new(serverName, pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
-            
-            var connectTask = client.ConnectAsync(ct);
-            using (ct.Register(() => { try { client.Close(); } catch { } }))
-            {
+
+            Task connectTask = client.ConnectAsync(ct);
+            await using (ct.Register(() =>
+                                     {
+                                         try
+                                         {
+                                             client.Close();
+                                         }
+                                         catch (Exception ex)
+                                         {
+                                             DebugLog("Error during pipe closure: " + ex);
+                                         }
+                                     }))
                 await connectTask;
-            }
-            
+
             ct.Register(client.Dispose);
             return client;
         }
 
         public void Dispose()
         {
-            StopServer();
+            this.StopServer();
+        }
+
+        private static void DebugLog(string message)
+        {
+            Svc.Log.Debug($"Pipe: {message}");
+        }
+        private static void ErrorLog(string message)
+        {
+            Svc.Log.Error($"Pipe: {message}");
         }
     }
 }

@@ -230,13 +230,9 @@ public class ConfigurationMain
                 try
                 {
                     if (on)
-                    {
                         StartServer();
-                    }
                     else
-                    {
                         StopServer();
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -250,7 +246,8 @@ public class ConfigurationMain
                 {
                     if (transport != null) return;
                     
-                    transport = transportType switch {
+                    transport = transportType switch 
+                    {
                         TransportType.NamedPipe => new NamedPipeTransport(pipeName),
                         TransportType.Tcp => new TcpTransport(serverPort),
                         _ => throw new NotImplementedException(transportType.ToString()),
@@ -285,6 +282,7 @@ public class ConfigurationMain
                         keepAlives[i] = DateTime.MinValue;
                         stepConfirms[i] = false;
                     }
+
                     if (!Plugin.InDungeon)
                     {
                         Chat.ExecuteCommand("/partycmd breakup");
@@ -348,11 +346,18 @@ public class ConfigurationMain
                         }
                         if (idx == -1)
                         {
-                            try { s.Dispose(); } catch { }
+                            try
+                            {
+                                await s.DisposeAsync();
+                            }
+                            catch (Exception ex)
+                            {
+                                ErrorLog(ex.ToString());
+                            }
                             continue;
                         }
 
-                        streams[idx] = new(s);
+                        streams[idx] = new StreamString(s);
 
                         int capturedIdx = idx;
                         _ = Task.Run(() => ConnectionHandler(s, capturedIdx, ct), ct);
@@ -360,7 +365,7 @@ public class ConfigurationMain
                 }
                 catch (OperationCanceledException)
                 {
-                    DebugLog("AcceptLoop ended due to cancelation");
+                    DebugLog("AcceptLoop ended due to cancellation");
                 }
                 catch (Exception ex)
                 {
@@ -372,7 +377,7 @@ public class ConfigurationMain
             {
                 try
                 {
-                    using Stream s = stream;
+                    await using Stream s = stream;
                     if (streams[index] == null)
                         return;
                     StreamString ss = streams[index]!;
@@ -382,7 +387,7 @@ public class ConfigurationMain
 
                     DebugLog($"Client {index} authenticated");
                     keepAlives[index] = DateTime.Now;
-                    var sendTask = Task.Run(async () => await ServerSendThread(index, ct), ct);
+                    Task sendTask = Task.Run(async () => await ServerSendThread(index, ct), ct);
 
                     while (!ct.IsCancellationRequested && !sendTask.IsCompleted)
                     {
@@ -392,7 +397,8 @@ public class ConfigurationMain
 
                         switch (split[0])
                         {
-                            case "":
+                            case "" when message.Length == 0:
+                                DebugLog($"Client {index} closed the connection.");
                                 return;
                             case CLIENT_CID_KEY:
                                 clients[index] = new ClientInfo(ulong.Parse(split[1]), split[2], ushort.Parse(split[3]));
@@ -442,7 +448,7 @@ public class ConfigurationMain
                 }
                 catch (OperationCanceledException)
                 {
-                    DebugLog("Connection handler ended due to cancelation");
+                    DebugLog("Connection handler ended due to cancellation");
                 }
                 catch (Exception e)
                 {
@@ -470,7 +476,7 @@ public class ConfigurationMain
                         } 
                         else if ((DateTime.Now - keepAlives[index]).TotalSeconds > 15)
                         {
-                            // if no messages to send and the connection is stale, send a keepalive to check. (Usually this is the clients job but the tcp socket doesnt die immediately)
+                            // if no messages to send and the connection is stale, send a keepalive to check. (Usually this is the clients job but the tcp socket doesn't die immediately)
                             streams[index]?.WriteString(KEEPALIVE_KEY);
                             await Task.Delay(1000, ct);
                         }
@@ -479,7 +485,7 @@ public class ConfigurationMain
                 }
                 catch (OperationCanceledException)
                 {
-                    DebugLog("SendLoop ended due to cancelation");
+                    DebugLog("SendLoop ended due to cancellation");
                 }
                 catch (Exception e)
                 {
@@ -582,7 +588,14 @@ public class ConfigurationMain
                 }
                 else
                 {
-                    try { clientCts?.Cancel(); } catch { }
+                    try
+                    {
+                        clientCts?.Cancel();
+                    }
+                    catch (Exception ex)
+                    {
+                        ErrorLog(ex.ToString());
+                    }
                     clientSS = null;
                     clientCts = null;
                 }
@@ -592,14 +605,15 @@ public class ConfigurationMain
             {
                 try
                 {
-                    using ITransport transport = transportType switch {
+                    using ITransport transport = transportType switch 
+                    {
                         TransportType.NamedPipe => new NamedPipeTransport(pipeName, serverName),
                         TransportType.Tcp => new TcpTransport(serverAddress, serverPort),
                         _ => throw new NotImplementedException(transportType.ToString()),
                     };
 
                     DebugLog($"Connecting to server ({transportType})...\n");
-                    using var clientStream = await transport.ConnectToServerAsync(ct);
+                    await using Stream clientStream = await transport.ConnectToServerAsync(ct);
 
                     clientSS = new StreamString(clientStream);
 
@@ -614,14 +628,15 @@ public class ConfigurationMain
                                                 }, cancellationToken: ct);
 
                         _ = Task.Run(() => ClientKeepAliveThread(ct), ct);
-                        while (!ct.IsCancellationRequested && clientSS != null)
+                        while (!ct.IsCancellationRequested)
                         {
                             string   message = clientSS.ReadString().Trim();
                             string[] split   = message.Split("|");
 
                             switch (split[0])
                             {
-                                case "":
+                                case "" when message.Length == 0:
+                                    DebugLog("Server closed the connection.");
                                     return;
                                 case STEP_START:
                                     if (int.TryParse(split[1], out int step))
@@ -649,9 +664,13 @@ public class ConfigurationMain
                                                                                                         {
                                                                                                             unsafe
                                                                                                             {
-                                                                                                                Utf8String inviterName = InfoProxyPartyInvite.Instance()->InviterName;
+                                                                                                                if(UniversalParty.Length > 1)
+                                                                                                                {
+                                                                                                                    PartyHelper.LeaveParty();
+                                                                                                                    return;
+                                                                                                                }
 
-                                                                                                                
+                                                                                                                Utf8String inviterName = InfoProxyPartyInvite.Instance()->InviterName;
                                                                                                                 if (InfoProxyPartyInvite.Instance()->InviterWorldId != 0 && 
                                                                                                                     UniversalParty.Length <= 1 &&
                                                                                                                     GenericHelpers.TryGetAddonByName("SelectYesno", out AtkUnitBase* addonSelectYesno) &&
@@ -678,7 +697,6 @@ public class ConfigurationMain
                                         DebugLog("setting steps from host");
                                         Plugin.Actions = steps;
                                     }
-
                                     break;
                                 default:
                                     ErrorLog("Unknown response: " + message);
@@ -689,7 +707,7 @@ public class ConfigurationMain
                 }
                 catch (OperationCanceledException)
                 {
-                    DebugLog("ClientConnection ended due to cancelation");
+                    DebugLog("ClientConnection ended due to cancellation");
                 }
                 catch (Exception e)
                 {
@@ -714,7 +732,7 @@ public class ConfigurationMain
                 }
                 catch (OperationCanceledException)
                 {
-                    DebugLog("ClientKeepalive ended due to cancelation");
+                    DebugLog("ClientKeepalive ended due to cancellation");
                 }
                 catch (Exception e)
                 {
@@ -3459,11 +3477,32 @@ public static class ConfigTab
 
             ImGuiEx.TextWrapped("Step 1: Have 4 clients logged in and ready with AD open on the same data center not in a party");
             ImGuiEx.TextWrapped("Step 2: One of the clients becomes the host. The host will lead the others. Select host below on the client you want to become host");
-            ImGuiEx.TextWrapped("Step 3: The pipe name needs to match between clients and host");
-            ImGuiEx.TextWrapped("Step 4: Select Multibox on the host");
-            ImGuiEx.TextWrapped("Step 5: On the clients, the server name can be used to connect to hosts on other computers. The default of \".\" is the local computer.");
-            ImGuiEx.TextWrapped("Step 6: Select Multibox on the 3 clients. Each of them should be invited to the party. Below will be current information about them. if it says \"no info\" they are not connected");
-            ImGuiEx.TextWrapped("Step 7: On the host, select which dungeon you want to run and how often. Click run");
+            ImGuiEx.TextWrapped("Step 3: Select if you want to use Named Pipes or TCP to connect. While both works in either case, Pipes are recommended when all clients are on the same pc. TCP if not.");
+            ImGui.Separator();
+
+            uint text     = ImGui.GetColorU32(ImGuiCol.Text);
+            uint disabled = ImGui.GetColorU32(ImGuiCol.TextDisabled);
+
+            using (ImRaii.PushColor(ImGuiCol.Text, ConfigurationMain.MultiboxUtility.transportType == TransportType.NamedPipe ? text : disabled))
+            {
+                ImGui.TextWrapped("Named Pipes");
+                ImGuiEx.TextWrapped("Step 4: The pipe name needs to match between clients and host");
+                ImGuiEx.TextWrapped("Step 5: On the clients, the server name can be used to connect to hosts on other computers. The default of \".\" is the local computer.");
+            }
+            ImGui.Separator();
+            using (ImRaii.PushColor(ImGuiCol.Text, ConfigurationMain.MultiboxUtility.transportType == TransportType.Tcp ? text : disabled))
+            {
+                ImGui.TextWrapped("TCP");
+                ImGuiEx.TextWrapped("Step 4: The port needs to match between clients and host");
+                ImGuiEx.TextWrapped("Step 5: On the clients, the server address can be changed to connect to hosts on other computers.");
+                if(OperatingSystem.IsWindows())
+                    ImGui.TextWrapped("UAC might ask you to allow network access");
+            }
+
+            ImGui.Separator();
+            ImGuiEx.TextWrapped("Step 6: Select Multibox on the host");
+            ImGuiEx.TextWrapped("Step 7: Select Multibox on the 3 clients. Each of them should be invited to the party. Below will be current information about them. if it says \"no info\" they are not connected");
+            ImGuiEx.TextWrapped("Step 8: On the host, select which dungeon you want to run and how often. Click run");
 
             bool multiBox = ConfigurationMain.Instance.multiBox;
             if (ImGui.Checkbox(nameof(ConfigurationMain.MultiBox), ref multiBox))
@@ -3475,61 +3514,64 @@ public static class ConfigTab
             using(ImRaii.Disabled(ConfigurationMain.Instance.MultiBox))
             {
                 ImGui.Indent();
-                
-                int transportType = (int)ConfigurationMain.MultiboxUtility.transportType;
-                if (ImGui.Combo("Transport Type", ref transportType, "Named Pipe\0TCP\0"))
-                {
-                    ConfigurationMain.MultiboxUtility.transportType = (TransportType)transportType;
+                if(ImGuiEx.EnumCombo("Transport Type", ref ConfigurationMain.MultiboxUtility.transportType))
                     Configuration.Save();
-                }
                 ImGuiComponents.HelpMarker("Named Pipe: Network connectivity depends on system settings.\nTCP: Network connectivity depends on firewall settings.\nIn most cases Named Pipe should work with no changes.");
 
-                // Conditional fields based on transport type
-                if (ConfigurationMain.MultiboxUtility.transportType == TransportType.NamedPipe)
+                switch (ConfigurationMain.MultiboxUtility.transportType)
                 {
-                    if(ImGui.InputText("Pipe Name", ref ConfigurationMain.MultiboxUtility.pipeName))
-                        Configuration.Save();
-                    ImGui.SameLine();
-                    if (ImGui.Button("Reset##MultiboxResetPipeName"))
+                    case TransportType.NamedPipe:
                     {
-                        ConfigurationMain.MultiboxUtility.pipeName = "AutoDutyPipe";
-                        Configuration.Save();
-                    }
-
-                    if (!ConfigurationMain.Instance.host)
-                    {
-                        if (ImGui.InputText("Server Name", ref ConfigurationMain.MultiboxUtility.serverName))
+                        if(ImGui.InputText("Pipe Name", ref ConfigurationMain.MultiboxUtility.pipeName))
                             Configuration.Save();
                         ImGui.SameLine();
-                        if (ImGui.Button("Reset##MultiboxResetServerName"))
+                        if (ImGui.Button("Reset##MultiboxResetPipeName"))
                         {
-                            ConfigurationMain.MultiboxUtility.serverName = ".";
+                            ConfigurationMain.MultiboxUtility.pipeName = "AutoDutyPipe";
                             Configuration.Save();
                         }
+
+                        if (!ConfigurationMain.Instance.host)
+                        {
+                            if (ImGui.InputText("Server Name", ref ConfigurationMain.MultiboxUtility.serverName))
+                                Configuration.Save();
+                            ImGui.SameLine();
+                            if (ImGui.Button("Reset##MultiboxResetServerName"))
+                            {
+                                ConfigurationMain.MultiboxUtility.serverName = ".";
+                                Configuration.Save();
+                            }
+                        }
+
+                        break;
                     }
-                }
-                else if (ConfigurationMain.MultiboxUtility.transportType == TransportType.Tcp)
-                {
-                    if (!ConfigurationMain.Instance.host)
+                    case TransportType.Tcp:
                     {
-                        if (ImGui.InputText("Server Address", ref ConfigurationMain.MultiboxUtility.serverAddress))
+                        if (!ConfigurationMain.Instance.host)
+                        {
+                            if (ImGui.InputText("Server Address", ref ConfigurationMain.MultiboxUtility.serverAddress))
+                                Configuration.Save();
+                            ImGui.SameLine();
+                            if (ImGui.Button("Reset##MultiboxResetServerAddress"))
+                            {
+                                ConfigurationMain.MultiboxUtility.serverAddress = "127.0.0.1";
+                                Configuration.Save();
+                            }
+                        }
+
+                        if (ImGui.InputInt("Server Port", ref ConfigurationMain.MultiboxUtility.serverPort))
                             Configuration.Save();
                         ImGui.SameLine();
-                        if (ImGui.Button("Reset##MultiboxResetServerAddress"))
+                        if (ImGui.Button("Reset##MultiboxResetServerPort"))
                         {
-                            ConfigurationMain.MultiboxUtility.serverAddress = "127.0.0.1";
+                            ConfigurationMain.MultiboxUtility.serverPort = 12345;
                             Configuration.Save();
                         }
-                    }
 
-                    if (ImGui.InputInt("Server Port", ref ConfigurationMain.MultiboxUtility.serverPort))
-                        Configuration.Save();
-                    ImGui.SameLine();
-                    if (ImGui.Button("Reset##MultiboxResetServerPort"))
-                    {
-                        ConfigurationMain.MultiboxUtility.serverPort = 12345;
-                        Configuration.Save();
+                        break;
                     }
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
 
                 if (ImGui.Checkbox($"Host##MultiboxHost", ref ConfigurationMain.Instance.host))

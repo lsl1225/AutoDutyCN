@@ -7,44 +7,52 @@ using System.Threading.Tasks;
 
 namespace AutoDuty.Managers
 {
-    public class TcpTransport : ITransport
+    using ECommons.DalamudServices;
+
+    public sealed class TcpTransport : ITransport
     {
-        private readonly IPAddress address;
-        private readonly int port;
-        private TcpListener? listener;
+        private readonly IPAddress    address;
+        private readonly int          port;
+        private          TcpListener? listener;
 
         public TcpTransport(string address, int port)
         {
             this.address = IPAddress.Parse(address);
-            this.port = port;
+            this.port    = port;
         }
         public TcpTransport(int port)
         {
             this.address = IPAddress.Any;
-            this.port = port;
+            this.port    = port;
         }
 
         public void StartServer(int backlog = 3)
         {
-            if (listener != null) return;
-            listener = new TcpListener(address, port);
-            listener.Start(backlog);
+            if (this.listener != null) 
+                return;
+            this.listener = new TcpListener(this.address, this.port);
+            this.listener.Start(backlog);
         }
 
         public void StopServer()
         {
             try
             {
-                listener?.Stop();
+                this.listener?.Stop();
             }
-            catch { }
-            listener = null;
+            catch (Exception ex)
+            {
+                DebugLog("Error during tcp socket closure: " + ex);
+            }
+
+            this.listener = null;
         }
 
         public async Task<Stream> AcceptConnectionAsync(CancellationToken ct)
         {
-            if (listener == null) throw new InvalidOperationException("Listener not started");
-            TcpClient client = await listener.AcceptTcpClientAsync(ct);
+            if (this.listener == null) 
+                throw new InvalidOperationException("Listener not started");
+            TcpClient client = await this.listener.AcceptTcpClientAsync(ct);
             client.NoDelay = true;
             ct.Register(client.Dispose);
             return client.GetStream();
@@ -52,12 +60,21 @@ namespace AutoDuty.Managers
 
         public async Task<Stream> ConnectToServerAsync(CancellationToken ct)
         {
-            TcpClient client = new TcpClient();
-            var connectTask = client.ConnectAsync(address, port, ct);
-            using (ct.Register(() => { try { client.Close(); } catch { } }))
-            {
+            TcpClient client      = new();
+            ValueTask connectTask = client.ConnectAsync(this.address, this.port, ct);
+            await using (ct.Register(() =>
+                                     {
+                                         try
+                                         {
+                                             client.Close();
+                                         }
+                                         catch (Exception ex)
+                                         {
+                                             DebugLog("Error during tcp socket closure on cancel: " + ex);
+                                         }
+                                     }))
                 await connectTask;
-            }
+
             client.NoDelay = true;
             ct.Register(client.Dispose);
             return client.GetStream();
@@ -65,7 +82,16 @@ namespace AutoDuty.Managers
 
         public void Dispose()
         {
-            StopServer();
+            this.StopServer();
+        }
+
+        private static void DebugLog(string message)
+        {
+            Svc.Log.Debug($"TCP Connection: {message}");
+        }
+        private static void ErrorLog(string message)
+        {
+            Svc.Log.Error($"TCP Connection: {message}");
         }
     }
 }

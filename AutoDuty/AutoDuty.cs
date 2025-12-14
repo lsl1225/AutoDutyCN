@@ -258,7 +258,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.AssemblyDirectoryInfo = this.AssemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 274) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 276) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this._configDirectory.Exists)
@@ -848,8 +848,7 @@ public sealed class AutoDuty : IDalamudPlugin
         }
         //Svc.Log.Debug($"{flag} : {value}");
         if (this.Stage is not Stage.Dead and not Stage.Revived and not Stage.Action && !this._recentlyWatchedCutscene && !Conditions.Instance()->WatchingCutscene && 
-            flag is not ConditionFlag.WatchingCutscene and not ConditionFlag.WatchingCutscene78 and not ConditionFlag.OccupiedInCutSceneEvent and 
-                (ConditionFlag.BetweenAreas or ConditionFlag.BetweenAreas51 or ConditionFlag.Jumping61) && 
+            flag is not ConditionFlag.WatchingCutscene and not ConditionFlag.WatchingCutscene78 and not ConditionFlag.OccupiedInCutSceneEvent and (ConditionFlag.BetweenAreas or ConditionFlag.BetweenAreas51 or ConditionFlag.Jumping61) && 
             value && this.States.HasFlag(PluginState.Navigating))
         {
             Svc.Log.Info($"Condition_ConditionChange: Indexer Increase and Change Stage to Condition");
@@ -1389,23 +1388,23 @@ public sealed class AutoDuty : IDalamudPlugin
 
         Svc.Log.Debug($"Starting Action {this.PathAction.ToCustomString()}");
 
-        bool sync = !QueueHelper.ShouldBeUnSynced();
+        bool unsync = QueueHelper.ShouldBeUnSynced();
 
-        if (this.PathAction.Tag.HasFlag(ActionTag.Unsynced) && sync)
+        if (this.PathAction.Tag.HasFlag(ActionTag.Unsynced) && !unsync)
         {
             Svc.Log.Debug($"Skipping path entry {this.Actions[this.Indexer]} because we are synced");
             this.Indexer++;
             return;
         }
 
-        if (this.PathAction.Tag.HasFlag(ActionTag.W2W) && !this.Configuration.IsW2W(unsync: !sync))
+        if (this.PathAction.Tag.HasFlag(ActionTag.W2W) && !this.Configuration.IsW2W(unsync: unsync))
         {
             Svc.Log.Debug($"Skipping path entry {this.Actions[this.Indexer]} because we are not W2W-ing");
             this.Indexer++;
             return;
         }
 
-        if (this.PathAction.Tag.HasFlag(ActionTag.Synced) && !sync)
+        if (this.PathAction.Tag.HasFlag(ActionTag.Synced) && unsync)
         {
             Svc.Log.Debug($"Skipping path entry {this.Actions[this.Indexer]} because we are unsynced");
             this.Indexer++;

@@ -5,6 +5,7 @@ using System.Linq;
 namespace AutoDuty.Helpers
 {
     using Dalamud.Game.ClientState.Objects.Types;
+    using ECommons.Automation;
     using ECommons.DalamudServices;
     using ECommons.GameFunctions;
     using ECommons.PartyFunctions;
@@ -127,6 +128,11 @@ namespace AutoDuty.Helpers
                 return false;
 
             return UniversalParty.Members.Any(upm => upm.ContentID == cid);
+        }
+
+        public static void LeaveParty()
+        {
+            Chat.ExecuteCommand("/partycmd leave");
         }
     }
 }

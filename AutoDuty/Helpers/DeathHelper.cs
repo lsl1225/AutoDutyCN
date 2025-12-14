@@ -15,32 +15,42 @@ namespace AutoDuty.Helpers
 
     internal static class DeathHelper
     {
-        private static PlayerLifeState _deathState = PlayerLifeState.Alive;
+        private static PlayerLifeState deathState = PlayerLifeState.Alive;
         internal static PlayerLifeState DeathState
         {
-            get => _deathState;
+            get => deathState;
             set
             {
-                if(_deathState != value)
+                if (Plugin.Stage == Stage.Stopped)
+                    return;
+
+                if(deathState != value)
                     ConfigurationMain.MultiboxUtility.IsDead(value == PlayerLifeState.Dead);
 
-                if (value == PlayerLifeState.Dead)
+                switch (value)
                 {
-                    if (value != _deathState)
+                    case PlayerLifeState.Dead:
                     {
-                        DebugLog("Player is Dead changing state to Dead");
-                        SchedulerHelper.ScheduleAction(nameof(OnDeath), OnDeath, 500, false); 
+                        if (value != deathState)
+                        {
+                            DebugLog("Player is Dead changing state to Dead");
+                            SchedulerHelper.ScheduleAction(nameof(OnDeath), OnDeath, 500, false); 
+                        }
+
+                        break;
                     }
+                    case PlayerLifeState.Revived:
+                        SchedulerHelper.DescheduleAction(nameof(OnDeath));
+                        DebugLog("Player is Revived changing state to Revived");
+                        _oldIndex              = Plugin.Indexer;
+                        _findShortcutStartTime = Environment.TickCount;
+                        FindShortcut();
+                        break;
+                    case PlayerLifeState.Alive:
+                    default:
+                        break;
                 }
-                else if (value == PlayerLifeState.Revived)
-                {
-                    SchedulerHelper.DescheduleAction(nameof(OnDeath));
-                    DebugLog("Player is Revived changing state to Revived");
-                    _oldIndex = Plugin.Indexer;
-                    _findShortcutStartTime = Environment.TickCount;
-                    FindShortcut();
-                }
-                _deathState = value;
+                deathState = value;
             }
         }
 
@@ -182,7 +192,7 @@ namespace AutoDuty.Helpers
             Plugin.Stage = Stage.Idle;
             Plugin.Stage = Stage.Reading_Path;
             Svc.Log.Debug("DeathHelper - Player is Alive, and we are done with Revived Actions, changing state to Alive");
-            _deathState               = PlayerLifeState.Alive;
+            deathState               = PlayerLifeState.Alive;
             Plugin.SkipTreasureCoffer = false;
         }
 

@@ -826,18 +826,19 @@ public sealed class AutoDuty : IDalamudPlugin
 
     private unsafe void Condition_ConditionChange(ConditionFlag flag, bool value)
     {
-        if (this.Stage == Stage.Stopped) return;
+        if (this.Stage == Stage.Stopped) 
+            return;
 
         if (flag == ConditionFlag.Unconscious)
         {
             switch (value)
             {
-                case true when (this.Stage != Stage.Dead || DeathHelper.DeathState != PlayerLifeState.Dead):
+                case true when this.Stage != Stage.Dead || DeathHelper.DeathState != PlayerLifeState.Dead:
                     Svc.Log.Debug($"We Died, Setting Stage to Dead");
                     DeathHelper.DeathState = PlayerLifeState.Dead;
                     this.Stage             = Stage.Dead;
                     break;
-                case false when (this.Stage != Stage.Revived || DeathHelper.DeathState != PlayerLifeState.Revived):
+                case false when this.Stage != Stage.Revived || DeathHelper.DeathState != PlayerLifeState.Revived:
                     Svc.Log.Debug($"We Revived, Setting Stage to Revived");
                     DeathHelper.DeathState = PlayerLifeState.Revived;
                     this.Stage             = Stage.Revived;

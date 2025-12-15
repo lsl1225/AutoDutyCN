@@ -92,12 +92,26 @@
       "Note": ""
     },
     {
-      "Tag": "W2W",
-      "Name": "Wait",
+      "Tag": "None",
+      "Name": "MoveTo",
       "Position": {
         "X": 175.41,
         "Y": 154.68,
         "Z": -68.05
+      },
+      "Arguments": [
+        ""
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "W2W",
+      "Name": "Wait",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
       },
       "Arguments": [
         "2500"
@@ -634,7 +648,16 @@
   ],
   "Meta": {
     "CreatedAt": 273,
-    "Changelog": [],
+    "Changelog": [
+      {
+        "Version": 276,
+        "Change": ""
+      },
+      {
+        "Version": 276,
+        "Change": "Seperate the move and wait steps to keep party together for healing"
+      }
+    ],
     "Notes": []
   }
 }

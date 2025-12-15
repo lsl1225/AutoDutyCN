@@ -165,36 +165,38 @@ namespace AutoDuty.Helpers
 
             if (dawnSheet == null || jobSheet == null) return;
 
-            void AddMember(TrustMemberName name, byte index, byte memberId, TrustRole role, ClassJobType classJob, uint levelInit = 71, uint levelCap = 100, uint unlockQuest = 0)
+            void AddMember(TrustMemberName name, byte index, byte[] memberId, TrustRole role, ClassJobType classJob, uint levelInit = 71, uint levelCap = 100, uint unlockQuest = 0)
             {
-                TrustMember member = new TrustMember
-                                          {
-                                              Index       = index,
-                                              MemberId    = memberId,
-                                              Name        = dawnSheet.GetRow((uint)name)!.Unknown0.ToString(),
-                                              Role        = role,
-                                              Job         = jobSheet.GetRow((uint)classJob)!,
-                                              MemberName  = name,
-                                              LevelInit   = levelInit,
-                                              Level       = levelInit,
-                                              LevelCap    = levelCap,
-                                              LevelIsSet  = levelInit == levelCap,
-                                              UnlockQuest = unlockQuest
-                                          };
+                TrustMember member = new()
+                                     {
+                                         Index       = index,
+                                         MemberIds   = memberId,
+                                         Name        = dawnSheet.GetRow((uint)name)!.Unknown0.ToString(),
+                                         Role        = role,
+                                         Job         = jobSheet.GetRow((uint)classJob)!,
+                                         MemberName  = name,
+                                         LevelInit   = levelInit,
+                                         Level       = levelInit,
+                                         LevelCap    = levelCap,
+                                         LevelIsSet  = levelInit == levelCap,
+                                         UnlockQuest = unlockQuest
+                                     };
                 Members.Add(name, member);
-                MembersByMemberId.Add(memberId, member);
+
+                foreach (byte id in memberId)
+                    MembersByMemberId.Add(id, member);
             }
 
-            AddMember(TrustMemberName.Alphinaud, 0, 6,   TrustRole.Healer,     ClassJobType.Sage);
-            AddMember(TrustMemberName.Alisaie,   1, 1,   TrustRole.DPS,        ClassJobType.RedMage);
-            AddMember(TrustMemberName.Thancred,  2, 2,   TrustRole.Tank,       ClassJobType.Gunbreaker);
-            AddMember(TrustMemberName.Urianger,  3, 3,   TrustRole.Healer,     ClassJobType.Astrologian);
-            AddMember(TrustMemberName.Yshtola,   4, 4,   TrustRole.DPS,        ClassJobType.Black_Mage);
-            AddMember(TrustMemberName.Ryne,      5, 5,   TrustRole.DPS,        ClassJobType.Rogue,       71, 80);
-            AddMember(TrustMemberName.Estinien,  5, 7,   TrustRole.DPS,        ClassJobType.Dragoon,     81);
-            AddMember(TrustMemberName.Graha,     6, 8,   TrustRole.AllRounder, ClassJobType.Black_Mage,  81, unlockQuest: 69318);
-            AddMember(TrustMemberName.Zero,      7, 103, TrustRole.DPS,        ClassJobType.Reaper,      90, 90);
-            AddMember(TrustMemberName.Krile,     7, 11,  TrustRole.DPS,        ClassJobType.Pictomancer, 91);
+            AddMember(TrustMemberName.Alphinaud, 0, [0,6],      TrustRole.Healer,     ClassJobType.Sage);
+            AddMember(TrustMemberName.Alisaie,   1, [1],        TrustRole.DPS,        ClassJobType.RedMage);
+            AddMember(TrustMemberName.Thancred,  2, [2],        TrustRole.Tank,       ClassJobType.Gunbreaker);
+            AddMember(TrustMemberName.Urianger,  3, [3],        TrustRole.Healer,     ClassJobType.Astrologian);
+            AddMember(TrustMemberName.Yshtola,   4, [4],        TrustRole.DPS,        ClassJobType.Black_Mage);
+            AddMember(TrustMemberName.Ryne,      5, [5],        TrustRole.DPS,        ClassJobType.Rogue,       71, 80);
+            AddMember(TrustMemberName.Estinien,  5, [7],        TrustRole.DPS,        ClassJobType.Dragoon,     81);
+            AddMember(TrustMemberName.Graha,     6, [8, 9, 10], TrustRole.AllRounder, ClassJobType.Black_Mage,  81, unlockQuest: 69318);
+            AddMember(TrustMemberName.Zero,      7, [103],      TrustRole.DPS,        ClassJobType.Reaper,      90, 90);
+            AddMember(TrustMemberName.Krile,     7, [11],       TrustRole.DPS,        ClassJobType.Pictomancer, 91);
         }
 
         public static void ResetTrustIfInvalid()
@@ -314,11 +316,9 @@ namespace AutoDuty.Helpers
 
             foreach (AgentDawnInterface.DawnMemberEntry entry in memberData.Members)
             {
-                Svc.Log.Debug($"{entry.Name} {entry.Level} {entry.MemberId} {entry.DefaultMemberId} {(Job)entry.ClassJob}");
-
-                if(entry.MemberId != 0 && MembersByMemberId.TryGetValue(entry.MemberId, out TrustMember? member) && !member.LevelIsSet)
+                if((entry.MemberId != 0 || entry.ClassJob != 0) && MembersByMemberId.TryGetValue(entry.MemberId, out TrustMember? member) && !member.LevelIsSet)
                 {
-                    Svc.Log.Debug($"TrustHelper - Setting {member.MemberName} aka {member.Name} {member.MemberId} level to {entry.Level}");
+                    Svc.Log.Debug($"TrustHelper - Setting {member.MemberName} aka {member.Name} {entry.MemberId} level to {entry.Level}");
                     member.SetLevel(entry.Level);
                     
                     if(LevelsSet())

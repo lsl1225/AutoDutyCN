@@ -310,9 +310,12 @@ namespace AutoDuty.Helpers
                 return;
             }
 
-            AgentDawnInterface.DawnMemberData   memberData = agentDawn->Data->MemberData;
+            AgentDawnInterface.DawnMemberData memberData = agentDawn->Data->MemberData;
 
             foreach (AgentDawnInterface.DawnMemberEntry entry in memberData.Members)
+            {
+                Svc.Log.Debug($"{entry.Name} {entry.Level} {entry.MemberId} {entry.DefaultMemberId} {(Job)entry.ClassJob}");
+
                 if(entry.MemberId != 0 && MembersByMemberId.TryGetValue(entry.MemberId, out TrustMember? member) && !member.LevelIsSet)
                 {
                     Svc.Log.Debug($"TrustHelper - Setting {member.MemberName} aka {member.Name} {member.MemberId} level to {entry.Level}");
@@ -324,6 +327,7 @@ namespace AutoDuty.Helpers
                         return;
                     }
                 }
+            }
 
             Stop();
         }

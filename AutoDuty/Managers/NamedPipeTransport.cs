@@ -1,15 +1,16 @@
 using ECommons;
 using ECommons.DalamudServices;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.IO.Pipes;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace AutoDuty.Managers
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
+
     public sealed class NamedPipeTransport(string pipeName, string serverName = ".") : ITransport
     {
         private readonly List<NamedPipeServerStream> availablePipes = [];

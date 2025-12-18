@@ -1,14 +1,15 @@
 ﻿using ECommons;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Serilog.Events;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Numerics;
 using System.Text.Json.Serialization;
 
 namespace AutoDuty.Data
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
     using Dalamud.Bindings.ImGui;
     using Dalamud.Game.ClientState.Objects.Types;
     using ECommons.ImGuiMethods;
@@ -16,7 +17,6 @@ namespace AutoDuty.Data
     using Helpers;
     using Lumina.Excel.Sheets;
     using Newtonsoft.Json;
-    using System;
     using ECommons.GameFunctions;
 
     public class Classes
@@ -35,26 +35,26 @@ namespace AutoDuty.Data
 
         public class Content
         {
-            public uint              RowId                  { get; set; }
-            public uint              Id                     { get; set; }
-            public string?           Name                   { get; set; }
-            public string?           EnglishName            { get; set; }
-            public uint              TerritoryType          { get; set; }
-            public uint              ExVersion              { get; set; }
-            public byte              ClassJobLevelRequired  { get; set; }
-            public uint              ItemLevelRequired      { get; set; }
-            public uint              DawnRowId              { get; set; }
-            public int               DawnIndex              { get; set; } = -1;
+            public uint              RowId                  { get; init; }
+            public uint              Id                     { get; init; }
+            public string?           Name                   { get; init; }
+            public string?           EnglishName            { get; init; }
+            public uint              TerritoryType          { get; init; }
+            public uint              ExVersion              { get; init; }
+            public byte              ClassJobLevelRequired  { get; init; }
+            public uint              ItemLevelRequired      { get; init; }
+            public uint              DawnRowId              { get; init; }
+            public int               DawnIndex              { get; init; } = -1;
             public ushort            DawnIndicator          { get; set; }
-            public uint              ContentFinderCondition { get; set; }
+            public uint              ContentFinderCondition { get; init; }
             public uint              ContentType            { get; set; }
             public uint              ContentMemberType      { get; set; }
-            public int               TrustIndex             { get; set; } = -1;
+            public int               TrustIndex             { get; init; } = -1;
             public bool              VariantContent         { get; set; } = false;
-            public int               VVDIndex               { get; set; } = -1;
-            public bool              GCArmyContent          { get; set; } = false;
-            public int               GCArmyIndex            { get; set; } = -1;
-            public List<TrustMember> TrustMembers           { get; set; } = [];
+            public int               VVDIndex               { get; init; } = -1;
+            public int               GCArmyIndex            { get; init; } = -1;
+            public bool              GCArmyContent          => this.GCArmyIndex >= 0;
+            public List<TrustMember> TrustMembers           { get; }      = [];
             public DutyMode          DutyModes              { get; set; } = DutyMode.None;
             public uint              UnlockQuest            { get; init; }
         }
@@ -62,7 +62,7 @@ namespace AutoDuty.Data
         public class TrustMember
         {
             public byte            Index      { get; set; }
-            public byte[]          MemberIds   { get; set; }
+            public byte[]          MemberIds  { get; set; } = [];
             public TrustRole       Role       { get; set; }         // 0 = DPS, 1 = Healer, 2 = Tank, 3 = G'raha All Rounder
             public ClassJob?       Job        { get; set; } = null; //closest actual job that applies. G'raha gets Blackmage
             public string          Name       { get; set; } = string.Empty;
@@ -158,12 +158,12 @@ namespace AutoDuty.Data
         {
             public const ConditionType TYPE = ConditionType.None;
 
-            public JobWithRole job = JobWithRole.All;
-            public override bool IsFulfilled() => this.job.HasJob(PlayerHelper.GetJob());
-            public override void DrawConfig()
-            {
+            public          JobWithRole job = JobWithRole.All;
+            public override bool        IsFulfilled() => 
+                this.job.HasJob(PlayerHelper.GetJob());
+
+            public override void        DrawConfig()  => 
                 JobWithRoleHelper.DrawCategory(JobWithRole.All, ref this.job);
-            }
         }
 
         public class PathActionConditionActionStatus : PathActionCondition
@@ -445,7 +445,7 @@ namespace AutoDuty.Data
 
             public static string Version => $"{Plugin.Version}";
 
-            public static string LogFile => Plugin.DalamudLogEntries.SelectMulti(x => x.Message).ToList().ToCustomString("\n");
+            public static string LogFile => Plugin.dalamudLogEntries.SelectMulti(x => x.Message).ToList().ToCustomString("\n");
 
             public static string InstalledPlugins => PluginInterface.InstalledPlugins.Select(x => $"{x.InternalName}, Version= {x.Version}").ToList().ToCustomString("\n");
 
@@ -453,7 +453,7 @@ namespace AutoDuty.Data
 
             private static List<string> ReadConfigFile()
             {
-                using FileStream fs = new(Plugin.ConfigFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                using FileStream fs = new(Plugin.configFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                 using StreamReader sr = new(fs);
                 string? x;
                 List<string> strings = [];

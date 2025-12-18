@@ -1,13 +1,13 @@
 ﻿using AutoDuty.Windows;
 using ECommons.DalamudServices;
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace AutoDuty.Updater
 {
+    using System;
     using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Threading.Tasks;
 
     public class Patcher
     {
@@ -38,34 +38,35 @@ namespace AutoDuty.Updater
             Svc.Log.Info("Patching Started");
             try
             {
-                IEnumerable<FileInfo>? localFileInfos = Plugin.PathsDirectory.EnumerateFiles("*.json", SearchOption.AllDirectories);
-                Dictionary<string, string>? localFilesDictionary = localFileInfos.ToDictionary(
-                                                                                               fileInfo => fileInfo.Name,
-                                                                                               fileInfo => BitConverter.ToString(FileHelper.CalculateMD5(fileInfo.FullName)).Replace("-", "")
-                                                                                              );
-                (Dictionary<string, string>? md5, Dictionary<string, string>? del) list                 = await GitHubHelper.GetPathUpdateInfoAsync();
+                IEnumerable<FileInfo> localFileInfos = Plugin.pathsDirectory.EnumerateFiles("*.json", SearchOption.AllDirectories);
+                Dictionary<string, string> localFilesDictionary = skipMD5 ? [] : localFileInfos.ToDictionary(
+                                                                                              fileInfo => fileInfo.Name,
+                                                                                              fileInfo => Convert.ToHexString(FileHelper.CalculateMD5(fileInfo.FullName))
+                                                                                             );
+
+                (Dictionary<string, string>? md5, Dictionary<string, string>? del) = await GitHubHelper.GetPathUpdateInfoAsync();
 
                 HashSet<string> doNotUpdatePathFiles = ConfigurationMain.Instance.GetCurrentConfig.DoNotUpdatePathFiles;
-                if (list.md5 != null)
+                if (md5 != null)
                 {
-                    IEnumerable<KeyValuePair<string, string>>? downloadList =
-                        list.md5.Where(kvp => !doNotUpdatePathFiles.Contains(kvp.Key) && (!localFilesDictionary.ContainsKey(kvp.Key) || !localFilesDictionary[kvp.Key].Equals(kvp.Value, StringComparison.OrdinalIgnoreCase)));
+                    IEnumerable<KeyValuePair<string, string>> downloadList =
+                        md5.Where(kvp => !doNotUpdatePathFiles.Contains(kvp.Key) && (!localFilesDictionary.ContainsKey(kvp.Key) || !localFilesDictionary[kvp.Key].Equals(kvp.Value, StringComparison.OrdinalIgnoreCase)));
 
                     foreach (KeyValuePair<string, string> file in downloadList)
                     {
-                        bool    result = await GitHubHelper.DownloadFileAsync($"https://raw.githubusercontent.com/erdelf/AutoDuty/refs/heads/master/AutoDuty/Paths/{file.Key}", $"{Plugin.PathsDirectory.FullName}/{file.Key}");
-                        Svc.Log.Info(result ? $"Succesfully downloaded: {file.Key}" : $"Failed to download: {file.Key}");
+                        bool    result = await GitHubHelper.DownloadFileAsync($"https://raw.githubusercontent.com/erdelf/AutoDuty/refs/heads/master/AutoDuty/Paths/{file.Key}", $"{Plugin.pathsDirectory.FullName}/{file.Key}");
+                        Svc.Log.Info(result ? $"Successfully downloaded: {file.Key}" : $"Failed to download: {file.Key}");
                     }
                 }
 
-                if (list.del != null)
+                if (del != null)
                 {
                     IEnumerable<KeyValuePair<string, string>>? deleteList =
-                        list.del.Where(kvp => !doNotUpdatePathFiles.Contains(kvp.Key) && localFilesDictionary.ContainsKey(kvp.Key) && localFilesDictionary[kvp.Key].Equals(kvp.Value, StringComparison.OrdinalIgnoreCase));
+                        del.Where(kvp => !doNotUpdatePathFiles.Contains(kvp.Key) && localFilesDictionary.ContainsKey(kvp.Key) && localFilesDictionary[kvp.Key].Equals(kvp.Value, StringComparison.OrdinalIgnoreCase));
 
                     foreach (KeyValuePair<string, string> file in deleteList)
                     {
-                        File.Delete($"{Plugin.PathsDirectory.FullName}/{file.Key}");
+                        File.Delete($"{Plugin.pathsDirectory.FullName}/{file.Key}");
                         Svc.Log.Info("Deleted " + file.Key);
                     }
                 }

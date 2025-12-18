@@ -1,10 +1,10 @@
-using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace AutoDuty.Managers
 {
+    using System;
+    using System.IO;
+    using System.Threading;
+    using System.Threading.Tasks;
+
     public enum TransportType
     {
         NamedPipe = 0,

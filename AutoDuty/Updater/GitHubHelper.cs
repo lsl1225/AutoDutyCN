@@ -1,18 +1,19 @@
 ﻿using ECommons.DalamudServices;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Dalamud.Networking.Http;
 
 namespace AutoDuty.Updater
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Net.Http;
+    using System.Threading.Tasks;
+
     internal static class GitHubHelper
     {
         const string CLIENT_ID = "Iv23liWV5R21nasKaQjP";

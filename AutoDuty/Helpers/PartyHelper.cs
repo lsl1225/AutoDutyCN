@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace AutoDuty.Helpers
+﻿namespace AutoDuty.Helpers
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Dalamud.Game.ClientState.Objects.Types;
     using ECommons.Automation;
     using ECommons.DalamudServices;
@@ -64,9 +63,9 @@ namespace AutoDuty.Helpers
                 return partyInCombat;
 
 
-            if (Plugin.PathAction?.Name != "Boss")
+            if (Plugin.pathAction?.Name != "Boss")
             {
-                EnemyListNumberArray.EnemyListEnemyNumberArray[] inCombatEnemies = EnemyListNumberArray.Instance()->Enemies.ToArray().Where(x => x.MaxHPPercent > 0).ToArray();
+                EnemyListNumberArray.EnemyListEnemyNumberArray[] inCombatEnemies = [..EnemyListNumberArray.Instance()->Enemies.ToArray().Where(x => x.MaxHPPercent > 0)];
 
                 if (inCombatEnemies.Length > 0 && inCombatEnemies.All(x =>
                                                                           Svc.Objects.FirstOrDefault(y => y.EntityId == x.EntityId) is IBattleChara chara &&
@@ -130,9 +129,7 @@ namespace AutoDuty.Helpers
             return UniversalParty.Members.Any(upm => upm.ContentID == cid);
         }
 
-        public static void LeaveParty()
-        {
+        public static void LeaveParty() => 
             Chat.ExecuteCommand("/partycmd leave");
-        }
     }
 }

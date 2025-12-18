@@ -1,12 +1,12 @@
-using System;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace AutoDuty.Managers
 {
+    using System;
+    using System.IO;
+    using System.Threading;
+    using System.Threading.Tasks;
     using ECommons.DalamudServices;
 
     public sealed class TcpTransport : ITransport

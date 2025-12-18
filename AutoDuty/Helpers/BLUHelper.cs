@@ -1,15 +1,14 @@
-﻿using System.Collections.Generic;
-
-namespace AutoDuty.Helpers
+﻿namespace AutoDuty.Helpers
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using ECommons;
     using ECommons.DalamudServices;
     using FFXIVClientStructs.FFXIV.Client.Game;
     using FFXIVClientStructs.FFXIV.Client.Game.UI;
     using Lumina.Excel;
     using Lumina.Excel.Sheets;
-    using System;
-    using System.Linq;
 
     internal static class BLUHelper
     {

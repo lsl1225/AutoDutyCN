@@ -11,14 +11,16 @@ using ECommons.ImGuiMethods;
 using ECommons.MathHelpers;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using Serilog.Events;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using static AutoDuty.Helpers.RepairNPCHelper;
 using static AutoDuty.Windows.ConfigTab;
 
 namespace AutoDuty.Windows;
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.ClientState.Party;
 using Data;
@@ -42,16 +44,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using Properties;
-using System;
-using System.Diagnostics;
-using System.IO;
 using System.Numerics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Achievement = Lumina.Excel.Sheets.Achievement;
 using Buddy = FFXIVClientStructs.FFXIV.Client.Game.UI.Buddy;
-using ExitDutyHelper = Helpers.ExitDutyHelper;
+using ExitDutyHelper = ExitDutyHelper;
 using Map = Lumina.Excel.Sheets.Map;
 using Vector2 = FFXIVClientStructs.FFXIV.Common.Math.Vector2;
 
@@ -60,10 +59,10 @@ public class ConfigurationMain
 {
     public const string CONFIGNAME_BARE = "Bare";
 
-    public static ConfigurationMain Instance;
+    public static ConfigurationMain Instance { get; set; } = null!;
 
-    [JsonProperty]
-    public string DefaultConfigName = CONFIGNAME_BARE;
+    [JsonProperty] 
+    public string DefaultConfigName { get; set; } = CONFIGNAME_BARE;
 
     [JsonProperty]
     private string activeProfileName = CONFIGNAME_BARE;
@@ -88,9 +87,11 @@ public class ConfigurationMain
         public          string Name;
         public          string World;
 
-        public string GetName() => this.Name.Any() ? $"{this.Name}@{this.World}" : this.CID.ToString();
+        public readonly string GetName() =>
+            this.Name.Length != 0 ? $"{this.Name}@{this.World}" : this.CID.ToString();
 
-        public override int GetHashCode() => this.CID.GetHashCode();
+        public readonly override int GetHashCode() => 
+            this.CID.GetHashCode();
     }
 
     [JsonProperty]
@@ -125,11 +126,12 @@ public class ConfigurationMain
 
     public class MultiboxUtility
     {
-        public static string pipeName   = "AutoDutyPipe";
-        public static string serverName = ".";
-        public static TransportType transportType = TransportType.NamedPipe;
-        public static string serverAddress = "127.0.0.1";
-        public static int serverPort = 12345;
+        public static string        PipeName      { get; set; } = "AutoDutyPipe";
+        public static string        ServerName    { get; set; } = ".";
+        public static TransportType TransportType { get; set; } = TransportType.NamedPipe;
+        public static string        ServerAddress { get; set; } = "127.0.0.1";
+        public static int           ServerPort    { get; set; } = 1716;
+
 
         private const string SERVER_AUTH_KEY = "AD_Server_Auth!";
         private const string CLIENT_AUTH_KEY = "AD_Client_Auth!";
@@ -179,7 +181,7 @@ public class ConfigurationMain
                 if(stepBlock)
                     if (Instance.host)
                     {
-                        Plugin.Action = "Waiting for clients";
+                        Plugin.action = "Waiting for clients";
                         Server.CheckStepProgress();
                     }
                     else
@@ -246,17 +248,17 @@ public class ConfigurationMain
                 {
                     if (transport != null) return;
                     
-                    transport = transportType switch 
+                    transport = TransportType switch 
                     {
-                        TransportType.NamedPipe => new NamedPipeTransport(pipeName),
-                        TransportType.Tcp => new TcpTransport(serverPort),
-                        _ => throw new NotImplementedException(transportType.ToString()),
+                        TransportType.NamedPipe => new NamedPipeTransport(PipeName),
+                        TransportType.Tcp => new TcpTransport(ServerPort),
+                        _ => throw new NotImplementedException(TransportType.ToString()),
                     };
 
                     transport.StartServer(MAX_SERVERS);
                     serverCts = new CancellationTokenSource();
                     Task.Run(() => AcceptLoop(serverCts.Token), serverCts.Token);
-                    DebugLog($"Server started with {transportType} transport");
+                    DebugLog($"Server started with {TransportType} transport");
                 }
                 catch (Exception ex)
                 {
@@ -283,7 +285,7 @@ public class ConfigurationMain
                         stepConfirms[i] = false;
                     }
 
-                    if (!Plugin.InDungeon)
+                    if (!InDungeon)
                     {
                         Chat.ExecuteCommand("/partycmd breakup");
 
@@ -412,7 +414,7 @@ public class ConfigurationMain
 
                                                                 if (!PartyHelper.IsPartyMember(client.CID))
                                                                 {
-                                                                    if (client.WorldId == Player.CurrentWorldId)
+                                                                    if (client.WorldId == Player.CurrentWorld.RowId)
                                                                         InfoProxyPartyInvite.Instance()->InviteToParty(client.CID, client.CName, client.WorldId);
                                                                     else
                                                                         InfoProxyPartyInvite.Instance()->InviteToPartyContentId(client.CID, 0);
@@ -522,7 +524,7 @@ public class ConfigurationMain
 
             public static void CheckStepProgress()
             {
-                if((Plugin.Stage != Stage.Looping && Plugin.Indexer >= 0 && Plugin.Indexer < Plugin.Actions.Count && Plugin.Actions[Plugin.Indexer].Tag == ActionTag.Treasure || stepConfirms.All(x => x)) && stepBlock)
+                if((Plugin.Stage != Stage.Looping && Plugin.indexer >= 0 && Plugin.indexer < Plugin.Actions.Count && Plugin.Actions[Plugin.indexer].Tag == ActionTag.Treasure || stepConfirms.All(x => x)) && stepBlock)
                 {
                     for (int i = 0; i < stepConfirms.Length; i++)
                         stepConfirms[i] = false;
@@ -539,7 +541,7 @@ public class ConfigurationMain
             public static void SendStepStart()
             {
                 DebugLog("Synchronizing Clients to Server step");
-                SendToAllClients($"{STEP_START}|{Plugin.Indexer}");
+                SendToAllClients($"{STEP_START}|{Plugin.indexer}");
             }
 
             public static void ExitDuty()
@@ -559,10 +561,8 @@ public class ConfigurationMain
                 stepBlock = false;
             }
 
-            public static void SendPath()
-            {
-                SendToAllClients($"{PATH_STEPS}|{JsonConvert.SerializeObject(Plugin.Actions, ConfigurationMain.jsonSerializerSettings)}");
-            }
+            public static void SendPath() => 
+                SendToAllClients($"{PATH_STEPS}|{JsonConvert.SerializeObject(Plugin.Actions, JsonSerializerSettings)}");
 
             private static void SendToAllClients(string message)
             {
@@ -605,14 +605,14 @@ public class ConfigurationMain
             {
                 try
                 {
-                    using ITransport transport = transportType switch 
+                    using ITransport transport = TransportType switch 
                     {
-                        TransportType.NamedPipe => new NamedPipeTransport(pipeName, serverName),
-                        TransportType.Tcp => new TcpTransport(serverAddress, serverPort),
-                        _ => throw new NotImplementedException(transportType.ToString()),
+                        TransportType.NamedPipe => new NamedPipeTransport(PipeName, ServerName),
+                        TransportType.Tcp => new TcpTransport(ServerAddress, ServerPort),
+                        _ => throw new NotImplementedException(TransportType.ToString()),
                     };
 
-                    DebugLog($"Connecting to server ({transportType})...\n");
+                    DebugLog($"Connecting to server ({TransportType})...\n");
                     await using Stream clientStream = await transport.ConnectToServerAsync(ct);
 
                     clientSS = new StreamString(clientStream);
@@ -624,7 +624,7 @@ public class ConfigurationMain
                         _ = Svc.Framework.RunOnTick(() =>
                                                 {
                                                     if (Player.CID != 0)
-                                                        clientSS.WriteString($"{CLIENT_CID_KEY}|{Player.CID}|{Player.Name}|{Player.CurrentWorldId}");
+                                                        clientSS.WriteString($"{CLIENT_CID_KEY}|{Player.CID}|{Player.Name}|{Player.CurrentWorld.RowId}");
                                                 }, cancellationToken: ct);
 
                         _ = Task.Run(() => ClientKeepAliveThread(ct), ct);
@@ -641,7 +641,7 @@ public class ConfigurationMain
                                 case STEP_START:
                                     if (int.TryParse(split[1], out int step))
                                     {
-                                        Plugin.Indexer = step;
+                                        Plugin.indexer = step;
                                         stepBlock      = false;
                                         Plugin.Stage   = Stage.Idle;
                                         Plugin.Stage   = Stage.Reading_Path;
@@ -691,7 +691,7 @@ public class ConfigurationMain
                                                                                                         }, 500, false);
                                     break;
                                 case PATH_STEPS:
-                                    List<PathAction>? steps = JsonConvert.DeserializeObject<List<PathAction>>(message[(split[0].Length+1)..], jsonSerializerSettings);
+                                    List<PathAction>? steps = JsonConvert.DeserializeObject<List<PathAction>>(message[(split[0].Length+1)..], JsonSerializerSettings);
                                     if (steps is { Count: > 0 })
                                     {
                                         DebugLog("setting steps from host");
@@ -747,7 +747,7 @@ public class ConfigurationMain
                     DebugLog("Client not connected, cannot send step completed.");
                     return;
                 }
-                Plugin.Action = "Waiting for others";
+                Plugin.action = "Waiting for others";
                 clientSS.WriteString(STEP_COMPLETED);
                 DebugLog("Step completed sent to server.");
             }
@@ -765,14 +765,11 @@ public class ConfigurationMain
         }
 
 
-        private static void DebugLog(string message)
-        {
+        private static void DebugLog(string message) => 
             Svc.Log.Debug($"Pipe Connection: {message}");
-        }
-        private static void ErrorLog(string message)
-        {
+
+        private static void ErrorLog(string message) => 
             Svc.Log.Error($"Pipe Connection: {message}");
-        }
 
         private class StreamString(Stream ioStream)
         {
@@ -860,7 +857,7 @@ public class ConfigurationMain
 
         void RegisterProfileData(ProfileData profile)
         {
-            if (profile.CIDs.Any())
+            if (profile.CIDs.Count == 0)
                 foreach (ulong cid in profile.CIDs)
                     this.profileByCID[cid] = profile.Name;
             this.profileByName[profile.Name] = profile;
@@ -997,34 +994,31 @@ public class ConfigurationMain
     public ProfileData? GetProfile(string name) => 
         this.profileByName.GetValueOrDefault(name);
 
-    public void SetCharacterDefault()
-    {
+    public void SetCharacterDefault() =>
         Svc.Framework.RunOnTick(() =>
-                          {
+                                {
 
-                              if (!PlayerHelper.IsValid)
-                                  return;
+                                    if (!PlayerHelper.IsValid)
+                                        return;
 
-                              ulong cid = Player.CID;
+                                    ulong cid = Player.CID;
 
-                              if (this.profileByCID.TryGetValue(cid, out string? oldProfile))
-                                  this.profileByName[oldProfile].CIDs.Remove(cid);
+                                    if (this.profileByCID.TryGetValue(cid, out string? oldProfile))
+                                        this.profileByName[oldProfile].CIDs.Remove(cid);
 
-                              this.GetCurrentProfile.CIDs.Add(cid);
-                              this.profileByCID.Add(cid, this.ActiveProfileName);
-                              this.charByCID[cid] = new CharData
-                                                    {
-                                                        CID   = cid,
-                                                        Name  = Player.Name,
-                                                        World = Player.CurrentWorld
-                                                    };
+                                    this.GetCurrentProfile.CIDs.Add(cid);
+                                    this.profileByCID.Add(cid, this.ActiveProfileName);
+                                    this.charByCID[cid] = new CharData
+                                                          {
+                                                              CID   = cid,
+                                                              Name  = Player.Name,
+                                                              World = Player.CurrentWorldName
+                                                          };
 
-                              EzConfig.Save();
-                          });
-    }
+                                    EzConfig.Save();
+                                });
 
-    public void RemoveCharacterDefault()
-    {
+    public void RemoveCharacterDefault() =>
         Svc.Framework.RunOnTick(() =>
                                 {
                                     if (!PlayerHelper.IsValid)
@@ -1037,30 +1031,37 @@ public class ConfigurationMain
 
                                     EzConfig.Save();
                                 });
-    }
 
-    public static void DebugLog(string message)
-    {
+    public static void DebugLog(string message) => 
         Svc.Log.Debug($"Configuration Main: {message}");
-    }
 
-    public static JsonSerializerSettings jsonSerializerSettings = new()
-                                                                  {
-                                                                      Formatting                     = Formatting.Indented,
-                                                                      DefaultValueHandling           = DefaultValueHandling.Include,
-                                                                      Converters                     = [new StringEnumConverter(new DefaultNamingStrategy())],
-                                                                      TypeNameHandling               = TypeNameHandling.Auto,
-                                                                      TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
-                                                                      Culture                        = CultureInfo.InvariantCulture,
-                                                                      SerializationBinder            = new AutoDutySerializationBinder()
-                                                                  };
+    public static JsonSerializerSettings JsonSerializerSettings { get; } = new()
+                                                                           {
+                                                                               Formatting                     = Formatting.Indented,
+                                                                               DefaultValueHandling           = DefaultValueHandling.Include,
+                                                                               Converters                     = [new StringEnumConverter(new DefaultNamingStrategy())],
+                                                                               TypeNameHandling               = TypeNameHandling.Auto,
+                                                                               TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+                                                                               Culture                        = CultureInfo.InvariantCulture,
+                                                                               SerializationBinder            = new AutoDutySerializationBinder()
+                                                                           };
 
     public class AutoDutySerializationBinder : DefaultSerializationBinder
     {
-        public override Type BindToType(string assemblyName, string typeName) =>
-            assemblyName.StartsWith("AutoDuty") ? 
-                typeof(Configuration).Assembly.GetType(typeName) : 
-                base.BindToType(assemblyName, typeName);
+        
+        public override Type BindToType(string? assemblyName, string typeName)
+        {
+            bool isInternal = (assemblyName?.StartsWith("AutoDuty") ?? false);
+
+            if (isInternal)
+            {
+                Type? type = typeof(Configuration).Assembly.GetType(typeName);
+                if (type != null)
+                    return type;
+            }
+
+            return base.BindToType(assemblyName, typeName);
+        }
     }
 }
 
@@ -1150,9 +1151,8 @@ public class Configuration
         get => this.showOverlay;
         set
         {
-            this.showOverlay = value;
-            if (Plugin.Overlay != null)
-                Plugin.Overlay.IsOpen = value;
+            this.showOverlay       = value;
+            Plugin.Overlay?.IsOpen = value;
         }
     }
     internal bool hideOverlayWhenStopped = false;
@@ -1163,7 +1163,7 @@ public class Configuration
         {
             this.hideOverlayWhenStopped = value;
             if (Plugin.Overlay != null) 
-                SchedulerHelper.ScheduleAction("LockOverlaySetter", () => Plugin.Overlay.IsOpen = !value || Plugin.States.HasAnyFlag(PluginState.Looping, PluginState.Navigating), () => Plugin.Overlay != null);
+                SchedulerHelper.ScheduleAction("LockOverlaySetter", () => Plugin.Overlay.IsOpen = !value || Plugin.states.HasAnyFlag(PluginState.Looping, PluginState.Navigating), () => Plugin.Overlay != null);
         }
     }
     internal bool lockOverlay = false;
@@ -1270,7 +1270,7 @@ public class Configuration
         {
             this.maxDistanceToTargetRoleBased = value;
             if (value)
-                SchedulerHelper.ScheduleAction("MaxDistanceToTargetRoleBasedBMRoleChecks", () => Plugin.BMRoleChecks(), () => PlayerHelper.IsReady);
+                SchedulerHelper.ScheduleAction("MaxDistanceToTargetRoleBasedBMRoleChecks", () => BMRoleChecks(), () => PlayerHelper.IsReady);
         }
     }
     public float MaxDistanceToTargetFloat    = 2.6f;
@@ -1284,7 +1284,7 @@ public class Configuration
         {
             this.positionalRoleBased = value;
             if (value)
-                SchedulerHelper.ScheduleAction("PositionalRoleBasedBMRoleChecks", () => Plugin.BMRoleChecks(), () => PlayerHelper.IsReady);
+                SchedulerHelper.ScheduleAction("PositionalRoleBasedBMRoleChecks", () => BMRoleChecks(), () => PlayerHelper.IsReady);
         }
     }
     public float MaxDistanceToTargetRoleMelee  = 2.6f;
@@ -1453,25 +1453,23 @@ public class Configuration
     public bool                                        TerminationKeepActive       = true;
     #endregion
 
-    public void Save()
-    {
+    public static void Save() => 
         EzConfig.Save();
-    }
 
     public TrustMemberName?[] SelectedTrustMembers = new TrustMemberName?[3];
 }
 
 public static class ConfigTab
 {
-    internal static string FollowName = "";
+    internal static string followName = "";
 
-    private static Configuration Configuration => Plugin.Configuration;
-    private static string preLoopCommand = string.Empty;
-    private static string betweenLoopCommand = string.Empty;
-    private static string terminationCommand = string.Empty;
-    private static Dictionary<uint, Item> Items { get; set; } = Svc.Data.GetExcelSheet<Item>()?.Where(x => !x.Name.ToString().IsNullOrEmpty()).ToDictionary(x => x.RowId, x => x) ?? [];
-    private static string stopItemQtyItemNameInput = "";
-    private static KeyValuePair<uint, string> stopItemQtySelectedItem = new(0, "");
+    private static Configuration              Configuration => AutoDuty.Configuration;
+    private static string                     preLoopCommand     = string.Empty;
+    private static string                     betweenLoopCommand = string.Empty;
+    private static string                     terminationCommand = string.Empty;
+    private static Dictionary<uint, Item>     Items { get; set; } = Svc.Data.GetExcelSheet<Item>()?.Where(x => !x.Name.ToString().IsNullOrEmpty()).ToDictionary(x => x.RowId, x => x) ?? [];
+    private static string                     stopItemQtyItemNameInput = "";
+    private static KeyValuePair<uint, string> stopItemQtySelectedItem  = new(0, "");
 
     private static string                     autoOpenCoffersNameInput    = "";
     private static KeyValuePair<uint, string> autoOpenCoffersSelectedItem = new(0, "");
@@ -1484,16 +1482,23 @@ public static class ConfigTab
         public ushort StatusId;
     }
 
-    private static List<ConsumableItem> ConsumableItems { get; } = Svc.Data.GetExcelSheet<Item>()
-                                                                     ?.Where(x => !x.Name.ToString().IsNullOrEmpty() && x.ItemUICategory.ValueNullable?.RowId is 44 or 45 or 46 && x.ItemAction.ValueNullable?.Data[0] is 48 or 49)
-                                                                      .Select(x => new ConsumableItem() { StatusId = x.ItemAction.Value!.Data[0], ItemId = x.RowId, Name = x.Name.ToString(), CanBeHq = x.CanBeHq }).ToList() ?? [];
+    private static List<ConsumableItem> ConsumableItems { get; } = [..Svc.Data.GetExcelSheet<Item>()
+                                                                         .Where(x => !x.Name.ToString().IsNullOrEmpty() && 
+                                                                                     x.ItemUICategory.ValueNullable?.RowId is 44 or 45 or 46 && x.ItemAction.ValueNullable?.Data[0] is 48 or 49)
+                                                                         .Select(x => new ConsumableItem
+                                                                                      {
+                                                                                          StatusId = x.ItemAction.Value!.Data[0],
+                                                                                          ItemId   = x.RowId,
+                                                                                          Name     = x.Name.ToString(),
+                                                                                          CanBeHq  = x.CanBeHq
+                                                                                      })];
 
     private static string         consumableItemsItemNameInput = "";
     private static ConsumableItem consumableItemsSelectedItem  = new();
 
     private static string profileRenameInput = "";
 
-    private static readonly Sounds[] _validSounds = ((Sounds[])Enum.GetValues(typeof(Sounds))).Where(s => s is not Sounds.None and not Sounds.Unknown).ToArray();
+    private static readonly Sounds[] validSounds = [..((Sounds[])Enum.GetValues(typeof(Sounds))).Where(s => s is not Sounds.None and not Sounds.Unknown)];
 
     private static bool overlayHeaderSelected      = false;
     private static bool multiboxHeaderSelected     = false;
@@ -1555,10 +1560,11 @@ public static class ConfigTab
                     ImGui.Text(key);
 
                     ProfileData? profile = ConfigurationMain.Instance.GetProfile(key);
-                    if(profile?.CIDs.Any() ?? false)
+                    if(profile?.CIDs.Count != 0)
                     {
                         ImGui.SameLine();
-                        ImGuiEx.TextWrapped(ImGuiHelper.VersionColor, string.Join(", ", profile.CIDs.Select(cid => ConfigurationMain.Instance.charByCID.TryGetValue(cid, out ConfigurationMain.CharData cd) ? cd.GetName() : cid.ToString())));
+                        ImGuiEx.TextWrapped(ImGuiHelper.VersionColor, 
+                                            string.Join(", ", profile!.CIDs.Select(cid => ConfigurationMain.Instance.charByCID.TryGetValue(cid, out ConfigurationMain.CharData cd) ? cd.GetName() : cid.ToString())));
                     }
                 }
         }
@@ -1798,7 +1804,7 @@ public static class ConfigTab
                             ImGui.Indent();
                             if (ImGui.CollapsingHeader("Duties##DevSquadronDuties"))
                             {
-                                ReaderGCArmyCapture armyCapture = new ReaderGCArmyCapture(armyCaptureAtk);
+                                ReaderGCArmyCapture armyCapture = new(armyCaptureAtk);
                                 ImGui.Text($"{armyCapture.PlayerCharLvl} ({armyCapture.PlayerCharIlvl}) {armyCapture.PlayerCharName}");
                                 ImGui.Columns(6);
 
@@ -1839,7 +1845,7 @@ public static class ConfigTab
                             if (ImGui.CollapsingHeader("Available Members##DevGCArmyMembers"))
                                 if (GenericHelpers.TryGetAddonByName("GcArmyMemberList", out AtkUnitBase* armyMemberListAtk) && GenericHelpers.IsAddonReady(armyMemberListAtk))
                                 {
-                                    ReaderGCArmyMemberList armyMemberList = new ReaderGCArmyMemberList(armyMemberListAtk);
+                                    ReaderGCArmyMemberList armyMemberList = new(armyMemberListAtk);
 
                                     ImGui.Columns(13);
 
@@ -1999,7 +2005,7 @@ public static class ConfigTab
                         {
                             if (u != 0)
                             {
-                                if (BLUHelper.spellsById.TryGetValue(BLUHelper.NormalToAoz(u), out BLUHelper.BLUSpell spell))
+                                if (BLUHelper.spellsById.TryGetValue(BLUHelper.NormalToAoz(u), out BLUHelper.BLUSpell? spell))
                                 {
                                     ImGui.AlignTextToFramePadding();
                                     ImGui.Text($"{u}: {BLUHelper.NormalToAoz(u)} {spell.Entry} {spell.Name}");
@@ -2067,9 +2073,9 @@ public static class ConfigTab
                         ImGui.Text($"Party {Svc.Party.Length}");
                         ImGui.Text($"Party {PartyHelper.GetPartyMembers().Count}");
                         ImGui.Text($"Party {PartyHelper.GetPartyMembers().Skip(1).FirstOrDefault()?.ObjectKind}");
-                        ImGui.Text($"Party {PartyHelper.GetPartyMembers().Skip(1).FirstOrDefault()?.DataId}");
-                        ImGui.Text($"Party {PartyHelper.GetPartyMembers().Skip(2).FirstOrDefault()?.DataId}");
-                        ImGui.Text($"Party {PartyHelper.GetPartyMembers().Skip(3).FirstOrDefault()?.DataId}");
+                        ImGui.Text($"Party {PartyHelper.GetPartyMembers().Skip(1).FirstOrDefault()?.BaseId}");
+                        ImGui.Text($"Party {PartyHelper.GetPartyMembers().Skip(2).FirstOrDefault()?.BaseId}");
+                        ImGui.Text($"Party {PartyHelper.GetPartyMembers().Skip(3).FirstOrDefault()?.BaseId}");
                         ImGui.Text($"Buddies: {Svc.Buddies.Length}");
                         ImGui.Text($"Buddies: {Svc.Buddies.Count}");
                         ImGui.Text($"Pet: {Svc.Buddies.PetBuddy?.GameObject?.Name}");
@@ -2112,7 +2118,7 @@ public static class ConfigTab
                 if (ImGui.Button("BetweenLoopActions##DevBetweenLoops"))
                 {
                     Plugin.CurrentTerritoryContent =  ContentHelper.DictionaryContent.Values.First();
-                    Plugin.States                  |= PluginState.Other;
+                    Plugin.states                  |= PluginState.Other;
                     Plugin.LoopTasks(false);
                 }
 
@@ -2129,7 +2135,7 @@ public static class ConfigTab
                     if (ImGui.CollapsingHeader("Warps##DevWarps"))
                     {
                         ImGui.Indent();
-                        foreach (Warp warp in Svc.Data.GameData.GetExcelSheet<Warp>())
+                        foreach (Warp warp in Svc.Data.GameData.GetExcelSheet<Warp>()!)
                         {
                             if (warp.TerritoryType.RowId != 152)
                                 continue;
@@ -2146,15 +2152,15 @@ public static class ConfigTab
                     }
 
                     if (ImGui.CollapsingHeader("LevelTest"))
-                        foreach ((Level lvl, Vector3, Vector3) level in Svc.Data.GameData.GetExcelSheet<Level>().Where(lvl => lvl.Territory.RowId == 152)
+                        foreach ((Level lvl, Vector3, Vector3) level in Svc.Data.GameData.GetExcelSheet<Level>()!.Where(lvl => lvl.Territory.RowId == 152)
                                                                            .Select(lvl => (lvl, (new Vector3(lvl.X, lvl.Y, lvl.Z))))
                                                                            .Select(tuple => (tuple.lvl, tuple.Item2, (tuple.Item2 - Player.Position))).OrderBy(lvl => lvl.Item3.LengthSquared()))
                             ImGui.Text($"{level.lvl.RowId} {level.Item2} {level.Item3} {string.Join(" | ", level.lvl.Object.GetType().GenericTypeArguments.Select(t => t.FullName))}: {level.lvl.Object.RowId}");
 
-                    ImGuiEx.Text($"{typeof(Achievement).Assembly.GetTypes().Where(x => x.FullName.StartsWith("Lumina.Excel.Sheets")).
+                    ImGuiEx.Text($"{typeof(Achievement).Assembly.GetTypes().Where(x => x.FullName?.StartsWith("Lumina.Excel.Sheets") ?? false).
                                                         Select(x => (x, x.GetProperties().Where(f => f.PropertyType.Name == "RowRef`1" && f.PropertyType.GenericTypeArguments[0].FullName == typeof(Map).FullName))).
                                                         Where(x => x.Item2.Any()).
-                                                        Select(x => $"{x.Item1} references {x.Item2.Select(x => x.Name).Print(", ")}").Print("\n")}");
+                                                        Select(x => $"{x.x} references {x.Item2.Select(pi => pi.Name).Print(", ")}").Print("\n")}");
                     ImGui.Unindent();
                 }
             }
@@ -2202,7 +2208,7 @@ public static class ConfigTab
                             if (ImGui.Selectable(rotationPlugin.ToCustomString(), Configuration.rotationPlugin == rotationPlugin, ImGuiSelectableFlags.AllowItemOverlap))
                             {
                                 Configuration.rotationPlugin = rotationPlugin;
-                                Plugin.Configuration.Save();
+                                Configuration.Save();
                             }
                         }
 
@@ -2371,7 +2377,7 @@ public static class ConfigTab
                         BossMod_IPCSubscriber.RefreshPreset("AutoDuty", Resources.AutoDutyPreset);
                         BossMod_IPCSubscriber.RefreshPreset("AutoDuty Passive", Resources.AutoDutyPassivePreset);
                     }
-                    if (ImGui.Checkbox("Update Presets automatically", ref Configuration.BM_UpdatePresetsAutomatically)) 
+                    if (ImGui.Checkbox("Update Presets automatically", ref Configuration.BM_UpdatePresetsAutomatically))
                         Configuration.Save();
                     if (ImGui.Checkbox("Set Max Distance To Target Based on Player Role", ref Configuration.maxDistanceToTargetRoleBased))
                     {
@@ -2411,7 +2417,7 @@ public static class ConfigTab
                     if (ImGui.Checkbox("Set Positional Based on Player Role", ref Configuration.positionalRoleBased))
                     {
                         Configuration.PositionalRoleBased = Configuration.positionalRoleBased;
-                        Plugin.BMRoleChecks();
+                        BMRoleChecks();
                         Configuration.Save();
                     }
                     using (ImRaii.Disabled(Configuration.positionalRoleBased))
@@ -2473,7 +2479,7 @@ public static class ConfigTab
                 }
                 
                 if (ImGui.Checkbox("Loot Boss Treasure Only", ref Configuration.LootBossTreasureOnly))
-                        Configuration.Save();
+                    Configuration.Save();
 
                 ImGuiComponents.HelpMarker("AutoDuty will walk around non-boss chests, and only loot boss chests.\nNot all paths may accomodate.");
                 ImGui.PopItemWidth();
@@ -2606,8 +2612,7 @@ public static class ConfigTab
             using (ImRaii.Disabled(!Configuration.EnablePreLoopActions))
             {
                 ImGui.Separator();
-                MakeCommands("Execute commands on start of all loops",
-                             ref Configuration.ExecuteCommandsPreLoop, ref Configuration.CustomCommandsPreLoop, ref preLoopCommand);
+                MakeCommands("Execute commands on start of all loops", ref Configuration.ExecuteCommandsPreLoop, ref Configuration.CustomCommandsPreLoop, ref preLoopCommand, "CommandsPreLoop");
 
                 ImGui.Separator();
 
@@ -2959,7 +2964,7 @@ public static class ConfigTab
                 ImGuiComponents.HelpMarker("Will delay all AutoDuty between-loop Processes for X seconds.");
                 ImGui.Separator();
 
-                MakeCommands("Execute commands in between of all loops", ref Configuration.ExecuteCommandsBetweenLoop, ref Configuration.CustomCommandsBetweenLoop, ref betweenLoopCommand);
+                MakeCommands("Execute commands in between of all loops", ref Configuration.ExecuteCommandsBetweenLoop, ref Configuration.CustomCommandsBetweenLoop, ref betweenLoopCommand, "CommandsBetweenLoop");
 
                 if (ImGui.Checkbox("Auto Extract", ref Configuration.AutoExtract))
                     Configuration.Save();
@@ -3073,7 +3078,7 @@ public static class ConfigTab
 
                 using (ImGuiHelper.RequiresPlugin(ExternalPlugin.AutoRetainer, "DiscardConfig", inline: true))
                 {
-                    if (ImGui.Checkbox("Discard Items", ref Configuration.DiscardItems)) 
+                    if (ImGui.Checkbox("Discard Items", ref Configuration.DiscardItems))
                         Configuration.Save();
                 }
                 if (!AutoRetainer_IPCSubscriber.IsEnabled)
@@ -3116,7 +3121,7 @@ public static class ConfigTab
                         ImGui.Unindent();
                     }
 
-                    if (ImGui.Checkbox($"Protect Gearsets##Desynth{nameof(Configuration.AutoDesynthNoGearset)}", ref Configuration.AutoDesynthNoGearset)) 
+                    if (ImGui.Checkbox($"Protect Gearsets##Desynth{nameof(Configuration.AutoDesynthNoGearset)}", ref Configuration.AutoDesynthNoGearset))
                         Configuration.Save();
 
                     if (ImGui.CollapsingHeader("Desynth Categories"))
@@ -3178,7 +3183,7 @@ public static class ConfigTab
                             }
                             ImGui.PopItemWidth();
                         }
-                        if (ImGui.Checkbox("Use GC Aetheryte Ticket", ref Configuration.AutoGCTurninUseTicket)) 
+                        if (ImGui.Checkbox("Use GC Aetheryte Ticket", ref Configuration.AutoGCTurninUseTicket))
                             Configuration.Save();
                         ImGui.Unindent();
                     }
@@ -3391,7 +3396,7 @@ public static class ConfigTab
                                 if (ImGui.Selectable($"({bluSpell.Entry}) {bluSpell.Name}"))
                                 {
                                     Configuration.TerminationBLUSpells.Add(bluSpell.ID);
-                                    Configuration.TerminationBLUSpells = Configuration.TerminationBLUSpells.OrderBy(sp => BLUHelper.spellsById[sp].Entry).ToList();
+                                    Configuration.TerminationBLUSpells = [..Configuration.TerminationBLUSpells.OrderBy(sp => BLUHelper.spellsById[sp].Entry)];
                                     Configuration.Save();
                                 }
                         }
@@ -3420,11 +3425,10 @@ public static class ConfigTab
                     ImGui.Unindent();
                 }
 
-                MakeCommands("Execute commands on termination of all loops",
-                             ref Configuration.ExecuteCommandsTermination,  ref Configuration.CustomCommandsTermination, ref terminationCommand);
+                MakeCommands("Execute commands on termination of all loops", ref Configuration.ExecuteCommandsTermination,  ref Configuration.CustomCommandsTermination, ref terminationCommand, "CommandsTermination");
 
                 if (ImGui.Checkbox("Play Sound on Completion of All Loops: ", ref Configuration.PlayEndSound)) //Heavily Inspired by ChatAlerts
-                        Configuration.Save();
+                    Configuration.Save();
                 if (Configuration.PlayEndSound)
                 {
                     if (ImGuiEx.IconButton(FontAwesomeIcon.Play, "##ConfigSoundTest", new Vector2(ImGui.GetItemRectSize().Y)))
@@ -3483,14 +3487,15 @@ public static class ConfigTab
             uint text     = ImGui.GetColorU32(ImGuiCol.Text);
             uint disabled = ImGui.GetColorU32(ImGuiCol.TextDisabled);
 
-            using (ImRaii.PushColor(ImGuiCol.Text, ConfigurationMain.MultiboxUtility.transportType == TransportType.NamedPipe ? text : disabled))
+            TransportType transportType = ConfigurationMain.MultiboxUtility.TransportType;
+            using (ImRaii.PushColor(ImGuiCol.Text, transportType == TransportType.NamedPipe ? text : disabled))
             {
                 ImGui.TextWrapped("Named Pipes");
                 ImGuiEx.TextWrapped("Step 4: The pipe name needs to match between clients and host");
                 ImGuiEx.TextWrapped("Step 5: On the clients, the server name can be used to connect to hosts on other computers. The default of \".\" is the local computer.");
             }
             ImGui.Separator();
-            using (ImRaii.PushColor(ImGuiCol.Text, ConfigurationMain.MultiboxUtility.transportType == TransportType.Tcp ? text : disabled))
+            using (ImRaii.PushColor(ImGuiCol.Text, transportType == TransportType.Tcp ? text : disabled))
             {
                 ImGui.TextWrapped("TCP");
                 ImGuiEx.TextWrapped("Step 4: The port needs to match between clients and host");
@@ -3514,32 +3519,46 @@ public static class ConfigTab
             using(ImRaii.Disabled(ConfigurationMain.Instance.MultiBox))
             {
                 ImGui.Indent();
-                if(ImGuiEx.EnumCombo("Transport Type", ref ConfigurationMain.MultiboxUtility.transportType))
+                if(ImGuiEx.EnumCombo("Transport Type", ref transportType))
+                {
+                    ConfigurationMain.MultiboxUtility.TransportType = transportType;
                     Configuration.Save();
+                }
+
                 ImGuiComponents.HelpMarker("Named Pipe: Network connectivity depends on system settings.\nTCP: Network connectivity depends on firewall settings.\nIn most cases Named Pipe should work with no changes.");
 
-                switch (ConfigurationMain.MultiboxUtility.transportType)
+                switch (transportType)
                 {
                     case TransportType.NamedPipe:
                     {
-                        if(ImGui.InputText("Pipe Name", ref ConfigurationMain.MultiboxUtility.pipeName))
+                        string pipeName = ConfigurationMain.MultiboxUtility.PipeName;
+                        if(ImGui.InputText("Pipe Name", ref pipeName))
+                        {
+                            ConfigurationMain.MultiboxUtility.PipeName = pipeName;
                             Configuration.Save();
+                        }
+
                         ImGui.SameLine();
                         if (ImGui.Button("Reset##MultiboxResetPipeName"))
                         {
-                            ConfigurationMain.MultiboxUtility.pipeName = "AutoDutyPipe";
-                            Configuration.Save();
+                            ConfigurationMain.MultiboxUtility.PipeName = "AutoDutyPipe";
+                                Configuration.Save();
                         }
 
                         if (!ConfigurationMain.Instance.host)
                         {
-                            if (ImGui.InputText("Server Name", ref ConfigurationMain.MultiboxUtility.serverName))
+                            string serverName = ConfigurationMain.MultiboxUtility.ServerName;
+                            if (ImGui.InputText("Server Name", ref serverName))
+                            {
+                                ConfigurationMain.MultiboxUtility.ServerName = serverName;
                                 Configuration.Save();
+                            }
+
                             ImGui.SameLine();
                             if (ImGui.Button("Reset##MultiboxResetServerName"))
                             {
-                                ConfigurationMain.MultiboxUtility.serverName = ".";
-                                Configuration.Save();
+                                ConfigurationMain.MultiboxUtility.ServerName = ".";
+                                    Configuration.Save();
                             }
                         }
 
@@ -3549,23 +3568,33 @@ public static class ConfigTab
                     {
                         if (!ConfigurationMain.Instance.host)
                         {
-                            if (ImGui.InputText("Server Address", ref ConfigurationMain.MultiboxUtility.serverAddress))
+                            string serverAddress = ConfigurationMain.MultiboxUtility.ServerAddress;
+                            if (ImGui.InputText("Server Address", ref serverAddress))
+                            {
+                                ConfigurationMain.MultiboxUtility.ServerAddress = serverAddress;
                                 Configuration.Save();
+                            }
+
                             ImGui.SameLine();
                             if (ImGui.Button("Reset##MultiboxResetServerAddress"))
                             {
-                                ConfigurationMain.MultiboxUtility.serverAddress = "127.0.0.1";
-                                Configuration.Save();
+                                ConfigurationMain.MultiboxUtility.ServerAddress = "127.0.0.1";
+                                    Configuration.Save();
                             }
                         }
 
-                        if (ImGui.InputInt("Server Port", ref ConfigurationMain.MultiboxUtility.serverPort))
+                        int serverPort = ConfigurationMain.MultiboxUtility.ServerPort;
+                        if (ImGui.InputInt("Server Port", ref serverPort))
+                        {
+                            ConfigurationMain.MultiboxUtility.ServerPort = serverPort;
                             Configuration.Save();
+                        }
+
                         ImGui.SameLine();
                         if (ImGui.Button("Reset##MultiboxResetServerPort"))
                         {
-                            ConfigurationMain.MultiboxUtility.serverPort = 12345;
-                            Configuration.Save();
+                            ConfigurationMain.MultiboxUtility.ServerPort = 1716;
+                                Configuration.Save();
                         }
 
                         break;
@@ -3657,7 +3686,7 @@ public static class ConfigTab
                         }
                         ImGui.Columns(1);
 
-                        using(ImRaii.Disabled(!Plugin.InDungeon))
+                        using(ImRaii.Disabled(!InDungeon))
                         {
                             if(ImGui.Button("Resynchronize Step##MultiboxSynchronizeStep"))
                                 ConfigurationMain.MultiboxUtility.Server.SendStepStart();
@@ -3670,7 +3699,9 @@ public static class ConfigTab
             }
         }
 
-        void MakeCommands(string checkbox, ref bool execute, ref List<string> commands, ref string curCommand)
+        return;
+
+        static void MakeCommands(string checkbox, ref bool execute, ref List<string> commands, ref string curCommand, string id)
         {
             if (ImGui.Checkbox($"{checkbox}{(execute ? ":" : string.Empty)} ", ref execute))
                 Configuration.Save();
@@ -3681,7 +3712,7 @@ public static class ConfigTab
             {
                 ImGui.Indent();
                 ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 185 * ImGuiHelpers.GlobalScale);
-                if (ImGui.InputTextWithHint($"##Commands{checkbox}", "enter command starting with /", ref curCommand, 500, ImGuiInputTextFlags.EnterReturnsTrue))
+                if (ImGui.InputTextWithHint($"##Commands{checkbox}_{id}", "enter command starting with /", ref curCommand, 500, ImGuiInputTextFlags.EnterReturnsTrue))
                     if (!curCommand.IsNullOrEmpty() && curCommand[0] == '/' && (ImGui.IsKeyDown(ImGuiKey.Enter) || ImGui.IsKeyDown(ImGuiKey.KeypadEnter)))
                     {
                         Configuration.CustomCommandsPreLoop.Add(curCommand);
@@ -3694,13 +3725,13 @@ public static class ConfigTab
                 ImGui.SameLine(0, 5);
                 using (ImRaii.Disabled(curCommand.IsNullOrEmpty() || curCommand[0] != '/'))
                 {
-                    if (ImGui.Button($"Add Command##CommandButton{checkbox}"))
+                    if (ImGui.Button($"Add Command##CommandButton{checkbox}_{id}"))
                     {
                         commands.Add(curCommand);
                         Configuration.Save();
                     }
                 }
-                if (!ImGui.BeginListBox($"##CommandList{checkbox}", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, (ImGui.GetTextLineHeightWithSpacing() * commands.Count) + 5))) 
+                if (!ImGui.BeginListBox($"##CommandList{checkbox}_{id}", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, (ImGui.GetTextLineHeightWithSpacing() * commands.Count) + 5))) 
                     return;
 
                 bool removeItem = false;
@@ -3708,7 +3739,7 @@ public static class ConfigTab
 
                 foreach ((string Value, int Index) item in commands.Select((Value, Index) => (Value, Index)))
                 {
-                    ImGui.Selectable($"{item.Value}##Selectable{checkbox}");
+                    ImGui.Selectable($"{item.Value}##Selectable{checkbox}_{id}");
                     if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
                     {
                         removeItem = true;
@@ -3732,7 +3763,7 @@ public static class ConfigTab
         ImGui.PushItemWidth(150 * ImGuiHelpers.GlobalScale);
         if (ImGui.BeginCombo("##ConfigEndSoundMethod", Configuration.SoundEnum.ToName()))
         {
-            foreach (Sounds sound in _validSounds)
+            foreach (Sounds sound in validSounds)
                 if (ImGui.Selectable(sound.ToName()))
                 {
                     Configuration.SoundEnum = sound;

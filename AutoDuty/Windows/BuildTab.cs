@@ -9,21 +9,21 @@ using ECommons;
 using ECommons.DalamudServices;
 using ECommons.ImGuiMethods;
 using Pictomancy;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Numerics;
 using static AutoDuty.Managers.ContentPathsManager;
 using static AutoDuty.Windows.MainWindow;
 
 namespace AutoDuty.Windows
 {
+    using System;
+    using System.Collections.Generic;
     using Dalamud.Interface;
     using Dalamud.Utility.Numerics;
     using Newtonsoft.Json;
     using System.Globalization;
+    using System.IO;
+    using System.Linq;
 
     internal static class BuildTab
     {
@@ -57,9 +57,9 @@ namespace AutoDuty.Windows
         internal static unsafe void Draw()
         {
             SetCurrentTabName("BuildTab");
-            using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Navigating) || Plugin.States.HasFlag(PluginState.Looping)))
+            using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Navigating) || Plugin.states.HasFlag(PluginState.Looping)))
             {
-                if (Plugin.InDungeon)
+                if (InDungeon)
                 {
                     DrawPathElements();
                     DrawSeperator();
@@ -79,22 +79,25 @@ namespace AutoDuty.Windows
 
         private static void DrawPathElements()
         {
-            using ImRaii.IEndObject? d = ImRaii.Disabled(!Plugin.InDungeon || Plugin.Stage > 0 || !Player.Available);
+            using ImRaii.IEndObject? d = ImRaii.Disabled(!InDungeon || Plugin.Stage > 0 || !Player.Available);
             ImGui.Text($"Build Path: ({Svc.ClientState.TerritoryType}) {(ContentHelper.DictionaryContent.TryGetValue(Svc.ClientState.TerritoryType, out Classes.Content? content) ? content.Name : TerritoryName.GetTerritoryName(Svc.ClientState.TerritoryType))}");
 
+            ImGui.AlignTextToFramePadding();
             string idText = $"({Svc.ClientState.TerritoryType}) ";
             ImGui.Text(idText);
             ImGui.SameLine();
-            string path = Path.GetFileName(Plugin.PathFile).Replace(idText, string.Empty).Replace(".json", string.Empty);
+            string path = Path.GetFileName(Plugin.pathFile).Replace(idText, string.Empty).Replace(".json", string.Empty);
             string pathOrg = path;
 
             Vector2 textL = ImGui.CalcTextSize(".json");
             ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - textL.Length());
             if (ImGui.InputText("##BuildPathFileName", ref path, 100) && !path.Equals(pathOrg))
-                Plugin.PathFile = $"{Plugin.PathsDirectory.FullName}{Path.DirectorySeparatorChar}{idText}{path}.json";
+                Plugin.pathFile = $"{Plugin.pathsDirectory.FullName}{Path.DirectorySeparatorChar}{idText}{path}.json";
 
-            ImGui.SameLine();
+            ImGui.SameLine(0);
             ImGui.Text($".json");
+
+            ImGui.AlignTextToFramePadding();
             ImGui.Text("Changelog:");
             ImGui.SameLine();
             ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
@@ -159,13 +162,13 @@ namespace AutoDuty.Windows
                             case "MoveToObject":
                             case "Interactable":
                             case "Target":
-                                IGameObject? targetObject = Player.Object.TargetObject;
+                                IGameObject? targetObject = Player.Object?.TargetObject;
                                 IGameObject? gameObject = (targetObject ?? null) ?? ClosestObject;
                                 _arguments = [gameObject != null ? $"{gameObject.BaseId}" : string.Empty];
                                 _note = gameObject != null ? gameObject.Name.GetText() : string.Empty;
                                 break;
                             case "Boss":
-                                IGameObject? gameObject2   = Player.Object.TargetObject;
+                                IGameObject? gameObject2   = Player.Object?.TargetObject;
                                 _note = gameObject2 != null ? gameObject2.Name.GetText() : string.Empty;
                                 break;
                             default:
@@ -205,13 +208,13 @@ namespace AutoDuty.Windows
                         Svc.Log.Error($"You must add at least one action to save the path, please add an action and try again");
                         return;
                     }
-                    Svc.Log.Info($"Saving {Plugin.PathFile}");
+                    Svc.Log.Info($"Saving {Plugin.pathFile}");
 
                     PathFile? pathFile = null;
 
                     if (DictionaryPaths.TryGetValue(Svc.ClientState.TerritoryType, out ContentPathContainer? container))
                     {
-                        DutyPath? dutyPath = container.Paths.FirstOrDefault(dp => dp.FilePath == Plugin.PathFile);
+                        DutyPath? dutyPath = container.Paths.FirstOrDefault(dp => dp.FilePath == Plugin.pathFile);
                         if (dutyPath != null)
                         {
                             pathFile = dutyPath.PathFile;
@@ -230,9 +233,9 @@ namespace AutoDuty.Windows
                     pathFile ??= new PathFile();
 
                     pathFile.Actions = [.. Plugin.Actions];
-                    string json = JsonConvert.SerializeObject(pathFile, ConfigurationMain.jsonSerializerSettings);
-                    File.WriteAllText(Plugin.PathFile, json);
-                    Plugin.CurrentPath = 0;
+                    string json = JsonConvert.SerializeObject(pathFile, ConfigurationMain.JsonSerializerSettings);
+                    File.WriteAllText(Plugin.pathFile, json);
+                    Plugin.currentPath = 0;
                 }
                 catch (Exception e)
                 {
@@ -251,10 +254,10 @@ namespace AutoDuty.Windows
             ImGui.SameLine(0, 5);
             using(ImRaii.Enabled())
             {
-                using (ImRaii.Disabled(Plugin.PathFile.IsNullOrEmpty()))
+                using (ImRaii.Disabled(Plugin.pathFile.IsNullOrEmpty()))
                 {
                     if (ImGuiEx.ButtonWrapped("Open File"))
-                        Process.Start("explorer",  Plugin.PathFile ?? string.Empty);
+                        Process.Start("explorer",  Plugin.pathFile ?? string.Empty);
                 }
             }
         }
@@ -438,26 +441,27 @@ namespace AutoDuty.Windows
                             ConditionType.ObjectData => new PathActionConditionObjectData(),
                             ConditionType.Job => new PathActionConditionJob(),
                             ConditionType.ActionStatus => new PathActionConditionActionStatus(),
+                            _ => throw new ArgumentOutOfRangeException()
                         });
                     }
                 }
             }
         }
 
-        private static bool guide = false;
-
         private static void DrawBuildList()
         {
-            if (!ImGui.BeginListBox("##BuildList", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y))) return;
+            if (!ImGui.BeginListBox("##BuildList", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y))) 
+                return;
+
             try
             {
-                if (Plugin.InDungeon)
+                if (InDungeon)
                 {
                     int? dragIndex = null;
                     int? dragNext  = null;
 
 
-                    foreach ((PathAction Value, int Index) item in Plugin.Actions.Select((Value, Index) => (Value, Index)))
+                    foreach ((PathAction Value, int Index) item in Plugin.Actions.Select((value, index) => (Value: value, Index: index)))
                     {
                         Vector4 v4 = item.Value.Name.StartsWith("<--", StringComparison.InvariantCultureIgnoreCase) ? new Vector4(0, 255, 0, 1) : new Vector4(255, 255, 255, 1);
 
@@ -473,12 +477,11 @@ namespace AutoDuty.Windows
                             {
                                 _comment = item.Value.Name.Equals($"<-- Comment -->", StringComparison.InvariantCultureIgnoreCase);
                                 _noArgument = (ActionsList?.Any(x => x.Item1.Equals($"{item.Value.Name}", StringComparison.InvariantCultureIgnoreCase) &&
-                                                                     x.Item2.Equals("false", StringComparison.InvariantCultureIgnoreCase)) ??
-                                               false); // || item.Value.Name.Equals("MoveTo", StringComparison.InvariantCultureIgnoreCase);
-                                _actionText        = item.Value.Name;
-                                _note              = item.Value.Note;
-                                _arguments         = [..item.Value.Arguments];
-                                _position          = item.Value.Position;
+                                                                     x.Item2.Equals("false", StringComparison.InvariantCultureIgnoreCase)) ?? false); // || item.Value.Name.Equals("MoveTo", StringComparison.InvariantCultureIgnoreCase);
+                                _actionText = item.Value.Name;
+                                _note       = item.Value.Note;
+                                _arguments  = [..item.Value.Arguments];
+                                _position   = item.Value.Position;
                                 //_positionText      = _position.ToCustomString();
                                 _buildListSelected = item.Index;
                                 _showAddActionUI   = true;
@@ -502,7 +505,7 @@ namespace AutoDuty.Windows
                             _duplicateItemIndex = item.Index;
                         }
 
-                        if (ImGui.IsItemActive() && !ImGui.IsItemHovered() && !_dragDrop) 
+                        if (ImGui.IsItemActive() && !ImGui.IsItemHovered() && !_dragDrop)
                             _buildListSelected = item.Index;
 
                         if (_buildListSelected == item.Index && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !_showAddActionUI)
@@ -531,7 +534,7 @@ namespace AutoDuty.Windows
                         _buildListSelected                                                = dragNext.Value;
                         ImGui.ResetMouseDragDelta();
                     }
-                    else if(!ImGui.IsMouseDown(ImGuiMouseButton.Left) && !_showAddActionUI)
+                    else if (!ImGui.IsMouseDown(ImGuiMouseButton.Left) && !_showAddActionUI)
                     {
                         _dragDrop          = false;
                         _buildListSelected = -1;
@@ -546,7 +549,7 @@ namespace AutoDuty.Windows
 
                     if (_duplicateItem)
                     {
-                        Plugin.Actions.Insert(_duplicateItemIndex, Plugin.Actions[_duplicateItemIndex.JSONClone()]);
+                        Plugin.Actions.Insert(_duplicateItemIndex, Plugin.Actions[_duplicateItemIndex].JSONClone());
                         _duplicateItem = false;
                     }
                 }
@@ -555,7 +558,11 @@ namespace AutoDuty.Windows
                     ImGuiEx.TextWrapped(new Vector4(0, 1, 0, 1), "You must enter a dungeon to Build a Path");
                 }
             }
-            catch (Exception ex) { Svc.Log.Error(ex.ToString()); }
+            catch (Exception ex)
+            {
+                Svc.Log.Error(ex.ToString());
+            }
+
             if (_scrollBottom)
             {
                 ImGui.SetScrollHereY(1.0f);

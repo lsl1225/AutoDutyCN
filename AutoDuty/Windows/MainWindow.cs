@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
+﻿using System.Numerics;
 using AutoDuty.Helpers;
 using AutoDuty.IPC;
 using Dalamud.Interface;
@@ -17,7 +15,9 @@ using Dalamud.Bindings.ImGui;
 
 namespace AutoDuty.Windows;
 
-public class MainWindow : Window, IDisposable
+using System;
+
+public sealed class MainWindow : Window, IDisposable
 {
     internal static string CurrentTabName = "";
 
@@ -59,29 +59,26 @@ public class MainWindow : Window, IDisposable
     {
     }
 
-    internal static void Start()
-    {
+    internal static void Start() => 
         ImGui.SameLine(0, 5);
-    }
 
     internal static void LoopsConfig()
     {
         using ImRaii.IEndObject _ = ImRaii.Disabled(ConfigurationMain.Instance.MultiBox && !ConfigurationMain.Instance.host);
 
-        if ((Plugin.Configuration.UseSliderInputs  && ImGui.SliderInt("Times", ref Plugin.Configuration.LoopTimes, 0, 100)) || 
-            (!Plugin.Configuration.UseSliderInputs && ImGui.InputInt("Times", ref Plugin.Configuration.LoopTimes, 1)))
+        if ((AutoDuty.Configuration.UseSliderInputs  && ImGui.SliderInt("Times", ref AutoDuty.Configuration.LoopTimes, 0, 100)) || 
+            (!AutoDuty.Configuration.UseSliderInputs && ImGui.InputInt("Times", ref AutoDuty.Configuration.LoopTimes, 1)))
         {
-            if (Plugin.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
-                if (Plugin.PlaylistCurrentEntry != null)
-                    Plugin.PlaylistCurrentEntry.count = Plugin.Configuration.LoopTimes;
+            if (AutoDuty.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
+                Plugin.PlaylistCurrentEntry?.count = AutoDuty.Configuration.LoopTimes;
 
-            Plugin.Configuration.Save();
+            Configuration.Save();
         }
     }
 
     internal static void StopResumePause()
     {
-        using (ImRaii.Disabled(!Plugin.States.HasFlag(PluginState.Looping) && !Plugin.States.HasFlag(PluginState.Navigating) && RepairHelper.State != ActionState.Running && GotoHelper.State != ActionState.Running && GotoInnHelper.State != ActionState.Running && GotoBarracksHelper.State != ActionState.Running && GCTurninHelper.State != ActionState.Running && ExtractHelper.State != ActionState.Running && DesynthHelper.State != ActionState.Running))
+        using (ImRaii.Disabled(!Plugin.states.HasFlag(PluginState.Looping) && !Plugin.states.HasFlag(PluginState.Navigating) && RepairHelper.State != ActionState.Running && GotoHelper.State != ActionState.Running && GotoInnHelper.State != ActionState.Running && GotoBarracksHelper.State != ActionState.Running && GCTurninHelper.State != ActionState.Running && ExtractHelper.State != ActionState.Running && DesynthHelper.State != ActionState.Running))
         {
             if (ImGui.Button($"Stop###Stop2"))
             {
@@ -91,15 +88,15 @@ public class MainWindow : Window, IDisposable
             ImGui.SameLine(0, 5);
         }
 
-        using (ImRaii.Disabled((!Plugin.States.HasFlag(PluginState.Looping) && !Plugin.States.HasFlag(PluginState.Navigating) && RepairHelper.State != ActionState.Running && GotoHelper.State != ActionState.Running && GotoInnHelper.State != ActionState.Running && GotoBarracksHelper.State != ActionState.Running && GCTurninHelper.State != ActionState.Running && ExtractHelper.State != ActionState.Running && DesynthHelper.State != ActionState.Running) || Plugin.CurrentTerritoryContent == null))
+        using (ImRaii.Disabled((!Plugin.states.HasFlag(PluginState.Looping) && !Plugin.states.HasFlag(PluginState.Navigating) && RepairHelper.State != ActionState.Running && GotoHelper.State != ActionState.Running && GotoInnHelper.State != ActionState.Running && GotoBarracksHelper.State != ActionState.Running && GCTurninHelper.State != ActionState.Running && ExtractHelper.State != ActionState.Running && DesynthHelper.State != ActionState.Running) || Plugin.CurrentTerritoryContent == null))
         {
             if (Plugin.Stage == Stage.Paused)
             {
                 if (ImGui.Button("Resume"))
                 {
                     Plugin.taskManager.StepMode = false;
-                    Plugin.Stage = Plugin.PreviousStage;
-                    Plugin.States &= ~PluginState.Paused;
+                    Plugin.Stage = Plugin.previousStage;
+                    Plugin.states &= ~PluginState.Paused;
                 }
             }
             else
@@ -111,24 +108,24 @@ public class MainWindow : Window, IDisposable
 
     private static void StopAndReset()
     {
-        Plugin.PlaylistIndex = 0;
+        Plugin.playlistIndex = 0;
         Plugin.Stage = Stage.Stopped;
     }
 
     internal static void GotoAndActions()
     {
-        if(Plugin.States.HasFlag(PluginState.Other))
+        if(Plugin.states.HasFlag(PluginState.Other))
         {
             if(ImGui.Button("Stop###Stop1"))
                 StopAndReset();
             ImGui.SameLine(0,5);
         }
 
-        using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Looping) || Plugin.States.HasFlag(PluginState.Navigating)))
+        using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Looping) || Plugin.states.HasFlag(PluginState.Navigating)))
         {
-            using (ImRaii.Disabled(Plugin.Configuration is { OverrideOverlayButtons: true, GotoButton: false }))
+            using (ImRaii.Disabled(AutoDuty.Configuration is { OverrideOverlayButtons: true, GotoButton: false }))
             {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
+                using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
                     if (ImGui.Button("Goto"))
                     {
@@ -143,7 +140,7 @@ public class MainWindow : Window, IDisposable
                 if (ImGui.Selectable("Inn")) GotoInnHelper.Invoke();
                 if (ImGui.Selectable("GCSupply")) GotoHelper.Invoke(PlayerHelper.GetGrandCompanyTerritoryType(PlayerHelper.GetGrandCompany()), [GCTurninHelper.GCSupplyLocation], 0.25f, 3f);
                 if (ImGui.Selectable("Flag Marker")) MapHelper.MoveToMapMarker();
-                if (ImGui.Selectable("Summoning Bell")) SummoningBellHelper.Invoke(Plugin.Configuration.PreferredSummoningBellEnum);
+                if (ImGui.Selectable("Summoning Bell")) SummoningBellHelper.Invoke(AutoDuty.Configuration.PreferredSummoningBellEnum);
                 if (ImGui.Selectable("Apartment")) GotoHousingHelper.Invoke(Housing.Apartment);
                 if (ImGui.Selectable("Personal Home")) GotoHousingHelper.Invoke(Housing.Personal_Home);
                 if (ImGui.Selectable("FC Estate")) GotoHousingHelper.Invoke(Housing.FC_Estate);
@@ -155,9 +152,9 @@ public class MainWindow : Window, IDisposable
 
 
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(Plugin.Configuration is { AutoGCTurnin: false, OverrideOverlayButtons: false } || !Plugin.Configuration.TurninButton))
+            using (ImRaii.Disabled(AutoDuty.Configuration is { AutoGCTurnin: false, OverrideOverlayButtons: false } || !AutoDuty.Configuration.TurninButton))
             {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
+                using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
                     if (ImGui.Button("TurnIn"))
                     {
@@ -173,9 +170,9 @@ public class MainWindow : Window, IDisposable
                 }
             }
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(Plugin.Configuration is { AutoDesynth: false, OverrideOverlayButtons: false } || !Plugin.Configuration.DesynthButton))
+            using (ImRaii.Disabled(AutoDuty.Configuration is { AutoDesynth: false, OverrideOverlayButtons: false } || !AutoDuty.Configuration.DesynthButton))
             {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
+                using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
                     if (ImGui.Button("Desynth"))
                         DesynthHelper.Invoke();
@@ -184,9 +181,9 @@ public class MainWindow : Window, IDisposable
                 }
             }
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(Plugin.Configuration is { AutoExtract: false, OverrideOverlayButtons: false } || !Plugin.Configuration.ExtractButton))
+            using (ImRaii.Disabled(AutoDuty.Configuration is { AutoExtract: false, OverrideOverlayButtons: false } || !AutoDuty.Configuration.ExtractButton))
             {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
+                using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
                     if (ImGui.Button("Extract"))
                     {
@@ -203,9 +200,9 @@ public class MainWindow : Window, IDisposable
             }
             
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(Plugin.Configuration is { AutoRepair: false, OverrideOverlayButtons: false } || !Plugin.Configuration.RepairButton))
+            using (ImRaii.Disabled(AutoDuty.Configuration is { AutoRepair: false, OverrideOverlayButtons: false } || !AutoDuty.Configuration.RepairButton))
             {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
+                using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
                     if (ImGui.Button("Repair"))
                     {
@@ -222,9 +219,9 @@ public class MainWindow : Window, IDisposable
                 }
             }
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(Plugin.Configuration is { AutoEquipRecommendedGear: false, OverrideOverlayButtons: false } || !Plugin.Configuration.EquipButton))
+            using (ImRaii.Disabled(AutoDuty.Configuration is { AutoEquipRecommendedGear: false, OverrideOverlayButtons: false } || !AutoDuty.Configuration.EquipButton))
             {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
+                using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
                     if (ImGui.Button("Equip"))
                     {
@@ -241,9 +238,9 @@ public class MainWindow : Window, IDisposable
             }
 
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(Plugin.Configuration is { AutoOpenCoffers: false, OverrideOverlayButtons: false } || !Plugin.Configuration.CofferButton))
+            using (ImRaii.Disabled(AutoDuty.Configuration is { AutoOpenCoffers: false, OverrideOverlayButtons: false } || !AutoDuty.Configuration.CofferButton))
             {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
+                using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
                     if (ImGui.Button("Coffers")) 
                         CofferHelper.Invoke();
@@ -252,9 +249,9 @@ public class MainWindow : Window, IDisposable
             }
             ImGui.SameLine(0, 5);
 
-            using (ImRaii.Disabled(!(Plugin.Configuration.TripleTriadRegister || Plugin.Configuration.TripleTriadSell) && (!Plugin.Configuration.OverrideOverlayButtons || !Plugin.Configuration.TTButton)))
+            using (ImRaii.Disabled(!(AutoDuty.Configuration.TripleTriadRegister || AutoDuty.Configuration.TripleTriadSell) && (!AutoDuty.Configuration.OverrideOverlayButtons || !AutoDuty.Configuration.TTButton)))
             {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
+                using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
                     if (ImGui.Button("Triple Triad"))
                         ImGui.OpenPopup("TTPopup");
@@ -347,26 +344,26 @@ public class MainWindow : Window, IDisposable
         ImGui.BeginTabBar(id, flags);
 
 
-        bool valid = (BossMod_IPCSubscriber.IsEnabled  || Plugin.Configuration.UsingAlternativeBossPlugin)     &&
-                     (VNavmesh_IPCSubscriber.IsEnabled || Plugin.Configuration.UsingAlternativeMovementPlugin) &&
-                     (BossMod_IPCSubscriber.IsEnabled  || Plugin.Configuration.UsingAlternativeRotationPlugin);
+        bool valid = (BossMod_IPCSubscriber.IsEnabled  || AutoDuty.Configuration.UsingAlternativeBossPlugin)     &&
+                     (VNavmesh_IPCSubscriber.IsEnabled || AutoDuty.Configuration.UsingAlternativeMovementPlugin) &&
+                     (BossMod_IPCSubscriber.IsEnabled  || AutoDuty.Configuration.UsingAlternativeRotationPlugin);
 
         if (!valid)
             openTabName = "Info";
 
-        foreach ((string name, Action function, Vector4? color, bool child) x in tabs)
+        foreach ((string name, Action function, Vector4? color, bool child) in tabs)
         {
-            if (x.name.IsNullOrEmpty()) 
+            if (name.IsNullOrEmpty()) 
                 continue;
-            if (x.color != null) 
-                ImGui.PushStyleColor(ImGuiCol.Tab, x.color.Value);
+            if (color != null) 
+                ImGui.PushStyleColor(ImGuiCol.Tab, color.Value);
             
-            if ((valid || x.name == "Info") && ImGui.BeginTabItem(x.name, openTabName == x.name ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None))
+            if ((valid || name == "Info") && ImGui.BeginTabItem(name, openTabName == name ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None))
             {
-                if (x.color != null) 
+                if (color != null) 
                     ImGui.PopStyleColor();
-                if (x.child) 
-                    ImGui.BeginChild(x.name + "child");
+                if (child) 
+                    ImGui.BeginChild(name + "child");
 
                 if(!valid)
                 {
@@ -374,15 +371,15 @@ public class MainWindow : Window, IDisposable
                     ImGui.TextColored(EzColor.Red, "You need to do the basic setup below. Enjoy");
                 }
 
-                x.function();
+                function();
 
-                if (x.child) 
+                if (child) 
                     ImGui.EndChild();
                 ImGui.EndTabItem();
             }
             else
             {
-                if (x.color != null) 
+                if (color != null) 
                     ImGui.PopStyleColor();
             }
         }
@@ -392,7 +389,7 @@ public class MainWindow : Window, IDisposable
         ImGui.EndTabBar();
     }
 
-    private static readonly List<(string, Action, Vector4?, bool)> tabList =
+    private static readonly (string, Action, Vector4?, bool)[] tabList =
     [
         ("Main", MainTab.Draw, null, false), 
         ("Build", BuildTab.Draw, null, false), 
@@ -416,6 +413,6 @@ public class MainWindow : Window, IDisposable
                 return;
         }
 
-        EzTabBar("MainTab", null, openTabName, ImGuiTabBarFlags.None, tabList.ToArray());
+        EzTabBar("MainTab", null, openTabName, ImGuiTabBarFlags.None, tabList);
     }
 }

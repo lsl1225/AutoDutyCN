@@ -10,12 +10,12 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Excel.Sheets;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace AutoDuty.Helpers
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Lumina.Excel;
     using static Data.Classes;
 
@@ -44,15 +44,11 @@ namespace AutoDuty.Helpers
             return !checkTrustLevels || CanTrustRunMembers(content);
         }
 
-        internal static bool LevelsSetFor(Content content)
-        {
-            return !content.TrustMembers.Any(tm => tm is { LevelIsSet: false, Available: true });
-        }
+        internal static bool LevelsSetFor(Content content) => 
+            !content.TrustMembers.Any(tm => tm is { LevelIsSet: false, Available: true });
 
-        internal static bool LevelsSet()
-        {
-            return !Members.Values.Any(tm => tm is { LevelIsSet: false, Available: true });
-        }
+        internal static bool LevelsSet() => 
+            !Members.Values.Any(tm => tm is { LevelIsSet: false, Available: true });
 
         private static bool CanTrustRunMembers(Content content)
         {
@@ -63,7 +59,7 @@ namespace AutoDuty.Helpers
 
             int index = 0;
             foreach (TrustMember member in content.TrustMembers)
-                if (member.Level >= content.ClassJobLevelRequired && members.CanSelectMember(member, (Player.Available ? Player.Object.GetRole() : CombatRole.NonCombat)))
+                if (member.Level >= content.ClassJobLevelRequired && members.CanSelectMember(member, Player.Available ? Player.Job.GetCombatRole() : CombatRole.NonCombat))
                 {
                     members[index++] = member;
                     if (index >= 3)
@@ -78,13 +74,13 @@ namespace AutoDuty.Helpers
             Job        playerJob  = PlayerHelper.GetJob();
             CombatRole playerRole = playerJob.GetCombatRole();
 
-            if (Members.All(tm => tm.Value.Level >= tm.Value.LevelCap) && Plugin.Configuration.SelectedTrustMembers.All(tmn => tmn.HasValue))
+            if (Members.All(tm => tm.Value.Level >= tm.Value.LevelCap) && Configuration.SelectedTrustMembers.All(tmn => tmn.HasValue))
             {
                 bool test = true;
 
                 for (int i = 0; i < 3 && test; i++)
                 {
-                    TrustMember?[] curMembers = Plugin.Configuration.SelectedTrustMembers.Select(tmn => Members[tmn!.Value]).ToArray();
+                    TrustMember?[] curMembers = [..Configuration.SelectedTrustMembers.Select(tmn => Members[tmn!.Value])];
                     TrustMember    testMember = curMembers[i]!;
                     curMembers[i] = null;
                     test &= curMembers.CanSelectMember(testMember, playerRole);
@@ -97,11 +93,11 @@ namespace AutoDuty.Helpers
                 }
             }
 
-            Plugin.Configuration.SelectedTrustMembers = new TrustMemberName?[3];
+            Configuration.SelectedTrustMembers = new TrustMemberName?[3];
 
             TrustMember?[] trustMembers = new TrustMember?[3];
 
-            JobRole playerJobRole = Player.Available ? Player.Object.ClassJob.ValueNullable?.GetJobRole() ?? JobRole.None : JobRole.None;
+            JobRole playerJobRole = Player.Available ? Player.ClassJob.ValueNullable?.GetJobRole() ?? JobRole.None : JobRole.None;
 
             Svc.Log.Info("Leveling Trust Members set start");
             Svc.Log.Info("Trustmembers available: " + content.TrustMembers.Count);
@@ -133,8 +129,8 @@ namespace AutoDuty.Helpers
 
             if (trustMembers.All(tm => tm != null))
             {
-                Plugin.Configuration.SelectedTrustMembers = trustMembers.Select(tm => tm?.MemberName).ToArray();
-                Plugin.Configuration.Save();
+                Configuration.SelectedTrustMembers = [..trustMembers.Select(tm => tm?.MemberName)];
+                Windows.Configuration.Save();
                 return true;
             }
 
@@ -147,12 +143,12 @@ namespace AutoDuty.Helpers
             member.Available &&
             member.Role switch
             {
-                TrustRole.DPS => playerRole == CombatRole.DPS && !trustMembers.Where(x => x != null).Any(x => x.Role is TrustRole.DPS) ||
-                                 playerRole != CombatRole.DPS && trustMembers.Where(x => x  != null).Count(x => x.Role is TrustRole.DPS) < 2,
-                TrustRole.Healer => playerRole != CombatRole.Healer && !trustMembers.Where(x => x != null).Any(x => x.Role is TrustRole.Healer),
-                TrustRole.Tank => playerRole   != CombatRole.Tank   && !trustMembers.Where(x => x != null).Any(x => x.Role is TrustRole.Tank),
+                TrustRole.DPS => playerRole == CombatRole.DPS && !trustMembers.Where(x => x != null).Any(x => x!.Role is TrustRole.DPS) ||
+                                 playerRole != CombatRole.DPS && trustMembers.Where(x => x  != null).Count(x => x!.Role is TrustRole.DPS) < 2,
+                TrustRole.Healer => playerRole != CombatRole.Healer && !trustMembers.Where(x => x != null).Any(x => x!.Role is TrustRole.Healer),
+                TrustRole.Tank => playerRole   != CombatRole.Tank   && !trustMembers.Where(x => x != null).Any(x => x!.Role is TrustRole.Tank),
                 TrustRole.AllRounder => true,
-                _ => throw new ArgumentOutOfRangeException(member.Name, "member is of invalid role.. somehow")
+                _ => throw new ArgumentOutOfRangeException(member.Name, @"member is of invalid role.. somehow")
             };
 
         internal static readonly Dictionary<TrustMemberName, TrustMember> Members           = [];
@@ -163,7 +159,8 @@ namespace AutoDuty.Helpers
             ExcelSheet<DawnMemberUIParam>? dawnSheet = Svc.Data.GetExcelSheet<DawnMemberUIParam>();
             ExcelSheet<ClassJob>?          jobSheet  = Svc.Data.GetExcelSheet<ClassJob>();
 
-            if (dawnSheet == null || jobSheet == null) return;
+            if (dawnSheet == null || jobSheet == null)
+                return;
 
             void AddMember(TrustMemberName name, byte index, byte[] memberId, TrustRole role, ClassJobType classJob, uint levelInit = 71, uint levelCap = 100, uint unlockQuest = 0)
             {
@@ -203,11 +200,11 @@ namespace AutoDuty.Helpers
         {
             if (!PlayerHelper.IsValid) return;
 
-            if (Plugin.Configuration.SelectedTrustMembers.Count(x => x is not null) == 3)
+            if (Configuration.SelectedTrustMembers.Count(x => x is not null) == 3)
             {
                 CombatRole playerRole = Player.Job.GetCombatRole();
 
-                TrustMember[] trustMembers = Plugin.Configuration.SelectedTrustMembers.Select(name => Members[(TrustMemberName)name!]).ToArray();
+                TrustMember[] trustMembers = [.. Configuration.SelectedTrustMembers.Select(name => Members[(TrustMemberName)name!])];
 
                 int dps = trustMembers.Count(x => x.Role is TrustRole.DPS);
                 int healers = trustMembers.Count(x => x.Role is TrustRole.Healer);
@@ -223,8 +220,8 @@ namespace AutoDuty.Helpers
 
                 if (needsReset)
                 {
-                    Plugin.Configuration.SelectedTrustMembers = new TrustMemberName?[3];
-                    Plugin.Configuration.Save();
+                    Configuration.SelectedTrustMembers = new TrustMemberName?[3];
+                    Windows.Configuration.Save();
                 }
             }
         }
@@ -286,7 +283,7 @@ namespace AutoDuty.Helpers
         private static Content? _getLevelsContent = null;
         internal static unsafe void GetLevelsUpdate(IFramework framework)
         {
-            if (_getLevelsContent == null || Plugin.InDungeon || !AgentHUD.Instance()->IsMainCommandEnabled(82))
+            if (_getLevelsContent == null || InDungeon || !AgentHUD.Instance()->IsMainCommandEnabled(82))
             {
                 Stop();
                 return;

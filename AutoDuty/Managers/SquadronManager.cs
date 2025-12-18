@@ -8,7 +8,6 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace AutoDuty.Managers
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using ECommons.GameFunctions;
@@ -28,7 +27,7 @@ namespace AutoDuty.Managers
                 return;
             }
             _taskManager.Enqueue(() => Svc.Log.Info($"Queueing Squadron: {content.Name}"), "RegisterSquadron");
-            _taskManager.Enqueue(() => Plugin.Action = $"Queueing Squadron: {content.Name}", "RegisterSquadron");
+            _taskManager.Enqueue(() => Plugin.action = $"Queueing Squadron: {content.Name}", "RegisterSquadron");
 
             AtkUnitBase* captureAddon = null;
 
@@ -65,7 +64,7 @@ namespace AutoDuty.Managers
             ReaderGCArmyMemberList armyMemberList = null!;
             _taskManager.Enqueue(() => armyMemberList = new ReaderGCArmyMemberList(memberListAddon), "RegisterSquadron-GetReader");
 
-            if (Plugin.Configuration.SquadronAssignLowestMembers)
+            if (Configuration.SquadronAssignLowestMembers)
             {
                 // disable active members
                 _taskManager.Enqueue(() =>
@@ -95,7 +94,6 @@ namespace AutoDuty.Managers
                                                          _taskManager.Insert(() => AddonHelper.FireCallBack(memberListAddon, true, 11, index));
                                                          neededTanks--;
                                                      }
-
                                                      break;
                                                  case ReaderGCArmyMemberList.SquadronClassType.Pugilist:
                                                  case ReaderGCArmyMemberList.SquadronClassType.Lancer:
@@ -108,7 +106,6 @@ namespace AutoDuty.Managers
                                                          _taskManager.Insert(() => AddonHelper.FireCallBack(memberListAddon, true, 11, index));
                                                          neededDPS--;
                                                      }
-
                                                      break;
                                                  case ReaderGCArmyMemberList.SquadronClassType.Conjurer:
                                                      if (neededHeal > 0)
@@ -116,10 +113,10 @@ namespace AutoDuty.Managers
                                                          _taskManager.Insert(() => AddonHelper.FireCallBack(memberListAddon, true, 11, index));
                                                          neededHeal--;
                                                      }
-
                                                      break;
                                                  default:
-                                                     throw new ArgumentOutOfRangeException();
+                                                     Svc.Log.Error($"Squadron class breaking? {member.Name} with {member.ClassType}");
+                                                     break;
                                              }
                                      }, "RegisterSquadron-SelectMembers");
             }

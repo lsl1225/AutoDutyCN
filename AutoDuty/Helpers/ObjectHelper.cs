@@ -6,29 +6,27 @@ using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 
 namespace AutoDuty.Helpers
 {
-    using Dalamud.Bindings.ImGui;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Dalamud.Game.ClientState.Objects.SubKinds;
-    using Dalamud.Game.ClientState.Party;
     using ECommons.ExcelServices;
     using ECommons.GameFunctions;
     using ECommons.PartyFunctions;
     using FFXIVClientStructs.FFXIV.Client.Game.Object;
     using FFXIVClientStructs.FFXIV.Client.UI.Info;
     using Lumina.Excel.Sheets;
-    using Buddy = FFXIVClientStructs.FFXIV.Client.Game.UI.Buddy;
+    using Buddy = Buddy;
     using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
     internal static class ObjectHelper
     {
-        internal static bool TryGetObjectByDataId(uint dataId, out IGameObject? gameObject) => (gameObject = Svc.Objects.OrderBy(GetDistanceToPlayer).FirstOrDefault(x => x.DataId == dataId)) != null;
-        internal static bool TryGetObjectByDataId(uint dataId, Func<IGameObject, bool> condition, out IGameObject? gameObject) => (gameObject = Svc.Objects.OrderBy(GetDistanceToPlayer).FirstOrDefault(x => x.DataId == dataId && condition(x))) != null;
+        internal static bool TryGetObjectByDataId(uint dataId, out IGameObject? gameObject) => (gameObject = Svc.Objects.OrderBy(GetDistanceToPlayer).FirstOrDefault(x => x.BaseId == dataId)) != null;
+        internal static bool TryGetObjectByDataId(uint dataId, Func<IGameObject, bool> condition, out IGameObject? gameObject) => (gameObject = Svc.Objects.OrderBy(GetDistanceToPlayer).FirstOrDefault(x => x.BaseId == dataId && condition(x))) != null;
 
         internal static List<IGameObject>? GetObjectsByObjectKind(ObjectKind objectKind) => [.. Svc.Objects.OrderBy(GetDistanceToPlayer).Where(o => o.ObjectKind == objectKind)];
 
@@ -49,11 +47,13 @@ namespace AutoDuty.Helpers
 
         internal static IGameObject? GetObjectByPartialName(string name) => Svc.Objects.OrderBy(GetDistanceToPlayer).FirstOrDefault(o => o.Name.TextValue.Contains(name, StringComparison.CurrentCultureIgnoreCase));
 
-        internal static List<IGameObject>? GetObjectsByNameAndRadius(string objectName) => [.. Svc.Objects.OrderBy(GetDistanceToPlayer).Where(g => g.Name.TextValue.Equals(objectName, StringComparison.CurrentCultureIgnoreCase) && Vector3.Distance(Player.Object.Position, g.Position) <= 10)];
+        internal static List<IGameObject>? GetObjectsByNameAndRadius(string objectName) => 
+            [.. Svc.Objects.OrderBy(GetDistanceToPlayer).Where(g => g.Name.TextValue.Equals(objectName, StringComparison.CurrentCultureIgnoreCase) && Vector3.Distance(Player.Position, g.Position) <= 10)];
 
-        internal static IGameObject? GetObjectByNameAndRadius(string objectName) => Svc.Objects.OrderBy(GetDistanceToPlayer).FirstOrDefault(g => g.Name.TextValue.Equals(objectName, StringComparison.CurrentCultureIgnoreCase) && Vector3.Distance(Player.Object.Position, g.Position) <= 10);
+        internal static IGameObject? GetObjectByNameAndRadius(string objectName) => 
+            Svc.Objects.OrderBy(GetDistanceToPlayer).FirstOrDefault(g => g.Name.TextValue.Equals(objectName, StringComparison.CurrentCultureIgnoreCase) && Vector3.Distance(Player.Position, g.Position) <= 10);
 
-        internal static IBattleChara? GetBossObject(int radius = 100) => GetObjectsByRadius(radius)?.OfType<IBattleChara>().FirstOrDefault(b => IsBossFromIcon(b) || BossMod_IPCSubscriber.HasModuleByDataId(b.DataId));
+        internal static IBattleChara? GetBossObject(int radius = 100) => GetObjectsByRadius(radius)?.OfType<IBattleChara>().FirstOrDefault(IsBoss);
 
         internal static unsafe float GetDistanceToPlayer(IGameObject gameObject) => GetDistanceToPlayer(gameObject.Position);
 
@@ -114,10 +114,12 @@ namespace AutoDuty.Helpers
             return distance;
         }
 
-        internal static BNpcBase? GetObjectNPC(IGameObject gameObject) => Svc.Data.GetExcelSheet<BNpcBase>()?.GetRow(gameObject.DataId) ?? null;
+        internal static BNpcBase? GetObjectNPC(IGameObject gameObject) => Svc.Data.GetExcelSheet<BNpcBase>()?.GetRow(gameObject.BaseId) ?? null;
 
         //From RotationSolver
         internal static bool IsBossFromIcon(IGameObject gameObject) => GetObjectNPC(gameObject)?.Rank is 1 or 2 or 6;
+
+        internal static bool IsBoss(IGameObject gameObject) => IsBossFromIcon(gameObject) || BossMod_IPCSubscriber.HasModuleByDataId(gameObject.BaseId);
 
         internal static unsafe void InteractWithObject(IGameObject? gameObject, bool face = true)
         {
@@ -126,8 +128,8 @@ namespace AutoDuty.Helpers
                 if (gameObject is not { IsTargetable: true }) 
                     return;
                 if (face) 
-                    Plugin.OverrideCamera.Face(gameObject.Position);
-                GameObject* gameObjectPointer = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)gameObject.Address;
+                    Plugin.overrideCamera.Face(gameObject.Position);
+                GameObject* gameObjectPointer = (GameObject*)gameObject.Address;
                 TargetSystem.Instance()->InteractWithObject(gameObjectPointer, false);
             }
             catch (Exception ex)

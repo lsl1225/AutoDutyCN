@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Dalamud.NET.Sdk/14.0.0">
+<Project Sdk="Dalamud.NET.Sdk/14.0.1">
   <PropertyGroup>
     <Authors></Authors>
     <Company></Company>
@@ -30,12 +30,10 @@
   </PropertyGroup>
   
    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <PackageVersion_DalamudPackager>13.1.0</PackageVersion_DalamudPackager>
      <NoWarn>8620</NoWarn>
    </PropertyGroup>
   
    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <PackageVersion_DalamudPackager>13.1.0</PackageVersion_DalamudPackager>
      <NoWarn>8620</NoWarn>
    </PropertyGroup>
   

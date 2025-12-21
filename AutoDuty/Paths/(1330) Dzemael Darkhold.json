@@ -39,6 +39,18 @@
       "Note": ""
     },
     {
+      "Tag": "Treasure",
+      "Name": "TreasureCoffer",
+      "Position": {
+        "X": 81.78937,
+        "Y": 2.067525,
+        "Z": 127.45017
+      },
+      "Arguments": [],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
       "Tag": "None",
       "Name": "MoveTo",
       "Position": {
@@ -237,7 +249,12 @@
   ],
   "Meta": {
     "CreatedAt": 279,
-    "Changelog": [],
+    "Changelog": [
+      {
+        "Version": 279,
+        "Change": "Added arm 1 treasure"
+      }
+    ],
     "Notes": []
   }
 }

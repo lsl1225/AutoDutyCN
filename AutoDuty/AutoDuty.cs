@@ -2123,15 +2123,15 @@ public sealed class AutoDuty : IDalamudPlugin
     {
         GitHubHelper.Dispose();
         this.StopAndResetAll();
-        ConfigurationMain.Instance.MultiBox =  false;
-        Svc.Framework.Update                -= this.Framework_Update;
-        Svc.Framework.Update                -= SchedulerHelper.ScheduleInvoker;
-        FileHelper.FileSystemWatcher.Dispose();
-        FileHelper.fileWatcher.Dispose();
-        this.windowSystem.RemoveAllWindows();
+        ConfigurationMain.Instance?.MultiBox =  false;
+        Svc.Framework.Update                 -= this.Framework_Update;
+        Svc.Framework.Update                 -= SchedulerHelper.ScheduleInvoker;
+        FileHelper.FileSystemWatcher?.Dispose();
+        FileHelper.fileWatcher?.Dispose();
+        this.windowSystem?.RemoveAllWindows();
         ECommonsMain.Dispose();
-        this.MainWindow.Dispose();
-        this.overrideCamera.Dispose();
+        this.MainWindow?.Dispose();
+        this.overrideCamera?.Dispose();
         Svc.ClientState.TerritoryChanged -= this.ClientState_TerritoryChanged;
         Svc.Condition.ConditionChange    -= this.Condition_ConditionChange;
         PictoService.Dispose();

@@ -538,7 +538,7 @@ namespace AutoDuty.Managers
                 else
                 {
                     Svc.Log.Debug($"InteractableCheck: Interacting with {gameObject!.Name} at {gameObject.Position} which is {GetDistanceToPlayer(gameObject)} away, because game object is not null: {gameObject != null} and IsTargetable: {gameObject!.IsTargetable} and IsValid: {gameObject.IsValid()}");
-                    if (VNavmesh_IPCSubscriber.Path_IsRunning())
+                    if (VNavmesh_IPCSubscriber.Path_IsRunning)
                         VNavmesh_IPCSubscriber.Path_Stop();
                     InteractWithObject(gameObject);
                 };

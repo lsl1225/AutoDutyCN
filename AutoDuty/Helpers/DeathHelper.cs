@@ -65,7 +65,7 @@ namespace AutoDuty.Helpers
             Plugin.stopForCombat = true;
             Plugin.skipTreasureCoffer = true;
 
-            if (VNavmesh_IPCSubscriber.Path_IsRunning())
+            if (VNavmesh_IPCSubscriber.Path_IsRunning)
                 VNavmesh_IPCSubscriber.Path_Stop();
 
             if (Plugin.taskManager.IsBusy)
@@ -186,7 +186,7 @@ namespace AutoDuty.Helpers
         internal static void Stop()
         {
             Svc.Framework.Update -= OnRevive;
-            if (VNavmesh_IPCSubscriber.Path_IsRunning())
+            if (VNavmesh_IPCSubscriber.Path_IsRunning)
                 VNavmesh_IPCSubscriber.Path_Stop();
             BossMod_IPCSubscriber.SetMovement(true);
             Plugin.Stage = Stage.Idle;

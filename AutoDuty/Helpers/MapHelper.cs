@@ -141,7 +141,7 @@ namespace AutoDuty.Helpers
             if (GotoHelper.State == ActionState.Running)
                 return;
 
-            if (VNavmesh_IPCSubscriber.Path_IsRunning())
+            if (VNavmesh_IPCSubscriber.Path_IsRunning)
                 return;
 
             if (GenericHelpers.TryGetAddonByName("AreaMap", out AtkUnitBase* addonAreaMap) && GenericHelpers.IsAddonReady(addonAreaMap))

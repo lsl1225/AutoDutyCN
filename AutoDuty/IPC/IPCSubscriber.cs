@@ -5,6 +5,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using System.Globalization;
 using System.Numerics;
+using static ECommons.IPC.ECommonsIPC;
 
 // ReSharper disable InconsistentNaming
 #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
@@ -22,131 +23,86 @@ namespace AutoDuty.IPC
     using System.Threading;
     using System.Threading.Tasks;
     using Dalamud.Plugin;
+    using ECommons.IPC;
+    using ECommons.IPC.Subscribers.Vnavmesh;
 
     internal static class AutoRetainer_IPCSubscriber
     {
-        private static readonly EzIPCDisposalToken[] _disposalTokens = EzIPC.Init(typeof(AutoRetainer_IPCSubscriber), "AutoRetainer.PluginState", SafeWrapper.IPCException);
-
         internal static bool IsEnabled => IPCSubscriber_Common.IsReady("AutoRetainer");
 
-        [EzIPC] internal static readonly Func<bool> IsBusy;
-        [EzIPC] internal static readonly Func<Dictionary<ulong, HashSet<string>>> GetEnabledRetainers;
+        internal static bool IsBusy() => 
+            AutoRetainer.IsBusy();
+        internal static bool AreAnyRetainersAvailableForCurrentChara() => 
+            AutoRetainer.AreAnyRetainersAvailableForCurrentChara();
 
-        [EzIPC] internal static readonly Func<bool>         AreAnyRetainersAvailableForCurrentChara;
-        [EzIPC] internal static readonly Func<ulong, long?> GetClosestRetainerVentureSecondsRemaining; //ulong CID
-        [EzIPC] internal static readonly Action             AbortAllTasks;
-        [EzIPC] internal static readonly Action             DisableAllFunctions;
-        [EzIPC] internal static readonly Action             EnableMultiMode;
-        [EzIPC] internal static readonly Func<int>          GetInventoryFreeSlotCount;
-        [EzIPC] internal static readonly Action             EnqueueHET;
+        internal static void AbortAllTasks() =>
+            AutoRetainer.AbortAllTasks();
 
-        [EzIPC("AutoRetainer.GC.EnqueueInitiation", applyPrefix: false)] internal static readonly Action EnqueueGCInitiation;
+        internal static void EnableMultiMode() =>
+            AutoRetainer.EnableMultiMode();
+
+        internal static void EnqueueGCInitiation() =>
+            AutoRetainer.EnqueueInitiation();
 
         public static bool RetainersAvailable()
         {
             if (Configuration.EnableAutoRetainer && IsEnabled)
             {
-                long? remaining = GetClosestRetainerVentureSecondsRemaining(Player.CID);
+                long? remaining = AutoRetainer.GetClosestRetainerVentureSecondsRemaining(Player.CID);
                 Svc.Log.Debug($"AutoRetainer IPC - Closest Retainer Venture Remaining Time: {remaining}");
                 return remaining.HasValue && remaining < Configuration.AutoRetainer_RemainingTime;
             }
 
             return false;
         }
-
-        internal static void Dispose() => IPCSubscriber_Common.DisposeAll(_disposalTokens);
     }
-
-    internal static class AM_IPCSubscriber
-    {
-        private static readonly EzIPCDisposalToken[] _disposalTokens = EzIPC.Init(typeof(AM_IPCSubscriber), "AutoBot", SafeWrapper.IPCException);
-
-        internal static bool IsEnabled => IPCSubscriber_Common.IsReady("AutoBot");
-
-        [EzIPC] internal static readonly Action Start;
-        [EzIPC] internal static readonly Action Stop;
-        [EzIPC] internal static readonly Func<bool> IsRunning;
-
-        internal static void Dispose() => IPCSubscriber_Common.DisposeAll(_disposalTokens);
-    }
-
-    internal static class BossModReborn_IPCSubscriber
-    {
-        private static readonly EzIPCDisposalToken[] _disposalTokens = EzIPC.Init(typeof(BossModReborn_IPCSubscriber), "BossMod", SafeWrapper.AnyException);
-
-        internal static bool IsEnabled => IPCSubscriber_Common.IsReady("BossModReborn");
-
-        [EzIPC("AI.GetPreset", true)] internal static readonly Func<string> Presets_GetActive;
-
-        [EzIPC("AI.SetPreset", true)] internal static readonly Action<string> Presets_SetActive;
-
-        internal static void Dispose() => IPCSubscriber_Common.DisposeAll(_disposalTokens);
-    }
-
 
     internal static class BossMod_IPCSubscriber
     {
-        private static readonly EzIPCDisposalToken[] _disposalTokens = EzIPC.Init(typeof(BossMod_IPCSubscriber), "BossMod", SafeWrapper.AnyException);
-
         internal static bool IsEnabled => IPCSubscriber_Common.IsReady("BossMod") || IPCSubscriber_Common.IsReady("BossModReborn");
-
-        [EzIPC] internal static readonly Func<uint, bool> HasModuleByDataId;
-        [EzIPC] internal static readonly Func<IReadOnlyList<string>, bool, List<string>> Configuration;
-        [EzIPC("Presets.Get", true)] internal static readonly Func<string, string?> Presets_Get;
-        [EzIPC("Presets.Create", true)] internal static readonly Func<string, bool, bool> Presets_Create;
-        [EzIPC("Presets.Delete", true)] internal static readonly Func<string, bool> Presets_Delete;
-        [EzIPC("Presets.GetActive", true)] internal static readonly Func<string> Presets_GetActive;
-        [EzIPC("Presets.SetActive", true)] internal static readonly Func<string, bool> Presets_SetActive;
-        [EzIPC("Presets.ClearActive", true)] internal static readonly Func<bool> Presets_ClearActive;
-        [EzIPC("Presets.GetForceDisabled", true)] internal static readonly Func<bool> Presets_GetForceDisabled; 
-        [EzIPC("Presets.SetForceDisabled", true)] internal static readonly Func<bool> Presets_SetForceDisabled;
-        /** string presetName, string moduleTypeName, string trackName, string value*/
-        [EzIPC("Presets.AddTransientStrategy")] internal static readonly Func<string, string, string, string, bool> Presets_AddTransientStrategy;
-
-        internal static void Dispose() => IPCSubscriber_Common.DisposeAll(_disposalTokens);
 
         public static void AddPreset(string name, string preset)
         {
-            if (Presets_Get(name) == null)
-                Svc.Log.Debug($"BossMod Adding Preset: {name} {Presets_Create(preset, true)}");
+            if (BossMod.Presets_Get(name) == null)
+                Svc.Log.Debug($"BossMod Adding Preset: {name} {BossMod.Presets_Create(preset, true)}");
         }
 
         public static void RefreshPreset(string name, string preset)
         {
-            if (Presets_Get(name) != null)
-                Presets_Delete(name);
+            if (BossMod.Presets_Get(name) != null)
+                BossMod.Presets_Delete(name);
             AddPreset(name, preset);
         }
 
         public static void SetPreset(string name, string preset)
         {
-            if (AutoDuty.Configuration.AutoManageBossModAISettings)
-                if (Presets_GetActive() != name)
+            if (Configuration.AutoManageBossModAISettings)
+                if (BossMod.Presets_GetActive() != name)
                 {
                     Svc.Log.Debug($"BossMod Setting Preset: {name}");
                     AddPreset(name, preset);
-                    Presets_SetActive(name);
+                    BossMod.Presets_SetActive(name);
                 }
         }
 
         public static void DisablePresets()
         {
-            if (AutoDuty.Configuration.AutoManageBossModAISettings)
-                if (Presets_GetActive() != null)
+            if (Configuration.AutoManageBossModAISettings)
+                if (BossMod.Presets_GetActive() != null)
                 {
                     Svc.Log.Debug($"BossMod Disabling Presets");
-                    Presets_ClearActive();
+                    BossMod.Presets_ClearActive();
                 }
         }
 
         public static void SetRange(float range)
         {
-            if (AutoDuty.Configuration.AutoManageBossModAISettings)
+            if (Configuration.AutoManageBossModAISettings)
             {
                 Svc.Log.Debug($"BossMod Setting Range to: {range}");
 
-                Presets_AddTransientStrategy("AutoDuty",         "BossMod.Autorotation.MiscAI.StayCloseToTarget", "range", MathF.Round(range, 1).ToString(CultureInfo.InvariantCulture));
-                Presets_AddTransientStrategy("AutoDuty Passive", "BossMod.Autorotation.MiscAI.StayCloseToTarget", "range", MathF.Round(range, 1).ToString(CultureInfo.InvariantCulture));
+                BossMod.Presets_AddTransientStrategy("AutoDuty",         "BossMod.Autorotation.MiscAI.StayCloseToTarget", "range", MathF.Round(range, 1).ToString(CultureInfo.InvariantCulture));
+                BossMod.Presets_AddTransientStrategy("AutoDuty Passive", "BossMod.Autorotation.MiscAI.StayCloseToTarget", "range", MathF.Round(range, 1).ToString(CultureInfo.InvariantCulture));
             }
         }
 
@@ -154,35 +110,35 @@ namespace AutoDuty.IPC
 
         public static void SetMovement(bool on)
         {
-            if (AutoDuty.Configuration.AutoManageBossModAISettings)
+            if (Configuration.AutoManageBossModAISettings)
             {
                 Svc.Log.Debug($"BossMod Setting Movement: {on}");
 
                 string destinationStrategy = (on ? DestinationStrategy.Pathfind : DestinationStrategy.None).ToString();
 
-                Presets_AddTransientStrategy("AutoDuty",         "BossMod.Autorotation.MiscAI.NormalMovement", "Destination", destinationStrategy);
-                Presets_AddTransientStrategy("AutoDuty Passive", "BossMod.Autorotation.MiscAI.NormalMovement", "Destination", destinationStrategy);
+                BossMod.Presets_AddTransientStrategy("AutoDuty",         "BossMod.Autorotation.MiscAI.NormalMovement", "Destination", destinationStrategy);
+                BossMod.Presets_AddTransientStrategy("AutoDuty Passive", "BossMod.Autorotation.MiscAI.NormalMovement", "Destination", destinationStrategy);
             }
         }
 
         public static void SetPositional(Positional positional)
         {
-            if (AutoDuty.Configuration.AutoManageBossModAISettings)
+            if (Configuration.AutoManageBossModAISettings)
             {
                 Svc.Log.Debug($"BossMod Setting Positional: {positional}");
 
-                Presets_AddTransientStrategy("AutoDuty Passive", "BossMod.Autorotation.MiscAI.GoToPositional", "Positional", positional.ToString());
+                BossMod.Presets_AddTransientStrategy("AutoDuty Passive", "BossMod.Autorotation.MiscAI.GoToPositional", "Positional", positional.ToString());
             }
         }
 
         public static void InBoss(bool boss)
         {
-            if (AutoDuty.Configuration.AutoManageBossModAISettings)
+            if (Configuration.AutoManageBossModAISettings)
             {
-                string role = boss ? "None" : Role.Tank.ToString();
+                string role = boss ? "None" : nameof(Role.Tank);
 
-                Presets_AddTransientStrategy("AutoDuty",         "BossMod.Autorotation.MiscAI.StayCloseToPartyRole", "Role", role);
-                Presets_AddTransientStrategy("AutoDuty Passive", "BossMod.Autorotation.MiscAI.StayCloseToPartyRole", "Role", role);
+                BossMod.Presets_AddTransientStrategy("AutoDuty",         "BossMod.Autorotation.MiscAI.StayCloseToPartyRole", "Role", role);
+                BossMod.Presets_AddTransientStrategy("AutoDuty Passive", "BossMod.Autorotation.MiscAI.StayCloseToPartyRole", "Role", role);
             }
         }
     }
@@ -190,96 +146,62 @@ namespace AutoDuty.IPC
     
     internal static class YesAlready_IPCSubscriber
     {
-        private static readonly EzIPCDisposalToken[] _disposalTokens = EzIPC.Init(typeof(YesAlready_IPCSubscriber), "YesAlready", SafeWrapper.IPCException);
-
-        internal static bool IsEnabled => IPCSubscriber_Common.IsReady("YesAlready");
-
-        [EzIPC("SetPluginEnabled")] private static readonly Action<bool> SetPluginEnabled;
-        [EzIPC("IsPluginEnabled")] public static readonly Func<bool> IsPluginEnabled;
-
-        internal static void Dispose() => IPCSubscriber_Common.DisposeAll(_disposalTokens);
+        public static bool IsEnabled => YesAlready.IsPluginEnabled();
 
         public static void SetState(bool on) => 
-            SetPluginEnabled(on);
+            YesAlready.SetPluginEnabled(on);
     }
 
     internal static class Gearsetter_IPCSubscriber
     {
-        private static readonly EzIPCDisposalToken[] _disposalTokens = EzIPC.Init(typeof(Gearsetter_IPCSubscriber), "Gearsetter", SafeWrapper.IPCException);
-
         internal static bool IsEnabled => IPCSubscriber_Common.IsReady("Gearsetter");
 
-        [EzIPC] internal static readonly Func<byte, List<(uint ItemId, InventoryType? SourceInventory, byte? SourceInventorySlot, RaptureGearsetModule.GearsetItemIndex TargetSlot)>> GetRecommendationsForGearset;
-
-        internal static void Dispose() => IPCSubscriber_Common.DisposeAll(_disposalTokens);
+        internal static List<(uint ItemId, InventoryType? SourceInventory, byte? SourceInventorySlot, RaptureGearsetModule.GearsetItemIndex TargetSlot)> GetRecommendationsForGearset(byte gearset) =>
+            Gearsetter.GetRecommendationsForGearset(gearset);
     }
 
     internal static class Stylist_IPCSubscriber
     {
-        private static readonly          EzIPCDisposalToken[] _disposalTokens = EzIPC.Init(typeof(Stylist_IPCSubscriber), "Stylist", SafeWrapper.IPCException);
-        internal static                  bool                 IsEnabled => IPCSubscriber_Common.IsReady("Stylist");
-        [EzIPC] internal static readonly Action<bool?, bool?> UpdateCurrentGearsetEx; //bool? moveItemsFromInventory, bool? shouldEquip
-        [EzIPC] internal static readonly Func<bool>           IsBusy;
-        internal static                  void                 Dispose() => IPCSubscriber_Common.DisposeAll(_disposalTokens);
+        internal static bool IsEnabled => IPCSubscriber_Common.IsReady("Stylist");
+        internal static void UpdateCurrentGearsetEx(bool? moveItemsFromInventory, bool? shouldEquip) =>
+            Stylist.UpdateCurrentGearsetEx(moveItemsFromInventory, shouldEquip);
+
+        internal static bool IsBusy    => Stylist.IsBusy();
     }
 
 
     internal static class VNavmesh_IPCSubscriber
     {
-        private static readonly EzIPCDisposalToken[] _disposalTokens = EzIPC.Init(typeof(VNavmesh_IPCSubscriber), "vnavmesh", SafeWrapper.IPCException);
-
         internal static bool IsEnabled => IPCSubscriber_Common.IsReady("vnavmesh");
 
-        [EzIPC("Nav.IsReady",            true)] internal static readonly Func<bool>                                                           Nav_IsReady;
-        [EzIPC("Nav.BuildProgress",      true)] internal static readonly Func<float>                                                          Nav_BuildProgress;
-        [EzIPC("Nav.Reload",             true)] internal static readonly Func<bool>                                                           Nav_Reload;
-        [EzIPC("Nav.Rebuild",            true)] internal static readonly Func<bool>                                                           Nav_Rebuild;
-        [EzIPC("Nav.Pathfind",           true)] internal static readonly Func<Vector3, Vector3, bool, Task<List<Vector3>>>                    Nav_Pathfind;
-        [EzIPC("Nav.PathfindCancelable", true)] internal static readonly Func<Vector3, Vector3, bool, CancellationToken, Task<List<Vector3>>> Nav_PathfindCancelable;
-        [EzIPC("Nav.PathfindCancelAll",  true)] internal static readonly Action                                                               Nav_PathfindCancelAll;
-        [EzIPC("Nav.PathfindInProgress", true)] internal static readonly Func<bool>                                                           Nav_PathfindInProgress;
-        [EzIPC("Nav.PathfindNumQueued",  true)] internal static readonly Func<int>                                                            Nav_PathfindNumQueued;
-        [EzIPC("Nav.IsAutoLoad",         true)] internal static readonly Func<bool>                                                           Nav_IsAutoLoad;
-        [EzIPC("Nav.SetAutoLoad",        true)] internal static readonly Action<bool>                                                         Nav_SetAutoLoad;
+        internal static void  Path_Stop()                                 => Vnavmesh.Stop();
+        internal static bool  Nav_IsReady                                 => Vnavmesh.IsReady();
+        internal static bool  SimpleMove_PathfindInProgress               => Vnavmesh.PathfindInProgress();
+        internal static bool  Path_IsRunning                              => Vnavmesh.IsRunning();
+        internal static void  Path_MoveTo(List<Vector3> points, bool fly) => Vnavmesh.MoveTo(points, fly);
+        internal static bool  GetNav_Rebuild()  => Vnavmesh.Rebuild();
+        internal static float Nav_BuildProgress => Vnavmesh.BuildProgress();
+        internal static bool SimpleMove_PathfindAndMoveTo(Vector3 position, bool canFly) =>
+            Vnavmesh.PathfindAndMoveTo(position, canFly);
+        internal static int   Path_NumWaypoints                  => Vnavmesh.NumWaypoints();
+        internal static float Path_GetTolerance                  => Vnavmesh.GetTolerance();
+        internal static void  Path_SetTolerance(float tolerance) => Vnavmesh.SetTolerance(tolerance);
+        internal static bool  Path_GetAlignCamera                => Vnavmesh.GetAlignCamera();
+        internal static void  Path_SetAlignCamera(bool align)    => Vnavmesh.SetAlignCamera(align);
 
-        [EzIPC("Query.Mesh.NearestPoint", true)] internal static readonly Func<Vector3, float, float, Vector3> Query_Mesh_NearestPoint;
-        [EzIPC("Query.Mesh.PointOnFloor", true)] internal static readonly Func<Vector3, bool, float, Vector3> Query_Mesh_PointOnFloor;
-
-        [EzIPC("Path.MoveTo", true)] internal static readonly Action<List<Vector3>, bool> Path_MoveTo;
-        [EzIPC("Path.Stop", true)] internal static readonly Action Path_Stop;
-        [EzIPC("Path.IsRunning", true)] internal static readonly Func<bool> Path_IsRunning;
-        [EzIPC("Path.NumWaypoints", true)] internal static readonly Func<int> Path_NumWaypoints;
-        [EzIPC("Path.GetMovementAllowed", true)] internal static readonly Func<bool> Path_GetMovementAllowed;
-        [EzIPC("Path.SetMovementAllowed", true)] internal static readonly Action<bool> Path_SetMovementAllowed;
-        [EzIPC("Path.GetAlignCamera", true)] internal static readonly Func<bool> Path_GetAlignCamera;
-        [EzIPC("Path.SetAlignCamera", true)] internal static readonly Action<bool> Path_SetAlignCamera;
-        [EzIPC("Path.GetTolerance", true)] internal static readonly Func<float> Path_GetTolerance;
-        [EzIPC("Path.SetTolerance", true)] internal static readonly Action<float> Path_SetTolerance;
-
-        [EzIPC("SimpleMove.PathfindAndMoveTo", true)] internal static readonly Func<Vector3, bool, bool> SimpleMove_PathfindAndMoveTo;
-        [EzIPC("SimpleMove.PathfindInProgress", true)] internal static readonly Func<bool> SimpleMove_PathfindInProgress;
-
-        [EzIPC("Window.IsOpen", true)] internal static readonly Func<bool> Window_IsOpen;
-        [EzIPC("Window.SetOpen", true)] internal static readonly Action<bool> Window_SetOpen;
-
-        [EzIPC("DTR.IsShown", true)] internal static readonly Func<bool> DTR_IsShown;
-        [EzIPC("DTR.SetShown", true)] internal static readonly Action<bool> DTR_SetShown;
-
-        internal static void Dispose() => IPCSubscriber_Common.DisposeAll(_disposalTokens);
+        internal static void SetMovementAllowed(bool move)
+        {
+            if (Vnavmesh.GetMovementAllowed() != move)
+                Vnavmesh.SetMovementAllowed(move);
+        }
     }
 
     internal static class PandorasBox_IPCSubscriber
     {
-        private static readonly EzIPCDisposalToken[] _disposalTokens = EzIPC.Init(typeof(PandorasBox_IPCSubscriber), "PandorasBox", SafeWrapper.IPCException);
-
         internal static bool IsEnabled => IPCSubscriber_Common.IsReady("PandorasBox");
 
-        [EzIPC] internal static readonly Action<string, int> PauseFeature;
-        [EzIPC] internal static readonly Action<string, bool> SetFeatureEnabled;
-        [EzIPC] internal static readonly Func<string, bool> GetFeatureEnabled;
-        [EzIPC] internal static readonly Action<string, string, bool> SetConfigEnabled;
-
-        internal static void Dispose() => IPCSubscriber_Common.DisposeAll(_disposalTokens);
+        internal static void SetFeatureEnabled(string feature, bool enabled) => PandorasBox.SetFeatureEnabled(feature, enabled);
+        internal static bool? GetFeatureEnabled(string feature) => PandorasBox.GetFeatureEnabled(feature);
     }
 
     public static class Wrath_IPCSubscriber

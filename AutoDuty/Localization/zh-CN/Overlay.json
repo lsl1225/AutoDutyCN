@@ -1,0 +1,28 @@
+{
+  "Overlay": {
+    "Button": {
+      "Goto": "移动/寻路",
+      "TurnIn": "上缴装备换军票",
+      "Desynth": "分解装备",
+      "Extract": "精制魔晶石",
+      "Repair": "修理装备",
+      "Equip": "装备推荐装备",
+      "Coffers": "开启宝箱",
+      "TripleTriad": "九宫幻卡"
+    },
+    "Tooltip": {
+      "TurnIn": "点击前往大国防联军补给处，并调用 AutoRetainer 的军票上缴功能",
+      "TurnInMissing": "军票上缴功能需要安装 AutoRetainer 插件。获取地址：https://love.puni.sh/ment.json",
+      "Desynth": "点击分解背包中的所有可分解物品",
+      "Extract": "点击精制魔晶石",
+      "ExtractMissing": "魔晶石精制需要完成任务：物尽其用",
+      "Repair": "点击修理装备",
+      "Equip": "点击装备推荐装备",
+      "Coffers": "点击开启宝箱"
+    },
+    "Popup": {
+      "MissingPlugin": "缺少插件",
+      "MissingQuestCompletion": "缺少任务完成"
+    }
+  }
+}

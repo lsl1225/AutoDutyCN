@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using AutoDuty.Helpers;
 using AutoDuty.IPC;
+using AutoDuty.Managers;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
@@ -128,7 +129,7 @@ public sealed class MainWindow : Window, IDisposable
             {
                 using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
-                    if (ImGui.Button("Goto"))
+                    if (ImGui.Button(Loc.Get("Overlay.Button.Goto")))
                     {
                         ImGui.OpenPopup("GotoPopup");
                     }   
@@ -157,17 +158,17 @@ public sealed class MainWindow : Window, IDisposable
             {
                 using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
-                    if (ImGui.Button("TurnIn"))
+                    if (ImGui.Button(Loc.Get("Overlay.Button.TurnIn")))
                     {
                         if (AutoRetainer_IPCSubscriber.IsEnabled)
                             GCTurninHelper.Invoke();
                         else
-                            ShowPopup("Missing Plugin", "GC Turnin Requires AutoRetainer plugin. Get @ https://love.puni.sh/ment.json");
+                            ShowPopup(Loc.Get("Overlay.Popup.MissingPlugin"), Loc.Get("Overlay.Tooltip.TurnInMissing"));
                     }
                     if (AutoRetainer_IPCSubscriber.IsEnabled)
-                        ToolTip("Click to Goto GC Turnin and Invoke AutoRetainer's GC Turnin");
+                        ToolTip(Loc.Get("Overlay.Tooltip.TurnIn"));
                     else
-                        ToolTip("GC Turnin Requires AutoRetainer plugin. Get @ https://love.puni.sh/ment.json");
+                        ToolTip(Loc.Get("Overlay.Tooltip.TurnInMissing"));
                 }
             }
             ImGui.SameLine(0, 5);
@@ -175,9 +176,9 @@ public sealed class MainWindow : Window, IDisposable
             {
                 using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
-                    if (ImGui.Button("Desynth"))
+                    if (ImGui.Button(Loc.Get("Overlay.Button.Desynth")))
                         DesynthHelper.Invoke();
-                    ToolTip("Click to Desynth all Items in Inventory");
+                    ToolTip(Loc.Get("Overlay.Tooltip.Desynth"));
                     
                 }
             }
@@ -186,17 +187,17 @@ public sealed class MainWindow : Window, IDisposable
             {
                 using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
-                    if (ImGui.Button("Extract"))
+                    if (ImGui.Button(Loc.Get("Overlay.Button.Extract")))
                     {
                         if (QuestManager.IsQuestComplete(66174))
                             ExtractHelper.Invoke();
                         else
-                            ShowPopup("Missing Quest Completion", "Materia Extraction requires having completed quest: Forging the Spirit");
+                            ShowPopup(Loc.Get("Overlay.Popup.MissingQuestCompletion"), Loc.Get("Overlay.Tooltip.ExtractMissing"));
                     }
                     if (QuestManager.IsQuestComplete(66174))
-                        ToolTip("Click to Extract Materia");
+                        ToolTip(Loc.Get("Overlay.Tooltip.Extract"));
                     else
-                        ToolTip("Materia Extraction requires having completed quest: Forging the Spirit");
+                        ToolTip(Loc.Get("Overlay.Tooltip.ExtractMissing"));
                 }
             }
             
@@ -205,7 +206,7 @@ public sealed class MainWindow : Window, IDisposable
             {
                 using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
-                    if (ImGui.Button("Repair"))
+                    if (ImGui.Button(Loc.Get("Overlay.Button.Repair")))
                     {
                         if (InventoryHelper.CanRepair(100))
                             RepairHelper.Invoke();
@@ -213,7 +214,7 @@ public sealed class MainWindow : Window, IDisposable
                             //ShowPopup("", "");
                     }
                     //if ()
-                        ToolTip("Click to Repair");
+                        ToolTip(Loc.Get("Overlay.Tooltip.Repair"));
                     //else
                         //ToolTip("");
                     
@@ -224,7 +225,7 @@ public sealed class MainWindow : Window, IDisposable
             {
                 using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
-                    if (ImGui.Button("Equip"))
+                    if (ImGui.Button(Loc.Get("Overlay.Button.Equip")))
                     {
                         AutoEquipHelper.Invoke();
                         //else
@@ -232,7 +233,7 @@ public sealed class MainWindow : Window, IDisposable
                     }
 
                     //if ()
-                    ToolTip("Click to Equip Gear");
+                    ToolTip(Loc.Get("Overlay.Tooltip.Equip"));
                     //else
                     //ToolTip("");
                 }
@@ -243,9 +244,9 @@ public sealed class MainWindow : Window, IDisposable
             {
                 using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
-                    if (ImGui.Button("Coffers")) 
+                    if (ImGui.Button(Loc.Get("Overlay.Button.Coffers")))
                         CofferHelper.Invoke();
-                    ToolTip("Click to open coffers");
+                    ToolTip(Loc.Get("Overlay.Tooltip.Coffers"));
                 }
             }
             ImGui.SameLine(0, 5);
@@ -254,7 +255,7 @@ public sealed class MainWindow : Window, IDisposable
             {
                 using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
-                    if (ImGui.Button("Triple Triad"))
+                    if (ImGui.Button(Loc.Get("Overlay.Button.TripleTriad")))
                         ImGui.OpenPopup("TTPopup");
                     
                 }

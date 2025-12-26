@@ -104,6 +104,20 @@ internal static class LocalizationManager
         return fallback ?? key;
     }
 
+    internal static string Get(string key, params object[] args)
+    {
+        string template = Get(key);
+        try
+        {
+            return string.Format(template, args);
+        }
+        catch (FormatException ex)
+        {
+            Svc.Log.Error($"Format error for key '{key}': {ex.Message}");
+            return template;
+        }
+    }
+
     internal static string CurrentLanguage => _currentLanguage;
 
     internal static string[] AvailableLanguages => new[] { "en-US", "zh-CN" };
@@ -114,4 +128,7 @@ internal static class Loc
 {
     internal static string Get(string key, string? fallback = null) =>
         LocalizationManager.Get(key, fallback);
+
+    internal static string Get(string key, params object[] args) =>
+        LocalizationManager.Get(key, args);
 }

@@ -1824,7 +1824,7 @@ public sealed class AutoDuty : IDalamudPlugin
             {
                 bool wrathRotationReady = true;
                 if (active)
-                    wrathRotationReady = Wrath_IPCSubscriber.IsCurrentJobAutoRotationReady() ||
+                    wrathRotationReady = Wrath_IPCSubscriber.IsCurrentJobAutoRotationReady ||
                                          ConfigurationMain.Instance.GetCurrentConfig.Wrath_AutoSetupJobs && Wrath_IPCSubscriber.SetJobAutoReady();
 
                 if (!active || wrathRotationReady)

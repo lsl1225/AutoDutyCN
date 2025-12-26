@@ -26,6 +26,20 @@
           "SharpDX.Mathematics": "4.2.0"
         }
       },
+      "WrathCombo.API": {
+        "type": "Direct",
+        "requested": "[0.4.2, )",
+        "resolved": "0.4.2",
+        "contentHash": "JW8FLmk1I4FRNEDI6XzDCXcCcyoTqhqoxX5uiLXHwy2Ake9S3uGyInJZ6m0JQ+s/21QL0YjOzyR0Qrs8bTHTFA==",
+        "dependencies": {
+          "JetBrains.Annotations": "2025.2.4"
+        }
+      },
+      "JetBrains.Annotations": {
+        "type": "Transitive",
+        "resolved": "2025.2.4",
+        "contentHash": "TwbgxAkXxY+vNEhNVx/QXjJ4vqxmepOjsgRvvImQPbHkHMMb4W+ahL3laMsxXKtNT7iMy+E1B3xkqao2hf1n3A=="
+      },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
         "resolved": "1.1.0",

@@ -256,10 +256,10 @@ namespace AutoDuty.Windows
                     ImGui.TextColored(ImGuiHelper.StateGoodColor, Loc.Get("MainTab.SelectMode"));
                     ImGui.SameLine(0);
                     ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-                    if (ImGui.BeginCombo("##AutoDutyModeEnum", AutoDuty.Configuration.AutoDutyModeEnum.ToCustomString()))
+                    if (ImGui.BeginCombo("##AutoDutyModeEnum", Loc.Get($"MainTab.Modes.{AutoDuty.Configuration.AutoDutyModeEnum}")))
                     {
                         foreach (AutoDutyMode mode in Enum.GetValues(typeof(AutoDutyMode)))
-                            if (ImGui.Selectable(mode.ToCustomString(), AutoDuty.Configuration.AutoDutyModeEnum == mode))
+                            if (ImGui.Selectable(Loc.Get($"MainTab.Modes.{mode}"), AutoDuty.Configuration.AutoDutyModeEnum == mode))
                             {
                                 AutoDuty.Configuration.AutoDutyModeEnum = mode;
                                 Configuration.Save();
@@ -317,10 +317,10 @@ namespace AutoDuty.Windows
                             ImGui.TextColored(AutoDuty.Configuration.DutyModeEnum == DutyMode.None ? ImGuiHelper.StateBadColor : ImGuiHelper.StateGoodColor, Loc.Get("MainTab.SelectDutyMode"));
                             ImGui.SameLine(0);
                             ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-                            if (ImGui.BeginCombo("##DutyModeEnum", AutoDuty.Configuration.DutyModeEnum.ToCustomString()))
+                            if (ImGui.BeginCombo("##DutyModeEnum", Loc.Get($"MainTab.DutyModes.{AutoDuty.Configuration.DutyModeEnum}")))
                             {
                                 foreach (DutyMode mode in Enum.GetValues(typeof(DutyMode)))
-                                    if (ImGui.Selectable(mode.ToCustomString(), AutoDuty.Configuration.DutyModeEnum == mode))
+                                    if (ImGui.Selectable(Loc.Get($"MainTab.DutyModes.{mode}"), AutoDuty.Configuration.DutyModeEnum == mode))
                                     {
                                         AutoDuty.Configuration.DutyModeEnum = mode;
                                             Configuration.Save();
@@ -346,18 +346,18 @@ namespace AutoDuty.Windows
                                     ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
                                     if (ImGui.BeginCombo("##LevelingModeEnum", Plugin.LevelingModeEnum switch
                                         {
-                                            LevelingMode.None => Loc.Get("MainTab.None"),
-                                            _ => $"{Plugin.LevelingModeEnum.ToCustomString().Replace(AutoDuty.Configuration.DutyModeEnum.ToString(), null)} Auto".Trim()
+                                            LevelingMode.None => Loc.Get("MainTab.LevelingModes.None"),
+                                            _ => Loc.Get("MainTab.LevelingModes.Auto")
                                         }))
                                     {
-                                        if (ImGui.Selectable(Loc.Get("MainTab.None"), Plugin.LevelingModeEnum == LevelingMode.None))
+                                        if (ImGui.Selectable(Loc.Get("MainTab.LevelingModes.None"), Plugin.LevelingModeEnum == LevelingMode.None))
                                         {
                                             Plugin.LevelingModeEnum = LevelingMode.None;
                                                 Configuration.Save();
                                         }
 
                                         LevelingMode autoLevelMode = (AutoDuty.Configuration.DutyModeEnum == DutyMode.Support ? LevelingMode.Support : LevelingMode.Trust_Group);
-                                        if (ImGui.Selectable($"{autoLevelMode.ToCustomString().Replace(AutoDuty.Configuration.DutyModeEnum.ToString(), null)} Auto".Trim(), Plugin.LevelingModeEnum == autoLevelMode))
+                                        if (ImGui.Selectable(Loc.Get("MainTab.LevelingModes.Auto"), Plugin.LevelingModeEnum == autoLevelMode))
                                         {
                                             Plugin.LevelingModeEnum = autoLevelMode;
                                                 Configuration.Save();
@@ -366,7 +366,7 @@ namespace AutoDuty.Windows
                                         }
 
                                         if (AutoDuty.Configuration.DutyModeEnum == DutyMode.Trust)
-                                            if (ImGui.Selectable($"{LevelingMode.Trust_Solo.ToCustomString().Replace(AutoDuty.Configuration.DutyModeEnum.ToString(), null)} Auto".Trim(), Plugin.LevelingModeEnum == LevelingMode.Trust_Solo))
+                                            if (ImGui.Selectable(Loc.Get("MainTab.LevelingModes.Auto"), Plugin.LevelingModeEnum == LevelingMode.Trust_Solo))
                                             {
                                                 Plugin.LevelingModeEnum = LevelingMode.Trust_Solo;
                                                     Configuration.Save();
@@ -602,7 +602,7 @@ namespace AutoDuty.Windows
                                             ImGui.SameLine();
 
                                             ImGui.PushItemWidth(80f.Scale());
-                                            if (ImGui.BeginCombo($"##Playlist{i}DutyModeEnum", entry.DutyMode.ToCustomString()))
+                                            if (ImGui.BeginCombo($"##Playlist{i}DutyModeEnum", Loc.Get($"MainTab.DutyModes.{entry.DutyMode}")))
                                             {
                                                 foreach (DutyMode mode in Enum.GetValues(typeof(DutyMode)))
                                                 {
@@ -611,7 +611,7 @@ namespace AutoDuty.Windows
 
                                                     using (ImRaii.PushColor(ImGuiCol.Text, ImGuiHelper.StateGoodColor, entryContent.DutyModes.HasFlag(mode)))
                                                     {
-                                                        if (ImGui.Selectable(mode.ToCustomString(), entry.DutyMode == mode)) 
+                                                        if (ImGui.Selectable(Loc.Get($"MainTab.DutyModes.{mode}"), entry.DutyMode == mode)) 
                                                             entry.DutyMode = mode;
                                                     }
                                                 }

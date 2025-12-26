@@ -1,51 +1,53 @@
-global using static AutoDuty.Data.Enums;
-global using static AutoDuty.Data.Extensions;
-global using static AutoDuty.Data.Classes;
-global using static AutoDuty.AutoDuty;
 global using AutoDuty.Managers;
 global using ECommons.GameHelpers;
-using System.Numerics;
-using Dalamud.Game.Command;
-using Dalamud.Plugin;
-using Dalamud.Interface.Windowing;
-using Dalamud.Plugin.Services;
-using ECommons;
-using ECommons.DalamudServices;
-using AutoDuty.Windows;
-using AutoDuty.IPC;
+global using static AutoDuty.AutoDuty;
+global using static AutoDuty.Data.Classes;
+global using static AutoDuty.Data.Enums;
+global using static AutoDuty.Data.Extensions;
 using AutoDuty.External;
 using AutoDuty.Helpers;
-using ECommons.Throttlers;
-using Dalamud.Game.ClientState.Objects.Types;
-using ECommons.GameFunctions;
-using ECommons.Automation;
-using FFXIVClientStructs.FFXIV.Client.Game;
-using ECommons.ExcelServices;
-using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-using Dalamud.IoC;
-using System.Diagnostics;
-using Dalamud.Game.ClientState.Conditions;
+using AutoDuty.IPC;
 using AutoDuty.Properties;
+using AutoDuty.Updater;
+using AutoDuty.Windows;
+using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Game.Command;
+using Dalamud.Interface.Windowing;
+using Dalamud.IoC;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
+using ECommons;
+using ECommons.Automation;
+using ECommons.DalamudServices;
+using ECommons.ExcelServices;
+using ECommons.GameFunctions;
+using ECommons.Throttlers;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using Serilog.Events;
-using AutoDuty.Updater;
+using System.Diagnostics;
+using System.Numerics;
 
 namespace AutoDuty;
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Data;
 using ECommons.Automation.NeoTaskManager;
 using ECommons.Configuration;
+using ECommons.EzIpcManager;
+using ECommons.IPC.Subscribers;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using Lumina.Excel.Sheets;
 using Pictomancy;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using static Data.Classes;
 using TaskManager = ECommons.Automation.NeoTaskManager.TaskManager;
 
@@ -117,7 +119,7 @@ public sealed class AutoDuty : IDalamudPlugin
                     break;
                 case Stage.Paused:
                     this.previousStage = this.Stage;
-                    if (VNavmesh_IPCSubscriber.Path_NumWaypoints() > 0)
+                    if (VNavmesh_IPCSubscriber.Path_NumWaypoints > 0)
                         VNavmesh_IPCSubscriber.Path_Stop();
                     FollowHelper.SetFollow(null);
                     this.taskManager.StepMode =  true;
@@ -139,7 +141,7 @@ public sealed class AutoDuty : IDalamudPlugin
                         ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true;
                     break;
                 case Stage.Idle:
-                    if (VNavmesh_IPCSubscriber.Path_NumWaypoints() > 0)
+                    if (VNavmesh_IPCSubscriber.Path_NumWaypoints > 0)
                         VNavmesh_IPCSubscriber.Path_Stop();
                     break;
                 case Stage.Looping:
@@ -239,6 +241,8 @@ public sealed class AutoDuty : IDalamudPlugin
         try
         {
             Plugin = this;
+
+            IPCBase.DefaultWrapper = SafeWrapper.IPCException;
             ECommonsMain.Init(PluginInterface, Plugin, Module.DalamudReflector, Module.ObjectFunctions);
             PictoService.Initialize(PluginInterface);
 
@@ -919,8 +923,7 @@ public sealed class AutoDuty : IDalamudPlugin
         this.Stage =  Stage.Looping;
         this.states   |= PluginState.Looping;
         this.SetGeneralSettings(false);
-        if (!VNavmesh_IPCSubscriber.Path_GetMovementAllowed())
-            VNavmesh_IPCSubscriber.Path_SetMovementAllowed(true);
+        VNavmesh_IPCSubscriber.SetMovementAllowed(true);
         this.taskManager.Abort();
         Svc.Log.Info($"Running {this.CurrentTerritoryContent.Name} {Configuration.LoopTimes} Times");
         if (!InDungeon)
@@ -988,7 +991,7 @@ public sealed class AutoDuty : IDalamudPlugin
 
         this.taskManager.Enqueue(() => Svc.Log.Debug($"Done Queueing-WaitDutyStarted, NavIsReady"));
         this.taskManager.Enqueue(() => Svc.DutyState.IsDutyStarted,          "Run-WaitDutyStarted");
-        this.taskManager.Enqueue(() => VNavmesh_IPCSubscriber.Nav_IsReady(), "Run-WaitNavIsReady", new TaskManagerConfiguration(int.MaxValue));
+        this.taskManager.Enqueue(() => VNavmesh_IPCSubscriber.Nav_IsReady, "Run-WaitNavIsReady", new TaskManagerConfiguration(int.MaxValue));
         this.taskManager.Enqueue(() => Svc.Log.Debug($"Start Navigation"));
         this.taskManager.Enqueue(() => this.StartNavigation(startFromZero), "Run-StartNavigation");
 
@@ -1205,7 +1208,7 @@ public sealed class AutoDuty : IDalamudPlugin
                                                                                         new TaskManagerConfiguration(int.MaxValue));
                                                                this.taskManager.Enqueue(() => PlayerHelper.IsValid,                 "Loop-WaitPlayerValid", new TaskManagerConfiguration(int.MaxValue));
                                                                this.taskManager.Enqueue(() => Svc.DutyState.IsDutyStarted,          "Loop-WaitDutyStarted", new TaskManagerConfiguration(int.MaxValue));
-                                                               this.taskManager.Enqueue(() => VNavmesh_IPCSubscriber.Nav_IsReady(), "Loop-WaitNavReady", new TaskManagerConfiguration(int.MaxValue));
+                                                               this.taskManager.Enqueue(() => VNavmesh_IPCSubscriber.Nav_IsReady, "Loop-WaitNavReady", new TaskManagerConfiguration(int.MaxValue));
                                                                this.taskManager.Enqueue(() => Svc.Log.Debug($"StartNavigation"));
                                                                this.taskManager.Enqueue(() => this.StartNavigation(true), "Loop-StartNavigation");
                                                            }, () => !ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep);
@@ -1468,7 +1471,7 @@ public sealed class AutoDuty : IDalamudPlugin
             return;
         }
 
-        if (!VNavmesh_IPCSubscriber.SimpleMove_PathfindInProgress() && !VNavmesh_IPCSubscriber.Path_IsRunning())
+        if (!VNavmesh_IPCSubscriber.SimpleMove_PathfindInProgress && !VNavmesh_IPCSubscriber.Path_IsRunning)
         {
             Chat.ExecuteCommand("/automove off");
             VNavmesh_IPCSubscriber.Path_SetTolerance(0.25f);
@@ -1549,7 +1552,7 @@ public sealed class AutoDuty : IDalamudPlugin
                 }
                 else if (Configuration.RebuildNavmeshOnStuck && stuckCount >= Configuration.RebuildNavmeshAfterStuckXTimes)
                 {
-                    VNavmesh_IPCSubscriber.Nav_Rebuild();
+                    VNavmesh_IPCSubscriber.GetNav_Rebuild();
                 }
 
                 this.Stage = Stage.Idle;
@@ -1558,7 +1561,7 @@ public sealed class AutoDuty : IDalamudPlugin
             }
         }
 
-        if ((!VNavmesh_IPCSubscriber.SimpleMove_PathfindInProgress() && VNavmesh_IPCSubscriber.Path_NumWaypoints() == 0) || (!this.pathAction.Name.IsNullOrEmpty() && this.pathAction.Position != Vector3.Zero && ObjectHelper.GetDistanceToPlayer(this.pathAction.Position) <= (this.pathAction.Name.EqualsIgnoreCase("Interactable") ? 2f : 0.25f)))
+        if ((!VNavmesh_IPCSubscriber.SimpleMove_PathfindInProgress && VNavmesh_IPCSubscriber.Path_NumWaypoints == 0) || (!this.pathAction.Name.IsNullOrEmpty() && this.pathAction.Position != Vector3.Zero && ObjectHelper.GetDistanceToPlayer(this.pathAction.Position) <= (this.pathAction.Name.EqualsIgnoreCase("Interactable") ? 2f : 0.25f)))
         {
             if (this.pathAction.Name.IsNullOrEmpty() || this.pathAction.Name.Equals("MoveTo") || this.pathAction.Name.Equals("TreasureCoffer") || this.pathAction.Name.Equals("Revival"))
             {
@@ -1628,7 +1631,7 @@ public sealed class AutoDuty : IDalamudPlugin
                 {
                     int enemyCount = ObjectFunctions.GetAttackableEnemyCountAroundPoint(Svc.Targets.Target.Position, 15);
 
-                    if (!VNavmesh_IPCSubscriber.SimpleMove_PathfindInProgress() && VNavmesh_IPCSubscriber.Path_IsRunning())
+                    if (!VNavmesh_IPCSubscriber.SimpleMove_PathfindInProgress && VNavmesh_IPCSubscriber.Path_IsRunning)
                         VNavmesh_IPCSubscriber.Path_Stop();
 
                     if (enemyCount > 2)
@@ -1643,12 +1646,12 @@ public sealed class AutoDuty : IDalamudPlugin
                     }
                 }
             }
-            else if (!VNavmesh_IPCSubscriber.SimpleMove_PathfindInProgress() && VNavmesh_IPCSubscriber.Path_IsRunning())
+            else if (!VNavmesh_IPCSubscriber.SimpleMove_PathfindInProgress && VNavmesh_IPCSubscriber.Path_IsRunning)
             {
                 VNavmesh_IPCSubscriber.Path_Stop();
             }
         }
-        else if (!PartyHelper.PartyInCombat() && !VNavmesh_IPCSubscriber.SimpleMove_PathfindInProgress())
+        else if (!PartyHelper.PartyInCombat() && !VNavmesh_IPCSubscriber.SimpleMove_PathfindInProgress)
         {
             BossMod_IPCSubscriber.SetRange(Configuration.MaxDistanceToTargetFloat);
 
@@ -1708,7 +1711,7 @@ public sealed class AutoDuty : IDalamudPlugin
         this.Stage           =  Stage.Reading_Path;
         this.states          |= PluginState.Navigating;
         this.stopForCombat   =  true;
-        if (Configuration.AutoManageVnavAlignCamera && !VNavmesh_IPCSubscriber.Path_GetAlignCamera())
+        if (Configuration.AutoManageVnavAlignCamera && !VNavmesh_IPCSubscriber.Path_GetAlignCamera)
             VNavmesh_IPCSubscriber.Path_SetAlignCamera(true);
 
         if (Configuration is { AutoManageBossModAISettings: true, BM_UpdatePresetsAutomatically: true })
@@ -1776,7 +1779,8 @@ public sealed class AutoDuty : IDalamudPlugin
         */
         if (YesAlready_IPCSubscriber.IsEnabled is true and true) this.settingsActive |= SettingsActive.YesAlready;
 
-        if (PandorasBox_IPCSubscriber.IsEnabled && PandorasBox_IPCSubscriber.GetFeatureEnabled("Auto-interact with Objects in Instances")) this.settingsActive |= SettingsActive.Pandora_Interact_Objects;
+        if (PandorasBox_IPCSubscriber.IsEnabled && (PandorasBox_IPCSubscriber.GetFeatureEnabled("Auto-interact with Objects in Instances") ?? false))
+            this.settingsActive |= SettingsActive.Pandora_Interact_Objects;
 
         Svc.Log.Debug($"General Settings Active: {this.settingsActive}");
     }
@@ -1970,7 +1974,7 @@ public sealed class AutoDuty : IDalamudPlugin
 
     private void CheckRetainerWindow()
     {
-        if (AutoRetainerHelper.State == ActionState.Running || AutoRetainer_IPCSubscriber.IsBusy() || AM_IPCSubscriber.IsRunning() || this.Stage == Stage.Paused)
+        if (AutoRetainerHelper.State == ActionState.Running || AutoRetainer_IPCSubscriber.IsBusy() || this.Stage == Stage.Paused)
             return;
 
         if (Svc.Condition[ConditionFlag.OccupiedSummoningBell])
@@ -2099,11 +2103,11 @@ public sealed class AutoDuty : IDalamudPlugin
             this.indexer = -1;
         if (Configuration is { ShowOverlay: true, HideOverlayWhenStopped: true })
             this.Overlay.IsOpen = false;
-        if (VNavmesh_IPCSubscriber.IsEnabled && VNavmesh_IPCSubscriber.Path_GetTolerance() > 0.25F)
+        if (VNavmesh_IPCSubscriber.IsEnabled && VNavmesh_IPCSubscriber.Path_GetTolerance > 0.25F)
             VNavmesh_IPCSubscriber.Path_SetTolerance(0.25f);
         FollowHelper.SetFollow(null);
 
-        if (VNavmesh_IPCSubscriber.IsEnabled && VNavmesh_IPCSubscriber.Path_IsRunning())
+        if (VNavmesh_IPCSubscriber.IsEnabled && VNavmesh_IPCSubscriber.Path_IsRunning)
             VNavmesh_IPCSubscriber.Path_Stop();
 
         if (MapHelper.State == ActionState.Running)

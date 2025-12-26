@@ -48,6 +48,7 @@
    </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ECommons.IPC\ECommons.IPC\ECommons.IPC.csproj" />
     <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
     <PackageReference Include="Pictomancy" Version="0.0.2" />
     <Reference Include="Dalamud.Common">

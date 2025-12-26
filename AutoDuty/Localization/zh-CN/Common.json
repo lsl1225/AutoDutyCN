@@ -1,0 +1,21 @@
+{
+  "Common": {
+    "Start": "开始",
+    "Stop": "停止",
+    "Pause": "暂停",
+    "Resume": "继续",
+    "Save": "保存",
+    "Cancel": "取消",
+    "Close": "关闭",
+    "Refresh": "刷新",
+    "Add": "添加",
+    "Delete": "删除",
+    "Edit": "编辑",
+    "Copy": "复制",
+    "Clear": "清除",
+    "Open": "打开",
+    "Load": "加载",
+    "Run": "运行",
+    "Build": "构建"
+  }
+}

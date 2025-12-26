@@ -1,4 +1,5 @@
 ﻿using AutoDuty.Helpers;
+using AutoDuty.Managers;
 using Dalamud.Bindings.ImGui;
 using ECommons.ImGuiMethods;
 using System.Diagnostics;
@@ -15,25 +16,25 @@ namespace AutoDuty.Windows
 
         public static void Draw()
         {
-            MainWindow.CurrentTabName = "Info";
+            MainWindow.CurrentTabName = Loc.Get("InfoTab.Title");
 
             ImGui.NewLine();
-            ImGuiEx.TextWrapped("For assistance with general setup for both AutoDuty and it's dependencies, be sure to check out the setup guide below for more information:");
+            ImGuiEx.TextWrapped(Loc.Get("InfoTab.SetupGuideIntro"));
             ImGui.NewLine();
-            ImGui.SetCursorPosX((ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("Information and Setup").X) / 2);
-            if (ImGui.Button("Information and Setup"))
+            ImGui.SetCursorPosX((ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(Loc.Get("InfoTab.InformationAndSetup")).X) / 2);
+            if (ImGui.Button(Loc.Get("InfoTab.InformationAndSetup")))
                 Process.Start("explorer.exe", InfoUrl);
             ImGui.NewLine();
-            ImGuiEx.TextWrapped("The above guide also has information on the status of each path, such as Path maturity, module maturity, and general consistency of each path. You can also review additional notes or considerations, that may need to be made on your part for successful looping. For requests, issues, or contributions to AD, please use the AutoDuty Github to open an issue:");
+            ImGuiEx.TextWrapped(Loc.Get("InfoTab.PathStatusInfo"));
             ImGui.NewLine();
-            ImGui.SetCursorPosX((ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("GitHub Issues").X) / 2);
-            if (ImGui.Button("GitHub Issues"))
+            ImGui.SetCursorPosX((ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(Loc.Get("InfoTab.GitHubIssues")).X) / 2);
+            if (ImGui.Button(Loc.Get("InfoTab.GitHubIssues")))
                 Process.Start("explorer.exe", GitIssueUrl);
             ImGui.NewLine();
-            ImGuiEx.TextCentered("For everything else, join the discord!");
+            ImGuiEx.TextCentered(Loc.Get("InfoTab.DiscordInvite"));
             ImGui.NewLine();
-            ImGui.SetCursorPosX((ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("Punish Discord").X) / 2);
-            if (ImGui.Button("Punish Discord"))
+            ImGui.SetCursorPosX((ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(Loc.Get("InfoTab.PunishDiscord")).X) / 2);
+            if (ImGui.Button(Loc.Get("InfoTab.PunishDiscord")))
                 Process.Start("explorer.exe", PunishDiscordUrl);
 
             ImGui.NewLine();
@@ -42,12 +43,12 @@ namespace AutoDuty.Windows
 
             void PluginInstallLine(ExternalPlugin plugin, string message)
             {
-                bool isReady = plugin == ExternalPlugin.BossMod ? 
-                                   BossMod_IPCSubscriber.IsEnabled : 
+                bool isReady = plugin == ExternalPlugin.BossMod ?
+                                   BossMod_IPCSubscriber.IsEnabled :
                                    IPCSubscriber_Common.IsReady(plugin.GetExternalPluginData().name);
-                
+
                 if(!isReady)
-                    if (ImGui.Button($"Install##InstallExternalPlugin_{plugin}_{id++}"))
+                    if (ImGui.Button($"{Loc.Get("InfoTab.Install")}##InstallExternalPlugin_{plugin}_{id++}"))
                         PluginInstaller.InstallPlugin(plugin);
 
                 ImGui.NextColumn();
@@ -60,49 +61,49 @@ namespace AutoDuty.Windows
                 ImGui.NextColumn();
             }
 
-            ImGui.SetCursorPosX((ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("Required Plugins").X) / 2);
-            ImGui.Text("Required Plugins");
+            ImGui.SetCursorPosX((ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(Loc.Get("InfoTab.RequiredPlugins")).X) / 2);
+            ImGui.Text(Loc.Get("InfoTab.RequiredPlugins"));
 
             ImGui.Columns(3, "PluginInstallerRequired", false);
             ImGui.SetColumnWidth(0, 60);
             ImGui.SetColumnWidth(1, 100);
 
-            PluginInstallLine(ExternalPlugin.BossMod, "handles boss fights for you");
-            PluginInstallLine(ExternalPlugin.vnav, "can move you around");
+            PluginInstallLine(ExternalPlugin.BossMod, Loc.Get("InfoTab.PluginDesc.BossModFights"));
+            PluginInstallLine(ExternalPlugin.vnav, Loc.Get("InfoTab.PluginDesc.VNavMovement"));
 
             ImGui.Columns(1);
             ImGui.NewLine();
-            ImGui.SetCursorPosX((ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("Combat Plugins").X) / 2);
-            ImGui.Text("Combat Plugins");
+            ImGui.SetCursorPosX((ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(Loc.Get("InfoTab.CombatPlugins")).X) / 2);
+            ImGui.Text(Loc.Get("InfoTab.CombatPlugins"));
 
             ImGui.Indent(65f);
-            ImGui.TextColored(EzColor.Cyan, "Hotly debated, pick your favorite. You can configure it in the config");
+            ImGui.TextColored(EzColor.Cyan, Loc.Get("InfoTab.CombatPluginsNote"));
             ImGui.Unindent(65f);
 
             ImGui.Columns(3, "PluginInstallerCombat", false);
             ImGui.SetColumnWidth(0, 60);
             ImGui.SetColumnWidth(1, 100);
 
-            PluginInstallLine(ExternalPlugin.BossMod,              "has integrated rotations");
-            PluginInstallLine(ExternalPlugin.WrathCombo,           "Puni.sh's dedicated rotation plugin");
-            PluginInstallLine(ExternalPlugin.RotationSolverReborn, "Reborn's rotation plugin");
+            PluginInstallLine(ExternalPlugin.BossMod,              Loc.Get("InfoTab.PluginDesc.BossModRotations"));
+            PluginInstallLine(ExternalPlugin.WrathCombo,           Loc.Get("InfoTab.PluginDesc.WrathCombo"));
+            PluginInstallLine(ExternalPlugin.RotationSolverReborn, Loc.Get("InfoTab.PluginDesc.RotationSolverReborn"));
 
             ImGui.Columns(1);
             ImGui.NewLine();
-            ImGui.SetCursorPosX((ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("Recommended Plugins").X) / 2);
-            ImGui.Text("Recommended Plugins");
+            ImGui.SetCursorPosX((ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(Loc.Get("InfoTab.RecommendedPlugins")).X) / 2);
+            ImGui.Text(Loc.Get("InfoTab.RecommendedPlugins"));
             ImGui.NewLine();
             ImGui.Columns(3, "PluginInstallerRecommended", false);
             ImGui.SetColumnWidth(0, 60);
             ImGui.SetColumnWidth(1, 100);
 
-            PluginInstallLine(ExternalPlugin.AntiAFK,      "keeps you from being marked as afk");
-            PluginInstallLine(ExternalPlugin.AutoRetainer, "can be triggered, does GC delivery and discarding");
-            PluginInstallLine(ExternalPlugin.Avarice,      "is read for positionals");
-            PluginInstallLine(ExternalPlugin.Lifestream,   "incredibly extensive teleporting");
-            PluginInstallLine(ExternalPlugin.Pandora,      "chest looting + tankstance");
-            PluginInstallLine(ExternalPlugin.Gearsetter,   "recommend items to equip");
-            PluginInstallLine(ExternalPlugin.Stylist,      "recommend items to equip");
+            PluginInstallLine(ExternalPlugin.AntiAFK,      Loc.Get("InfoTab.PluginDesc.AntiAFK"));
+            PluginInstallLine(ExternalPlugin.AutoRetainer, Loc.Get("InfoTab.PluginDesc.AutoRetainer"));
+            PluginInstallLine(ExternalPlugin.Avarice,      Loc.Get("InfoTab.PluginDesc.Avarice"));
+            PluginInstallLine(ExternalPlugin.Lifestream,   Loc.Get("InfoTab.PluginDesc.Lifestream"));
+            PluginInstallLine(ExternalPlugin.Pandora,      Loc.Get("InfoTab.PluginDesc.Pandora"));
+            PluginInstallLine(ExternalPlugin.Gearsetter,   Loc.Get("InfoTab.PluginDesc.Gearsetter"));
+            PluginInstallLine(ExternalPlugin.Stylist,      Loc.Get("InfoTab.PluginDesc.Stylist"));
 
 
             ImGui.Columns(1);

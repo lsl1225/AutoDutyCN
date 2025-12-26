@@ -1,5 +1,6 @@
 using AutoDuty.Helpers;
 using AutoDuty.IPC;
+using AutoDuty.Managers;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
@@ -1143,6 +1144,7 @@ public class Configuration
     public bool SquadronAssignLowestMembers    = true;
 
     public bool ShowMainWindowOnStartup = false;
+    public string Language = "en-US";
 
     
     #region OverlayConfig
@@ -1660,6 +1662,29 @@ public static class ConfigTab
         if (bareProfile)
             ImGuiEx.TextWrapped("The bare profile is for just running a duty, and nothing else. You can duplicate it to make edits.");
         using ImRaii.IEndObject _ = ImRaii.Disabled(bareProfile);
+
+        //Language Selector
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+        ImGui.AlignTextToFramePadding();
+        ImGui.Text(Loc.Get("ConfigTab.Language"));
+        ImGui.SameLine();
+
+        string currentLang = Configuration.Language;
+        string[] languages = LocalizationManager.AvailableLanguages;
+        int currentIndex = Array.IndexOf(languages, currentLang);
+
+        ImGui.SetNextItemWidth(150);
+        if (ImGui.Combo("##Language", ref currentIndex, languages, languages.Length))
+        {
+            Configuration.Language = languages[currentIndex];
+            LocalizationManager.SetLanguage(Configuration.Language);
+            Configuration.Save();
+        }
+
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip(Loc.Get("ConfigTab.LanguageHelp"));
 
         //Start of Window & Overlay Settings
         ImGui.Spacing();

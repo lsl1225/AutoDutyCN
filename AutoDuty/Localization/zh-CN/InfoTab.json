@@ -1,0 +1,30 @@
+{
+  "InfoTab": {
+    "Title": "信息",
+    "SetupGuideIntro": "有关 AutoDuty 及其依赖项的常规设置帮助，请务必查看下面的设置指南以获取更多信息：",
+    "InformationAndSetup": "信息和设置",
+    "PathStatusInfo": "上述指南还包含每个路径的状态信息，例如路径成熟度、模块成熟度和每个路径的一般一致性。您还可以查看其他注意事项或考虑因素，这些可能需要您进行成功循环。如需请求、问题或对 AD 的贡献，请使用 AutoDuty Github 提交问题：",
+    "GitHubIssues": "GitHub 问题",
+    "DiscordInvite": "其他问题，请加入 Discord！",
+    "PunishDiscord": "Punish Discord",
+    "Install": "安装",
+    "RequiredPlugins": "必需插件",
+    "CombatPlugins": "战斗插件",
+    "CombatPluginsNote": "争议较大，选择您喜欢的。您可以在配置中进行配置",
+    "RecommendedPlugins": "推荐插件",
+    "PluginDesc": {
+      "BossModFights": "为您处理 Boss 战斗",
+      "VNavMovement": "可以移动您",
+      "BossModRotations": "集成了循环",
+      "WrathCombo": "Puni.sh 的专用循环插件",
+      "RotationSolverReborn": "Reborn 的循环插件",
+      "AntiAFK": "防止您被标记为 AFK",
+      "AutoRetainer": "可触发，执行军票交付和丢弃",
+      "Avarice": "读取方位",
+      "Lifestream": "极其广泛的传送",
+      "Pandora": "宝箱拾取 + 坦克姿态",
+      "Gearsetter": "推荐装备物品",
+      "Stylist": "推荐装备物品"
+    }
+  }
+}

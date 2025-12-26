@@ -48,6 +48,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ECommons.IPC.Subscribers.RotationSolverReborn;
 using Achievement = Lumina.Excel.Sheets.Achievement;
 using Buddy = FFXIVClientStructs.FFXIV.Client.Game.UI.Buddy;
 using ExitDutyHelper = ExitDutyHelper;
@@ -1239,9 +1240,9 @@ public class Configuration
 
     #region RSR
 
-    public RSR_IPCSubscriber.TargetHostileType RSR_TargetHostileType    = RSR_IPCSubscriber.TargetHostileType.AllTargetsCanAttack;
-    public RSR_IPCSubscriber.TargetingType     RSR_TargetingTypeTank    = RSR_IPCSubscriber.TargetingType.HighMaxHP;
-    public RSR_IPCSubscriber.TargetingType     RSR_TargetingTypeNonTank = RSR_IPCSubscriber.TargetingType.LowHP;
+    public RotationSolverRebornIPC.TargetHostileType RSR_TargetHostileType    = RotationSolverRebornIPC.TargetHostileType.AllTargetsCanAttack;
+    public RotationSolverRebornIPC.TargetingType     RSR_TargetingTypeTank    = RotationSolverRebornIPC.TargetingType.HighMaxHP;
+    public RotationSolverRebornIPC.TargetingType     RSR_TargetingTypeNonTank = RotationSolverRebornIPC.TargetingType.LowHP;
     #endregion
 
 
@@ -2305,7 +2306,7 @@ public static class ConfigTab
                             ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X * ImGuiHelpers.GlobalScale);
                             if (ImGui.BeginCombo("##ConfigRSREngage", RSR_IPCSubscriber.GetHostileTypeDescription(Configuration.RSR_TargetHostileType)))
                             {
-                                foreach (RSR_IPCSubscriber.TargetHostileType hostileType in Enum.GetValues(typeof(RSR_IPCSubscriber.TargetHostileType)))
+                                foreach (RotationSolverRebornIPC.TargetHostileType hostileType in Enum.GetValues<RotationSolverRebornIPC.TargetHostileType>())
                                     if (ImGui.Selectable(RSR_IPCSubscriber.GetHostileTypeDescription(hostileType), hostileType == Configuration.RSR_TargetHostileType))
                                     {
                                         Configuration.RSR_TargetHostileType = hostileType;
@@ -2322,7 +2323,7 @@ public static class ConfigTab
                             ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X * ImGuiHelpers.GlobalScale);
                             if (ImGui.BeginCombo("##ConfigRSRTargetTank", Configuration.RSR_TargetingTypeTank.ToCustomString()))
                             {
-                                foreach (RSR_IPCSubscriber.TargetingType targetingType in Enum.GetValues(typeof(RSR_IPCSubscriber.TargetingType)))
+                                foreach (RotationSolverRebornIPC.TargetingType targetingType in Enum.GetValues<RotationSolverRebornIPC.TargetingType>())
                                     if (ImGui.Selectable(targetingType.ToCustomString(), targetingType == Configuration.RSR_TargetingTypeTank))
                                     {
                                         Configuration.RSR_TargetingTypeTank = targetingType;
@@ -2338,7 +2339,7 @@ public static class ConfigTab
                             ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X * ImGuiHelpers.GlobalScale);
                             if (ImGui.BeginCombo("##ConfigRSRTargetNonTank", Configuration.RSR_TargetingTypeNonTank.ToCustomString()))
                             {
-                                foreach (RSR_IPCSubscriber.TargetingType targetingType in Enum.GetValues(typeof(RSR_IPCSubscriber.TargetingType)))
+                                foreach (RotationSolverRebornIPC.TargetingType targetingType in Enum.GetValues<RotationSolverRebornIPC.TargetingType>())
                                     if (ImGui.Selectable(targetingType.ToCustomString(), targetingType == Configuration.RSR_TargetingTypeNonTank))
                                     {
                                         Configuration.RSR_TargetingTypeNonTank = targetingType;

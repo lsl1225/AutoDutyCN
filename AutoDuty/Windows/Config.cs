@@ -54,6 +54,7 @@ using Buddy = FFXIVClientStructs.FFXIV.Client.Game.UI.Buddy;
 using ExitDutyHelper = ExitDutyHelper;
 using Map = Lumina.Excel.Sheets.Map;
 using Vector2 = FFXIVClientStructs.FFXIV.Common.Math.Vector2;
+using WrathCombo.API;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class ConfigurationMain
@@ -1234,8 +1235,8 @@ public class Configuration
 
     #region Wrath
     public bool                                Wrath_AutoSetupJobs { get; set; } = true;
-    public Wrath_IPCSubscriber.DPSRotationMode Wrath_TargetingTank    = Wrath_IPCSubscriber.DPSRotationMode.Highest_Max;
-    public Wrath_IPCSubscriber.DPSRotationMode Wrath_TargetingNonTank = Wrath_IPCSubscriber.DPSRotationMode.Lowest_Current;
+    public WrathCombo.API.Enum.DPSRotationMode Wrath_TargetingTank    = WrathCombo.API.Enum.DPSRotationMode.Highest_Max;
+    public WrathCombo.API.Enum.DPSRotationMode Wrath_TargetingNonTank = WrathCombo.API.Enum.DPSRotationMode.Lowest_Current;
     #endregion
 
     #region RSR
@@ -2249,9 +2250,9 @@ public static class ConfigTab
                             ImGui.PushItemWidth(150 * ImGuiHelpers.GlobalScale);
                             if (ImGui.BeginCombo("##ConfigWrathTargetingTank", Configuration.Wrath_TargetingTank.ToCustomString()))
                             {
-                                foreach (Wrath_IPCSubscriber.DPSRotationMode targeting in Enum.GetValues(typeof(Wrath_IPCSubscriber.DPSRotationMode)))
+                                foreach (WrathCombo.API.Enum.DPSRotationMode targeting in Enum.GetValues<WrathCombo.API.Enum.DPSRotationMode>())
                                 {
-                                    if (targeting == Wrath_IPCSubscriber.DPSRotationMode.Tank_Target)
+                                    if (targeting == WrathCombo.API.Enum.DPSRotationMode.Tank_Target)
                                         continue;
 
                                     if (ImGui.Selectable(targeting.ToCustomString(), Configuration.Wrath_TargetingTank == targeting))
@@ -2270,7 +2271,7 @@ public static class ConfigTab
                             ImGui.PushItemWidth(150 * ImGuiHelpers.GlobalScale);
                             if (ImGui.BeginCombo("##ConfigWrathTargetingNonTank", Configuration.Wrath_TargetingNonTank.ToCustomString()))
                             {
-                                foreach (Wrath_IPCSubscriber.DPSRotationMode targeting in Enum.GetValues(typeof(Wrath_IPCSubscriber.DPSRotationMode)))
+                                foreach (WrathCombo.API.Enum.DPSRotationMode targeting in Enum.GetValues<WrathCombo.API.Enum.DPSRotationMode>())
                                     if (ImGui.Selectable(targeting.ToCustomString(), Configuration.Wrath_TargetingNonTank == targeting))
                                     {
                                         Configuration.Wrath_TargetingNonTank = targeting;

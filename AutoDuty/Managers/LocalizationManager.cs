@@ -16,7 +16,7 @@ internal static class LocalizationManager
 
     static LocalizationManager()
     {
-        _localizationPath = Path.Combine(Plugin.PluginInterface.AssemblyLocation.Directory!.FullName, "Localization");
+        _localizationPath = Path.Combine(AutoDuty.PluginInterface.AssemblyLocation.Directory!.FullName, "Localization");
     }
 
     internal static void Initialize(string language = "en-US")

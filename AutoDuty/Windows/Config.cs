@@ -63,8 +63,11 @@ public class ConfigurationMain
 
     public static ConfigurationMain Instance { get; set; } = null!;
 
-    [JsonProperty] 
+    [JsonProperty]
     public string DefaultConfigName { get; set; } = CONFIGNAME_BARE;
+
+    [JsonProperty]
+    public string Language { get; set; } = "zh-CN";
 
     [JsonProperty]
     private string activeProfileName = CONFIGNAME_BARE;

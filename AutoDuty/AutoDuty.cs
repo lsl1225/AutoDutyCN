@@ -48,6 +48,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Multibox;
 using static Data.Classes;
 using TaskManager = ECommons.Automation.NeoTaskManager.TaskManager;
 
@@ -138,7 +139,7 @@ public sealed class AutoDuty : IDalamudPlugin
                     break;
                 case Stage.Reading_Path:
                     if (field is not Stage.Waiting_For_Combat and not Stage.Revived and not Stage.Looping and not Stage.Idle)
-                        ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true;
+                        MultiboxUtility.MultiboxBlockingNextStep = true;
                     break;
                 case Stage.Idle:
                     if (VNavmesh_IPCSubscriber.Path_NumWaypoints > 0)
@@ -733,7 +734,7 @@ public sealed class AutoDuty : IDalamudPlugin
                     this.Actions = [..path.Actions];
 
                 if(ConfigurationMain.Instance.MultiBox && ConfigurationMain.Instance.multiBoxSynchronizePath && ConfigurationMain.Instance.host)
-                    ConfigurationMain.MultiboxUtility.Server.SendPath();
+                    MultiboxUtility.Server.SendPath();
             }
 
             //Svc.Log.Info($"Loading Path: {CurrentPath} {ListBoxPOSText.Count}");
@@ -783,7 +784,7 @@ public sealed class AutoDuty : IDalamudPlugin
             } else
             {
                 if(!isDuty)
-                    ConfigurationMain.MultiboxUtility.Server.ExitDuty();
+                    MultiboxUtility.Server.ExitDuty();
             }
         }
 
@@ -1165,9 +1166,9 @@ public sealed class AutoDuty : IDalamudPlugin
         if (ConfigurationMain.Instance.MultiBox)
         {
             if (ConfigurationMain.Instance.host)
-                ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true;
+                MultiboxUtility.MultiboxBlockingNextStep = true;
             else
-                this.taskManager.Enqueue(() => ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true);
+                this.taskManager.Enqueue(() => MultiboxUtility.MultiboxBlockingNextStep = true);
         }
 
         if (!queue)
@@ -1240,7 +1241,7 @@ public sealed class AutoDuty : IDalamudPlugin
                                                                this.taskManager.Enqueue(() => VNavmesh_IPCSubscriber.Nav_IsReady, "Loop-WaitNavReady", new TaskManagerConfiguration(int.MaxValue));
                                                                this.taskManager.Enqueue(() => Svc.Log.Debug($"StartNavigation"));
                                                                this.taskManager.Enqueue(() => this.StartNavigation(true), "Loop-StartNavigation");
-                                                           }, () => !ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep);
+                                                           }, () => !MultiboxUtility.MultiboxBlockingNextStep);
     }
 
     private void LoopsCompleteActions()
@@ -1411,7 +1412,7 @@ public sealed class AutoDuty : IDalamudPlugin
 
         this.pathAction = this.Actions[this.indexer];
 
-        if (ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep)
+        if (MultiboxUtility.MultiboxBlockingNextStep)
         {
             if (PartyHelper.PartyInCombat() && Plugin.stopForCombat)
             {
@@ -1426,7 +1427,7 @@ public sealed class AutoDuty : IDalamudPlugin
                     {
 
                         if (ConfigurationMain.Instance.host)
-                            ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = false;
+                            MultiboxUtility.MultiboxBlockingNextStep = false;
                         this.Stage = Stage.Action;
                         return;
                     }
@@ -1492,7 +1493,7 @@ public sealed class AutoDuty : IDalamudPlugin
         BossMod_IPCSubscriber.InBoss(this.pathAction.Name.Equals("Boss"));
 
         if(ConfigurationMain.Instance.host)
-            ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = false;
+            MultiboxUtility.MultiboxBlockingNextStep = false;
 
         if (this.pathAction.Position == Vector3.Zero)
         {

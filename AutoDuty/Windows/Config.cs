@@ -92,6 +92,18 @@ public class ConfigurationMain
     }
 
     [JsonProperty]
+    public StatData stats = new();
+
+    [JsonObject(MemberSerialization.OptOut)]
+    public class StatData
+    {
+        public          int                  dungeonsRun;
+        public readonly List<DutyDataRecord> dutyRecords = [];
+        public          TimeSpan             timeSpent   = TimeSpan.Zero;
+    }
+
+
+    [JsonProperty]
     //Dev Options
     internal bool updatePathsOnStartup = true;
     public bool UpdatePathsOnStartup

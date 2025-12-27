@@ -333,9 +333,10 @@ public sealed class MainWindow : Window, IDisposable
             Vector4 vector1 = ImGuiEx.Vector4FromRGB(0x022594);
             Vector4 vector2 = ImGuiEx.Vector4FromRGB(0x940238);
 
-            uint    gen                                                                       = GradientColor.Get(vector1, vector2).ToUint();
-            uint[]? data                                                                      = EzSharedData.GetOrCreate<uint[]>("ECommonsPatreonBannerRandomColor", [gen]);
-            if (!GradientColor.IsColorInRange(data[0].ToVector4(), vector1, vector2)) data[0] = gen;
+            uint    gen  = GradientColor.Get(vector1, vector2).ToUint();
+            uint[]? data = EzSharedData.GetOrCreate<uint[]>("ECommonsPatreonBannerRandomColor", [gen]);
+            if (!GradientColor.IsColorInRange(data[0].ToVector4(), vector1, vector2)) 
+                data[0] = gen;
             return data[0];
         }
     }
@@ -398,6 +399,7 @@ public sealed class MainWindow : Window, IDisposable
         ("Config", ConfigTab.Draw, null, false), 
         ("Info", InfoTab.Draw, null, false), 
         ("Logs", LogTab.Draw, null, false),
+        ("Stats", StatsTab.Draw, null, false),
         ("Support AutoDuty", KofiLink, ImGui.ColorConvertU32ToFloat4(ColorNormal), false)
     ];
 

@@ -2655,10 +2655,10 @@ public static class ConfigTab
                 {
                     ImGui.SameLine(0, 5);
                     ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-                    if (ImGui.BeginCombo("##RetireLocation", Configuration.RetireLocationEnum.ToCustomString()))
+                    if (ImGui.BeginCombo("##RetireLocation", Configuration.RetireLocationEnum.ToLocalizedString("RetireLocation")))
                     {
                         foreach (RetireLocation retireLocation in Enum.GetValues(typeof(RetireLocation)))
-                            if (ImGui.Selectable(retireLocation.ToCustomString(), Configuration.RetireLocationEnum == retireLocation))
+                            if (ImGui.Selectable(retireLocation.ToLocalizedString("RetireLocation"), Configuration.RetireLocationEnum == retireLocation))
                             {
                                 Configuration.RetireLocationEnum = retireLocation;
                                 Configuration.Save();
@@ -3160,8 +3160,8 @@ public static class ConfigTab
                         for (int index = 0; index < values.Length; index++)
                         {
                             bool   x            = Bitmask.IsBitSet(Configuration.AutoDesynthCategories, index);
-                            string categoryName = values[index].ToCustomString();
-                            if (ImGui.Checkbox(categoryName + $"##DesynthCategory{categoryName}", ref x))
+                            string categoryName = values[index].ToLocalizedString("DesynthCategory");
+                            if (ImGui.Checkbox(categoryName + $"##DesynthCategory{index}", ref x))
                                 if (x)
                                     Bitmask.SetBit(ref Configuration.AutoDesynthCategories, index);
                                 else

@@ -229,6 +229,59 @@
       "InPartyNo": "no party",
       "NoInfo": "{0}: No Info",
       "ResynchronizeStep": "Resynchronize Step"
+    },
+    "Enums": {
+      "RetireLocation": {
+        "Inn": "Inn",
+        "Apartment": "Apartment",
+        "Personal_Home": "Personal Home",
+        "FC_Estate": "FC Estate",
+        "GC_Barracks": "GC Barracks"
+      },
+      "DesynthCategory": {
+        "Inventory_Equipment": "Inventory: Equipment",
+        "Inventory_Housing": "Inventory: Housing",
+        "Armoury_Main_Off": "Armoury: Main/Off",
+        "Armoury_Head_Body_Hands": "Armoury: Head/Body/Hands",
+        "Armoury_Legs_Feet": "Armoury: Legs/Feet",
+        "Armoury_Neck_Ears": "Armoury: Neck/Ears",
+        "Armoury_Wrists_Rings": "Armoury: Wrists/Rings",
+        "Equipped": "Equipped"
+      },
+      "Jobs": {
+        "All": "All",
+        "Tanks": "Tanks",
+        "Healers": "Healers",
+        "DPS": "DPS",
+        "Melee": "Melee",
+        "Striking": "Striking",
+        "Maiming": "Maiming",
+        "Scouting": "Scouting",
+        "Aiming": "Aiming",
+        "Casters": "Casters",
+        "Paladin": "Paladin",
+        "Warrior": "Warrior",
+        "Dark_Knight": "Dark Knight",
+        "Gunbreaker": "Gunbreaker",
+        "White_Mage": "White Mage",
+        "Scholar": "Scholar",
+        "Astrologian": "Astrologian",
+        "Sage": "Sage",
+        "Monk": "Monk",
+        "Samurai": "Samurai",
+        "Dragoon": "Dragoon",
+        "Reaper": "Reaper",
+        "Ninja": "Ninja",
+        "Viper": "Viper",
+        "Bard": "Bard",
+        "Machinist": "Machinist",
+        "Dancer": "Dancer",
+        "Black_Mage": "Black Mage",
+        "Summoner": "Summoner",
+        "Red_Mage": "Red Mage",
+        "Pictomancer": "Pictomancer",
+        "Blue_Mage": "Blue Mage"
+      }
     }
   }
 }

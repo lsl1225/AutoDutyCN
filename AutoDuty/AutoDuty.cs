@@ -105,6 +105,8 @@ public sealed class AutoDuty : IDalamudPlugin
     internal static   Configuration Configuration => ConfigurationMain.Instance.GetCurrentConfig;
     internal readonly WindowSystem  windowSystem = new("AutoDuty");
 
+    internal DateTime runStartTime = DateTime.UnixEpoch;
+
     public   int   Version { get; set; }
     internal Stage previousStage = Stage.Stopped;
 
@@ -146,12 +148,22 @@ public sealed class AutoDuty : IDalamudPlugin
                         VNavmesh_IPCSubscriber.Path_Stop();
                     break;
                 case Stage.Looping:
+                    if(this.runStartTime.Equals(DateTime.UnixEpoch))
+                        this.runStartTime = DateTime.UtcNow;
+                    goto case Stage.Moving;
                 case Stage.Moving:
                 case Stage.Dead:
                 case Stage.Revived:
                 case Stage.Interactable:
                 default:
                     break;
+            }
+
+            if (value is Stage.Stopped or Stage.Paused && !this.runStartTime.Equals(DateTime.UnixEpoch))
+            {
+                ConfigurationMain.Instance.stats.timeSpent += DateTime.UtcNow.Subtract(this.runStartTime);
+                this.runStartTime                          =  DateTime.UnixEpoch;
+                Configuration.Save();
             }
 
             Svc.Log.Debug($"Stage from {field.ToCustomString()} to {value.ToCustomString()}");
@@ -626,6 +638,14 @@ public sealed class AutoDuty : IDalamudPlugin
 
         SchedulerHelper.ScheduleAction("LoginConfig", () =>
                                                       {
+                                                          if(!ConfigurationMain.Instance.charByCID.ContainsKey(Player.CID))
+                                                              ConfigurationMain.Instance.charByCID.Add(Player.CID, new ConfigurationMain.CharData
+                                                                                                                   {
+                                                                                                                       CID   = Player.CID,
+                                                                                                                       Name  = Player.Name,
+                                                                                                                       World = Player.CurrentWorldName
+                                                                                                                   });
+
                                                           if (Configuration.ShowOverlay &&
                                                               (!Configuration.HideOverlayWhenStopped || this.states.HasFlag(PluginState.Looping) ||
                                                                this.states.HasFlag(PluginState.Navigating)))
@@ -680,12 +700,30 @@ public sealed class AutoDuty : IDalamudPlugin
         }
     }
 
-    private void DutyState_DutyStarted(object?     sender, ushort e) => this.dutyState = DutyState.DutyStarted;
+    private DateTime lastDutyStart = DateTime.MinValue;
+
+    private void DutyState_DutyStarted(object?     sender, ushort e)
+    {
+        this.dutyState     = DutyState.DutyStarted;
+        this.lastDutyStart = DateTime.UtcNow;
+    }
+
     private void DutyState_DutyWiped(object?       sender, ushort e) => this.dutyState = DutyState.DutyWiped;
     private void DutyState_DutyRecommenced(object? sender, ushort e) => this.dutyState = DutyState.DutyRecommenced;
     private void DutyState_DutyCompleted(object? sender, ushort e)
     {
         this.dutyState = DutyState.DutyComplete;
+        if(this.states is not (PluginState.None or PluginState.Paused))
+        {
+            TimeSpan timeSpan = DateTime.UtcNow.Subtract(this.lastDutyStart);
+
+            ConfigurationMain.StatData stats = ConfigurationMain.Instance.stats;
+
+            stats.dutyRecords.Add(new DutyDataRecord(DateTime.UtcNow, timeSpan, Player.Territory.RowId, Player.CID, InventoryHelper.CurrentItemLevel, Player.Job));
+            stats.dungeonsRun++;
+            Configuration.Save();
+        }
+
         this.CheckFinishing();
     }
 

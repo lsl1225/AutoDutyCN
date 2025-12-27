@@ -3274,10 +3274,10 @@ public static class ConfigTab
                     ImGui.Indent();
                     ImGui.Text(Loc.Get("ConfigTab.BetweenLoop.PreferredSummoningBell"));
                     ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.BetweenLoop.PreferredSummoningBellHelp"));
-                    if (ImGui.BeginCombo("##PreferredBell", Configuration.PreferredSummoningBellEnum.ToCustomString()))
+                    if (ImGui.BeginCombo("##PreferredBell", Configuration.PreferredSummoningBellEnum.ToLocalizedString("SummoningBellLocations")))
                     {
                         foreach (SummoningBellLocations summoningBells in Enum.GetValues(typeof(SummoningBellLocations)))
-                            if (ImGui.Selectable(summoningBells.ToCustomString()))
+                            if (ImGui.Selectable(summoningBells.ToLocalizedString("SummoningBellLocations")))
                             {
                                 Configuration.PreferredSummoningBellEnum = summoningBells;
                                 Configuration.Save();

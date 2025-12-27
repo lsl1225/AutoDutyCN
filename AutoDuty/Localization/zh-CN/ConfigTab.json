@@ -238,6 +238,25 @@
         "FC_Estate": "部队房屋",
         "GC_Barracks": "冒险者分队兵营"
       },
+      "SummoningBellLocations": {
+        "Inn": "旅馆",
+        "Apartment": "个人公寓",
+        "Personal_Home": "个人房屋",
+        "FC_Estate": "部队房屋",
+        "Limsa_Lominsa_Lower_Decks": "利姆萨·罗敏萨下层甲板",
+        "Old_Gridania": "格里达尼亚旧街",
+        "Uldah_Steps_of_Thal": "乌尔达哈现世回廊",
+        "The_Pillars": "伊修加德砥柱层",
+        "Rhalgrs_Reach": "神拳痕",
+        "Kugane": "黄金港",
+        "The_Doman_Enclave": "多玛飞地",
+        "The_Crystarium": "水晶都",
+        "Eulmore": "游末邦",
+        "Old_Sharlayan": "旧萨雷安",
+        "Radz_at_Han": "拉扎罕",
+        "Tuliyollal": "图莱尤拉",
+        "Nexus_Arcade": "九号解决方案"
+      },
       "DesynthCategory": {
         "Inventory_Equipment": "背包: 装备",
         "Inventory_Housing": "背包: 家具/庭具",

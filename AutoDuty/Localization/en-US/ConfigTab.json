@@ -238,6 +238,25 @@
         "FC_Estate": "FC Estate",
         "GC_Barracks": "GC Barracks"
       },
+      "SummoningBellLocations": {
+        "Inn": "Inn",
+        "Apartment": "Apartment",
+        "Personal_Home": "Personal Home",
+        "FC_Estate": "FC Estate",
+        "Limsa_Lominsa_Lower_Decks": "Limsa Lominsa Lower Decks",
+        "Old_Gridania": "Old Gridania",
+        "Uldah_Steps_of_Thal": "Uldah Steps of Thal",
+        "The_Pillars": "The Pillars",
+        "Rhalgrs_Reach": "Rhalgrs Reach",
+        "Kugane": "Kugane",
+        "The_Doman_Enclave": "The Doman Enclave",
+        "The_Crystarium": "The Crystarium",
+        "Eulmore": "Eulmore",
+        "Old_Sharlayan": "Old Sharlayan",
+        "Radz_at_Han": "Radz-at-Han",
+        "Tuliyollal": "Tuliyollal",
+        "Nexus_Arcade": "Nexus Arcade"
+      },
       "DesynthCategory": {
         "Inventory_Equipment": "Inventory: Equipment",
         "Inventory_Housing": "Inventory: Housing",

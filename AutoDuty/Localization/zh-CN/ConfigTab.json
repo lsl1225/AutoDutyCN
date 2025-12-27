@@ -37,7 +37,7 @@
       "AutoLeaveDutyHelp": "完成路径后将自动退出副本。",
       "BlockLeavingDuty": "阻止在副本完成前离开",
       "AutoManageRotation": "自动管理输出循环插件状态",
-      "AutoManageRotationHelp": "AutoDuty 将在副本开始时启用循环插件。\\n*AutoDuty 会按列表优先级尝试加载可用的插件。",
+      "AutoManageRotationHelp": "AutoDuty 将在副本开始时启用循环插件。\n*AutoDuty 会按列表优先级尝试加载可用的插件。",
       "Wrath": {
         "Header": "> Wrath Combo 配置选项 <",
         "AutoSetupJobs": "自动为职业设置自动输出",
@@ -71,7 +71,7 @@
       "LootTreasure": "自动开启宝箱",
       "SelectMethod": "选择方法：",
       "LootBossTreasureOnly": "仅开启 Boss 宝箱",
-      "LootBossTreasureOnlyHelp": "AutoDuty 将绕过非 Boss 宝箱，仅开启 Boss 宝箱。\\n并非所有路径都支持此功能。",
+      "LootBossTreasureOnlyHelp": "AutoDuty 将绕过非 Boss 宝箱，仅开启 Boss 宝箱。\n并非所有路径都支持此功能。",
       "MinStuckTime": "判定卡住的最短时间（毫秒）",
       "ResetStuckOnStep": "仅在下一步时重置卡住计数器",
       "RebuildNavmeshOnStuck": "卡住时重建导航网格",
@@ -81,12 +81,12 @@
       "DrawPath": "绘制路径中的下一步",
       "DrawPathSteps": "绘制 X 步",
       "W2W": {
-        "Header": "> 全程拉怪 (W2W) 配置 <",
+        "Header": "> 全程拉怪 (W2W) 配置，可以拉两波小怪*高风险，除了防护职业 (T)容易暴毙* <",
         "TreatUnsyncAsW2W": "将非同步视为 W2W",
         "TreatUnsyncAsW2WHelp": "仅在路径步骤中带有 W2W 标签时有效"
       },
       "OverridePartyValidation": "覆盖队伍验证",
-      "OverridePartyValidationHelp": "AutoDuty 将在排队副本时忽略你的队伍配置\\n此功能仅用于多开\\n*不建议与其他玩家一起使用 AutoDuty*",
+      "OverridePartyValidationHelp": "AutoDuty 将在排队副本时忽略你的队伍配置\n此功能仅用于多开\n*不建议与其他玩家一起使用 AutoDuty，例如在日随中使用。",
       "Advanced": {
         "Header": "高级配置选项",
         "UsingAltRotation": "使用替代输出循环插件",
@@ -94,7 +94,7 @@
         "UsingAltMovement": "使用替代移动插件",
         "UsingAltMovementHelp": "你决定使用 Vnavmesh 以外的插件。",
         "UsingAltBoss": "使用替代 Boss 插件",
-        "UsingAltBossHelp": "你决定使用 BossMod 以外的插件。"
+        "UsingAltBossHelp": "你决定使用 BossMod 以外的插件，例如AEAssist3。"
       }
     },
     "PreLoop": {
@@ -106,7 +106,7 @@
       "AddCurrentPosition": "添加当前位置",
       "HomePathHelp": "大多数房屋从传送点到门口是直线，无需此设置。仅当你的房屋门口路径受阻或距离传送点较远时，请走到门口并点击添加当前位置。",
       "AutoEquipGear": "自动装备推荐装备",
-      "GearSourceHelp": "原版 - 仅使用兵装库(Armory Chest)装备\\n装备管理器 - 调用 Gearsetter，可将淘汰装备移至背包\\n造型师 - 使用 Stylist 插件设置",
+      "GearSourceHelp": "原版 - 仅使用兵装库(Armory Chest)装备\n装备管理器 - 调用 Gearsetter，可将淘汰装备移至背包\n造型师 - 使用 Stylist 插件设置",
       "MoveOldToInventory": "将旧物品移至背包",
       "MoveOldToInventoryHelp": "除武器外，将被替换的装备移至背包。",
       "RequiresGearsetterOrStylist": "* 兵装库外的物品需要 Gearsetter 或 Stylist 插件",
@@ -209,7 +209,7 @@
       "Step7": "加入：在 3 个客户端勾选 [多开同步]。连接成功后下方会显示角色信息。",
       "Step8": "运行：主机选择副本并点击 [开始]，全队同步行动。",
       "TransportType": "传输类型",
-      "TransportTypeHelp": "命名管道：网络连接取决于系统设置。\\nTCP：网络连接取决于防火墙设置。\\n在大多数情况下，命名管道无需更改即可工作。",
+      "TransportTypeHelp": "命名管道：网络连接取决于系统设置。\nTCP：网络连接取决于防火墙设置。\n在大多数情况下，命名管道无需更改即可工作。",
       "PipeName": "管道名称",
       "ServerName": "服务器名称",
       "ServerAddress": "服务器地址",
@@ -273,11 +273,11 @@
         "Healers": "治疗职业 (H)",
         "DPS": "输出职业 (DPS)",
         "Melee": "近战",
-        "Striking": "物理进攻/���打 (Striking)",
+        "Striking": "物理进攻/击打 (Striking)",
         "Maiming": "物理进攻/斩击 (Maiming)",
         "Scouting": "物理进攻/侦查 (Scouting)",
-        "Aiming": "远程物理 (Aiming)",
-        "Casters": "远程法系",
+        "Aiming": "远敏",
+        "Casters": "法系",
         "Paladin": "骑士",
         "Warrior": "战士",
         "Dark_Knight": "暗黑骑士",

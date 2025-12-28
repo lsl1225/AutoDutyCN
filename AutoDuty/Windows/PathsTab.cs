@@ -125,12 +125,12 @@ namespace AutoDuty.Windows
                             ImGui.BeginGroup();
                             ImGui.Indent(20);
 
-                            /*
-                            if (Plugin.Configuration.PathSelectionsByPath.TryGetValue(container.id, out pathSelections))
+                            
+                            if (AutoDuty.Configuration.PathSelectionsByPath.TryGetValue(container.ID, out pathSelections))
                                 if (pathSelections != null)
                                     foreach ((string? path, JobWithRole jobs) in pathSelections)
-                                        ; //pathJobs[container.Paths.IndexOf(dp => dp.FileName.Equals(jobs))].Add(new Tuple<CombatRole, Job>(path.GetCombatRole(), path));
-                            */
+                                        ;//pathJobs[container.Paths.FindIndex(dp => dp.FileName.Equals(jobs))].Add(new Tuple<CombatRole, Job>(path.GetCombatRole(), path));
+                            
                         }
 
                         foreach (ContentPathsManager.DutyPath path in container.Paths)

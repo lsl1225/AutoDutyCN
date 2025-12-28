@@ -881,11 +881,11 @@ public sealed class AutoDuty : IDalamudPlugin
                                              if (this.StopLoop)
                                              {
                                                  this.taskManager.Enqueue(() => Svc.Log.Info($"Loop Stop Condition Encountered, Stopping Loop"));
-                                                 this.LoopTasks(false, Configuration.ExecuteBetweenLoopActionLastLoop);
+                                                 this.LoopTasks(false, Configuration is { EnableBetweenLoopActions: true, ExecuteBetweenLoopActionLastLoop: true });
                                              }
                                              else
                                              {
-                                                 this.LoopTasks();
+                                                 this.LoopTasks(between: Configuration.EnableBetweenLoopActions);
                                              }
                                          }, "Loop-CheckStopLoop");
 
@@ -896,7 +896,7 @@ public sealed class AutoDuty : IDalamudPlugin
                 this.taskManager.Enqueue(() => { this.states &= ~PluginState.Navigating; }, "Loop-RemoveNavigationState");
                 this.taskManager.Enqueue(() => PlayerHelper.IsReady, "Loop-WaitPlayerReady", new TaskManagerConfiguration(timeLimitMS: int.MaxValue));
                 this.taskManager.Enqueue(() => Svc.Log.Debug($"Loop {this.currentLoop} == {Configuration.LoopTimes} we are done Looping, Invoking Loop Actions"), "Loop-Debug");
-                this.taskManager.Enqueue(() => { this.LoopTasks(false, Configuration.ExecuteBetweenLoopActionLastLoop); }, "Loop-LoopCompleteActions");
+                this.taskManager.Enqueue(() => this.LoopTasks(false, Configuration is { EnableBetweenLoopActions: true, ExecuteBetweenLoopActionLastLoop: true }), "Loop-LoopCompleteActions");
             }
         }
     }

@@ -166,7 +166,7 @@ public class ConfigurationMain
 
         void RegisterProfileData(ProfileData profile)
         {
-            if (profile.CIDs.Count == 0)
+            if (profile.CIDs.Count != 0)
                 foreach (ulong cid in profile.CIDs)
                     this.profileByCID[cid] = profile.Name;
             this.profileByName[profile.Name] = profile;

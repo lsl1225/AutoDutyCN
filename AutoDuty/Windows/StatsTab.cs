@@ -15,6 +15,8 @@ internal static class StatsTab
 {
     private static bool scrambleNames = false;
 
+    private static Dictionary<ulong, string> scrambledNames = [];
+
     public static void Draw()
     {
         ConfigurationMain.StatData stats = ConfigurationMain.Instance.stats;
@@ -97,6 +99,14 @@ internal static class StatsTab
 
         records = recordsOrdered ?? records;
 
+        static string ScrambleName(ulong cid)
+        {
+            if(!scrambledNames.ContainsKey(cid))
+                scrambledNames[cid] = Random.Shared.GetHexString(Random.Shared.Next(8,14)) + "@" + Random.Shared.GetHexString(Random.Shared.Next(5, 8));
+            return scrambledNames[cid];
+        }
+
+
         foreach ((DateTime completionTime, TimeSpan duration, uint territoryId, ulong cid, int ilvl, Job job) in records)
         {
             ImGui.TableNextRow();
@@ -108,7 +118,7 @@ internal static class StatsTab
             ImGui.Text(ContentHelper.DictionaryContent[territoryId].Name ?? $"Unknown ({territoryId})");
             ImGui.TableNextColumn();
             ImGui.Text(scrambleNames ? 
-                           Random.Shared.GetHexString(5) :
+                           ScrambleName(cid) :
                            ConfigurationMain.Instance.charByCID.TryGetValue(cid, out ConfigurationMain.CharData cd) ? $"{cd.Name}@{cd.World}" : string.Empty);
             ImGui.TableNextColumn();
             ImGui.Text(ilvl.ToString());

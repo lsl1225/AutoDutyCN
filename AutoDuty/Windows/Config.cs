@@ -46,6 +46,7 @@ using System.Numerics;
 using System.Text;
 using ECommons.IPC.Subscribers.RotationSolverReborn;
 using Multibox;
+using NightmareUI.Censoring;
 using Achievement = Lumina.Excel.Sheets.Achievement;
 using Buddy = FFXIVClientStructs.FFXIV.Client.Game.UI.Buddy;
 using Map = Lumina.Excel.Sheets.Map;
@@ -85,7 +86,7 @@ public class ConfigurationMain
         public          string World;
 
         public readonly string GetName() =>
-            this.Name.Length != 0 ? $"{this.Name}@{this.World}" : this.CID.ToString();
+            this.Name.Length != 0 ? Censor.Character(this.Name, this.World) : this.CID.ToString();
 
         public readonly override int GetHashCode() => 
             this.CID.GetHashCode();
@@ -130,8 +131,6 @@ public class ConfigurationMain
     internal bool host = false;
     [JsonProperty]
     internal bool multiBoxSynchronizePath = true;
-    [JsonProperty]
-    internal bool multiBoxScrambleNames = false;
 
     public IEnumerable<string> ConfigNames => this.profileByName.Keys;
      
@@ -868,8 +867,10 @@ public static class ConfigTab
                     if(profile?.CIDs.Count != 0)
                     {
                         ImGui.SameLine();
-                        ImGuiEx.TextWrapped(ImGuiHelper.VersionColor, 
-                                            string.Join(", ", profile!.CIDs.Select(cid => ConfigurationMain.Instance.charByCID.TryGetValue(cid, out ConfigurationMain.CharData cd) ? cd.GetName() : cid.ToString())));
+                        ImGuiEx.TextWrapped(ImGuiHelper.VersionColor, string.Join(", ", 
+                                                                                  profile!.CIDs.Select(cid => ConfigurationMain.Instance.charByCID.TryGetValue(cid, out ConfigurationMain.CharData cd) ? 
+                                                                                                                  cd.GetName() : 
+                                                                                                                  cid.ToString())));
                     }
                 }
         }
@@ -2929,7 +2930,7 @@ public static class ConfigTab
                     {
                         ImGui.Separator();
 
-                        if (ImGui.Checkbox("Scramble names", ref ConfigurationMain.Instance.multiBoxScrambleNames))
+                        if (ImGui.Checkbox("Scramble names", ref Censor.Config.Enabled))
                             Configuration.Save();
 
                         ImGui.Columns(5);
@@ -2954,7 +2955,7 @@ public static class ConfigTab
 
                             if(info != null)
                             {
-                                ImGuiEx.Text(ConfigurationMain.Instance.multiBoxScrambleNames ? i.ToString() : info.CName);
+                                ImGuiEx.Text(Censor.Character(info.CName));
                                 ImGui.NextColumn();
                                 bool inParty = PartyHelper.IsPartyMember(info.CID);
                                 ImGuiEx.Text(inParty ? ImGuiHelper.StateGoodColor : ImGuiHelper.StateBadColor, inParty ? "in party" : "no party");

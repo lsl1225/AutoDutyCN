@@ -1,3 +1,6 @@
 [submodule "ECommons"]
 	path = ECommons
 	url = git@github.com:moewcorp/ECommons.git
+[submodule "ECommons.IPC"]
+	path = ECommons.IPC
+	url = https://github.com/NightmareXIV/ECommons.IPC

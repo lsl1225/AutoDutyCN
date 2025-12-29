@@ -24,7 +24,6 @@ using System.Linq;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.ClientState.Party;
 using Data;
-using ECommons.Automation;
 using ECommons.Configuration;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
@@ -34,7 +33,6 @@ using ECommons.UIHelpers.AtkReaderImplementations;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Group;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
-using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
@@ -46,11 +44,10 @@ using Newtonsoft.Json.Serialization;
 using Properties;
 using System.Numerics;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using ECommons.IPC.Subscribers.RotationSolverReborn;
+using Multibox;
 using Achievement = Lumina.Excel.Sheets.Achievement;
 using Buddy = FFXIVClientStructs.FFXIV.Client.Game.UI.Buddy;
-using ExitDutyHelper = ExitDutyHelper;
 using Map = Lumina.Excel.Sheets.Map;
 using Vector2 = FFXIVClientStructs.FFXIV.Common.Math.Vector2;
 
@@ -95,6 +92,18 @@ public class ConfigurationMain
     }
 
     [JsonProperty]
+    public StatData stats = new();
+
+    [JsonObject(MemberSerialization.OptOut)]
+    public class StatData
+    {
+        public          int                  dungeonsRun;
+        public readonly List<DutyDataRecord> dutyRecords = [];
+        public          TimeSpan             timeSpent   = TimeSpan.Zero;
+    }
+
+
+    [JsonProperty]
     //Dev Options
     internal bool updatePathsOnStartup = true;
     public bool UpdatePathsOnStartup
@@ -123,706 +132,6 @@ public class ConfigurationMain
     internal bool multiBoxSynchronizePath = true;
     [JsonProperty]
     internal bool multiBoxScrambleNames = false;
-
-    public class MultiboxUtility
-    {
-        public static string        PipeName      { get; set; } = "AutoDutyPipe";
-        public static string        ServerName    { get; set; } = ".";
-        public static TransportType TransportType { get; set; } = TransportType.NamedPipe;
-        public static string        ServerAddress { get; set; } = "127.0.0.1";
-        public static int           ServerPort    { get; set; } = 1716;
-
-
-        private const string SERVER_AUTH_KEY = "AD_Server_Auth!";
-        private const string CLIENT_AUTH_KEY = "AD_Client_Auth!";
-        private const string CLIENT_CID_KEY  = "CLIENT_CID";
-        private const string PARTY_INVITE    = "PARTY_INVITE";
-
-        private const string KEEPALIVE_KEY          = "KEEP_ALIVE";
-        private const string KEEPALIVE_RESPONSE_KEY = "KEEP_ALIVE received";
-
-        private const string DUTY_QUEUE_KEY = "DUTY_QUEUE";
-        private const string DUTY_EXIT_KEY  = "DUTY_EXIT";
-
-        private const string DEATH_KEY       = "DEATH";
-        private const string UNDEATH_KEY     = "UNDEATH";
-        private const string DEATH_RESET_KEY = "DEATH_RESET";
-
-        private const string PATH_STEPS = "PATH_STEPS";
-
-        private const string STEP_COMPLETED = "STEP_COMPLETED";
-        private const string STEP_START     = "STEP_START";
-
-        internal static bool stepBlock = false;
-        public static bool MultiboxBlockingNextStep
-        {
-            get
-            {
-                if (!Instance.MultiBox)
-                    return false;
-
-                return stepBlock;
-            }
-            set
-            {
-                DebugLog($"blocking step: {stepBlock} to {value}");
-                if (!Instance.MultiBox)
-                    return;
-
-                if (!value)
-                    if (Instance.host)
-                        Server.SendStepStart();
-
-                if (stepBlock == value)
-                    return;
-
-                stepBlock = value;
-
-                if(stepBlock)
-                    if (Instance.host)
-                    {
-                        Plugin.action = "Waiting for clients";
-                        Server.CheckStepProgress();
-                    }
-                    else
-                    {
-                        Client.SendStepCompleted();
-                    }
-            }
-        }
-
-        public static void IsDead(bool dead)
-        {
-            if (Instance.MultiBox)
-                return;
-
-            if(!Instance.host)
-                Client.SendDeath(dead);
-            else
-                Server.CheckDeaths();
-        }
-
-        public static void Set(bool on)
-        {
-            if(on)
-                Instance.GetCurrentConfig.DutyModeEnum = DutyMode.Regular;
-
-            if (Instance.host)
-                Server.Set(on);
-            else
-                Client.Set(on);
-        }
-
-        internal static class Server
-        {
-            public const             int             MAX_SERVERS   = 3;
-            private static readonly  StreamString?[] streams       = new StreamString?[MAX_SERVERS];
-            internal static readonly ClientInfo?[]   clients       = new ClientInfo?[MAX_SERVERS];
-            private static readonly  Queue<string>[] messageQueues = [new(), new(), new()];
-
-            internal static readonly DateTime[] keepAlives    = new DateTime[MAX_SERVERS];
-            internal static readonly bool[]     stepConfirms  = new bool[MAX_SERVERS];
-            private static readonly  bool[]     deathConfirms = new bool[MAX_SERVERS];
-
-            private static ITransport? transport;
-            private static CancellationTokenSource? serverCts;
-
-            public static void Set(bool on)
-            {
-                try
-                {
-                    if (on)
-                        StartServer();
-                    else
-                        StopServer();
-                }
-                catch (Exception ex)
-                {
-                    ErrorLog(ex.ToString());
-                }
-            }
-
-            private static void StartServer()
-            {
-                try
-                {
-                    if (transport != null) return;
-                    
-                    transport = TransportType switch 
-                    {
-                        TransportType.NamedPipe => new NamedPipeTransport(PipeName),
-                        TransportType.Tcp => new TcpTransport(ServerPort),
-                        _ => throw new NotImplementedException(TransportType.ToString()),
-                    };
-
-                    transport.StartServer(MAX_SERVERS);
-                    serverCts = new CancellationTokenSource();
-                    Task.Run(() => AcceptLoop(serverCts.Token), serverCts.Token);
-                    DebugLog($"Server started with {TransportType} transport");
-                }
-                catch (Exception ex)
-                {
-                    ErrorLog($"StartServer error: {ex}");
-                }
-            }
-
-            private static void StopServer()
-            {
-                try
-                {
-                    serverCts?.Cancel();
-                    transport?.StopServer();
-                    transport?.Dispose();
-                    transport = null;
-                    serverCts = null;
-
-                    for (int i = 0; i < MAX_SERVERS; i++)
-                    {
-                        streams[i] = null;
-                        clients[i] = null;
-                        messageQueues[i].Clear();
-                        keepAlives[i] = DateTime.MinValue;
-                        stepConfirms[i] = false;
-                    }
-
-                    if (!InDungeon)
-                    {
-                        Chat.ExecuteCommand("/partycmd breakup");
-
-                        SchedulerHelper.ScheduleAction("MultiboxServer PartyBreakup Accept", () =>
-                                                                                                {
-                                                                                                    unsafe
-                                                                                                    {
-                                                                                                        Utf8String inviterName = InfoProxyPartyInvite.Instance()->InviterName;
-
-                                                                                                        if (UniversalParty.Length <= 1)
-                                                                                                        {
-                                                                                                            SchedulerHelper.DescheduleAction("MultiboxServer PartyBreakup Accept");
-                                                                                                            return;
-                                                                                                        }
-
-                                                                                                        if (GenericHelpers.TryGetAddonByName("SelectYesno", out AtkUnitBase* addonSelectYesno) &&
-                                                                                                            GenericHelpers.IsAddonReady(addonSelectYesno))
-                                                                                                        {
-                                                                                                            AddonMaster.SelectYesno yesno = new(addonSelectYesno);
-                                                                                                            if (yesno.Text.Contains(inviterName.ToString()))
-                                                                                                                yesno.Yes();
-                                                                                                            else
-                                                                                                                yesno.No();
-                                                                                                        }
-
-                                                                                                        if (GenericHelpers.TryGetAddonByName("Social", out AtkUnitBase* addonSocial) &&
-                                                                                                            GenericHelpers.IsAddonReady(addonSocial))
-                                                                                                        {
-                                                                                                            ErrorLog("/partycmd breakup opened the party menu instead");
-                                                                                                            SchedulerHelper.DescheduleAction("MultiboxServer PartyBreakup Accept");
-                                                                                                            return;
-                                                                                                        }
-                                                                                                    }
-                                                                                                }, 500, false);
-                    }
-
-                    DebugLog("Server stopped");
-                }
-                catch (Exception ex)
-                {
-                    ErrorLog($"StopServer error: {ex}");
-                }
-            }
-
-            private static async void AcceptLoop(CancellationToken ct)
-            {
-                try
-                {
-                    while (!ct.IsCancellationRequested)
-                    {
-                        Stream s = await transport!.AcceptConnectionAsync(ct);
-                        int idx = -1;
-                        for (int i = 0; i < MAX_SERVERS; i++)
-                        {
-                            if (streams[i] == null)
-                            {
-                                idx = i;
-                                break;
-                            }
-                        }
-                        if (idx == -1)
-                        {
-                            try
-                            {
-                                await s.DisposeAsync();
-                            }
-                            catch (Exception ex)
-                            {
-                                ErrorLog(ex.ToString());
-                            }
-                            continue;
-                        }
-
-                        streams[idx] = new StreamString(s);
-
-                        int capturedIdx = idx;
-                        _ = Task.Run(() => ConnectionHandler(s, capturedIdx, ct), ct);
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    DebugLog("AcceptLoop ended due to cancellation");
-                }
-                catch (Exception ex)
-                {
-                    ErrorLog($"AcceptLoop error: {ex}");
-                }
-            }
-
-            private static async void ConnectionHandler(Stream stream, int index, CancellationToken ct)
-            {
-                try
-                {
-                    await using Stream s = stream;
-                    if (streams[index] == null)
-                        return;
-                    StreamString ss = streams[index]!;
-                    ss.WriteString(SERVER_AUTH_KEY);
-                    if (ss.ReadString() != CLIENT_AUTH_KEY)
-                        return;
-
-                    DebugLog($"Client {index} authenticated");
-                    keepAlives[index] = DateTime.Now;
-                    Task sendTask = Task.Run(async () => await ServerSendThread(index, ct), ct);
-
-                    while (!ct.IsCancellationRequested && !sendTask.IsCompleted)
-                    {
-                        await Task.Delay(100, ct);
-                        string message = ss.ReadString().Trim();
-                        string[] split = message.Split("|");
-
-                        switch (split[0])
-                        {
-                            case "" when message.Length == 0:
-                                DebugLog($"Client {index} closed the connection.");
-                                return;
-                            case CLIENT_CID_KEY:
-                                clients[index] = new ClientInfo(ulong.Parse(split[1]), split[2], ushort.Parse(split[3]));
-
-                                _ = Svc.Framework.RunOnTick(() =>
-                                                        {
-                                                            unsafe
-                                                            {
-                                                                ClientInfo client = clients[index]!;
-                                                                DebugLog($"Client Identification received: {client.CID} {client.CName} {client.WorldId}");
-
-                                                                if (!PartyHelper.IsPartyMember(client.CID))
-                                                                {
-                                                                    if (client.WorldId == Player.CurrentWorld.RowId)
-                                                                        InfoProxyPartyInvite.Instance()->InviteToParty(client.CID, client.CName, client.WorldId);
-                                                                    else
-                                                                        InfoProxyPartyInvite.Instance()->InviteToPartyContentId(client.CID, 0);
-
-                                                                    ss.WriteString(PARTY_INVITE);
-                                                                }
-                                                                stepConfirms[index] = false;
-                                                            }
-                                                        }, cancellationToken: ct);
-                                break;
-                            case KEEPALIVE_KEY:
-                                ss.WriteString(KEEPALIVE_RESPONSE_KEY);
-                                break;
-                            case KEEPALIVE_RESPONSE_KEY:
-                                break;
-                            case STEP_COMPLETED:
-                                stepConfirms[index] = true;
-                                CheckStepProgress();
-                                break;
-                            case DEATH_KEY:
-                                deathConfirms[index] = true;
-                                CheckDeaths();
-                                break;
-                            case UNDEATH_KEY:
-                                deathConfirms[index] = false;
-                                break;
-                            default:
-                                ss.WriteString($"Unknown Message: {message}");
-                                continue;
-                        }
-                        keepAlives[index] = DateTime.Now;
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    DebugLog("Connection handler ended due to cancellation");
-                }
-                catch (Exception e)
-                {
-                    ErrorLog($"ConnectionHandler error: {e.Message}\n{e.StackTrace}");
-                }
-                finally
-                {
-                    streams[index] = null;
-                    clients[index] = null;
-                }
-            }
-
-            private static async Task ServerSendThread(int index, CancellationToken ct)
-            {
-                try
-                {
-                    DebugLog("SEND Initialized with " + index);
-
-                    while (!ct.IsCancellationRequested && streams[index] != null)
-                    {
-                        if (messageQueues[index].Count > 0)
-                        {
-                            string message = messageQueues[index].Dequeue();
-                            streams[index]?.WriteString(message);
-                        } 
-                        else if ((DateTime.Now - keepAlives[index]).TotalSeconds > 15)
-                        {
-                            // if no messages to send and the connection is stale, send a keepalive to check. (Usually this is the clients job but the tcp socket doesn't die immediately)
-                            streams[index]?.WriteString(KEEPALIVE_KEY);
-                            await Task.Delay(1000, ct);
-                        }
-                        await Task.Delay(100, ct);
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    DebugLog("SendLoop ended due to cancellation");
-                }
-                catch (Exception e)
-                {
-                    ErrorLog("SERVER SEND ERROR: " + e);
-                }
-            }
-
-            public static bool AllInParty()
-            {
-                for (int i = 0; i < MAX_SERVERS; i++)
-                {
-                    if (clients[i] == null || !PartyHelper.IsPartyMember(clients[i]!.CID))
-                        return false;
-                }
-
-                return true;
-            }
-
-            public static void CheckDeaths()
-            {
-                if (deathConfirms.All(x => x) && Player.IsDead)
-                {
-                    for (int i = 0; i < deathConfirms.Length; i++)
-                        deathConfirms[i] = false;
-
-                    DebugLog("All dead");
-                    SendToAllClients(DEATH_RESET_KEY);
-                }
-                else
-                {
-                    DebugLog("Not all clients are dead yet, waiting for more death.");
-                }
-            }
-
-            public static void CheckStepProgress()
-            {
-                if((Plugin.Stage != Stage.Looping && Plugin.indexer >= 0 && Plugin.indexer < Plugin.Actions.Count && Plugin.Actions[Plugin.indexer].Tag == ActionTag.Treasure || stepConfirms.All(x => x)) && stepBlock)
-                {
-                    for (int i = 0; i < stepConfirms.Length; i++)
-                        stepConfirms[i] = false;
-
-                    DebugLog("All clients completed the step");
-                    stepBlock = false;
-                }
-                else
-                {
-                    DebugLog("Not all clients have completed the step yet, waiting for more confirmations.");
-                }
-            }
-
-            public static void SendStepStart()
-            {
-                DebugLog("Synchronizing Clients to Server step");
-                SendToAllClients($"{STEP_START}|{Plugin.indexer}");
-            }
-
-            public static void ExitDuty()
-            {
-                DebugLog("exiting duty");
-                SendToAllClients(DUTY_EXIT_KEY);
-                for (int i = 0; i < stepConfirms.Length; i++)
-                    stepConfirms[i] = false;
-            }
-
-            public static void Queue()
-            {
-                DebugLog("Queue initiated");
-                SendToAllClients(DUTY_QUEUE_KEY);
-                for (int i = 0; i < stepConfirms.Length; i++)
-                    stepConfirms[i] = false;
-                stepBlock = false;
-            }
-
-            public static void SendPath() => 
-                SendToAllClients($"{PATH_STEPS}|{JsonConvert.SerializeObject(Plugin.Actions, JsonSerializerSettings)}");
-
-            private static void SendToAllClients(string message)
-            {
-                DebugLog("Enqueuing to send: " + message);
-                foreach (Queue<string> queue in messageQueues)
-                    queue.Enqueue(message);
-            }
-
-            internal record ClientInfo(ulong CID, string CName, ushort WorldId);
-        }
-
-        internal static class Client
-        {
-            private static StreamString? clientSS;
-            private static CancellationTokenSource? clientCts;
-
-            public static void Set(bool on)
-            {
-                if (on)
-                {
-                    clientCts = new CancellationTokenSource();
-                    Task.Run(() => ClientConnectionThread(clientCts.Token), clientCts.Token);
-                }
-                else
-                {
-                    try
-                    {
-                        clientCts?.Cancel();
-                    }
-                    catch (Exception ex)
-                    {
-                        ErrorLog(ex.ToString());
-                    }
-                    clientSS = null;
-                    clientCts = null;
-                }
-            }
-
-            private static async void ClientConnectionThread(CancellationToken ct)
-            {
-                try
-                {
-                    using ITransport transport = TransportType switch 
-                    {
-                        TransportType.NamedPipe => new NamedPipeTransport(PipeName, ServerName),
-                        TransportType.Tcp => new TcpTransport(ServerAddress, ServerPort),
-                        _ => throw new NotImplementedException(TransportType.ToString()),
-                    };
-
-                    DebugLog($"Connecting to server ({TransportType})...\n");
-                    await using Stream clientStream = await transport.ConnectToServerAsync(ct);
-
-                    clientSS = new StreamString(clientStream);
-
-                    if (clientSS.ReadString() == SERVER_AUTH_KEY)
-                    {
-                        clientSS.WriteString(CLIENT_AUTH_KEY);
-
-                        _ = Svc.Framework.RunOnTick(() =>
-                                                {
-                                                    if (Player.CID != 0)
-                                                        clientSS.WriteString($"{CLIENT_CID_KEY}|{Player.CID}|{Player.Name}|{Player.CurrentWorld.RowId}");
-                                                }, cancellationToken: ct);
-
-                        _ = Task.Run(() => ClientKeepAliveThread(ct), ct);
-                        while (!ct.IsCancellationRequested)
-                        {
-                            string   message = clientSS.ReadString().Trim();
-                            string[] split   = message.Split("|");
-
-                            switch (split[0])
-                            {
-                                case "" when message.Length == 0:
-                                    DebugLog("Server closed the connection.");
-                                    return;
-                                case STEP_START:
-                                    if (int.TryParse(split[1], out int step))
-                                    {
-                                        Plugin.indexer = step;
-                                        stepBlock      = false;
-                                        Plugin.Stage   = Stage.Idle;
-                                        Plugin.Stage   = Stage.Reading_Path;
-                                    }
-                                    break;
-                                case KEEPALIVE_KEY:
-                                    clientSS.WriteString(KEEPALIVE_RESPONSE_KEY);
-                                    break;
-                                case KEEPALIVE_RESPONSE_KEY:
-                                    break;
-                                case DUTY_QUEUE_KEY:
-                                    QueueHelper.InvokeAcceptOnly();
-                                    break;
-                                case DUTY_EXIT_KEY:
-                                    stepBlock = false;
-                                    ExitDutyHelper.Invoke();
-                                    break;
-                                case PARTY_INVITE:
-                                    SchedulerHelper.ScheduleAction("MultiboxClient PartyInvite Accept", () =>
-                                                                                                        {
-                                                                                                            unsafe
-                                                                                                            {
-                                                                                                                if(UniversalParty.Length > 1)
-                                                                                                                {
-                                                                                                                    PartyHelper.LeaveParty();
-                                                                                                                    return;
-                                                                                                                }
-
-                                                                                                                Utf8String inviterName = InfoProxyPartyInvite.Instance()->InviterName;
-                                                                                                                if (InfoProxyPartyInvite.Instance()->InviterWorldId != 0 && 
-                                                                                                                    UniversalParty.Length <= 1 &&
-                                                                                                                    GenericHelpers.TryGetAddonByName("SelectYesno", out AtkUnitBase* addonSelectYesno) &&
-                                                                                                                    GenericHelpers.IsAddonReady(addonSelectYesno))
-                                                                                                                {
-                                                                                                                    AddonMaster.SelectYesno yesno = new(addonSelectYesno);
-                                                                                                                    if (yesno.Text.Contains(inviterName.ToString()))
-                                                                                                                    {
-                                                                                                                        yesno.Yes();
-                                                                                                                        SchedulerHelper.DescheduleAction("MultiboxClient PartyInvite Accept");
-                                                                                                                    }
-                                                                                                                    else
-                                                                                                                    {
-                                                                                                                        yesno.No();
-                                                                                                                    }
-                                                                                                                }
-                                                                                                            }
-                                                                                                        }, 500, false);
-                                    break;
-                                case PATH_STEPS:
-                                    List<PathAction>? steps = JsonConvert.DeserializeObject<List<PathAction>>(message[(split[0].Length+1)..], JsonSerializerSettings);
-                                    if (steps is { Count: > 0 })
-                                    {
-                                        DebugLog("setting steps from host");
-                                        Plugin.Actions = steps;
-                                    }
-                                    break;
-                                default:
-                                    ErrorLog("Unknown response: " + message);
-                                    break;
-                            }
-                        }
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    DebugLog("ClientConnection ended due to cancellation");
-                }
-                catch (Exception e)
-                {
-                    ErrorLog($"Client ERROR: {e.Message}\n{e.StackTrace}");
-                }
-                finally
-                {
-                    Instance.MultiBox = false;
-                }
-            }
-
-            private static async void ClientKeepAliveThread(CancellationToken ct)
-            {
-                try
-                {
-                    await Task.Delay(1000, ct);
-                    while (!ct.IsCancellationRequested && clientSS != null)
-                    {
-                        clientSS?.WriteString(KEEPALIVE_KEY);
-                        await Task.Delay(10000, ct);
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    DebugLog("ClientKeepalive ended due to cancellation");
-                }
-                catch (Exception e)
-                {
-                    ErrorLog("Client KEEPALIVE Error: " + e);
-                }
-            }
-
-            public static void SendStepCompleted()
-            {
-                if (clientSS == null)
-                {
-                    DebugLog("Client not connected, cannot send step completed.");
-                    return;
-                }
-                Plugin.action = "Waiting for others";
-                clientSS.WriteString(STEP_COMPLETED);
-                DebugLog("Step completed sent to server.");
-            }
-
-            public static void SendDeath(bool dead)
-            {
-                if (clientSS == null)
-                {
-                    DebugLog("Client not connected, cannot send death.");
-                    return;
-                }
-                clientSS.WriteString(dead ? DEATH_KEY : UNDEATH_KEY);
-                DebugLog("Death sent to server.");
-            }
-        }
-
-
-        private static void DebugLog(string message) => 
-            Svc.Log.Debug($"Pipe Connection: {message}");
-
-        private static void ErrorLog(string message) => 
-            Svc.Log.Error($"Pipe Connection: {message}");
-
-        private class StreamString(Stream ioStream)
-        {
-            private readonly UnicodeEncoding streamEncoding = new();
-
-            public string ReadString()
-            {
-                int b1 = ioStream.ReadByte();
-                int b2 = ioStream.ReadByte();
-
-                if (b1 == -1 || b2 == -1)
-                {
-                    DebugLog("End of stream reached.");
-                    return string.Empty;
-                }
-
-                int    len      = b1 * 256 + b2;
-                byte[] inBuffer = new byte[len];
-                int n = 0;
-                while (n < len)
-                {
-                    int c = ioStream.Read(inBuffer, n, len-n);
-                    if (c == 0)
-                    {
-                        ErrorLog("Stream closed unexpectedly");
-                        return string.Empty;
-                    }
-                    n += c;
-                }
-
-                string readString = this.streamEncoding.GetString(inBuffer);
-
-                DebugLog("Reading: " + readString);
-                return readString;
-            }
-
-            public int WriteString(string outString)
-            {
-                DebugLog("Writing: " + outString);
-
-                byte[] outBuffer = this.streamEncoding.GetBytes(outString);
-                int    len       = outBuffer.Length;
-                if (len > ushort.MaxValue)
-                    throw new ArgumentException("String too long to write to stream");
-                ioStream.WriteByte((byte)(len / 256));
-                ioStream.WriteByte((byte)(len & 255));
-                ioStream.Write(outBuffer, 0, len);
-                ioStream.Flush();
-
-                return outBuffer.Length + 2;
-            }
-        }
-    }
 
     public IEnumerable<string> ConfigNames => this.profileByName.Keys;
      
@@ -857,7 +166,7 @@ public class ConfigurationMain
 
         void RegisterProfileData(ProfileData profile)
         {
-            if (profile.CIDs.Count == 0)
+            if (profile.CIDs.Count != 0)
                 foreach (ulong cid in profile.CIDs)
                     this.profileByCID[cid] = profile.Name;
             this.profileByName[profile.Name] = profile;
@@ -1065,10 +374,6 @@ public class ConfigurationMain
     }
 }
 
-
-
-
-
 [JsonObject(MemberSerialization.OptOut)]
 public class ProfileData
 {
@@ -1233,15 +538,15 @@ public class Configuration
 
     #region Wrath
     public bool                                Wrath_AutoSetupJobs { get; set; } = true;
-    public Wrath_IPCSubscriber.DPSRotationMode Wrath_TargetingTank    = Wrath_IPCSubscriber.DPSRotationMode.Highest_Max;
-    public Wrath_IPCSubscriber.DPSRotationMode Wrath_TargetingNonTank = Wrath_IPCSubscriber.DPSRotationMode.Lowest_Current;
+    public WrathCombo.API.Enum.DPSRotationMode Wrath_TargetingTank    = WrathCombo.API.Enum.DPSRotationMode.Highest_Max;
+    public WrathCombo.API.Enum.DPSRotationMode Wrath_TargetingNonTank = WrathCombo.API.Enum.DPSRotationMode.Lowest_Current;
     #endregion
 
     #region RSR
 
-    public RSR_IPCSubscriber.TargetHostileType RSR_TargetHostileType    = RSR_IPCSubscriber.TargetHostileType.AllTargetsCanAttack;
-    public RSR_IPCSubscriber.TargetingType     RSR_TargetingTypeTank    = RSR_IPCSubscriber.TargetingType.HighMaxHP;
-    public RSR_IPCSubscriber.TargetingType     RSR_TargetingTypeNonTank = RSR_IPCSubscriber.TargetingType.LowHP;
+    public RotationSolverRebornIPC.TargetHostileType RSR_TargetHostileType    = RotationSolverRebornIPC.TargetHostileType.AllTargetsCanAttack;
+    public RotationSolverRebornIPC.TargetingType     RSR_TargetingTypeTank    = RotationSolverRebornIPC.TargetingType.HighMaxHP;
+    public RotationSolverRebornIPC.TargetingType     RSR_TargetingTypeNonTank = RotationSolverRebornIPC.TargetingType.LowHP;
     #endregion
 
 
@@ -2248,9 +1553,9 @@ public static class ConfigTab
                             ImGui.PushItemWidth(150 * ImGuiHelpers.GlobalScale);
                             if (ImGui.BeginCombo("##ConfigWrathTargetingTank", Configuration.Wrath_TargetingTank.ToCustomString()))
                             {
-                                foreach (Wrath_IPCSubscriber.DPSRotationMode targeting in Enum.GetValues(typeof(Wrath_IPCSubscriber.DPSRotationMode)))
+                                foreach (WrathCombo.API.Enum.DPSRotationMode targeting in Enum.GetValues<WrathCombo.API.Enum.DPSRotationMode>())
                                 {
-                                    if (targeting == Wrath_IPCSubscriber.DPSRotationMode.Tank_Target)
+                                    if (targeting == WrathCombo.API.Enum.DPSRotationMode.Tank_Target)
                                         continue;
 
                                     if (ImGui.Selectable(targeting.ToCustomString(), Configuration.Wrath_TargetingTank == targeting))
@@ -2269,7 +1574,7 @@ public static class ConfigTab
                             ImGui.PushItemWidth(150 * ImGuiHelpers.GlobalScale);
                             if (ImGui.BeginCombo("##ConfigWrathTargetingNonTank", Configuration.Wrath_TargetingNonTank.ToCustomString()))
                             {
-                                foreach (Wrath_IPCSubscriber.DPSRotationMode targeting in Enum.GetValues(typeof(Wrath_IPCSubscriber.DPSRotationMode)))
+                                foreach (WrathCombo.API.Enum.DPSRotationMode targeting in Enum.GetValues<WrathCombo.API.Enum.DPSRotationMode>())
                                     if (ImGui.Selectable(targeting.ToCustomString(), Configuration.Wrath_TargetingNonTank == targeting))
                                     {
                                         Configuration.Wrath_TargetingNonTank = targeting;
@@ -2305,7 +1610,7 @@ public static class ConfigTab
                             ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X * ImGuiHelpers.GlobalScale);
                             if (ImGui.BeginCombo("##ConfigRSREngage", RSR_IPCSubscriber.GetHostileTypeDescription(Configuration.RSR_TargetHostileType)))
                             {
-                                foreach (RSR_IPCSubscriber.TargetHostileType hostileType in Enum.GetValues(typeof(RSR_IPCSubscriber.TargetHostileType)))
+                                foreach (RotationSolverRebornIPC.TargetHostileType hostileType in Enum.GetValues<RotationSolverRebornIPC.TargetHostileType>())
                                     if (ImGui.Selectable(RSR_IPCSubscriber.GetHostileTypeDescription(hostileType), hostileType == Configuration.RSR_TargetHostileType))
                                     {
                                         Configuration.RSR_TargetHostileType = hostileType;
@@ -2322,7 +1627,7 @@ public static class ConfigTab
                             ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X * ImGuiHelpers.GlobalScale);
                             if (ImGui.BeginCombo("##ConfigRSRTargetTank", Configuration.RSR_TargetingTypeTank.ToCustomString()))
                             {
-                                foreach (RSR_IPCSubscriber.TargetingType targetingType in Enum.GetValues(typeof(RSR_IPCSubscriber.TargetingType)))
+                                foreach (RotationSolverRebornIPC.TargetingType targetingType in Enum.GetValues<RotationSolverRebornIPC.TargetingType>())
                                     if (ImGui.Selectable(targetingType.ToCustomString(), targetingType == Configuration.RSR_TargetingTypeTank))
                                     {
                                         Configuration.RSR_TargetingTypeTank = targetingType;
@@ -2338,7 +1643,7 @@ public static class ConfigTab
                             ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X * ImGuiHelpers.GlobalScale);
                             if (ImGui.BeginCombo("##ConfigRSRTargetNonTank", Configuration.RSR_TargetingTypeNonTank.ToCustomString()))
                             {
-                                foreach (RSR_IPCSubscriber.TargetingType targetingType in Enum.GetValues(typeof(RSR_IPCSubscriber.TargetingType)))
+                                foreach (RotationSolverRebornIPC.TargetingType targetingType in Enum.GetValues<RotationSolverRebornIPC.TargetingType>())
                                     if (ImGui.Selectable(targetingType.ToCustomString(), targetingType == Configuration.RSR_TargetingTypeNonTank))
                                     {
                                         Configuration.RSR_TargetingTypeNonTank = targetingType;
@@ -3487,7 +2792,7 @@ public static class ConfigTab
             uint text     = ImGui.GetColorU32(ImGuiCol.Text);
             uint disabled = ImGui.GetColorU32(ImGuiCol.TextDisabled);
 
-            TransportType transportType = ConfigurationMain.MultiboxUtility.TransportType;
+            TransportType transportType = MultiboxUtility.TransportType;
             using (ImRaii.PushColor(ImGuiCol.Text, transportType == TransportType.NamedPipe ? text : disabled))
             {
                 ImGui.TextWrapped("Named Pipes");
@@ -3521,7 +2826,7 @@ public static class ConfigTab
                 ImGui.Indent();
                 if(ImGuiEx.EnumCombo("Transport Type", ref transportType))
                 {
-                    ConfigurationMain.MultiboxUtility.TransportType = transportType;
+                    MultiboxUtility.TransportType = transportType;
                     Configuration.Save();
                 }
 
@@ -3531,33 +2836,33 @@ public static class ConfigTab
                 {
                     case TransportType.NamedPipe:
                     {
-                        string pipeName = ConfigurationMain.MultiboxUtility.PipeName;
+                        string pipeName = MultiboxUtility.PipeName;
                         if(ImGui.InputText("Pipe Name", ref pipeName))
                         {
-                            ConfigurationMain.MultiboxUtility.PipeName = pipeName;
+                            MultiboxUtility.PipeName = pipeName;
                             Configuration.Save();
                         }
 
                         ImGui.SameLine();
                         if (ImGui.Button("Reset##MultiboxResetPipeName"))
                         {
-                            ConfigurationMain.MultiboxUtility.PipeName = "AutoDutyPipe";
+                            MultiboxUtility.PipeName = "AutoDutyPipe";
                                 Configuration.Save();
                         }
 
                         if (!ConfigurationMain.Instance.host)
                         {
-                            string serverName = ConfigurationMain.MultiboxUtility.ServerName;
+                            string serverName = MultiboxUtility.ServerName;
                             if (ImGui.InputText("Server Name", ref serverName))
                             {
-                                ConfigurationMain.MultiboxUtility.ServerName = serverName;
+                                MultiboxUtility.ServerName = serverName;
                                 Configuration.Save();
                             }
 
                             ImGui.SameLine();
                             if (ImGui.Button("Reset##MultiboxResetServerName"))
                             {
-                                ConfigurationMain.MultiboxUtility.ServerName = ".";
+                                MultiboxUtility.ServerName = ".";
                                     Configuration.Save();
                             }
                         }
@@ -3568,32 +2873,32 @@ public static class ConfigTab
                     {
                         if (!ConfigurationMain.Instance.host)
                         {
-                            string serverAddress = ConfigurationMain.MultiboxUtility.ServerAddress;
+                            string serverAddress = MultiboxUtility.ServerAddress;
                             if (ImGui.InputText("Server Address", ref serverAddress))
                             {
-                                ConfigurationMain.MultiboxUtility.ServerAddress = serverAddress;
+                                MultiboxUtility.ServerAddress = serverAddress;
                                 Configuration.Save();
                             }
 
                             ImGui.SameLine();
                             if (ImGui.Button("Reset##MultiboxResetServerAddress"))
                             {
-                                ConfigurationMain.MultiboxUtility.ServerAddress = "127.0.0.1";
+                                MultiboxUtility.ServerAddress = "127.0.0.1";
                                     Configuration.Save();
                             }
                         }
 
-                        int serverPort = ConfigurationMain.MultiboxUtility.ServerPort;
+                        int serverPort = MultiboxUtility.ServerPort;
                         if (ImGui.InputInt("Server Port", ref serverPort))
                         {
-                            ConfigurationMain.MultiboxUtility.ServerPort = serverPort;
+                            MultiboxUtility.ServerPort = serverPort;
                             Configuration.Save();
                         }
 
                         ImGui.SameLine();
                         if (ImGui.Button("Reset##MultiboxResetServerPort"))
                         {
-                            ConfigurationMain.MultiboxUtility.ServerPort = 1716;
+                            MultiboxUtility.ServerPort = 1716;
                                 Configuration.Save();
                         }
 
@@ -3616,7 +2921,7 @@ public static class ConfigTab
             if (ConfigurationMain.Instance.MultiBox)
             {
                 ImGui.Indent();
-                ImGuiEx.Text($"Blocking: {ConfigurationMain.MultiboxUtility.stepBlock}");
+                ImGuiEx.Text($"Blocking: {MultiboxUtility.stepBlock}");
 
                 if(ConfigurationMain.Instance.host)
                 {
@@ -3643,9 +2948,9 @@ public static class ConfigTab
 
                         InfoProxyPartyMember* partyMembers = InfoProxyPartyMember.Instance();
 
-                        for (int i = 0; i < ConfigurationMain.MultiboxUtility.Server.MAX_SERVERS; i++)
+                        for (int i = 0; i < MultiboxUtility.Server.MAX_SERVERS; i++)
                         {
-                            ConfigurationMain.MultiboxUtility.Server.ClientInfo? info = ConfigurationMain.MultiboxUtility.Server.clients[i];
+                            MultiboxUtility.Server.ClientInfo? info = MultiboxUtility.Server.clients[i];
 
                             if(info != null)
                             {
@@ -3671,9 +2976,9 @@ public static class ConfigTab
                                 }
 
                                 ImGui.NextColumn();
-                                ImGuiEx.Text(ConfigurationMain.MultiboxUtility.Server.stepConfirms[i].ToString());
+                                ImGuiEx.Text(MultiboxUtility.Server.stepConfirms[i].ToString());
                                 ImGui.NextColumn();
-                                double totalSeconds = DateTime.Now.Subtract(ConfigurationMain.MultiboxUtility.Server.keepAlives[i]).TotalSeconds;
+                                double totalSeconds = DateTime.Now.Subtract(MultiboxUtility.Server.keepAlives[i]).TotalSeconds;
                                 ImGuiEx.Text(totalSeconds < 10 ? ImGuiHelper.StateGoodColor : ImGuiHelper.StateBadColor, $"{totalSeconds:F3}s ago");
                                 ImGui.NextColumn();
                             }
@@ -3689,7 +2994,7 @@ public static class ConfigTab
                         using(ImRaii.Disabled(!InDungeon))
                         {
                             if(ImGui.Button("Resynchronize Step##MultiboxSynchronizeStep"))
-                                ConfigurationMain.MultiboxUtility.Server.SendStepStart();
+                                MultiboxUtility.Server.SendStepStart();
                         }
                         ImGui.Separator();
                     }

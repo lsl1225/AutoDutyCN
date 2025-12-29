@@ -143,7 +143,9 @@ namespace AutoDuty.IPC
     
     internal static class YesAlready_IPCSubscriber
     {
-        public static bool IsEnabled => YesAlready.IsPluginEnabled();
+        internal static bool IsEnabled => IPCSubscriber_Common.IsReady("YesAlready");
+
+        public static bool IsPluginEnabled => YesAlready.IsPluginEnabled();
 
         public static void SetState(bool on) => 
             YesAlready.SetPluginEnabled(on);

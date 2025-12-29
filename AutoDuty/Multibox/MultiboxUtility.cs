@@ -17,6 +17,7 @@ using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Helpers;
+using Lumina.Excel.Sheets;
 using Newtonsoft.Json;
 
 public static class MultiboxUtility
@@ -466,7 +467,10 @@ public static class MultiboxUtility
                 queue.Enqueue(message);
         }
 
-        internal record ClientInfo(ulong CID, string CName, ushort WorldId);
+        internal record ClientInfo(ulong CID, string CName, ushort WorldId)
+        {
+            public string World => field ??= Svc.Data.Excel.GetSheet<World>().GetRow(this.WorldId).Name.GetText();
+        }
     }
 
     internal static class Client

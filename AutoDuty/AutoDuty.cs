@@ -278,7 +278,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.assemblyDirectoryInfo = this.assemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 282) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 284) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this.configDirectory.Exists)
@@ -1845,7 +1845,8 @@ public sealed class AutoDuty : IDalamudPlugin
         if (Configuration.AutoManageVnavAlignCamera && VNavmesh_IPCSubscriber.IsEnabled && VNavmesh_IPCSubscriber.Path_GetAlignCamera())
             _settingsActive |= SettingsActive.Vnav_Align_Camera_Off;
         */
-        if (YesAlready_IPCSubscriber.IsEnabled is true and true) this.settingsActive |= SettingsActive.YesAlready;
+        if (YesAlready_IPCSubscriber.IsEnabled && YesAlready_IPCSubscriber.IsPluginEnabled) 
+            this.settingsActive |= SettingsActive.YesAlready;
 
         if (PandorasBox_IPCSubscriber.IsEnabled && (PandorasBox_IPCSubscriber.GetFeatureEnabled("Auto-interact with Objects in Instances") ?? false))
             this.settingsActive |= SettingsActive.Pandora_Interact_Objects;

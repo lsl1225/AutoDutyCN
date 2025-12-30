@@ -10,12 +10,10 @@ using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.ExcelServices;
 using Helpers;
+using NightmareUI.Censoring;
 
 internal static class StatsTab
 {
-    private static bool scrambleNames = false;
-
-    private static Dictionary<ulong, string> scrambledNames = [];
 
     public static void Draw()
     {
@@ -40,7 +38,7 @@ internal static class StatsTab
         ImGui.Separator();
         ImGui.Text("Duties run");
 
-        ImGui.Checkbox("Scramble names", ref scrambleNames);
+        ImGui.Checkbox("Scramble names", ref Censor.Config.Enabled);
 
             
         if (!ImGui.BeginTable("##ADDutiesStats", 6, ImGuiTableFlags.Borders | ImGuiTableFlags.Sortable | ImGuiTableFlags.SortMulti, new Vector2(ImGui.GetContentRegionAvail().X, 500f)))
@@ -99,14 +97,6 @@ internal static class StatsTab
 
         records = recordsOrdered ?? records;
 
-        static string ScrambleName(ulong cid)
-        {
-            if(!scrambledNames.ContainsKey(cid))
-                scrambledNames[cid] = Random.Shared.GetHexString(Random.Shared.Next(8,14)) + "@" + Random.Shared.GetHexString(Random.Shared.Next(5, 8));
-            return scrambledNames[cid];
-        }
-
-
         foreach ((DateTime completionTime, TimeSpan duration, uint territoryId, ulong cid, int ilvl, Job job) in records)
         {
             ImGui.TableNextRow();
@@ -117,9 +107,10 @@ internal static class StatsTab
             ImGui.TableNextColumn();
             ImGui.Text(ContentHelper.DictionaryContent[territoryId].Name ?? $"Unknown ({territoryId})");
             ImGui.TableNextColumn();
-            ImGui.Text(scrambleNames ? 
-                           ScrambleName(cid) :
-                           ConfigurationMain.Instance.charByCID.TryGetValue(cid, out ConfigurationMain.CharData cd) ? $"{cd.Name}@{cd.World}" : string.Empty);
+            ImGui.Text(ConfigurationMain.Instance.charByCID.TryGetValue(cid, out ConfigurationMain.CharData cd) ?
+                           Censor.Character(cd.Name, cd.World) :
+                           string.Empty);
+
             ImGui.TableNextColumn();
             ImGui.Text(ilvl.ToString());
             ImGui.TableNextColumn();

@@ -28,9 +28,9 @@
       },
       "WrathCombo.API": {
         "type": "Direct",
-        "requested": "[0.4.2, )",
-        "resolved": "0.4.2",
-        "contentHash": "JW8FLmk1I4FRNEDI6XzDCXcCcyoTqhqoxX5uiLXHwy2Ake9S3uGyInJZ6m0JQ+s/21QL0YjOzyR0Qrs8bTHTFA==",
+        "requested": "[0.4.3, )",
+        "resolved": "0.4.3",
+        "contentHash": "tVDBloZKc799K8V/WeXyfcYJ//AcsL0t4MThOeUM4p1EmDyH8yvaamb121Qj4NbkeLVaRZ4wBqOeqRq8pBt2Qg==",
         "dependencies": {
           "JetBrains.Annotations": "2025.2.4"
         }

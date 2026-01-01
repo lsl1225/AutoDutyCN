@@ -90,11 +90,11 @@
       "Advanced": {
         "Header": "高级配置选项",
         "UsingAltRotation": "使用替代输出循环插件",
-        "UsingAltRotationHelp": "你决定使用 Wrath Combo、Rotation Solver 或 BossMod AutoRotation 以外的插件。",
+        "UsingAltRotationHelp": "你决定使用 Wrath Combo、Rotation Solver 或 BossMod AutoRotation 以外的插件，例如AEAssist3。",
         "UsingAltMovement": "使用替代移动插件",
         "UsingAltMovementHelp": "你决定使用 Vnavmesh 以外的插件。",
         "UsingAltBoss": "使用替代 Boss 插件",
-        "UsingAltBossHelp": "你决定使用 BossMod 以外的插件，例如AEAssist3。"
+        "UsingAltBossHelp": "你决定使用 BossMod 以外的插件。"
       }
     },
     "PreLoop": {

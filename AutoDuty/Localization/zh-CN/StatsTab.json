@@ -1,6 +1,5 @@
 {
   "StatsTab": {
-    "TabName": "统计 (Stats)",
     "ClearStatistics": "清除统计数据",
     "ClearStatisticsHelp": "按住 Ctrl 永久删除统计数据",
     "DutiesRun": "副本运行次数: {0}",

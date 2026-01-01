@@ -1,0 +1,14 @@
+{
+  "MainWindow": {
+    "Tabs": {
+      "Main": "主页",
+      "Build": "构建",
+      "Paths": "脚本路径",
+      "Config": "设置",
+      "Info": "信息",
+      "Logs": "日志",
+      "Stats": "统计",
+      "Support": "支持/赞助"
+    }
+  }
+}

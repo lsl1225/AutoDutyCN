@@ -1,0 +1,14 @@
+{
+  "MainWindow": {
+    "Tabs": {
+      "Main": "Main",
+      "Build": "Build",
+      "Paths": "Paths",
+      "Config": "Config",
+      "Info": "Info",
+      "Logs": "Logs",
+      "Stats": "Stats",
+      "Support": "Support AutoDuty"
+    }
+  }
+}

@@ -394,14 +394,14 @@ public sealed class MainWindow : Window, IDisposable
 
     private static (string, Action, Vector4?, bool)[] tabList =>
     [
-        ("Main", MainTab.Draw, null, false),
-        ("Build", BuildTab.Draw, null, false),
-        ("Paths", PathsTab.Draw, null, false),
-        ("Config", ConfigTab.Draw, null, false),
-        ("Info", InfoTab.Draw, null, false),
-        ("Logs", LogTab.Draw, null, false),
-        (Loc.Get("StatsTab.TabName"), StatsTab.Draw, null, false),
-        ("Support AutoDuty", KofiLink, ImGui.ColorConvertU32ToFloat4(ColorNormal), false)
+        (Loc.Get("MainWindow.Tabs.Main"), MainTab.Draw, null, false),
+        (Loc.Get("MainWindow.Tabs.Build"), BuildTab.Draw, null, false),
+        (Loc.Get("MainWindow.Tabs.Paths"), PathsTab.Draw, null, false),
+        (Loc.Get("MainWindow.Tabs.Config"), ConfigTab.Draw, null, false),
+        (Loc.Get("MainWindow.Tabs.Info"), InfoTab.Draw, null, false),
+        (Loc.Get("MainWindow.Tabs.Logs"), LogTab.Draw, null, false),
+        (Loc.Get("MainWindow.Tabs.Stats"), StatsTab.Draw, null, false),
+        (Loc.Get("MainWindow.Tabs.Support"), KofiLink, ImGui.ColorConvertU32ToFloat4(ColorNormal), false)
     ];
 
     public override void Draw()

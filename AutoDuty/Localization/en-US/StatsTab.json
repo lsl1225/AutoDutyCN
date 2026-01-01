@@ -1,6 +1,5 @@
 {
   "StatsTab": {
-    "TabName": "Stats",
     "ClearStatistics": "Clear Statistics",
     "ClearStatisticsHelp": "Hold ctrl to delete statistics permanently",
     "DutiesRun": "Duties run: {0}",

@@ -2774,11 +2774,11 @@ public static class ConfigTab
                 ImGui.Text(Loc.Get("ConfigTab.Termination.OnCompletionOfAllLoops"));
                 ImGui.SameLine(0, 10);
                 ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-                if (ImGui.BeginCombo("##ConfigTerminationMethod", Configuration.TerminationMethodEnum.ToCustomString()))
+                if (ImGui.BeginCombo("##ConfigTerminationMethod", Configuration.TerminationMethodEnum.ToLocalizedString("TerminationMode")))
                 {
                     foreach (TerminationMode terminationMode in Enum.GetValues(typeof(TerminationMode)))
                         if (terminationMode != TerminationMode.Kill_PC || OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
-                            if (ImGui.Selectable(terminationMode.ToCustomString(), Configuration.TerminationMethodEnum == terminationMode))
+                            if (ImGui.Selectable(terminationMode.ToLocalizedString("TerminationMode"), Configuration.TerminationMethodEnum == terminationMode))
                             {
                                 Configuration.TerminationMethodEnum = terminationMode;
                                 Configuration.Save();

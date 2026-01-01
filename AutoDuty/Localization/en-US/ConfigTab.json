@@ -267,6 +267,14 @@
         "Armoury_Wrists_Rings": "Armoury: Wrists/Rings",
         "Equipped": "Equipped"
       },
+      "TerminationMode": {
+        "Do_Nothing": "Do Nothing",
+        "Logout": "Logout",
+        "Start_AR_Multi_Mode": "Start AR Multi Mode",
+        "Kill_Client": "Kill Client",
+        "Kill_PC": "Kill PC",
+        "Start_AR_Night_Mode": "Start AR Night Mode"
+      },
       "Jobs": {
         "All": "All",
         "Tanks": "Tanks",

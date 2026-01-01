@@ -267,6 +267,14 @@
         "Armoury_Wrists_Rings": "兵装库: 手镯/戒指",
         "Equipped": "当前已装备"
       },
+      "TerminationMode": {
+        "Do_Nothing": "无操作",
+        "Logout": "下线/注销",
+        "Start_AR_Multi_Mode": "启动 AutoRetainer 多开模式",
+        "Kill_Client": "关闭游戏客户端",
+        "Kill_PC": "关闭电脑",
+        "Start_AR_Night_Mode": "启动 AutoRetainer 夜间模式"
+      },
       "Jobs": {
         "All": "所有职业 (All)",
         "Tanks": "防护职业 (T)",

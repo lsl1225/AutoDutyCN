@@ -12,6 +12,7 @@ namespace AutoDuty.Helpers
     using System;
     using Windows;
     using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+    using Multibox;
 
     internal static class DeathHelper
     {
@@ -25,7 +26,7 @@ namespace AutoDuty.Helpers
                     return;
 
                 if(deathState != value)
-                    ConfigurationMain.MultiboxUtility.IsDead(value == PlayerLifeState.Dead);
+                    MultiboxUtility.IsDead(value == PlayerLifeState.Dead);
 
                 switch (value)
                 {

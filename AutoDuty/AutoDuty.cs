@@ -48,6 +48,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Multibox;
 using static Data.Classes;
 using TaskManager = ECommons.Automation.NeoTaskManager.TaskManager;
 
@@ -104,6 +105,8 @@ public sealed class AutoDuty : IDalamudPlugin
     internal static   Configuration Configuration => ConfigurationMain.Instance.GetCurrentConfig;
     internal readonly WindowSystem  windowSystem = new("AutoDuty");
 
+    internal DateTime runStartTime = DateTime.UnixEpoch;
+
     public   int   Version { get; set; }
     internal Stage previousStage = Stage.Stopped;
 
@@ -138,19 +141,29 @@ public sealed class AutoDuty : IDalamudPlugin
                     break;
                 case Stage.Reading_Path:
                     if (field is not Stage.Waiting_For_Combat and not Stage.Revived and not Stage.Looping and not Stage.Idle)
-                        ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true;
+                        MultiboxUtility.MultiboxBlockingNextStep = true;
                     break;
                 case Stage.Idle:
                     if (VNavmesh_IPCSubscriber.Path_NumWaypoints > 0)
                         VNavmesh_IPCSubscriber.Path_Stop();
                     break;
                 case Stage.Looping:
+                    if(this.runStartTime.Equals(DateTime.UnixEpoch))
+                        this.runStartTime = DateTime.UtcNow;
+                    goto case Stage.Moving;
                 case Stage.Moving:
                 case Stage.Dead:
                 case Stage.Revived:
                 case Stage.Interactable:
                 default:
                     break;
+            }
+
+            if (value is Stage.Stopped or Stage.Paused && !this.runStartTime.Equals(DateTime.UnixEpoch))
+            {
+                ConfigurationMain.Instance.stats.timeSpent += DateTime.UtcNow.Subtract(this.runStartTime);
+                this.runStartTime                          =  DateTime.UnixEpoch;
+                Configuration.Save();
             }
 
             Svc.Log.Debug($"Stage from {field.ToCustomString()} to {value.ToCustomString()}");
@@ -268,7 +281,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.assemblyDirectoryInfo = this.assemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 281) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 284) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this.configDirectory.Exists)
@@ -307,12 +320,13 @@ public sealed class AutoDuty : IDalamudPlugin
             
             ActiveHelper.InvokeAllHelpers();
 
-            this.commands = [
+            this.commands =
+            [
                 (["config", "cfg"], "opens config window / modifies config", argsArray =>
                                                                              {
                                                                                  if (argsArray.Length < 2)
                                                                                      this.OpenConfigUI();
-                                                                                 else if (argsArray[1].Equals("list"))
+                                                                                 else if (argsArray[1] == "list")
                                                                                      ConfigHelper.ListConfig();
                                                                                  else
                                                                                      ConfigHelper.ModifyConfig(argsArray[1], argsArray[2..]);
@@ -324,25 +338,16 @@ public sealed class AutoDuty : IDalamudPlugin
                                              {
                                                  if (Plugin.Stage == Stage.Paused)
                                                  {
-                                                     Plugin.taskManager.StepMode = false;
-                                                     Plugin.Stage  =  Plugin.previousStage;
-                                                     Plugin.states &= ~PluginState.Paused;
+                                                     Plugin.taskManager.StepMode =  false;
+                                                     Plugin.Stage                =  Plugin.previousStage;
+                                                     Plugin.states               &= ~PluginState.Paused;
                                                  }
                                              }),
-                (["dataid"], "Logs and copies your target's dataid to clipboard", argsArray =>
-                                                                                  {
-                                                                                      IGameObject? obj = null;
-                                                                                      if (argsArray.Length == 2)
-                                                                                          obj = Svc.Objects[int.TryParse(argsArray[1], out int index) ? index : -1] ?? null;
-                                                                                      else
-                                                                                          obj = ObjectHelper.GetObjectByName(Svc.Targets.Target?.Name.TextValue ?? "");
-
-                                                                                      Svc.Log.Info($"{obj?.BaseId}");
-                                                                                      ImGui.SetClipboardText($"{obj?.BaseId}");
-                                                                                  }),
                 (["queue"], "queues duty", argsArray =>
                                            {
-                                               QueueHelper.Invoke(ContentHelper.DictionaryContent.FirstOrDefault(x => x.Value.Name!.Equals(string.Join(" ", argsArray).Replace("queue ", string.Empty), StringComparison.InvariantCultureIgnoreCase)).Value ?? null,
+                                               QueueHelper.Invoke(ContentHelper.DictionaryContent
+                                                                               .FirstOrDefault(x => x.Value.Name!.Equals(string.Join(" ", argsArray).Replace("queue ", string.Empty), StringComparison.InvariantCultureIgnoreCase)).Value ??
+                                                                  null,
                                                                   Configuration.DutyModeEnum);
                                            }),
                 (["overlay"], "opens overlay", argsArray =>
@@ -350,7 +355,7 @@ public sealed class AutoDuty : IDalamudPlugin
                                                    if (argsArray.Length == 1)
                                                    {
                                                        Configuration.ShowOverlay = true;
-                                                       this.Overlay.IsOpen            = true;
+                                                       this.Overlay.IsOpen       = true;
 
                                                        if (!Plugin.states.HasAnyFlag(PluginState.Looping, PluginState.Navigating))
                                                            Configuration.HideOverlayWhenStopped = false;
@@ -396,8 +401,32 @@ public sealed class AutoDuty : IDalamudPlugin
                                                                                 }),
                 (["run"], "starts auto duty in territory type specified", argsArray =>
                                                                           {
-                                                                              const string failPreMessage  = "Run Error: Incorrect usage: ";
-                                                                              const string failPostMessage = "\nCorrect usage: /autoduty run DutyMode TerritoryTypeInteger LoopTimesInteger (optional)BareModeBool\nexample: /autoduty run Support 1036 10 true\nYou can get the TerritoryTypeInteger from /autoduty tt name of territory (will be logged and copied to clipboard)";
+                                                                              const string failPreMessage = "Run Error: Incorrect usage: ";
+
+                                                                              const string failPostMessageLev =
+                                                                                  "\nCorrect usage: /autoduty run LoopTimesInteger\nexample: /autoduty run 10";
+
+                                                                              if (Plugin.LevelingEnabled)
+                                                                              {
+                                                                                  if (argsArray.Length < 2)
+                                                                                  {
+                                                                                      Svc.Log.Info($"{failPreMessage}Argument count must be at least 3, you inputted {argsArray.Length - 1}{failPostMessageLev}");
+                                                                                      return;
+                                                                                  }
+
+                                                                                  if (!int.TryParse(argsArray[1], out int loopTimesLev))
+                                                                                  {
+                                                                                      Svc.Log.Info($"{failPreMessage}Argument 1 must be an integer, you inputted {argsArray[3]}{failPostMessageLev}");
+                                                                                      return;
+                                                                                  }
+
+                                                                                  this.Run(0, loopTimesLev);
+                                                                                  return;
+                                                                              }
+
+                                                                              const string failPostMessage =
+                                                                                  "\nCorrect usage: /autoduty run DutyMode TerritoryTypeInteger LoopTimesInteger (optional)BareModeBool\nexample: /autoduty run Support 1036 10 true\nYou can get the TerritoryTypeInteger from /autoduty tt name of territory (will be logged and copied to clipboard)";
+
                                                                               if (argsArray.Length < 4)
                                                                               {
                                                                                   Svc.Log.Info($"{failPreMessage}Argument count must be at least 3, you inputted {argsArray.Length - 1}{failPostMessage}");
@@ -430,7 +459,8 @@ public sealed class AutoDuty : IDalamudPlugin
 
                                                                               if (!content.DutyModes.HasFlag(dutyMode))
                                                                               {
-                                                                                  Svc.Log.Info($"{failPreMessage}Argument 2 value was not of type {dutyMode}, which you inputted in Argument 1, Argument 2 value was {argsArray[2]}{failPostMessage}");
+                                                                                  Svc.Log
+                                                                                     .Info($"{failPreMessage}Argument 2 value was not of type {dutyMode}, which you inputted in Argument 1, Argument 2 value was {argsArray[2]}{failPostMessage}");
                                                                                   return;
                                                                               }
 
@@ -453,6 +483,17 @@ public sealed class AutoDuty : IDalamudPlugin
 
                                                                               this.Run(territoryType, loopTimes, bareMode: argsArray.Length > 4 && bool.TryParse(argsArray[4], out bool parsedBool) && parsedBool);
                                                                           }),
+                (["dataid"], "Logs and copies your target's dataid to clipboard", argsArray =>
+                                                                                  {
+                                                                                      IGameObject? obj = null;
+                                                                                      if (argsArray.Length == 2)
+                                                                                          obj = Svc.Objects[int.TryParse(argsArray[1], out int index) ? index : -1] ?? null;
+                                                                                      else
+                                                                                          obj = ObjectHelper.GetObjectByName(Svc.Targets.Target?.Name.TextValue ?? "");
+
+                                                                                      Svc.Log.Info($"{obj?.BaseId}");
+                                                                                      ImGui.SetClipboardText($"{obj?.BaseId}");
+                                                                                  }),
             ];
             this.commands = [.. this.commands.Concat(ActiveHelper.activeHelpers.Where(iah => iah.Commands != null).
                                                                   Select<IActiveHelper, (string[], string, Action<string[]>)>(iah => (iah.Commands!, iah.CommandDescription!, iah.OnCommand)))];
@@ -600,6 +641,14 @@ public sealed class AutoDuty : IDalamudPlugin
 
         SchedulerHelper.ScheduleAction("LoginConfig", () =>
                                                       {
+                                                          if(!ConfigurationMain.Instance.charByCID.ContainsKey(Player.CID))
+                                                              ConfigurationMain.Instance.charByCID.Add(Player.CID, new ConfigurationMain.CharData
+                                                                                                                   {
+                                                                                                                       CID   = Player.CID,
+                                                                                                                       Name  = Player.Name,
+                                                                                                                       World = Player.CurrentWorldName
+                                                                                                                   });
+
                                                           if (Configuration.ShowOverlay &&
                                                               (!Configuration.HideOverlayWhenStopped || this.states.HasFlag(PluginState.Looping) ||
                                                                this.states.HasFlag(PluginState.Navigating)))
@@ -654,12 +703,30 @@ public sealed class AutoDuty : IDalamudPlugin
         }
     }
 
-    private void DutyState_DutyStarted(object?     sender, ushort e) => this.dutyState = DutyState.DutyStarted;
+    private DateTime lastDutyStart = DateTime.MinValue;
+
+    private void DutyState_DutyStarted(object?     sender, ushort e)
+    {
+        this.dutyState     = DutyState.DutyStarted;
+        this.lastDutyStart = DateTime.UtcNow;
+    }
+
     private void DutyState_DutyWiped(object?       sender, ushort e) => this.dutyState = DutyState.DutyWiped;
     private void DutyState_DutyRecommenced(object? sender, ushort e) => this.dutyState = DutyState.DutyRecommenced;
     private void DutyState_DutyCompleted(object? sender, ushort e)
     {
         this.dutyState = DutyState.DutyComplete;
+        if(this.states is not (PluginState.None or PluginState.Paused))
+        {
+            TimeSpan timeSpan = DateTime.UtcNow.Subtract(this.lastDutyStart);
+
+            ConfigurationMain.StatData stats = ConfigurationMain.Instance.stats;
+
+            stats.dutyRecords.Add(new DutyDataRecord(DateTime.UtcNow, timeSpan, Player.Territory.RowId, Player.CID, InventoryHelper.CurrentItemLevel, Player.Job));
+            stats.dungeonsRun++;
+            Configuration.Save();
+        }
+
         this.CheckFinishing();
     }
 
@@ -708,7 +775,7 @@ public sealed class AutoDuty : IDalamudPlugin
                     this.Actions = [..path.Actions];
 
                 if(ConfigurationMain.Instance.MultiBox && ConfigurationMain.Instance.multiBoxSynchronizePath && ConfigurationMain.Instance.host)
-                    ConfigurationMain.MultiboxUtility.Server.SendPath();
+                    MultiboxUtility.Server.SendPath();
             }
 
             //Svc.Log.Info($"Loading Path: {CurrentPath} {ListBoxPOSText.Count}");
@@ -758,7 +825,7 @@ public sealed class AutoDuty : IDalamudPlugin
             } else
             {
                 if(!isDuty)
-                    ConfigurationMain.MultiboxUtility.Server.ExitDuty();
+                    MultiboxUtility.Server.ExitDuty();
             }
         }
 
@@ -817,11 +884,11 @@ public sealed class AutoDuty : IDalamudPlugin
                                              if (this.StopLoop)
                                              {
                                                  this.taskManager.Enqueue(() => Svc.Log.Info($"Loop Stop Condition Encountered, Stopping Loop"));
-                                                 this.LoopTasks(false, Configuration.ExecuteBetweenLoopActionLastLoop);
+                                                 this.LoopTasks(false, Configuration is { EnableBetweenLoopActions: true, ExecuteBetweenLoopActionLastLoop: true });
                                              }
                                              else
                                              {
-                                                 this.LoopTasks();
+                                                 this.LoopTasks(between: Configuration.EnableBetweenLoopActions);
                                              }
                                          }, "Loop-CheckStopLoop");
 
@@ -832,7 +899,7 @@ public sealed class AutoDuty : IDalamudPlugin
                 this.taskManager.Enqueue(() => { this.states &= ~PluginState.Navigating; }, "Loop-RemoveNavigationState");
                 this.taskManager.Enqueue(() => PlayerHelper.IsReady, "Loop-WaitPlayerReady", new TaskManagerConfiguration(timeLimitMS: int.MaxValue));
                 this.taskManager.Enqueue(() => Svc.Log.Debug($"Loop {this.currentLoop} == {Configuration.LoopTimes} we are done Looping, Invoking Loop Actions"), "Loop-Debug");
-                this.taskManager.Enqueue(() => { this.LoopTasks(false, Configuration.ExecuteBetweenLoopActionLastLoop); }, "Loop-LoopCompleteActions");
+                this.taskManager.Enqueue(() => this.LoopTasks(false, Configuration is { EnableBetweenLoopActions: true, ExecuteBetweenLoopActionLastLoop: true }), "Loop-LoopCompleteActions");
             }
         }
     }
@@ -883,7 +950,8 @@ public sealed class AutoDuty : IDalamudPlugin
             Configuration.AutoDutyModeEnum = AutoDutyMode.Looping;
 
         Svc.Log.Debug($"Run: territoryType={territoryType} loops={loops} bareMode={bareMode}");
-        if (territoryType > 0)
+
+        if (territoryType > 0 && !this.LevelingEnabled)
         {
             if (ContentHelper.DictionaryContent.TryGetValue(territoryType, out Content? content))
             {
@@ -1139,9 +1207,9 @@ public sealed class AutoDuty : IDalamudPlugin
         if (ConfigurationMain.Instance.MultiBox)
         {
             if (ConfigurationMain.Instance.host)
-                ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true;
+                MultiboxUtility.MultiboxBlockingNextStep = true;
             else
-                this.taskManager.Enqueue(() => ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = true);
+                this.taskManager.Enqueue(() => MultiboxUtility.MultiboxBlockingNextStep = true);
         }
 
         if (!queue)
@@ -1214,7 +1282,7 @@ public sealed class AutoDuty : IDalamudPlugin
                                                                this.taskManager.Enqueue(() => VNavmesh_IPCSubscriber.Nav_IsReady, "Loop-WaitNavReady", new TaskManagerConfiguration(int.MaxValue));
                                                                this.taskManager.Enqueue(() => Svc.Log.Debug($"StartNavigation"));
                                                                this.taskManager.Enqueue(() => this.StartNavigation(true), "Loop-StartNavigation");
-                                                           }, () => !ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep);
+                                                           }, () => !MultiboxUtility.MultiboxBlockingNextStep);
     }
 
     private void LoopsCompleteActions()
@@ -1385,7 +1453,7 @@ public sealed class AutoDuty : IDalamudPlugin
 
         this.pathAction = this.Actions[this.indexer];
 
-        if (ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep)
+        if (MultiboxUtility.MultiboxBlockingNextStep)
         {
             if (PartyHelper.PartyInCombat() && Plugin.stopForCombat)
             {
@@ -1400,7 +1468,7 @@ public sealed class AutoDuty : IDalamudPlugin
                     {
 
                         if (ConfigurationMain.Instance.host)
-                            ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = false;
+                            MultiboxUtility.MultiboxBlockingNextStep = false;
                         this.Stage = Stage.Action;
                         return;
                     }
@@ -1466,7 +1534,7 @@ public sealed class AutoDuty : IDalamudPlugin
         BossMod_IPCSubscriber.InBoss(this.pathAction.Name.Equals("Boss"));
 
         if(ConfigurationMain.Instance.host)
-            ConfigurationMain.MultiboxUtility.MultiboxBlockingNextStep = false;
+            MultiboxUtility.MultiboxBlockingNextStep = false;
 
         if (this.pathAction.Position == Vector3.Zero)
         {
@@ -1780,7 +1848,8 @@ public sealed class AutoDuty : IDalamudPlugin
         if (Configuration.AutoManageVnavAlignCamera && VNavmesh_IPCSubscriber.IsEnabled && VNavmesh_IPCSubscriber.Path_GetAlignCamera())
             _settingsActive |= SettingsActive.Vnav_Align_Camera_Off;
         */
-        if (YesAlready_IPCSubscriber.IsEnabled is true and true) this.settingsActive |= SettingsActive.YesAlready;
+        if (YesAlready_IPCSubscriber.IsEnabled && YesAlready_IPCSubscriber.IsPluginEnabled) 
+            this.settingsActive |= SettingsActive.YesAlready;
 
         if (PandorasBox_IPCSubscriber.IsEnabled && (PandorasBox_IPCSubscriber.GetFeatureEnabled("Auto-interact with Objects in Instances") ?? false))
             this.settingsActive |= SettingsActive.Pandora_Interact_Objects;
@@ -1827,7 +1896,7 @@ public sealed class AutoDuty : IDalamudPlugin
             {
                 bool wrathRotationReady = true;
                 if (active)
-                    wrathRotationReady = Wrath_IPCSubscriber.IsCurrentJobAutoRotationReady() ||
+                    wrathRotationReady = Wrath_IPCSubscriber.IsCurrentJobAutoRotationReady ||
                                          ConfigurationMain.Instance.GetCurrentConfig.Wrath_AutoSetupJobs && Wrath_IPCSubscriber.SetJobAutoReady();
 
                 if (!active || wrathRotationReady)

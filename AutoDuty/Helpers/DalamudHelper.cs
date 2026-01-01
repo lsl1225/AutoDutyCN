@@ -33,7 +33,7 @@ namespace AutoDuty.Helpers
                     return true;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 stagingChecked = true;
                 isStaging      = false;

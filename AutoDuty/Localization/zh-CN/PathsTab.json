@@ -1,0 +1,15 @@
+{
+  "PathsTab": {
+    "Title": "脚本文件列表",
+    "OpenFolder": "打开文件夹",
+    "OpenFile": "打开文件",
+    "DoNotOverwrite": "更新时不覆盖",
+    "ClearCachedJobs": "清除职业缓存",
+    "CollapseAll": "折叠所有",
+    "RevealAll": "展开所有",
+    "DownloadPaths": "下载官方脚本库",
+    "BrokenStatus": "已损坏",
+    "Separator": " => ",
+    "ClearJobSelection": "清除此副本的职业选择"
+  }
+}

@@ -301,6 +301,72 @@
         "Pictomancer": "Pictomancer",
         "Blue_Mage": "Blue Mage"
       }
+    },
+    "Dev": {
+      "Header": "Dev Settings",
+      "UpdatePathsOnStartup": "Update Paths on startup",
+      "PrintModList": "Print mod list",
+      "InvitedBy": "Invited by: ",
+      "DutySupport": {
+        "Header": "Available Duty Support",
+        "Selected": "Selected: ",
+        "Cnt": "Cnt: "
+      },
+      "Squadron": {
+        "Header": "Available Squadron stuff",
+        "Duties": "Duties",
+        "AvailableMembers": "Available Members",
+        "Columns": {
+          "Enabled": "Enabled?",
+          "Completed": "Completed",
+          "Name": "Name",
+          "Level": "Level",
+          "Synced": "Synced",
+          "Selected": "Selected",
+          "Class": "Class",
+          "ClassId": "Class Id",
+          "Physical": "Physical",
+          "Mental": "Mental",
+          "Tactical": "Tactical",
+          "Chemistry": "Chemistry",
+          "Tactics": "Tactics"
+        }
+      },
+      "TTCards": {
+        "Header": "Available TT cards",
+        "Cnt": "Cnt: "
+      },
+      "Partycheck": {
+        "Header": "Partycheck",
+        "PartySize": "Party Size: ",
+        "Valid": "valid: "
+      },
+      "BLU": {
+        "Header": "BLU loadout",
+        "NothingLoaded": "Nothing loaded",
+        "Unload": "Unload",
+        "Load": "Load"
+      },
+      "RetainerPrices": {
+        "Header": "RetainerInventoryPrices"
+      },
+      "Buddy": {
+        "Header": "BuddyChecks"
+      },
+      "Actions": {
+        "CheckAction": "CheckAction",
+        "CheckAction2": "CheckAction2",
+        "Return": "Return?",
+        "RotationOn": "Turn on rotation",
+        "RotationOff": "Turn off rotation",
+        "BetweenLoopActions": "BetweenLoopActions",
+        "BossLootTest": "BossLootTest"
+      },
+      "Teleport": {
+        "Header": "teleport playthings",
+        "Warps": "Warps",
+        "LevelTest": "LevelTest"
+      }
     }
   }
 }

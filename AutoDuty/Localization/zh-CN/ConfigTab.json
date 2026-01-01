@@ -301,6 +301,72 @@
         "Pictomancer": "绘灵法师",
         "Blue_Mage": "青魔法师"
       }
+    },
+    "Dev": {
+      "Header": "开发者设置",
+      "UpdatePathsOnStartup": "启动时更新路径",
+      "PrintModList": "打印 Mod 列表",
+      "InvitedBy": "邀请者 ID：",
+      "DutySupport": {
+        "Header": "可用亲信战友/剧情辅助",
+        "Selected": "已选择：",
+        "Cnt": "数量："
+      },
+      "Squadron": {
+        "Header": "可用冒险者分队",
+        "Duties": "副本任务",
+        "AvailableMembers": "可用成员",
+        "Columns": {
+          "Enabled": "已启用？",
+          "Completed": "已完成",
+          "Name": "名称",
+          "Level": "等级",
+          "Synced": "同步",
+          "Selected": "已选择",
+          "Class": "职业",
+          "ClassId": "职业 ID",
+          "Physical": "物理",
+          "Mental": "精神",
+          "Tactical": "战术",
+          "Chemistry": "化学",
+          "Tactics": "策略"
+        }
+      },
+      "TTCards": {
+        "Header": "可用九宫幻卡",
+        "Cnt": "数量："
+      },
+      "Partycheck": {
+        "Header": "队伍检查",
+        "PartySize": "队伍人数：",
+        "Valid": "有效："
+      },
+      "BLU": {
+        "Header": "青魔预设",
+        "NothingLoaded": "未加载任何技能",
+        "Unload": "卸载",
+        "Load": "加载"
+      },
+      "RetainerPrices": {
+        "Header": "雇员背包价格检查"
+      },
+      "Buddy": {
+        "Header": "搭档/陆行鸟检查"
+      },
+      "Actions": {
+        "CheckAction": "检查动作",
+        "CheckAction2": "检查动作2",
+        "Return": "执行返回？",
+        "RotationOn": "开启循环插件",
+        "RotationOff": "关闭循环插件",
+        "BetweenLoopActions": "循环间动作测试",
+        "BossLootTest": "Boss 宝箱测试"
+      },
+      "Teleport": {
+        "Header": "传送功能测试",
+        "Warps": "传送点",
+        "LevelTest": "等级测试"
+      }
     }
   }
 }

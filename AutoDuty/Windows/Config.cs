@@ -1096,7 +1096,7 @@ public static class ConfigTab
             ImGui.Separator();
             ImGui.Spacing();
             ImGui.PushStyleVar(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f));
-            bool devHeader = ImGui.Selectable("Dev Settings", devHeaderSelected, ImGuiSelectableFlags.DontClosePopups);
+            bool devHeader = ImGui.Selectable(Loc.Get("ConfigTab.Dev.Header"), devHeaderSelected, ImGuiSelectableFlags.DontClosePopups);
             ImGui.PopStyleVar();
             if (ImGui.IsItemHovered())
                 ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
@@ -1105,23 +1105,23 @@ public static class ConfigTab
 
             if (devHeaderSelected)
             {
-                if (ImGui.Checkbox("Update Paths on startup##DevUpdatePathsOnStartup", ref ConfigurationMain.Instance.updatePathsOnStartup))
+                if (ImGui.Checkbox(Loc.Get("ConfigTab.Dev.UpdatePathsOnStartup") + "##DevUpdatePathsOnStartup", ref ConfigurationMain.Instance.updatePathsOnStartup))
                     Configuration.Save();
 
-                if (ImGui.Button("Print mod list##DevPrintModList")) 
+                if (ImGui.Button(Loc.Get("ConfigTab.Dev.PrintModList") + "##DevPrintModList")) 
                     Svc.Log.Info(string.Join("\n", PluginInterface.InstalledPlugins.Where(pl => pl.IsLoaded).GroupBy(pl => pl.Manifest.InstalledFromUrl).OrderByDescending(g => g.Count()).Select(g => g.Key+"\n\t"+string.Join("\n\t", g.Select(pl => pl.Name)))));
                 unsafe
                 {
-                    ImGuiEx.Text("Invited by: " + InfoProxyPartyInvite.Instance()->InviterName + " | " + InfoProxyPartyInvite.Instance()->InviterWorldId);
+                    ImGuiEx.Text(Loc.Get("ConfigTab.Dev.InvitedBy") + InfoProxyPartyInvite.Instance()->InviterName + " | " + InfoProxyPartyInvite.Instance()->InviterWorldId);
                 }
 
-                if (ImGui.CollapsingHeader("Available Duty Support##DevDutySupport")) //ImGui.Button("check duty support?"))
+                if (ImGui.CollapsingHeader(Loc.Get("ConfigTab.Dev.DutySupport.Header") + "##DevDutySupport")) //ImGui.Button("check duty support?"))
                     if(GenericHelpers.TryGetAddonMaster<AddonMaster.DawnStory>(out AddonMaster.DawnStory? m))
                         if (m.IsAddonReady)
                         {
-                            ImGuiEx.Text("Selected: " + m.Reader.CurrentSelection);
+                            ImGuiEx.Text(Loc.Get("ConfigTab.Dev.DutySupport.Selected") + m.Reader.CurrentSelection);
 
-                            ImGuiEx.Text($"Cnt: {m.Reader.EntryCount}");
+                            ImGuiEx.Text(Loc.Get("ConfigTab.Dev.DutySupport.Cnt") + m.Reader.EntryCount);
                             foreach (AddonMaster.DawnStory.Entry? x in m.Entries)
                             {
                                 ImGuiEx.Text($"{x.Name} / {x.ReaderEntry.Callback} / {x.Index}");
@@ -1130,29 +1130,29 @@ public static class ConfigTab
                             }
                         }
 
-                if (ImGui.CollapsingHeader("Available Squadron stuff##DevSquadron"))
+                if (ImGui.CollapsingHeader(Loc.Get("ConfigTab.Dev.Squadron.Header") + "##DevSquadron"))
                     unsafe
                     {
                         if (GenericHelpers.TryGetAddonByName("GcArmyCapture", out AtkUnitBase* armyCaptureAtk) && GenericHelpers.IsAddonReady(armyCaptureAtk))
                         {
                             ImGui.Indent();
-                            if (ImGui.CollapsingHeader("Duties##DevSquadronDuties"))
+                            if (ImGui.CollapsingHeader(Loc.Get("ConfigTab.Dev.Squadron.Duties") + "##DevSquadronDuties"))
                             {
                                 ReaderGCArmyCapture armyCapture = new(armyCaptureAtk);
                                 ImGui.Text($"{armyCapture.PlayerCharLvl} ({armyCapture.PlayerCharIlvl}) {armyCapture.PlayerCharName}");
                                 ImGui.Columns(6);
 
-                                ImGui.Text("Enabled?");
+                                ImGui.Text(Loc.Get("ConfigTab.Dev.Squadron.Columns.Enabled"));
                                 ImGui.NextColumn();
-                                ImGui.Text("Completed");
+                                ImGui.Text(Loc.Get("ConfigTab.Dev.Squadron.Columns.Completed"));
                                 ImGui.NextColumn();
-                                
+
                                 ImGui.NextColumn();
-                                ImGui.Text("Name");
+                                ImGui.Text(Loc.Get("ConfigTab.Dev.Squadron.Columns.Name"));
                                 ImGui.NextColumn();
-                                ImGui.Text("Level");
+                                ImGui.Text(Loc.Get("ConfigTab.Dev.Squadron.Columns.Level"));
                                 ImGui.NextColumn();
-                                ImGui.Text("Synced");
+                                ImGui.Text(Loc.Get("ConfigTab.Dev.Squadron.Columns.Synced"));
                                 ImGui.NextColumn();
 
 
@@ -1176,7 +1176,7 @@ public static class ConfigTab
                                 }
                                 ImGui.Columns(1);
                             }
-                            if (ImGui.CollapsingHeader("Available Members##DevGCArmyMembers"))
+                            if (ImGui.CollapsingHeader(Loc.Get("ConfigTab.Dev.Squadron.AvailableMembers") + "##DevGCArmyMembers"))
                                 if (GenericHelpers.TryGetAddonByName("GcArmyMemberList", out AtkUnitBase* armyMemberListAtk) && GenericHelpers.IsAddonReady(armyMemberListAtk))
                                 {
                                     ReaderGCArmyMemberList armyMemberList = new(armyMemberListAtk);
@@ -1185,27 +1185,27 @@ public static class ConfigTab
 
 
                                     ImGui.NextColumn();
-                                    ImGui.Text("Selected");
+                                    ImGui.Text(Loc.Get("ConfigTab.Dev.Squadron.Columns.Selected"));
                                     ImGui.NextColumn();
-                                    ImGui.Text("Name");
+                                    ImGui.Text(Loc.Get("ConfigTab.Dev.Squadron.Columns.Name"));
                                     ImGui.NextColumn();
-                                    ImGui.Text("Class");
+                                    ImGui.Text(Loc.Get("ConfigTab.Dev.Squadron.Columns.Class"));
                                     ImGui.NextColumn();
-                                    ImGui.Text("Class Id");
+                                    ImGui.Text(Loc.Get("ConfigTab.Dev.Squadron.Columns.ClassId"));
                                     ImGui.NextColumn();
-                                    ImGui.Text("Level");
+                                    ImGui.Text(Loc.Get("ConfigTab.Dev.Squadron.Columns.Level"));
                                     ImGui.NextColumn();
                                     ImGui.NextColumn();
                                     ImGui.NextColumn();
-                                    ImGui.Text("Physical");
+                                    ImGui.Text(Loc.Get("ConfigTab.Dev.Squadron.Columns.Physical"));
                                     ImGui.NextColumn();
-                                    ImGui.Text("Mental");
+                                    ImGui.Text(Loc.Get("ConfigTab.Dev.Squadron.Columns.Mental"));
                                     ImGui.NextColumn();
-                                    ImGui.Text("Tactical");
+                                    ImGui.Text(Loc.Get("ConfigTab.Dev.Squadron.Columns.Tactical"));
                                     ImGui.NextColumn();
-                                    ImGui.Text("Chemistry");
+                                    ImGui.Text(Loc.Get("ConfigTab.Dev.Squadron.Columns.Chemistry"));
                                     ImGui.NextColumn();
-                                    ImGui.Text("Tactics");
+                                    ImGui.Text(Loc.Get("ConfigTab.Dev.Squadron.Columns.Tactics"));
                                     ImGui.NextColumn();
 
 
@@ -1246,7 +1246,7 @@ public static class ConfigTab
                         }
                     }
 
-                if (ImGui.CollapsingHeader("Available TT cards##DevAvailableTTShop"))
+                if (ImGui.CollapsingHeader(Loc.Get("ConfigTab.Dev.TTCards.Header") + "##DevAvailableTTShop"))
                     unsafe
                     {
                         if (GenericHelpers.TryGetAddonByName("TripleTriadCoinExchange", out AtkUnitBase* exchangeAddon))
@@ -1254,7 +1254,7 @@ public static class ConfigTab
                             {
                                 ReaderTripleTriadCoinExchange exchange = new(exchangeAddon);
 
-                                ImGuiEx.Text($"Cnt: {exchange.EntryCount}");
+                                ImGuiEx.Text(Loc.Get("ConfigTab.Dev.TTCards.Cnt") + exchange.EntryCount);
                                 foreach (ReaderTripleTriadCoinExchange.CardEntry? x in exchange.Entries)
                                 {
                                     ImGuiEx.Text($"({x.Id}) {x.Name} | {x.Count} | {x.Value} | {x.InDeck}");
@@ -1266,12 +1266,12 @@ public static class ConfigTab
                             }
                     }
 
-                if (ImGui.CollapsingHeader("Partycheck##DevPartyInfo"))
+                if (ImGui.CollapsingHeader(Loc.Get("ConfigTab.Dev.Partycheck.Header") + "##DevPartyInfo"))
                 {
                     ImGui.Indent();
                     unsafe
                     {
-                        ImGui.Text("Party Size: " + Svc.Party.Count);
+                        ImGui.Text(Loc.Get("ConfigTab.Dev.Partycheck.PartySize") + Svc.Party.Count);
                     
                         bool healer   = false;
                         bool tank     = false;
@@ -1297,7 +1297,7 @@ public static class ConfigTab
                             }
                         }
                         ImGui.NewLine();
-                        ImGui.Text($"valid: {tank && healer && dpsCount > 1}");
+                        ImGui.Text(Loc.Get("ConfigTab.Dev.Partycheck.Valid") + (tank && healer && dpsCount > 1));
                         ImGui.NewLine();
                         foreach (UniversalPartyMember member in UniversalParty.Members)
                         {
@@ -1330,7 +1330,7 @@ public static class ConfigTab
                     ImGui.Unindent();
                 }
 
-                if (ImGui.CollapsingHeader("BLU loadout##DevBlueLoadout"))
+                if (ImGui.CollapsingHeader(Loc.Get("ConfigTab.Dev.BLU.Header") + "##DevBlueLoadout"))
                 {
                     unsafe
                     {
@@ -1344,15 +1344,15 @@ public static class ConfigTab
                                     ImGui.AlignTextToFramePadding();
                                     ImGui.Text($"{u}: {BLUHelper.NormalToAoz(u)} {spell.Entry} {spell.Name}");
                                     ImGui.SameLine();
-                                    if (ImGui.Button($"Unload##DevBlueLoadoutUnload_{u}"))
+                                    if (ImGui.Button(Loc.Get("ConfigTab.Dev.BLU.Unload") + $"##DevBlueLoadoutUnload_{u}"))
                                         BLUHelper.SpellLoadoutOut(spell.Entry);
                                 }
 
                             } else
                             {
-                                ImGui.Text("Nothing loaded");
+                                ImGui.Text(Loc.Get("ConfigTab.Dev.BLU.NothingLoaded"));
                                 ImGui.SameLine();
-                                if (ImGui.Button($"Load##DevBlueLoadoutLoad"))
+                                if (ImGui.Button(Loc.Get("ConfigTab.Dev.BLU.Load") + "##DevBlueLoadoutLoad"))
                                 {
                                     BLUHelper.SpellLoadoutIn((byte)Random.Shared.Next(1, 124));
                                     return;
@@ -1362,7 +1362,7 @@ public static class ConfigTab
                     }
                 }
 
-                if (ImGui.CollapsingHeader("RetainerInventoryPrices##DevRetainerPricesCheck"))
+                if (ImGui.CollapsingHeader(Loc.Get("ConfigTab.Dev.RetainerPrices.Header") + "##DevRetainerPricesCheck"))
                 {
                     unsafe
                     {
@@ -1388,7 +1388,7 @@ public static class ConfigTab
                     }
                 }
 
-                if (ImGui.CollapsingHeader("BuddyChecks##DevBuddyChecks"))
+                if (ImGui.CollapsingHeader(Loc.Get("ConfigTab.Dev.Buddy.Header") + "##DevBuddyChecks"))
                 {
                     unsafe
                     {
@@ -1419,54 +1419,54 @@ public static class ConfigTab
                 }
 
 
-                if(ImGui.Button("CheckAction##DevCheckActionStatus"))
+                if(ImGui.Button(Loc.Get("ConfigTab.Dev.Actions.CheckAction") + "##DevCheckActionStatus"))
                     unsafe
                     {
                         Svc.Log.Warning(ActionManager.Instance()->GetActionStatus(ActionType.Action, 23282).ToString());
                     }
                 ImGui.SameLine();
-                if (ImGui.Button("CheckAction2##DevCheckActionStatus2"))
+                if (ImGui.Button(Loc.Get("ConfigTab.Dev.Actions.CheckAction2") + "##DevCheckActionStatus2"))
                     unsafe
                     {
                         Svc.Log.Warning(ActionManager.Instance()->GetActionStatus(ActionType.Action, 23277).ToString());
                     }
 
-                if (ImGui.Button("Return?##DevReturnButton"))
+                if (ImGui.Button(Loc.Get("ConfigTab.Dev.Actions.Return") + "##DevReturnButton"))
                     unsafe
                     {
                         VNavmesh_IPCSubscriber.Path_Stop();
                         ActionManager.Instance()->UseAction(ActionType.Action, 6);
                     }
 
-                if (ImGui.Button("Turn on rotation##DevRotationOn")) 
+                if (ImGui.Button(Loc.Get("ConfigTab.Dev.Actions.RotationOn") + "##DevRotationOn")) 
                     Plugin.SetRotationPluginSettings(true, ignoreConfig: true, ignoreTimer: true);
 
                 ImGui.SameLine();
-                if (ImGui.Button("Turn off rotation##DevRotationoff"))
+                if (ImGui.Button(Loc.Get("ConfigTab.Dev.Actions.RotationOff") + "##DevRotationoff"))
                 {
                     Plugin.SetRotationPluginSettings(false, ignoreConfig: true, ignoreTimer: true);
                     if(Wrath_IPCSubscriber.IsEnabled)
                         Wrath_IPCSubscriber.Release();
                 }
 
-                if (ImGui.Button("BetweenLoopActions##DevBetweenLoops"))
+                if (ImGui.Button(Loc.Get("ConfigTab.Dev.Actions.BetweenLoopActions") + "##DevBetweenLoops"))
                 {
                     Plugin.CurrentTerritoryContent =  ContentHelper.DictionaryContent.Values.First();
                     Plugin.states                  |= PluginState.Other;
                     Plugin.LoopTasks(false);
                 }
 
-                if (ImGui.Button("BossLootTest##DevBossLootTest"))
+                if (ImGui.Button(Loc.Get("ConfigTab.Dev.Actions.BossLootTest") + "##DevBossLootTest"))
                 {
                     IEnumerable<IGameObject> treasures = ObjectHelper.GetObjectsByObjectKind(Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure)?.
                                                                       Where(x => ObjectHelper.BelowDistanceToPoint(x.Position, Player.Position, 50, 10)) ?? [];
                     Svc.Log.Debug(treasures.Count() + "\n" + string.Join("\n", treasures.Select(igo => igo.Position.ToString())));
                 }
 
-                if (ImGui.CollapsingHeader("teleport playthings##DevTPPlay"))
+                if (ImGui.CollapsingHeader(Loc.Get("ConfigTab.Dev.Teleport.Header") + "##DevTPPlay"))
                 {
                     ImGui.Indent();
-                    if (ImGui.CollapsingHeader("Warps##DevWarps"))
+                    if (ImGui.CollapsingHeader(Loc.Get("ConfigTab.Dev.Teleport.Warps") + "##DevWarps"))
                     {
                         ImGui.Indent();
                         foreach (Warp warp in Svc.Data.GameData.GetExcelSheet<Warp>()!)
@@ -1485,7 +1485,7 @@ public static class ConfigTab
                         ImGui.Unindent();
                     }
 
-                    if (ImGui.CollapsingHeader("LevelTest"))
+                    if (ImGui.CollapsingHeader(Loc.Get("ConfigTab.Dev.Teleport.LevelTest")))
                         foreach ((Level lvl, Vector3, Vector3) level in Svc.Data.GameData.GetExcelSheet<Level>()!.Where(lvl => lvl.Territory.RowId == 152)
                                                                            .Select(lvl => (lvl, (new Vector3(lvl.X, lvl.Y, lvl.Z))))
                                                                            .Select(tuple => (tuple.lvl, tuple.Item2, (tuple.Item2 - Player.Position))).OrderBy(lvl => lvl.Item3.LengthSquared()))

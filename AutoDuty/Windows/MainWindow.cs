@@ -392,15 +392,15 @@ public sealed class MainWindow : Window, IDisposable
         ImGui.EndTabBar();
     }
 
-    private static readonly (string, Action, Vector4?, bool)[] tabList =
+    private static (string, Action, Vector4?, bool)[] tabList =>
     [
-        ("Main", MainTab.Draw, null, false), 
-        ("Build", BuildTab.Draw, null, false), 
-        ("Paths", PathsTab.Draw, null, false), 
-        ("Config", ConfigTab.Draw, null, false), 
-        ("Info", InfoTab.Draw, null, false), 
+        ("Main", MainTab.Draw, null, false),
+        ("Build", BuildTab.Draw, null, false),
+        ("Paths", PathsTab.Draw, null, false),
+        ("Config", ConfigTab.Draw, null, false),
+        ("Info", InfoTab.Draw, null, false),
         ("Logs", LogTab.Draw, null, false),
-        ("Stats", StatsTab.Draw, null, false),
+        (Loc.Get("StatsTab.TabName"), StatsTab.Draw, null, false),
         ("Support AutoDuty", KofiLink, ImGui.ColorConvertU32ToFloat4(ColorNormal), false)
     ];
 

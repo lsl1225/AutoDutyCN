@@ -138,16 +138,16 @@ public sealed class MainWindow : Window, IDisposable
 
             if (ImGui.BeginPopup("GotoPopup"))
             {
-                if (ImGui.Selectable("Barracks")) GotoBarracksHelper.Invoke();
-                if (ImGui.Selectable("Inn")) GotoInnHelper.Invoke();
-                if (ImGui.Selectable("GCSupply")) GotoHelper.Invoke(PlayerHelper.GetGrandCompanyTerritoryType(PlayerHelper.GetGrandCompany()), [GCTurninHelper.GCSupplyLocation], 0.25f, 3f);
-                if (ImGui.Selectable("Flag Marker")) MapHelper.MoveToMapMarker();
-                if (ImGui.Selectable("Summoning Bell")) SummoningBellHelper.Invoke(AutoDuty.Configuration.PreferredSummoningBellEnum);
-                if (ImGui.Selectable("Apartment")) GotoHousingHelper.Invoke(Housing.Apartment);
-                if (ImGui.Selectable("Personal Home")) GotoHousingHelper.Invoke(Housing.Personal_Home);
-                if (ImGui.Selectable("FC Estate")) GotoHousingHelper.Invoke(Housing.FC_Estate);
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.Barracks"))) GotoBarracksHelper.Invoke();
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.Inn"))) GotoInnHelper.Invoke();
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.GCSupply"))) GotoHelper.Invoke(PlayerHelper.GetGrandCompanyTerritoryType(PlayerHelper.GetGrandCompany()), [GCTurninHelper.GCSupplyLocation], 0.25f, 3f);
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.FlagMarker"))) MapHelper.MoveToMapMarker();
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.SummoningBell"))) SummoningBellHelper.Invoke(AutoDuty.Configuration.PreferredSummoningBellEnum);
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.Apartment"))) GotoHousingHelper.Invoke(Housing.Apartment);
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.PersonalHome"))) GotoHousingHelper.Invoke(Housing.Personal_Home);
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.FCEstate"))) GotoHousingHelper.Invoke(Housing.FC_Estate);
 
-                if (ImGui.Selectable("Triple Triad Trader")) GotoHelper.Invoke(TripleTriadCardSellHelper.GoldSaucerTerritoryType, TripleTriadCardSellHelper.TripleTriadCardVendorLocation);
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.TripleTriadTrader"))) GotoHelper.Invoke(TripleTriadCardSellHelper.GoldSaucerTerritoryType, TripleTriadCardSellHelper.TripleTriadCardVendorLocation);
                 ImGui.EndPopup();
             }
 
@@ -263,9 +263,9 @@ public sealed class MainWindow : Window, IDisposable
 
             if (ImGui.BeginPopup("TTPopup"))
             {
-                if (ImGui.Selectable("Register TT Cards"))
+                if (ImGui.Selectable(Loc.Get("MainWindow.TT.RegisterCards")))
                     TripleTriadCardUseHelper.Invoke();
-                if (ImGui.Selectable("Sell TT Cards")) 
+                if (ImGui.Selectable(Loc.Get("MainWindow.TT.SellCards")))
                     TripleTriadCardSellHelper.Invoke();
                 ImGui.EndPopup();
             }

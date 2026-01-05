@@ -281,13 +281,15 @@ namespace AutoDuty.IPC
                     WrathIPCWrapper.SetAutoRotationConfigState(_curLease.Value, AutoRotationConfigOption.AutoRezDPSJobs,     true);
                     WrathIPCWrapper.SetAutoRotationConfigState(_curLease.Value, AutoRotationConfigOption.IncludeNPCs,        true);
                     WrathIPCWrapper.SetAutoRotationConfigState(_curLease.Value, AutoRotationConfigOption.OnlyAttackInCombat, false);
+                    WrathIPCWrapper.SetAutoRotationConfigState(_curLease.Value, AutoRotationConfigOption.AutoCleanse,        true);
 
                     DPSRotationMode dpsConfig = Plugin.currentPlayerItemLevelAndClassJob.Value.GetCombatRole() == CombatRole.Tank ?
                                                     Configuration.Wrath_TargetingTank :
                                                     Configuration.Wrath_TargetingNonTank;
-                    WrathIPCWrapper.SetAutoRotationConfigState(_curLease.Value, AutoRotationConfigOption.DPSRotationMode, dpsConfig);
+                    WrathIPCWrapper.SetAutoRotationConfigState(_curLease.Value, AutoRotationConfigOption.DPSRotationMode,    dpsConfig);
                     WrathIPCWrapper.SetAutoRotationConfigState(_curLease.Value, AutoRotationConfigOption.HealerRotationMode, HealerRotationMode.Lowest_Current);
-
+                    WrathIPCWrapper.SetAutoRotationConfigState(_curLease.Value, AutoRotationConfigOption.DPSAlwaysHardTarget, true);
+                    WrathIPCWrapper.SetAutoRotationConfigState(_curLease.Value, AutoRotationConfigOption.HealerAlwaysHardTarget, true);
                 }
             }
         }

@@ -1,9 +1,8 @@
 {
-  "Author": "Herculezz, erdelf (CN: hatoya-china)",
-  "Version": "0.0.0.284",
+  "Author": "Herculezz, erdelf",
   "Name": "AutoDuty",
   "Punchline": "AutoDuty",
-  "Description": "【警告：请不要在咸鱼/淘宝购买本插件，所有 Dalamud 插件都是免费的！】\n\nAutoDuty 是一个自动运行副本的插件，支持信任、任务支持、冒险者分队、幻巧战、普通副本等模式。需要配合 BossMod、vnavmesh 和战斗插件（Wrath Combo、BossMod AutoRotation 或 RotationSolverReborn、AEAssist v3.0）使用。\n\n指令说明：\n/ad config - 打开设置窗口\n/ad start - 在副本中启动 AutoDuty\n/ad stop - 停止一切\n/ad pause - 暂停路径\n/ad resume - 恢复路径\n/ad queue - 自动排本\n/ad overlay - 打开悬浮窗\n/ad skipstep - 跳过当前步骤\n/ad movetoflag - 移动到地图旗帜标记处\n/ad ttfull - 打开卡包，自动收录九宫幻卡并出售多余卡片\n/ad run - 在指定区域启动 AutoDuty\n/ad dataid - 记录并复制当前目标的 DataId 到剪贴板\n/ad autoequip - 穿上推荐装备（一键最强装备）\n/ad ar - 使用 AutoRetainer 插件自动管理雇员\n/ad coffer - 打开背包中的宝箱\n/ad desynth - 分解背包中的物品\n/ad exitduty - 离开当前副本（非战斗状态）\n/ad extract - 精制装备魔晶石\n/ad turnin - 自动上交军票筹备\n/ad goto - 前往特定地点（inn-旅馆 / barracks-冒险者分队兵营 / gc-大国防联军 / bell-传唤铃 / apartment-公寓 / home-个人房屋 / fc-部队房屋）\n/ad repair - 修理装备\n/ad ttsell - 在金碟游乐场出售九宫幻卡\n/ad ttreg - 自动收录背包中的九宫幻卡",
+  "Description": "A plugin to run dungeons for you with Trust, Duty Support, Squadrons, Variants, and Regular, Requires BossMod, vnavmesh and a Rotation Plugin (Wrath Combo, BossMod AutoRotation, or RotationSolverReborn)",
   "InternalName": "AutoDuty",
   "DalamudApiLevel": "14",
   "MinimumDalamudVersion": "14.0.0.0",

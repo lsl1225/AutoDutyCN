@@ -385,6 +385,18 @@ namespace AutoDuty.Windows
                                     if (ImGui.Checkbox("Prefer Trust over Support Leveling", ref AutoDuty.Configuration.PreferTrustOverSupportLeveling))
                                             Configuration.Save();
 
+                                if (Plugin.LevelingEnabled)
+                                {
+                                    bool experimentalEntries = AutoDuty.Configuration.LevelingListExperimentalEntries;
+                                    if (ImGui.Checkbox("Include Testing/Unstable Dungeons", ref experimentalEntries))
+                                    {
+                                        AutoDuty.Configuration.LevelingListExperimentalEntries = experimentalEntries;
+                                        Configuration.Save();
+                                    }
+
+                                    ImGuiEx.HelpMarker($"Adds more dungeons into the leveling list\nThese dungeons are currently in testing for reliability\nPlease report if you have issues with them");
+                                }
+
                                 if (AutoDuty.Configuration.DutyModeEnum == DutyMode.Squadron)
                                     if (ImGui.Checkbox("Use lowest members", ref AutoDuty.Configuration.SquadronAssignLowestMembers))
                                             Configuration.Save();
@@ -514,6 +526,8 @@ namespace AutoDuty.Windows
                                                     {
                                                         ImGuiEx.TextWrapped(item.Value == Plugin.CurrentTerritoryContent ? new Vector4(0, 1, 1, 1) : new Vector4(1, 1, 1, 1),
                                                                             $"L{item.Value.ClassJobLevelRequired} (i{item.Value.ItemLevelRequired}): {item.Value.EnglishName}");
+                                                        if(LevelingHelper.levelingListExperimental.Contains(item.Value.TerritoryType))
+                                                            ImGuiEx.HelpMarker("This dungeon is currently in testing for reliability.\nDo report any issues with it", symbolOverride: FontAwesomeIcon.ExclamationTriangle.ToIconString());
                                                     }
                                             }
                                         }

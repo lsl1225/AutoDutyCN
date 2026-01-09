@@ -322,8 +322,9 @@ public class ConfigurationMain
                                                               Name  = Player.Name,
                                                               World = Player.CurrentWorldName
                                                           };
-
                                     EzConfig.Save();
+
+                                    LevelingHelper.ResetLevelingDuties();
                                 });
 
     public void RemoveCharacterDefault() =>
@@ -637,7 +638,19 @@ public class Configuration
 
         return ConfigurationMain.Instance.MultiBox || unsync.Value && this.TreatUnsyncAsW2W;
     }
-    #endregion
+
+    public bool LevelingListExperimentalEntries
+    {
+        get;
+        set
+        {
+            if(field != value)
+                LevelingHelper.ResetLevelingDuties();
+            field = value;
+        }
+    } = false;
+
+#endregion
 
     #region PreLoop
     public bool                                       EnablePreLoopActions     = true;

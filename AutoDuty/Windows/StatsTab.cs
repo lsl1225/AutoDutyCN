@@ -10,6 +10,7 @@ using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.ExcelServices;
 using Helpers;
+using Managers;
 using NightmareUI.Censoring;
 
 internal static class StatsTab
@@ -28,28 +29,28 @@ internal static class StatsTab
             }
         }
         ImGui.SameLine();
-        ImGui.Text("Clear Statistics");
-        ImGuiComponents.HelpMarker("Hold ctrl to delete statistics permanently");
+        ImGui.Text(Loc.Get("StatsTab.ClearStatistics"));
+        ImGuiComponents.HelpMarker(Loc.Get("StatsTab.ClearStatisticsHelp"));
 
 
-        ImGui.Text($"Duties run: {stats.dungeonsRun}");
-        ImGui.Text($"Time spent: {stats.timeSpent + (Plugin.runStartTime.Equals(DateTime.UnixEpoch) ? TimeSpan.Zero : DateTime.UtcNow - Plugin.runStartTime)}");
+        ImGui.Text(Loc.Get("StatsTab.DutiesRun", stats.dungeonsRun));
+        ImGui.Text(Loc.Get("StatsTab.TimeSpent", stats.timeSpent + (Plugin.runStartTime.Equals(DateTime.UnixEpoch) ? TimeSpan.Zero : DateTime.UtcNow - Plugin.runStartTime)));
 
         ImGui.Separator();
-        ImGui.Text("Duties run");
+        ImGui.Text(Loc.Get("StatsTab.DutiesRunHeader"));
 
-        ImGui.Checkbox("Scramble names", ref Censor.Config.Enabled);
+        ImGui.Checkbox(Loc.Get("StatsTab.ScrambleNames"), ref Censor.Config.Enabled);
 
             
         if (!ImGui.BeginTable("##ADDutiesStats", 6, ImGuiTableFlags.Borders | ImGuiTableFlags.Sortable | ImGuiTableFlags.SortMulti, new Vector2(ImGui.GetContentRegionAvail().X, 500f)))
             return;
 
-        ImGui.TableSetupColumn("Completed At", ImGuiTableColumnFlags.WidthFixed);
-        ImGui.TableSetupColumn("Duration", ImGuiTableColumnFlags.WidthFixed);
-        ImGui.TableSetupColumn("Duty");
-        ImGui.TableSetupColumn("Char");
-        ImGui.TableSetupColumn("ilvl", ImGuiTableColumnFlags.WidthFixed);
-        ImGui.TableSetupColumn("Job", ImGuiTableColumnFlags.WidthFixed);
+        ImGui.TableSetupColumn(Loc.Get("StatsTab.Columns.CompletedAt"), ImGuiTableColumnFlags.WidthFixed);
+        ImGui.TableSetupColumn(Loc.Get("StatsTab.Columns.Duration"), ImGuiTableColumnFlags.WidthFixed);
+        ImGui.TableSetupColumn(Loc.Get("StatsTab.Columns.Duty"));
+        ImGui.TableSetupColumn(Loc.Get("StatsTab.Columns.Char"));
+        ImGui.TableSetupColumn(Loc.Get("StatsTab.Columns.ilvl"), ImGuiTableColumnFlags.WidthFixed);
+        ImGui.TableSetupColumn(Loc.Get("StatsTab.Columns.Job"), ImGuiTableColumnFlags.WidthFixed);
 
         IEnumerable<DutyDataRecord>         records        = stats.dutyRecords;
         IOrderedEnumerable<DutyDataRecord>? recordsOrdered = null;
@@ -105,7 +106,7 @@ internal static class StatsTab
             ImGui.TableNextColumn();
             ImGui.Text(duration.ToString(@"mm\:ss\.FFFF"));
             ImGui.TableNextColumn();
-            ImGui.Text(ContentHelper.DictionaryContent[territoryId].Name ?? $"Unknown ({territoryId})");
+            ImGui.Text(ContentHelper.DictionaryContent[territoryId].Name ?? Loc.Get("StatsTab.Unknown", territoryId));
             ImGui.TableNextColumn();
             ImGui.Text(ConfigurationMain.Instance.charByCID.TryGetValue(cid, out ConfigurationMain.CharData cd) ?
                            Censor.Character(cd.Name, cd.World) :

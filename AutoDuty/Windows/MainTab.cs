@@ -526,8 +526,13 @@ namespace AutoDuty.Windows
                                                     {
                                                         ImGuiEx.TextWrapped(item.Value == Plugin.CurrentTerritoryContent ? new Vector4(0, 1, 1, 1) : new Vector4(1, 1, 1, 1),
                                                                             $"L{item.Value.ClassJobLevelRequired} (i{item.Value.ItemLevelRequired}): {item.Value.EnglishName}");
-                                                        if(LevelingHelper.levelingListExperimental.Contains(item.Value.TerritoryType))
-                                                            ImGuiEx.HelpMarker("This dungeon is currently in testing for reliability.\nDo report any issues with it", symbolOverride: FontAwesomeIcon.ExclamationTriangle.ToIconString());
+                                                        using (ImRaii.Enabled())
+                                                        {
+                                                            if (LevelingHelper.levelingListExperimental.Contains(item.Value.TerritoryType))
+                                                                ImGuiEx.HelpMarker("This dungeon is currently in testing for reliability.\nDo report any issues with it", symbolOverride: FontAwesomeIcon.ExclamationTriangle.ToIconString(), color: EzColor.Yellow);
+                                                            if (item.Value.TerritoryType == 1048u)
+                                                                ImGuiEx.HelpMarker("CutsceneSkip detected. Please keep it actually on.", symbolOverride: FontAwesomeIcon.ExclamationTriangle.ToIconString(), color: EzColor.Blue);
+                                                        }
                                                     }
                                             }
                                         }

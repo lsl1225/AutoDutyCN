@@ -265,6 +265,9 @@ public sealed class AutoDuty : IDalamudPlugin
             EzConfig.DefaultSerializationFactory = new AutoDutySerializationFactory();
             (ConfigurationMain.Instance = EzConfig.Init<ConfigurationMain>()).Init();
 
+            // Initialize localization system
+            LocalizationManager.Initialize(ConfigurationMain.Instance.Language);
+
 
 
             //Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();

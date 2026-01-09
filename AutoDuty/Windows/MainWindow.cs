@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using AutoDuty.Helpers;
 using AutoDuty.IPC;
+using AutoDuty.Managers;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
@@ -128,7 +129,7 @@ public sealed class MainWindow : Window, IDisposable
             {
                 using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
-                    if (ImGui.Button("Goto"))
+                    if (ImGui.Button(Loc.Get("Overlay.Button.Goto")))
                     {
                         ImGui.OpenPopup("GotoPopup");
                     }   
@@ -137,16 +138,16 @@ public sealed class MainWindow : Window, IDisposable
 
             if (ImGui.BeginPopup("GotoPopup"))
             {
-                if (ImGui.Selectable("Barracks")) GotoBarracksHelper.Invoke();
-                if (ImGui.Selectable("Inn")) GotoInnHelper.Invoke();
-                if (ImGui.Selectable("GCSupply")) GotoHelper.Invoke(PlayerHelper.GetGrandCompanyTerritoryType(PlayerHelper.GetGrandCompany()), [GCTurninHelper.GCSupplyLocation], 0.25f, 3f);
-                if (ImGui.Selectable("Flag Marker")) MapHelper.MoveToMapMarker();
-                if (ImGui.Selectable("Summoning Bell")) SummoningBellHelper.Invoke(AutoDuty.Configuration.PreferredSummoningBellEnum);
-                if (ImGui.Selectable("Apartment")) GotoHousingHelper.Invoke(Housing.Apartment);
-                if (ImGui.Selectable("Personal Home")) GotoHousingHelper.Invoke(Housing.Personal_Home);
-                if (ImGui.Selectable("FC Estate")) GotoHousingHelper.Invoke(Housing.FC_Estate);
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.Barracks"))) GotoBarracksHelper.Invoke();
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.Inn"))) GotoInnHelper.Invoke();
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.GCSupply"))) GotoHelper.Invoke(PlayerHelper.GetGrandCompanyTerritoryType(PlayerHelper.GetGrandCompany()), [GCTurninHelper.GCSupplyLocation], 0.25f, 3f);
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.FlagMarker"))) MapHelper.MoveToMapMarker();
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.SummoningBell"))) SummoningBellHelper.Invoke(AutoDuty.Configuration.PreferredSummoningBellEnum);
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.Apartment"))) GotoHousingHelper.Invoke(Housing.Apartment);
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.PersonalHome"))) GotoHousingHelper.Invoke(Housing.Personal_Home);
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.FCEstate"))) GotoHousingHelper.Invoke(Housing.FC_Estate);
 
-                if (ImGui.Selectable("Triple Triad Trader")) GotoHelper.Invoke(TripleTriadCardSellHelper.GoldSaucerTerritoryType, TripleTriadCardSellHelper.TripleTriadCardVendorLocation);
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.TripleTriadTrader"))) GotoHelper.Invoke(TripleTriadCardSellHelper.GoldSaucerTerritoryType, TripleTriadCardSellHelper.TripleTriadCardVendorLocation);
                 ImGui.EndPopup();
             }
 
@@ -157,17 +158,17 @@ public sealed class MainWindow : Window, IDisposable
             {
                 using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
-                    if (ImGui.Button("TurnIn"))
+                    if (ImGui.Button(Loc.Get("Overlay.Button.TurnIn")))
                     {
                         if (AutoRetainer_IPCSubscriber.IsEnabled)
                             GCTurninHelper.Invoke();
                         else
-                            ShowPopup("Missing Plugin", "GC Turnin Requires AutoRetainer plugin. Get @ https://love.puni.sh/ment.json");
+                            ShowPopup(Loc.Get("Overlay.Popup.MissingPlugin"), Loc.Get("Overlay.Tooltip.TurnInMissing"));
                     }
                     if (AutoRetainer_IPCSubscriber.IsEnabled)
-                        ToolTip("Click to Goto GC Turnin and Invoke AutoRetainer's GC Turnin");
+                        ToolTip(Loc.Get("Overlay.Tooltip.TurnIn"));
                     else
-                        ToolTip("GC Turnin Requires AutoRetainer plugin. Get @ https://love.puni.sh/ment.json");
+                        ToolTip(Loc.Get("Overlay.Tooltip.TurnInMissing"));
                 }
             }
             ImGui.SameLine(0, 5);
@@ -175,9 +176,9 @@ public sealed class MainWindow : Window, IDisposable
             {
                 using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
-                    if (ImGui.Button("Desynth"))
+                    if (ImGui.Button(Loc.Get("Overlay.Button.Desynth")))
                         DesynthHelper.Invoke();
-                    ToolTip("Click to Desynth all Items in Inventory");
+                    ToolTip(Loc.Get("Overlay.Tooltip.Desynth"));
                     
                 }
             }
@@ -186,17 +187,17 @@ public sealed class MainWindow : Window, IDisposable
             {
                 using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
-                    if (ImGui.Button("Extract"))
+                    if (ImGui.Button(Loc.Get("Overlay.Button.Extract")))
                     {
                         if (QuestManager.IsQuestComplete(66174))
                             ExtractHelper.Invoke();
                         else
-                            ShowPopup("Missing Quest Completion", "Materia Extraction requires having completed quest: Forging the Spirit");
+                            ShowPopup(Loc.Get("Overlay.Popup.MissingQuestCompletion"), Loc.Get("Overlay.Tooltip.ExtractMissing"));
                     }
                     if (QuestManager.IsQuestComplete(66174))
-                        ToolTip("Click to Extract Materia");
+                        ToolTip(Loc.Get("Overlay.Tooltip.Extract"));
                     else
-                        ToolTip("Materia Extraction requires having completed quest: Forging the Spirit");
+                        ToolTip(Loc.Get("Overlay.Tooltip.ExtractMissing"));
                 }
             }
             
@@ -205,7 +206,7 @@ public sealed class MainWindow : Window, IDisposable
             {
                 using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
-                    if (ImGui.Button("Repair"))
+                    if (ImGui.Button(Loc.Get("Overlay.Button.Repair")))
                     {
                         if (InventoryHelper.CanRepair(100))
                             RepairHelper.Invoke();
@@ -213,7 +214,7 @@ public sealed class MainWindow : Window, IDisposable
                             //ShowPopup("", "");
                     }
                     //if ()
-                        ToolTip("Click to Repair");
+                        ToolTip(Loc.Get("Overlay.Tooltip.Repair"));
                     //else
                         //ToolTip("");
                     
@@ -224,7 +225,7 @@ public sealed class MainWindow : Window, IDisposable
             {
                 using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
-                    if (ImGui.Button("Equip"))
+                    if (ImGui.Button(Loc.Get("Overlay.Button.Equip")))
                     {
                         AutoEquipHelper.Invoke();
                         //else
@@ -232,7 +233,7 @@ public sealed class MainWindow : Window, IDisposable
                     }
 
                     //if ()
-                    ToolTip("Click to Equip Gear");
+                    ToolTip(Loc.Get("Overlay.Tooltip.Equip"));
                     //else
                     //ToolTip("");
                 }
@@ -243,9 +244,9 @@ public sealed class MainWindow : Window, IDisposable
             {
                 using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
-                    if (ImGui.Button("Coffers")) 
+                    if (ImGui.Button(Loc.Get("Overlay.Button.Coffers")))
                         CofferHelper.Invoke();
-                    ToolTip("Click to open coffers");
+                    ToolTip(Loc.Get("Overlay.Tooltip.Coffers"));
                 }
             }
             ImGui.SameLine(0, 5);
@@ -254,7 +255,7 @@ public sealed class MainWindow : Window, IDisposable
             {
                 using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
                 {
-                    if (ImGui.Button("Triple Triad"))
+                    if (ImGui.Button(Loc.Get("Overlay.Button.TripleTriad")))
                         ImGui.OpenPopup("TTPopup");
                     
                 }
@@ -262,9 +263,9 @@ public sealed class MainWindow : Window, IDisposable
 
             if (ImGui.BeginPopup("TTPopup"))
             {
-                if (ImGui.Selectable("Register TT Cards"))
+                if (ImGui.Selectable(Loc.Get("MainWindow.TT.RegisterCards")))
                     TripleTriadCardUseHelper.Invoke();
-                if (ImGui.Selectable("Sell TT Cards")) 
+                if (ImGui.Selectable(Loc.Get("MainWindow.TT.SellCards")))
                     TripleTriadCardSellHelper.Invoke();
                 ImGui.EndPopup();
             }
@@ -391,16 +392,16 @@ public sealed class MainWindow : Window, IDisposable
         ImGui.EndTabBar();
     }
 
-    private static readonly (string, Action, Vector4?, bool)[] tabList =
+    private static (string, Action, Vector4?, bool)[] tabList =>
     [
-        ("Main", MainTab.Draw, null, false), 
-        ("Build", BuildTab.Draw, null, false), 
-        ("Paths", PathsTab.Draw, null, false), 
-        ("Config", ConfigTab.Draw, null, false), 
-        ("Info", InfoTab.Draw, null, false), 
-        ("Logs", LogTab.Draw, null, false),
-        ("Stats", StatsTab.Draw, null, false),
-        ("Support AutoDuty", KofiLink, ImGui.ColorConvertU32ToFloat4(ColorNormal), false)
+        (Loc.Get("MainWindow.Tabs.Main"), MainTab.Draw, null, false),
+        (Loc.Get("MainWindow.Tabs.Build"), BuildTab.Draw, null, false),
+        (Loc.Get("MainWindow.Tabs.Paths"), PathsTab.Draw, null, false),
+        (Loc.Get("MainWindow.Tabs.Config"), ConfigTab.Draw, null, false),
+        (Loc.Get("MainWindow.Tabs.Info"), InfoTab.Draw, null, false),
+        (Loc.Get("MainWindow.Tabs.Logs"), LogTab.Draw, null, false),
+        (Loc.Get("MainWindow.Tabs.Stats"), StatsTab.Draw, null, false),
+        (Loc.Get("MainWindow.Tabs.Support"), KofiLink, ImGui.ColorConvertU32ToFloat4(ColorNormal), false)
     ];
 
     public override void Draw()

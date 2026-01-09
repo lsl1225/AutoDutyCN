@@ -1,0 +1,30 @@
+{
+  "InfoTab": {
+    "Title": "关于",
+    "SetupGuideIntro": "如需获取 AutoDuty 及其前置依赖插件的安装与设置帮助，请务必参阅下方指南：",
+    "InformationAndSetup": "说明与设置",
+    "PathStatusInfo": "上述指南还包含了各副本脚本（Path）的状态信息，例如脚本完善度、模块稳定性以及运行的一般连贯性。您还可以查看为了实现稳定挂机循环（Looping）所需的额外注意事项。如有功能请求、Bug 反馈或代码贡献，请前往 AutoDuty GitHub 提交 Issue：",
+    "GitHubIssues": "GitHub 反馈 (Issues)",
+    "DiscordInvite": "其他任何问题，欢迎加入 Discord 频道讨论！",
+    "PunishDiscord": "Punish Discord",
+    "Install": "安装",
+    "RequiredPlugins": "前置依赖插件",
+    "CombatPlugins": "战斗/输出插件",
+    "CombatPluginsNote": "萝卜青菜各有所爱，请选择你最顺手的一个（可在 Config 中切换）：",
+    "RecommendedPlugins": "推荐搭配插件",
+    "PluginDesc": {
+      "BossModFights": "自动处理 Boss 机制与战斗逻辑",
+      "VNavMovement": "核心依赖，负责自动寻路与角色移动",
+      "BossModRotations": "BossMod 自带的基础输出循环",
+      "WrathCombo": "Puni.sh 出品的专用连击/输出插件",
+      "RotationSolverReborn": "RSR (Reborn) 输出循环插件",
+      "AntiAFK": "防止长时间挂机被踢出游戏 (防暂离)",
+      "AutoRetainer": "自动雇员 (支持自动上交军票筹备与清理背包)",
+      "Avarice": "显示身位指示器 (打身位辅助)",
+      "Lifestream": "强大的跨界/跨服自动传送工具",
+      "Pandora": "功能聚合 (推荐开启自动开箱、自动盾姿)",
+      "Gearsetter": "自动推荐并更换最优装备",
+      "Stylist": "自动推荐并更换最优装备"
+    }
+  }
+}

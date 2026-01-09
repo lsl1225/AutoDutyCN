@@ -1,0 +1,29 @@
+{
+  "MainWindow": {
+    "Tabs": {
+      "Main": "主页",
+      "Build": "构建",
+      "Paths": "脚本路径",
+      "Config": "设置",
+      "Info": "信息",
+      "Logs": "日志",
+      "Stats": "统计",
+      "Support": "支持/赞助"
+    },
+    "Goto": {
+      "Barracks": "冒险者分队兵营",
+      "Inn": "旅馆",
+      "GCSupply": "大国防联军筹备",
+      "FlagMarker": "地图旗帜标记",
+      "SummoningBell": "传唤铃",
+      "Apartment": "个人公寓",
+      "PersonalHome": "个人房屋",
+      "FCEstate": "部队房屋",
+      "TripleTriadTrader": "九宫幻卡商人"
+    },
+    "TT": {
+      "RegisterCards": "自动收录背包卡片",
+      "SellCards": "出售多余卡片"
+    }
+  }
+}

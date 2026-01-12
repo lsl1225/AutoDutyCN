@@ -263,6 +263,20 @@
     },
     {
       "Tag": "None",
+      "Name": "Interactable",
+      "Position": {
+        "X": 318.40204,
+        "Y": 18.385698,
+        "Z": -17.205706
+      },
+      "Arguments": [
+        "2013135"
+      ],
+      "Conditions": [],
+      "Note": "Myrrh Incense Burner"
+    },
+    {
+      "Tag": "None",
       "Name": "Wait",
       "Position": {
         "X": 289.05,

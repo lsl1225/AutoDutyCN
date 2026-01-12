@@ -347,7 +347,7 @@ namespace AutoDuty.Windows
                                     if (ImGui.BeginCombo("##LevelingModeEnum", Plugin.LevelingModeEnum switch
                                         {
                                             LevelingMode.None => Loc.Get("MainTab.LevelingModes.None"),
-                                            _ => Loc.Get("MainTab.LevelingModes.Auto")
+                                            _ => Loc.Get("MainTab.LevelingModes."+Plugin.LevelingModeEnum)
                                         }))
                                     {
                                         if (ImGui.Selectable(Loc.Get("MainTab.LevelingModes.None"), Plugin.LevelingModeEnum == LevelingMode.None))
@@ -357,7 +357,7 @@ namespace AutoDuty.Windows
                                         }
 
                                         LevelingMode autoLevelMode = (AutoDuty.Configuration.DutyModeEnum == DutyMode.Support ? LevelingMode.Support : LevelingMode.Trust_Group);
-                                        if (ImGui.Selectable(Loc.Get("MainTab.LevelingModes.Auto"), Plugin.LevelingModeEnum == autoLevelMode))
+                                        if (ImGui.Selectable(Loc.Get("MainTab.LevelingModes."+autoLevelMode)+"##LevelingModeComboAuto", Plugin.LevelingModeEnum == autoLevelMode))
                                         {
                                             Plugin.LevelingModeEnum = autoLevelMode;
                                                 Configuration.Save();
@@ -366,7 +366,7 @@ namespace AutoDuty.Windows
                                         }
 
                                         if (AutoDuty.Configuration.DutyModeEnum == DutyMode.Trust)
-                                            if (ImGui.Selectable(Loc.Get("MainTab.LevelingModes.Auto"), Plugin.LevelingModeEnum == LevelingMode.Trust_Solo))
+                                            if (ImGui.Selectable(Loc.Get("MainTab.LevelingModes."+"Trust_Solo")+"##LevelingModeComboTrustGroup", Plugin.LevelingModeEnum == LevelingMode.Trust_Solo))
                                             {
                                                 Plugin.LevelingModeEnum = LevelingMode.Trust_Solo;
                                                     Configuration.Save();

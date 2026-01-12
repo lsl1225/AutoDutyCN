@@ -17,6 +17,7 @@ using Dalamud.Bindings.ImGui;
 namespace AutoDuty.Windows;
 
 using System;
+using ECommons.DalamudServices;
 using ECommons.Reflection;
 
 public sealed class MainWindow : Window, IDisposable
@@ -342,7 +343,7 @@ public sealed class MainWindow : Window, IDisposable
         }
     }
 
-    public static void EzTabBar(string id, string? KoFiTransparent, string openTabName, ImGuiTabBarFlags flags, params (string name, Action function, Vector4? color, bool child)[] tabs)
+    public static void EzTabBar(string id, string? KoFiTransparent, string openTab, ImGuiTabBarFlags flags, params (string name, Action function, Vector4? color, bool child)[] tabs)
     {
         ImGui.BeginTabBar(id, flags);
 
@@ -352,7 +353,7 @@ public sealed class MainWindow : Window, IDisposable
                      (BossMod_IPCSubscriber.IsEnabled  || AutoDuty.Configuration.UsingAlternativeRotationPlugin);
 
         if (!valid)
-            openTabName = "Info";
+            openTab = "Info";
 
         foreach ((string name, Action function, Vector4? color, bool child) in tabs)
         {
@@ -360,8 +361,8 @@ public sealed class MainWindow : Window, IDisposable
                 continue;
             if (color != null) 
                 ImGui.PushStyleColor(ImGuiCol.Tab, color.Value);
-            
-            if ((valid || name == "Info") && ImGui.BeginTabItem(name, openTabName == name ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None))
+
+            if ((valid || name == "Info") && ImGui.BeginTabItem($"{Loc.Get($"MainWindow.Tabs.{name}")}###MainWindowTab{name}", openTab == name ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None))
             {
                 if (color != null) 
                     ImGui.PopStyleColor();
@@ -392,16 +393,16 @@ public sealed class MainWindow : Window, IDisposable
         ImGui.EndTabBar();
     }
 
-    private static (string, Action, Vector4?, bool)[] tabList =>
+    private static (string, Action, Vector4?, bool)[] TabList =>
     [
-        (Loc.Get("MainWindow.Tabs.Main"), MainTab.Draw, null, false),
-        (Loc.Get("MainWindow.Tabs.Build"), BuildTab.Draw, null, false),
-        (Loc.Get("MainWindow.Tabs.Paths"), PathsTab.Draw, null, false),
-        (Loc.Get("MainWindow.Tabs.Config"), ConfigTab.Draw, null, false),
-        (Loc.Get("MainWindow.Tabs.Info"), InfoTab.Draw, null, false),
-        (Loc.Get("MainWindow.Tabs.Logs"), LogTab.Draw, null, false),
-        (Loc.Get("MainWindow.Tabs.Stats"), StatsTab.Draw, null, false),
-        (Loc.Get("MainWindow.Tabs.Support"), KofiLink, ImGui.ColorConvertU32ToFloat4(ColorNormal), false)
+        ("Main", MainTab.Draw, null, false),
+        ("Build", BuildTab.Draw, null, false),
+        ("Paths", PathsTab.Draw, null, false),
+        ("Config", ConfigTab.Draw, null, false),
+        ("Info", InfoTab.Draw, null, false),
+        ("Logs", LogTab.Draw, null, false),
+        ("Stats", StatsTab.Draw, null, false),
+        ("Support", KofiLink, ImGui.ColorConvertU32ToFloat4(ColorNormal), false)
     ];
 
     public override void Draw()
@@ -417,6 +418,6 @@ public sealed class MainWindow : Window, IDisposable
                 return;
         }
 
-        EzTabBar("MainTab", null, openTabName, ImGuiTabBarFlags.None, tabList);
+        EzTabBar("MainTab", null, openTabName, ImGuiTabBarFlags.None, TabList);
     }
 }

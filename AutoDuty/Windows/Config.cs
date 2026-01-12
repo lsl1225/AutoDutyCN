@@ -64,7 +64,7 @@ public class ConfigurationMain
     public string DefaultConfigName { get; set; } = CONFIGNAME_BARE;
 
     [JsonProperty]
-    public string Language { get; set; } = "zh-CN";
+    internal string Language { get; set; } = LocalizationManager.BASE_LANGUAGE;
 
     [JsonProperty]
     private string activeProfileName = CONFIGNAME_BARE;
@@ -451,7 +451,6 @@ public class Configuration
     public bool SquadronAssignLowestMembers    = true;
 
     public bool ShowMainWindowOnStartup = false;
-    public string Language = "en-US";
 
     
     #region OverlayConfig
@@ -851,6 +850,30 @@ public static class ConfigTab
         if (MainWindow.CurrentTabName != "Config")
             MainWindow.CurrentTabName = "Config";
 
+        //Language Selector
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+        ImGui.AlignTextToFramePadding();
+        ImGui.Text(Loc.Get("ConfigTab.Language"));
+        ImGui.SameLine();
+
+        string   currentLang  = ConfigurationMain.Instance.Language;
+        string[] languages    = LocalizationManager.availableLanguages;
+        int      currentIndex = Array.IndexOf(languages, currentLang);
+
+        ImGui.SetNextItemWidth(150);
+        if (ImGui.Combo("##Language", ref currentIndex, languages, languages.Length))
+        {
+            LocalizationManager.SetLanguage(languages[currentIndex]);
+            Configuration.Save();
+        }
+
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip(Loc.Get("ConfigTab.LanguageHelp"));
+
+        ImGui.Separator();
+
         //Start of Profile Selection
         ImGui.AlignTextToFramePadding();
         ImGui.Text(Loc.Get("ConfigTab.Profile.CurrentlySelected"));
@@ -983,29 +1006,6 @@ public static class ConfigTab
         if (bareProfile)
             ImGuiEx.TextWrapped(Loc.Get("ConfigTab.Profile.BareProfileNote"));
         using ImRaii.IEndObject _ = ImRaii.Disabled(bareProfile);
-
-        //Language Selector
-        ImGui.Spacing();
-        ImGui.Separator();
-        ImGui.Spacing();
-        ImGui.AlignTextToFramePadding();
-        ImGui.Text(Loc.Get("ConfigTab.Language"));
-        ImGui.SameLine();
-
-        string currentLang = Configuration.Language;
-        string[] languages = LocalizationManager.AvailableLanguages;
-        int currentIndex = Array.IndexOf(languages, currentLang);
-
-        ImGui.SetNextItemWidth(150);
-        if (ImGui.Combo("##Language", ref currentIndex, languages, languages.Length))
-        {
-            Configuration.Language = languages[currentIndex];
-            LocalizationManager.SetLanguage(Configuration.Language);
-            Configuration.Save();
-        }
-
-        if (ImGui.IsItemHovered())
-            ImGui.SetTooltip(Loc.Get("ConfigTab.LanguageHelp"));
 
         //Start of Window & Overlay Settings
         ImGui.Spacing();

@@ -56,7 +56,9 @@
     },
     "LevelingModes": {
       "None": "None",
-      "Auto": "Auto"
+      "Support": "Auto",
+      "Trust_Group": "Trust Group",
+      "Trust_Solo": "Trust Solo"
     }
   }
 }

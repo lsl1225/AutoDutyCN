@@ -48,6 +48,12 @@
    </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Localization\**\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ECommons.IPC\ECommons.IPC\ECommons.IPC.csproj" />
     <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
     <ProjectReference Include="..\NightmareUI\NightmareUI\NightmareUI.csproj" />
@@ -57,7 +63,7 @@
       <HintPath>$(DalamudLibPath)Dalamud.Common.dll</HintPath>
     </Reference>
   </ItemGroup>
-
+  
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>

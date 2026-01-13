@@ -720,6 +720,7 @@ public class Configuration
         }
     }
     public int   AutoDesynthSkillUpLimit = 50;
+    public bool  AutoDesynthNQOnly       = false;
     public bool  AutoDesynthNoGearset    = true;
     public ulong AutoDesynthCategories   = 0x1;
 
@@ -2467,6 +2468,9 @@ public static class ConfigTab
                         ImGui.PopItemWidth();
                         ImGui.Unindent();
                     }
+
+                    if (ImGui.Checkbox($"{Loc.Get("ConfigTab.BetweenLoop.Desynth.NQOnly")}##Desynth{nameof(Configuration.AutoDesynthNQOnly)}", ref Configuration.AutoDesynthNQOnly))
+                        Configuration.Save();
 
                     if (ImGui.Checkbox($"{Loc.Get("ConfigTab.BetweenLoop.ProtectGearsets")}##Desynth{nameof(Configuration.AutoDesynthNoGearset)}", ref Configuration.AutoDesynthNoGearset))
                         Configuration.Save();

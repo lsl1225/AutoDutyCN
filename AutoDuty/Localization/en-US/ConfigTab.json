@@ -150,6 +150,9 @@
       "CofferNameHint": "Start typing coffer name to search",
       "AddCoffer": "Add Coffer",
       "DiscardItems": "Discard Items",
+      "Desynth": {
+        "NQOnly": "Guarantee NQ results"
+      },
       "AutoDesynth": "Auto Desynth",
       "OnlySkillUps": "Only Skill Ups",
       "ItemLevelLimit": "Item Level Limit",

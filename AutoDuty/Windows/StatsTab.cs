@@ -8,6 +8,7 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
+using Data;
 using ECommons.ExcelServices;
 using Helpers;
 using Managers;
@@ -106,7 +107,7 @@ internal static class StatsTab
             ImGui.TableNextColumn();
             ImGui.Text(duration.ToString(@"mm\:ss\.FFFF"));
             ImGui.TableNextColumn();
-            ImGui.Text(ContentHelper.DictionaryContent[territoryId].Name ?? Loc.Get("StatsTab.Unknown", territoryId));
+            ImGui.Text(ContentHelper.DictionaryContent.TryGetValue(territoryId, out Classes.Content? content) ? content.Name : Loc.Get("StatsTab.Unknown", territoryId));
             ImGui.TableNextColumn();
             ImGui.Text(ConfigurationMain.Instance.charByCID.TryGetValue(cid, out ConfigurationMain.CharData cd) ?
                            Censor.Character(cd.Name, cd.World) :

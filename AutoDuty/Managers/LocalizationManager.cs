@@ -134,7 +134,7 @@ internal static class LocalizationManager
         Svc.Log.Info($"Language changed to: {language}");
     }
 
-    internal static string Get(string key, string? fallback = null)
+    internal static string Get(string key)
     {
         string? translation = ActiveTranslation.GetTranslation(key);
 
@@ -148,7 +148,7 @@ internal static class LocalizationManager
         if (translation != null)
             return translation;
         Svc.Log.Error($"Missing translation key in base language {BASE_LANGUAGE}: {key}");
-        return fallback ?? key;
+        return key;
     }
 
     internal static string Get(string key, params object[] args)
@@ -169,8 +169,8 @@ internal static class LocalizationManager
 // Alias for shorter syntax
 internal static class Loc
 {
-    internal static string Get(string key, string? fallback = null) =>
-        LocalizationManager.Get(key, fallback);
+    internal static string Get(string key) =>
+        LocalizationManager.Get(key);
 
     internal static string Get(string key, params object[] args) =>
         LocalizationManager.Get(key, args);

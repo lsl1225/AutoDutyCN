@@ -338,10 +338,8 @@ namespace AutoDuty.Windows
                                     ImGui.TextColored(Plugin.LevelingModeEnum == LevelingMode.None ? ImGuiHelper.StateBadColor : ImGuiHelper.StateGoodColor, Loc.Get("MainTab.SelectLevelingMode"));
                                     ImGui.SameLine(0);
 
-                                    ImGuiComponents.HelpMarker(Loc.Get("MainTab.LevelingModeHelp",
-                                                               AutoDuty.Configuration.DutyModeEnum != DutyMode.Trust ?
-                                                                    string.Empty :
-                                                                    Loc.Get("MainTab.LevelingModeHelpTrust")));
+                                    ImGuiComponents.HelpMarker(Loc.Get("MainTab.LevelingModeHelp", AutoDuty.Configuration.DutyModeEnum != DutyMode.Trust ?
+                                                                                                       string.Empty : Loc.Get("MainTab.LevelingModeHelpTrust")));
                                     ImGui.SameLine(0);
                                     ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
                                     if (ImGui.BeginCombo("##LevelingModeEnum", Plugin.LevelingModeEnum switch

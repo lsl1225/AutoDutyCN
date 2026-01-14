@@ -265,6 +265,9 @@ public sealed class AutoDuty : IDalamudPlugin
             EzConfig.DefaultSerializationFactory = new AutoDutySerializationFactory();
             (ConfigurationMain.Instance = EzConfig.Init<ConfigurationMain>()).Init();
 
+            // Initialize localization system
+            LocalizationManager.Initialize();
+
 
 
             //Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
@@ -278,7 +281,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.assemblyDirectoryInfo = this.assemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 284) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 286) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this.configDirectory.Exists)

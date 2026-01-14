@@ -135,7 +135,7 @@ namespace AutoDuty.Helpers
             if (plugin == ExternalPlugin.None)
                 return new EndUnconditionally();
 
-            if (IPCSubscriber_Common.IsReady(plugin.GetExternalPluginData().name))
+            if (IPCSubscriber_Common.IsReady(plugin.GetExternalPluginData().name) || (plugin == ExternalPlugin.BossMod && IPCSubscriber_Common.IsReady("BossModReborn")))
             {
                 return new EndUnconditionally(() =>
                                               {

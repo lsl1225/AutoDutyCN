@@ -1,0 +1,62 @@
+{
+  "MainTab": {
+    "SearchDuties": "搜索副本/任务...",
+    "ClearSavedPath": "清除当前脚本路径",
+    "TerminationNotice": "注意：您已启用自动终止选项，可能会在未跑完时提前结束循环",
+    "MeshLoading": "{0} 网格导航：加载中...",
+    "MeshLoadedPath": "{0} 网格导航：已加载路径：{1}",
+    "Loaded": "已就绪",
+    "None": "无",
+    "Start": "开始挂机",
+    "Times": "次",
+    "NoPathFound": "未找到脚本文件：\n{0}\n({1}.json)\n路径目录：\n{2}\n请从以下地址下载官方脚本库：\n{3}\n或在 Build 标签页中自行录制",
+    "RequiresVNavmesh": "AutoDuty 需要安装并加载 VNavmesh 插件才能寻路。\n请添加第三方仓库：\nhttps://puni.sh/api/repository/veyn",
+    "RequiresBossMod": "AutoDuty 需要安装并加载 BossMod 插件才能处理机制。\n请添加第三方仓库：\nhttps://puni.sh/api/repository/veyn",
+    "RequiresRotation": "AutoDuty 需要安装并加载输出循环插件\n（支持 Wrath Combo、RSR 或 BossMod 自带循环）",
+    "SelectMode": "选择运行模式：",
+    "Run": "开始运行",
+    "Error": "错误",
+    "ErrorSelectVersion": "您必须选择一个游戏版本\n才能运行对应副本",
+    "ErrorNotInParty": "运行亲信/支援模式时，请先退出当前队伍（需单人状态）",
+    "ErrorGroupOf4": "运行常规副本模式必须组成满编 4 人小队",
+    "ErrorPartyMakeup": "运行常规副本模式必须符合职能要求（1T 1H 2D）",
+    "ErrorNoPath": "未找到 {0} {1} 的脚本路径",
+    "SelectDutyMode": "副本模式 (任务类型)：",
+    "SelectLevelingMode": "自动练级模式：",
+    "LevelingModeHelp": "练级模式会自动根据您的等级和装等，排队效率最高且最稳定的副本。\n{0}\n\n注意：为了求稳，它不一定会排当前能进的最高级副本。",
+    "LevelingModeHelpTrust": "组队模式：会平均提升所有 NPC 的等级。\n单人模式：只练您自己的等级（效率更高）。",
+    "PreferTrust": "练级时优先排 [亲信战友] 而非 [副本协助]",
+    "UseLowestMembers": "优先使用等级最低的 NPC（练 NPC 等级用）",
+    "SelectTrustParty": "选择出战 NPC 组合",
+    "Refresh": "刷新数据",
+    "RefreshTrustLevels": "刷新 NPC 等级数据",
+    "HideUnavailable": "隐藏不可用/未解锁的副本",
+    "Unsynced": "解除限制 (解限跑本)",
+    "SwitchCombatJob": "请先切换到战斗职业，才能使用 AutoDuty。",
+    "BlueMageRestriction": "青魔法师无法参与亲信、支援或异闻副本。\n请切换常规战斗职业。",
+    "LevelingModeStatus": "当前练级状态：等级 {0} (装等 {1})",
+    "SelectSupportTrust": "请先在上方选择 [支援]、[信赖] 或 [小队] 模式\n以加载副本列表",
+    "CurrentGearset": "当前套装",
+    "Busy": "工作中...",
+    "RequiresVNavmeshAlt": "AutoDuty 依赖 vnavmesh 插件进行移动和导航。\n请添加仓库：https://puni.sh/api/repository/veyn",
+    "RequiresBossModAlt": "AutoDuty 依赖 BossMod 插���处理战斗机制。\n请添加仓库：https://puni.sh/api/repository/veyn",
+    "Modes": {
+      "Looping": "单副本挂机 (Looping)",
+      "Playlist": "任务列表模式 (Playlist)"
+    },
+    "DutyModes": {
+      "None": "未选择",
+      "Support": "副本协助 (剧情 NPC)",
+      "Trust": "亲信战友 (7.0 之前 NPC)",
+      "Squadron": "冒险者分队 (军衔)",
+      "Regular": "常规副本 (匹配/组队)",
+      "Trial": "讨伐/歼灭战",
+      "Raid": "大型任务 (Raid)",
+      "Variant": "异闻/多变副本"
+    },
+    "LevelingModes": {
+      "None": "不开启",
+      "Auto": "自动排队"
+    }
+  }
+}

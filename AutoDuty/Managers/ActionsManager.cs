@@ -477,7 +477,7 @@ namespace AutoDuty.Managers
 
         private bool TargetCheck(IGameObject? gameObject)
         {
-            if (gameObject is not { IsTargetable: not true } || gameObject.IsValid() || Svc.Targets.Target == gameObject)
+            if (gameObject is not { IsTargetable: true } || !gameObject.IsValid() || (Svc.Targets.Target?.Equals(gameObject) ?? false))
                 return true;
 
             if (EzThrottler.Check("TargetCheck"))
@@ -496,7 +496,7 @@ namespace AutoDuty.Managers
             Plugin.action = $"Target: {objectDataId}";
 
             taskManager.Enqueue(() => TryGetObjectByDataId(uint.Parse(objectDataId), out gameObject), "Target-GetGameObject");
-            taskManager.Enqueue(() => this.TargetCheck(gameObject),                                      "Target-Check");
+            taskManager.Enqueue(() => this.TargetCheck(gameObject),                                   "Target-Check");
             taskManager.Enqueue(() => Plugin.action = "");
         }
 

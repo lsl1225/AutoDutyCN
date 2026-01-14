@@ -496,11 +496,32 @@
       ],
       "Conditions": [],
       "Note": "The boss loot"
+    },
+    {
+      "Tag": "None",
+      "Name": "Wait",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "2000"
+      ],
+      "Conditions": [],
+      "Note": ""
     }
   ],
   "Meta": {
     "CreatedAt": 285,
-    "Changelog": [],
-    "Notes": ["Requires BMR Rotation to solve drake puzzle"]
+    "Changelog": [
+      {
+        "Version": 286,
+        "Change": "Added wait at the end to prevent immediate leave"
+      }
+    ],
+    "Notes": [
+      "Requires BMR Rotation to solve drake puzzle"
+    ]
   }
 }

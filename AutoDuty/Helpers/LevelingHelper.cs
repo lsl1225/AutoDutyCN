@@ -34,7 +34,9 @@ namespace AutoDuty.Helpers
             822u,  // 79 Mt. Gulg
             952u,  // 81 Tower of Zot
             969u,  // 83 Tower of Babil
+            // 970u,  // Vanaspati
             974u,  // 87 Ktisis Hyperboreia
+            // 978u,  // Aitiascope
             1167u, // 91 Ihuykatumu
             1193u, // 93 Worqor Zormor
             1194u, // 95 The Skydeep Cenote

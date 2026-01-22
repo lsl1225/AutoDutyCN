@@ -619,23 +619,57 @@ namespace AutoDuty.Windows
             if (_showAddActionUI && _position.LengthSquared() > 0.1f)
             {
                 drawList.AddCircle(_position, 1.25f, 0xFFFFFFFF, thickness: 2);
-                drawList.AddText(_position + Vector3.UnitZ * 1.1f, 0xFFFFFFFF, Loc.Get("BuildTab.PlusZ"), 5f);
-                drawList.AddText(_position + Vector3.UnitZ * -1.1f, 0xFFFFFFFF, Loc.Get("BuildTab.MinusZ"), 5f);
+                drawList.AddText(_position + Vector3.UnitZ * 1.1f, 0xFFFFFFFF, Loc.Get("BuildTab.PlusZ"), 1f);
+                drawList.AddText(_position + Vector3.UnitZ * -1.1f, 0xFFFFFFFF, Loc.Get("BuildTab.MinusZ"), 1f);
 
-                drawList.AddText(_position + Vector3.UnitX * 1.1f,  0xFFFFFFFF, Loc.Get("BuildTab.PlusX"), 5f);
-                drawList.AddText(_position + Vector3.UnitX * -1.1f, 0xFFFFFFFF, Loc.Get("BuildTab.MinusX"), 5f);
+                drawList.AddText(_position + Vector3.UnitX * 1.1f,  0xFFFFFFFF, Loc.Get("BuildTab.PlusX"), 1f);
+                drawList.AddText(_position + Vector3.UnitX * -1.1f, 0xFFFFFFFF, Loc.Get("BuildTab.MinusX"), 1f);
 
                 if(PlayerHelper.IsValid)
                 {
-                    float playerY   = Player.Position.Y;
-                    float ydiff = (_position.Y - playerY);
+                    float   playerY = Player.Position.Y;
+                    float   ydiff   = (_position.Y - playerY);
+                    Vector3 posWithY   = _position.WithY(playerY);
                     if (MathF.Abs(ydiff) > 0.1f)
                     {
-                        drawList.AddText(_position + Vector3.UnitY * MathF.Sign(ydiff), 0xFFFFFFFF, Loc.Get("BuildTab.YDiff") + ydiff.ToString("F3", CultureInfo.CurrentCulture), 5f);
+                        drawList.AddText(_position + Vector3.UnitY * MathF.Sign(ydiff), 0xFFFFFFFF, Loc.Get("BuildTab.YDiff") + ydiff.ToString("F3", CultureInfo.CurrentCulture), 1f);
                         
                         drawList.PathLineTo(_position);
-                        drawList.PathLineTo(_position.WithY(playerY));
+                        drawList.PathLineTo(posWithY);
                         drawList.PathStroke(0xFFFFFFFF);
+                    }
+
+                    float playerX = Player.Position.X;
+                    float xdiff   = (_position.X - playerX);
+                    if (MathF.Abs(xdiff) > 0.1f)
+                    {
+                        drawList.AddText(posWithY + Vector3.UnitY / 2 + Vector3.UnitX * MathF.Sign(xdiff) * -1, 0xFFFFFFFF, Loc.Get("BuildTab.XDiff") + ydiff.ToString("F3", CultureInfo.CurrentCulture), 1f);
+
+                        drawList.PathLineTo(posWithY);
+                        drawList.PathLineTo(posWithY.WithX(playerX));
+                        drawList.PathStroke(0xFFFFFFFF);
+                    }
+
+                    float playerZ = Player.Position.Z;
+                    float zdiff   = (_position.Z - playerZ);
+                    if (MathF.Abs(zdiff) > 0.1f)
+                    {
+                        drawList.AddText(posWithY + Vector3.UnitY / 2 + Vector3.UnitZ * MathF.Sign(zdiff) * -1, 0xFFFFFFFF, Loc.Get("BuildTab.ZDiff") + zdiff.ToString("F3", CultureInfo.CurrentCulture), 1f);
+
+                        drawList.PathLineTo(posWithY);
+                        drawList.PathLineTo(posWithY.WithZ(playerZ));
+                        drawList.PathStroke(0xFFFFFFFF);
+                    }
+
+                    Vector3 diff = (_position - Player.Position);
+                    float   diffL     = diff.Length();
+                    if (MathF.Abs(diffL) > 0.1f)
+                    {
+                        drawList.PathLineTo(_position);
+                        drawList.PathLineTo(Player.Position);
+                        drawList.PathStroke(0xFFFFFFFF);
+
+                        drawList.AddText(_position - Vector3.Normalize(diff), 0xFF00FF00, Loc.Get("BuildTab.Diff") + diffL.ToString("F3", CultureInfo.CurrentCulture), 1f);
                     }
                 }
 

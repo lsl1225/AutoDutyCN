@@ -39,6 +39,9 @@
     "MinusZ": "-Z",
     "PlusX": "+X",
     "MinusX": "-X",
-    "YDiff": "Y-Diff: "
+    "XDiff": "X-Diff: ",
+    "YDiff": "Y-Diff: ",
+    "ZDiff": "Z-Diff: ",
+    "Diff": "Diff: "
   }
 }

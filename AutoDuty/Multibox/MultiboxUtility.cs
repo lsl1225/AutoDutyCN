@@ -22,12 +22,34 @@ using Newtonsoft.Json;
 
 public static class MultiboxUtility
 {
-    public static string        PipeName      { get; set; } = "AutoDutyPipe";
-    public static string        ServerName    { get; set; } = ".";
-    public static TransportType TransportType { get; set; } = TransportType.NamedPipe;
-    public static string        ServerAddress { get; set; } = "127.0.0.1";
-    public static int           ServerPort    { get; set; } = 1716;
+    [JsonObject(MemberSerialization.OptOut)]
+    public class MultiboxConfiguration
+    {
+        [JsonIgnore]
+        [field: JsonIgnore]
+        public bool MultiBox
+        {
+            get;
+            set
+            {
+                if (field == value)
+                    return;
+                field = value;
 
+                MultiboxUtility.Set(field);
+            }
+        } = false;
+
+        internal bool          SynchronizePath { get; set; } = true;
+        public   bool          Host            { get; set; } = false;
+        public   string        PipeName        { get; set; } = "AutoDutyPipe";
+        public   string        ServerName      { get; set; } = ".";
+        public   TransportType TransportType   { get; set; } = TransportType.NamedPipe;
+        public   string        ServerAddress   { get; set; } = "127.0.0.1";
+        public   int           ServerPort      { get; set; } = 1716;
+    }
+
+    public static MultiboxConfiguration Config => ConfigurationMain.Instance.multibox;
 
     private const string SERVER_AUTH_KEY = "AD_Server_Auth!";
     private const string CLIENT_AUTH_KEY = "AD_Client_Auth!";
@@ -54,7 +76,7 @@ public static class MultiboxUtility
     {
         get
         {
-            if (!ConfigurationMain.Instance.MultiBox)
+            if (!Config.MultiBox)
                 return false;
 
             return stepBlock;
@@ -62,11 +84,11 @@ public static class MultiboxUtility
         set
         {
             DebugLog($"blocking step: {stepBlock} to {value}");
-            if (!ConfigurationMain.Instance.MultiBox)
+            if (!Config.MultiBox)
                 return;
 
             if (!value)
-                if (ConfigurationMain.Instance.host)
+                if (Config.Host)
                     Server.SendStepStart();
 
             if (stepBlock == value)
@@ -75,7 +97,7 @@ public static class MultiboxUtility
             stepBlock = value;
 
             if(stepBlock)
-                if (ConfigurationMain.Instance.host)
+                if (Config.Host)   
                 {
                     Plugin.action = "Waiting for clients";
                     Server.CheckStepProgress();
@@ -89,10 +111,10 @@ public static class MultiboxUtility
 
     public static void IsDead(bool dead)
     {
-        if (ConfigurationMain.Instance.MultiBox)
+        if (Config.MultiBox)
             return;
 
-        if(!ConfigurationMain.Instance.host)
+        if(!Config.Host)
             Client.SendDeath(dead);
         else
             Server.CheckDeaths();
@@ -103,7 +125,7 @@ public static class MultiboxUtility
         if(on)
             ConfigurationMain.Instance.GetCurrentConfig.DutyModeEnum = DutyMode.Regular;
 
-        if (ConfigurationMain.Instance.host)
+        if (Config.Host)
             Server.Set(on);
         else
             Client.Set(on);
@@ -144,17 +166,17 @@ public static class MultiboxUtility
             {
                 if (transport != null) return;
                     
-                transport = TransportType switch 
+                transport = Config.TransportType switch 
                 {
-                    TransportType.NamedPipe => new NamedPipeTransport(PipeName),
-                    TransportType.Tcp => new TcpTransport(ServerPort),
-                    _ => throw new NotImplementedException(TransportType.ToString()),
+                    TransportType.NamedPipe => new NamedPipeTransport(Config.PipeName),
+                    TransportType.Tcp => new TcpTransport(Config.ServerPort),
+                    _ => throw new NotImplementedException(Config.TransportType.ToString()),
                 };
 
                 transport.StartServer(MAX_SERVERS);
                 serverCts = new CancellationTokenSource();
                 Task.Run(() => AcceptLoop(serverCts.Token), serverCts.Token);
-                DebugLog($"Server started with {TransportType} transport");
+                DebugLog($"Server started with {Config.TransportType} transport");
             }
             catch (Exception ex)
             {
@@ -504,14 +526,14 @@ public static class MultiboxUtility
         {
             try
             {
-                using ITransport transport = TransportType switch 
+                using ITransport transport = Config.TransportType switch 
                 {
-                    TransportType.NamedPipe => new NamedPipeTransport(PipeName, ServerName),
-                    TransportType.Tcp => new TcpTransport(ServerAddress, ServerPort),
-                    _ => throw new NotImplementedException(TransportType.ToString()),
+                    TransportType.NamedPipe => new NamedPipeTransport(Config.PipeName, Config.ServerName),
+                    TransportType.Tcp => new TcpTransport(Config.ServerAddress, Config.ServerPort),
+                    _ => throw new NotImplementedException(Config.TransportType.ToString()),
                 };
 
-                DebugLog($"Connecting to server ({TransportType})...\n");
+                DebugLog($"Connecting to server ({Config.TransportType})...\n");
                 await using Stream clientStream = await transport.ConnectToServerAsync(ct);
 
                 clientSS = new StreamString(clientStream);
@@ -614,7 +636,7 @@ public static class MultiboxUtility
             }
             finally
             {
-                ConfigurationMain.Instance.MultiBox = false;
+                Config.MultiBox = false;
             }
         }
 

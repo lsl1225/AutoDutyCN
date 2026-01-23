@@ -1,7 +1,7 @@
-﻿using System.Numerics;
-using AutoDuty.Helpers;
+﻿using AutoDuty.Helpers;
 using AutoDuty.IPC;
 using AutoDuty.Managers;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
@@ -12,13 +12,14 @@ using ECommons.ImGuiMethods;
 using ECommons.Schedulers;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using Dalamud.Bindings.ImGui;
+using System.Numerics;
 
 namespace AutoDuty.Windows;
 
-using System;
 using ECommons.DalamudServices;
 using ECommons.Reflection;
+using global::AutoDuty.Multibox;
+using System;
 
 public sealed class MainWindow : Window, IDisposable
 {
@@ -67,7 +68,7 @@ public sealed class MainWindow : Window, IDisposable
 
     internal static void LoopsConfig()
     {
-        using ImRaii.IEndObject _ = ImRaii.Disabled(ConfigurationMain.Instance.MultiBox && !ConfigurationMain.Instance.host);
+        using ImRaii.IEndObject _ = ImRaii.Disabled(MultiboxUtility.Config.MultiBox && !MultiboxUtility.Config.Host);
 
         if ((AutoDuty.Configuration.UseSliderInputs  && ImGui.SliderInt("Times", ref AutoDuty.Configuration.LoopTimes, 0, 100)) || 
             (!AutoDuty.Configuration.UseSliderInputs && ImGui.InputInt("Times", ref AutoDuty.Configuration.LoopTimes, 1)))

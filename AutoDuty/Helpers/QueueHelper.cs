@@ -260,7 +260,7 @@ namespace AutoDuty.Helpers
                 Svc.Log.Debug("Queue Helper - All Conditions Met, Clicking Join");
                 AddonHelper.FireCallBack((AtkUnitBase*)this._addonContentsFinder, true, 12, 0);
 
-                if(ConfigurationMain.Instance is { MultiBox: true, host: true })
+                if(MultiboxUtility.Config is { MultiBox: true, Host: true })
                     MultiboxUtility.Server.Queue();
                 return;
             }

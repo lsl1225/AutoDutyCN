@@ -281,7 +281,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.assemblyDirectoryInfo = this.assemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 286) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 287) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this.configDirectory.Exists)
@@ -750,7 +750,7 @@ public sealed class AutoDuty : IDalamudPlugin
                 }
             }
 
-            if (!ConfigurationMain.Instance.MultiBox || !ConfigurationMain.Instance.multiBoxSynchronizePath || ConfigurationMain.Instance.host)
+            if (!MultiboxUtility.Config.MultiBox || !MultiboxUtility.Config.SynchronizePath || MultiboxUtility.Config.Host)
             {
                 this.Actions.Clear();
                 if (!ContentPathsManager.DictionaryPaths.TryGetValue(Svc.ClientState.TerritoryType, out ContentPathsManager.ContentPathContainer? container))
@@ -774,7 +774,7 @@ public sealed class AutoDuty : IDalamudPlugin
                 if (path?.Actions != null)
                     this.Actions = [..path.Actions];
 
-                if(ConfigurationMain.Instance.MultiBox && ConfigurationMain.Instance.multiBoxSynchronizePath && ConfigurationMain.Instance.host)
+                if(MultiboxUtility.Config.MultiBox && MultiboxUtility.Config.SynchronizePath && MultiboxUtility.Config.Host)
                     MultiboxUtility.Server.SendPath();
             }
 
@@ -813,10 +813,10 @@ public sealed class AutoDuty : IDalamudPlugin
 
     private void ClientState_TerritoryChanged(ushort t)
     {
-        if (ConfigurationMain.Instance.MultiBox)
+        if (MultiboxUtility.Config.MultiBox)
         {
             bool isDuty = ContentHelper.DictionaryContent.ContainsKey(t);
-            if (!ConfigurationMain.Instance.host)
+            if (!MultiboxUtility.Config.Host)
             {
                 if (isDuty)
                 {
@@ -1201,12 +1201,12 @@ public sealed class AutoDuty : IDalamudPlugin
             this.taskManager.Enqueue(() => PlayerHelper.IsReadyFull,                         "Loop-WaitIsReadyFull");
         }
 
-        if (queue || ConfigurationMain.Instance is { MultiBox: true, host: false }) 
+        if (queue || MultiboxUtility.Config is { MultiBox: true, Host: false }) 
             this.AutoConsume();
 
-        if (ConfigurationMain.Instance.MultiBox)
+        if (MultiboxUtility.Config.MultiBox)
         {
-            if (ConfigurationMain.Instance.host)
+            if (MultiboxUtility.Config.Host)
                 MultiboxUtility.MultiboxBlockingNextStep = true;
             else
                 this.taskManager.Enqueue(() => MultiboxUtility.MultiboxBlockingNextStep = true);
@@ -1467,7 +1467,7 @@ public sealed class AutoDuty : IDalamudPlugin
                     if (this.bossObject != null)
                     {
 
-                        if (ConfigurationMain.Instance.host)
+                        if (MultiboxUtility.Config.Host)
                             MultiboxUtility.MultiboxBlockingNextStep = false;
                         this.Stage = Stage.Action;
                         return;
@@ -1533,7 +1533,7 @@ public sealed class AutoDuty : IDalamudPlugin
 
         BossMod_IPCSubscriber.InBoss(this.pathAction.Name.Equals("Boss"));
 
-        if(ConfigurationMain.Instance.host)
+        if(MultiboxUtility.Config.Host)
             MultiboxUtility.MultiboxBlockingNextStep = false;
 
         if (this.pathAction.Position == Vector3.Zero)
@@ -2168,6 +2168,9 @@ public sealed class AutoDuty : IDalamudPlugin
         if (Configuration.AutoManageBossModAISettings) 
             BossMod_IPCSubscriber.DisablePresets();
 
+        this.stopForCombat = true;
+        this.actions.Rotation(true);
+
         this.SetGeneralSettings(true);
         if (Configuration is { AutoManageRotationPluginState: true, UsingAlternativeRotationPlugin: false }) 
             this.SetRotationPluginSettings(false);
@@ -2199,9 +2202,9 @@ public sealed class AutoDuty : IDalamudPlugin
     {
         GitHubHelper.Dispose();
         this.StopAndResetAll();
-        ConfigurationMain.Instance?.MultiBox =  false;
-        Svc.Framework.Update                 -= this.Framework_Update;
-        Svc.Framework.Update                 -= SchedulerHelper.ScheduleInvoker;
+        MultiboxUtility.Config?.MultiBox =  false;
+        Svc.Framework.Update             -= this.Framework_Update;
+        Svc.Framework.Update             -= SchedulerHelper.ScheduleInvoker;
         FileHelper.FileSystemWatcher?.Dispose();
         FileHelper.fileWatcher?.Dispose();
         this.windowSystem?.RemoveAllWindows();

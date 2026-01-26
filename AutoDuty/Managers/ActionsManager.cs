@@ -242,18 +242,22 @@ namespace AutoDuty.Managers
         }
 
         private bool autoManageRotationPluginState = false;
-        public void Rotation(PathAction action)
+        public  void Rotation(PathAction action) => 
+            this.Rotation(action.Arguments[0].Equals("on", StringComparison.InvariantCultureIgnoreCase));
+
+        public void Rotation(bool on)
         {
-            if (action.Arguments[0].Equals("off", StringComparison.InvariantCultureIgnoreCase))
+            if (!on)
             {
                 if (Configuration.AutoManageRotationPluginState)
                 {
-                    this.autoManageRotationPluginState = true;
+                    this.autoManageRotationPluginState          = true;
                     Configuration.AutoManageRotationPluginState = false;
                 }
+
                 Plugin.SetRotationPluginSettings(false, true);
             }
-            else if (action.Arguments[0].Equals("on", StringComparison.InvariantCultureIgnoreCase))
+            else
             {
                 if (this.autoManageRotationPluginState)
                     Configuration.AutoManageRotationPluginState = true;

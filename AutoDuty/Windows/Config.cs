@@ -1,6 +1,5 @@
 using AutoDuty.Helpers;
 using AutoDuty.IPC;
-using AutoDuty.Managers;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
@@ -117,24 +116,8 @@ public class ConfigurationMain
         set => this.updatePathsOnStartup = value;
     }
 
-    internal bool multiBox = false;
-    public bool MultiBox
-    {
-        get => this.multiBox;
-        set
-        {
-            if (this.multiBox == value)
-                return;
-            this.multiBox = value;
-
-            MultiboxUtility.Set(this.multiBox);
-        }
-    }
-
     [JsonProperty]
-    internal bool host = false;
-    [JsonProperty]
-    internal bool multiBoxSynchronizePath = true;
+    public MultiboxUtility.MultiboxConfiguration multibox = new();
 
     public IEnumerable<string> ConfigNames => this.profileByName.Keys;
      
@@ -616,7 +599,7 @@ public class Configuration
     public int        StuckReturnX                   = 10;
     public bool StuckReturn
     {
-        get => this.stuckReturn && !ConfigurationMain.Instance.MultiBox;
+        get => this.stuckReturn && !MultiboxUtility.Config.MultiBox;
         set => this.stuckReturn = value;
     }
 
@@ -640,7 +623,7 @@ public class Configuration
 
         unsync ??= this.Unsynced && this.DutyModeEnum.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial);
 
-        return ConfigurationMain.Instance.MultiBox || unsync.Value && this.TreatUnsyncAsW2W;
+        return MultiboxUtility.Config.MultiBox || unsync.Value && this.TreatUnsyncAsW2W;
     }
 
     public bool LevelingListExperimentalEntries
@@ -2838,7 +2821,7 @@ public static class ConfigTab
             uint text     = ImGui.GetColorU32(ImGuiCol.Text);
             uint disabled = ImGui.GetColorU32(ImGuiCol.TextDisabled);
 
-            TransportType transportType = MultiboxUtility.TransportType;
+            TransportType transportType = MultiboxUtility.Config.TransportType;
             using (ImRaii.PushColor(ImGuiCol.Text, transportType == TransportType.NamedPipe ? text : disabled))
             {
                 ImGui.TextWrapped(Loc.Get("ConfigTab.Multiboxing.NamedPipes"));
@@ -2860,19 +2843,19 @@ public static class ConfigTab
             ImGuiEx.TextWrapped(Loc.Get("ConfigTab.Multiboxing.Step7"));
             ImGuiEx.TextWrapped(Loc.Get("ConfigTab.Multiboxing.Step8"));
 
-            bool multiBox = ConfigurationMain.Instance.multiBox;
-            if (ImGui.Checkbox(nameof(ConfigurationMain.MultiBox), ref multiBox))
+            bool multiBox = MultiboxUtility.Config.MultiBox;
+            if (ImGui.Checkbox(nameof(MultiboxUtility.Config.MultiBox), ref multiBox))
             {
-                ConfigurationMain.Instance.MultiBox = multiBox;
+                MultiboxUtility.Config.MultiBox = multiBox;
                 Configuration.Save();
             }
 
-            using(ImRaii.Disabled(ConfigurationMain.Instance.MultiBox))
+            using(ImRaii.Disabled(MultiboxUtility.Config.MultiBox))
             {
                 ImGui.Indent();
                 if(ImGuiEx.EnumCombo(Loc.Get("ConfigTab.Multiboxing.TransportType"), ref transportType))
                 {
-                    MultiboxUtility.TransportType = transportType;
+                    MultiboxUtility.Config.TransportType = transportType;
                     Configuration.Save();
                 }
 
@@ -2882,33 +2865,33 @@ public static class ConfigTab
                 {
                     case TransportType.NamedPipe:
                     {
-                        string pipeName = MultiboxUtility.PipeName;
+                        string pipeName = MultiboxUtility.Config.PipeName;
                         if(ImGui.InputText(Loc.Get("ConfigTab.Multiboxing.PipeName"), ref pipeName))
                         {
-                            MultiboxUtility.PipeName = pipeName;
+                            MultiboxUtility.Config.PipeName = pipeName;
                             Configuration.Save();
                         }
 
                         ImGui.SameLine();
                         if (ImGui.Button($"{Loc.Get("ConfigTab.Multiboxing.Reset")}##MultiboxResetPipeName"))
                         {
-                            MultiboxUtility.PipeName = "AutoDutyPipe";
+                            MultiboxUtility.Config.PipeName = "AutoDutyPipe";
                                 Configuration.Save();
                         }
 
-                        if (!ConfigurationMain.Instance.host)
+                        if (!MultiboxUtility.Config.Host)
                         {
-                            string serverName = MultiboxUtility.ServerName;
+                            string serverName = MultiboxUtility.Config.ServerName;
                             if (ImGui.InputText(Loc.Get("ConfigTab.Multiboxing.ServerName"), ref serverName))
                             {
-                                MultiboxUtility.ServerName = serverName;
+                                MultiboxUtility.Config.ServerName = serverName;
                                 Configuration.Save();
                             }
 
                             ImGui.SameLine();
                             if (ImGui.Button($"{Loc.Get("ConfigTab.Multiboxing.Reset")}##MultiboxResetServerName"))
                             {
-                                MultiboxUtility.ServerName = ".";
+                                MultiboxUtility.Config.ServerName = ".";
                                     Configuration.Save();
                             }
                         }
@@ -2917,34 +2900,34 @@ public static class ConfigTab
                     }
                     case TransportType.Tcp:
                     {
-                        if (!ConfigurationMain.Instance.host)
+                        if (!MultiboxUtility.Config.Host)
                         {
-                            string serverAddress = MultiboxUtility.ServerAddress;
+                            string serverAddress = MultiboxUtility.Config.ServerAddress;
                             if (ImGui.InputText(Loc.Get("ConfigTab.Multiboxing.ServerAddress"), ref serverAddress))
                             {
-                                MultiboxUtility.ServerAddress = serverAddress;
+                                MultiboxUtility.Config.ServerAddress = serverAddress;
                                 Configuration.Save();
                             }
 
                             ImGui.SameLine();
                             if (ImGui.Button($"{Loc.Get("ConfigTab.Multiboxing.Reset")}##MultiboxResetServerAddress"))
                             {
-                                MultiboxUtility.ServerAddress = "127.0.0.1";
+                                MultiboxUtility.Config.ServerAddress = "127.0.0.1";
                                     Configuration.Save();
                             }
                         }
 
-                        int serverPort = MultiboxUtility.ServerPort;
+                        int serverPort = MultiboxUtility.Config.ServerPort;
                         if (ImGui.InputInt(Loc.Get("ConfigTab.Multiboxing.ServerPort"), ref serverPort))
                         {
-                            MultiboxUtility.ServerPort = serverPort;
+                            MultiboxUtility.Config.ServerPort = serverPort;
                             Configuration.Save();
                         }
 
                         ImGui.SameLine();
                         if (ImGui.Button($"{Loc.Get("ConfigTab.Multiboxing.Reset")}##MultiboxResetServerPort"))
                         {
-                            MultiboxUtility.ServerPort = 1716;
+                            MultiboxUtility.Config.ServerPort = 1716;
                                 Configuration.Save();
                         }
 
@@ -2954,22 +2937,31 @@ public static class ConfigTab
                         throw new ArgumentOutOfRangeException();
                 }
 
-                if (ImGui.Checkbox($"{Loc.Get("ConfigTab.Multiboxing.Host")}##MultiboxHost", ref ConfigurationMain.Instance.host))
+                bool host = MultiboxUtility.Config.Host;
+                if (ImGui.Checkbox($"{Loc.Get("ConfigTab.Multiboxing.Host")}##MultiboxHost", ref host))
+                {
+                    MultiboxUtility.Config.Host = host;
                     Configuration.Save();
+                }
 
                 ImGui.Unindent();
             }
 
-            if (ImGui.Checkbox($"{Loc.Get("ConfigTab.Multiboxing.SynchronizePaths")}##MultiboxSynchronizePaths", ref ConfigurationMain.Instance.multiBoxSynchronizePath))
+            bool synchronizePath = MultiboxUtility.Config.SynchronizePath;
+            if (ImGui.Checkbox($"{Loc.Get("ConfigTab.Multiboxing.SynchronizePaths")}##MultiboxSynchronizePaths", ref synchronizePath))
+            {
+                MultiboxUtility.Config.SynchronizePath = synchronizePath;
                 Configuration.Save();
+            }
+
             ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.Multiboxing.SynchronizePathsHelp"));
 
-            if (ConfigurationMain.Instance.MultiBox)
+            if (MultiboxUtility.Config.MultiBox)
             {
                 ImGui.Indent();
                 ImGuiEx.Text(string.Format(Loc.Get("ConfigTab.Multiboxing.Blocking"), MultiboxUtility.stepBlock));
 
-                if(ConfigurationMain.Instance.host)
+                if(MultiboxUtility.Config.Host)
                 {
                     unsafe
                     {

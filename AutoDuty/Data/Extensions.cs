@@ -66,12 +66,8 @@ namespace AutoDuty.Data
 
         public static string ToCustomString(this Enum T) => T.ToString().Replace("_", " ") ?? "";
 
-        public static string ToLocalizedString(this Enum T, string enumTypeName)
-        {
-            string enumValue = T.ToString();
-            string key = $"ConfigTab.Enums.{enumTypeName}.{enumValue}";
-            return Managers.Loc.Get(key, enumValue.Replace("_", " "));
-        }
+        public static string ToLocalizedString<T>(this T @enum) where T : Enum => 
+            string.Join(", ", @enum.ToString().Split(",").Select(flag => Managers.Loc.Get($"ConfigTab.Enums.{typeof(T).Name}.{flag.Trim()}")));
 
         public static bool StartsWithIgnoreCase(this string str, string strsw) => str.StartsWith(strsw, StringComparison.OrdinalIgnoreCase);
 

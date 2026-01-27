@@ -464,21 +464,24 @@
                 _ => JobWithRole.None
             };
 
-        public static void DrawSelectable(JobWithRole jwr, ref JobWithRole config, bool allowRemoval = true)
+        public static bool DrawSelectable(JobWithRole jwr, ref JobWithRole config, bool allowRemoval = true)
         {
             int flag = (int)config;
             
             using(ImRaii.Disabled(!allowRemoval && config.HasFlag(jwr)))
             {
-                if (ImGui.CheckboxFlags(jwr.ToLocalizedString("Jobs"), ref flag, (int)jwr))
+                if (ImGui.CheckboxFlags(jwr.ToLocalizedString(), ref flag, (int)jwr))
                 {
                     config = (JobWithRole)flag;
                     Windows.Configuration.Save();
+                    return true;
                 }
             }
+
+            return false;
         }
 
-        public static void DrawCategory(JobWithRole category, ref JobWithRole config, bool allowRemoval = true)
+        public static bool DrawCategory(JobWithRole category, ref JobWithRole config, bool allowRemoval = true)
         {
             ImGui.PushStyleColor(ImGuiCol.Header,        Vector4.Zero);
             ImGui.PushStyleColor(ImGuiCol.HeaderHovered, new Vector4(0.2f));
@@ -486,7 +489,7 @@
             bool collapse = ImGui.CollapsingHeader("##" + category, ImGuiTreeNodeFlags.AllowItemOverlap);
             ImGui.PopStyleColor(3);
             ImGui.SameLine();
-            DrawSelectable(category, ref config, allowRemoval);
+            bool changed = DrawSelectable(category, ref config, allowRemoval);
             if (collapse)
             {
                 ImGui.Indent();
@@ -494,17 +497,18 @@
                     if (VALUES[jobW].MinBy(jwr => CATEGORIES[jwr].Count()) == category)
                         if (CATEGORIES.ContainsKey(jobW))
                         {
-                            DrawCategory(jobW, ref config, allowRemoval);
+                            changed |= DrawCategory(jobW, ref config, allowRemoval);
                         }
                         else
                         {
                             ImGui.Indent();
-                            DrawSelectable(jobW, ref config, allowRemoval);
+                            changed |= DrawSelectable(jobW, ref config, allowRemoval);
                             ImGui.Unindent();
                         }
 
                 ImGui.Unindent();
             }
+            return changed;
         }
     }
 }

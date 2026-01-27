@@ -104,6 +104,17 @@ public class ConfigurationMain
         public          int                  dungeonsRun;
         public readonly List<DutyDataRecord> dutyRecords = [];
         public          TimeSpan             timeSpent   = TimeSpan.Zero;
+
+        public StatData Filter(Func<DutyDataRecord, bool> filter)
+        {
+            StatData newStat = new();
+
+            newStat.dutyRecords.AddRange(this.dutyRecords.Where(filter));
+            newStat.dungeonsRun = newStat.dutyRecords.Count;
+            foreach (DutyDataRecord record in newStat.dutyRecords)
+                newStat.timeSpent += record.Duration;
+            return newStat;
+        }
     }
 
 
@@ -1891,7 +1902,8 @@ public static class ConfigTab
 
 
                 ImGui.BeginListBox("##W2WConfig", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, 300));
-                JobWithRoleHelper.DrawCategory(JobWithRole.All, ref Configuration.W2WJobs);
+                if(JobWithRoleHelper.DrawCategory(JobWithRole.All, ref Configuration.W2WJobs))
+                    Configuration.Save();
                 ImGui.EndListBox();
             }
 
@@ -1957,10 +1969,10 @@ public static class ConfigTab
                 {
                     ImGui.SameLine(0, 5);
                     ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-                    if (ImGui.BeginCombo("##RetireLocation", Configuration.RetireLocationEnum.ToLocalizedString("RetireLocation")))
+                    if (ImGui.BeginCombo("##RetireLocation", Configuration.RetireLocationEnum.ToLocalizedString()))
                     {
                         foreach (RetireLocation retireLocation in Enum.GetValues(typeof(RetireLocation)))
-                            if (ImGui.Selectable(retireLocation.ToLocalizedString("RetireLocation"), Configuration.RetireLocationEnum == retireLocation))
+                            if (ImGui.Selectable(retireLocation.ToLocalizedString(), Configuration.RetireLocationEnum == retireLocation))
                             {
                                 Configuration.RetireLocationEnum = retireLocation;
                                 Configuration.Save();
@@ -2465,7 +2477,7 @@ public static class ConfigTab
                         for (int index = 0; index < values.Length; index++)
                         {
                             bool   x            = Bitmask.IsBitSet(Configuration.AutoDesynthCategories, index);
-                            string categoryName = values[index].ToLocalizedString("DesynthCategory");
+                            string categoryName = values[index].ToLocalizedString();
                             if (ImGui.Checkbox(categoryName + $"##DesynthCategory{index}", ref x))
                                 if (x)
                                     Bitmask.SetBit(ref Configuration.AutoDesynthCategories, index);
@@ -2579,10 +2591,10 @@ public static class ConfigTab
                     ImGui.Indent();
                     ImGui.Text(Loc.Get("ConfigTab.BetweenLoop.PreferredSummoningBell"));
                     ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.BetweenLoop.PreferredSummoningBellHelp"));
-                    if (ImGui.BeginCombo("##PreferredBell", Configuration.PreferredSummoningBellEnum.ToLocalizedString("SummoningBellLocations")))
+                    if (ImGui.BeginCombo("##PreferredBell", Configuration.PreferredSummoningBellEnum.ToLocalizedString()))
                     {
                         foreach (SummoningBellLocations summoningBells in Enum.GetValues(typeof(SummoningBellLocations)))
-                            if (ImGui.Selectable(summoningBells.ToLocalizedString("SummoningBellLocations")))
+                            if (ImGui.Selectable(summoningBells.ToLocalizedString()))
                             {
                                 Configuration.PreferredSummoningBellEnum = summoningBells;
                                 Configuration.Save();
@@ -2774,11 +2786,11 @@ public static class ConfigTab
                 ImGui.Text(Loc.Get("ConfigTab.Termination.OnCompletionOfAllLoops"));
                 ImGui.SameLine(0, 10);
                 ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-                if (ImGui.BeginCombo("##ConfigTerminationMethod", Configuration.TerminationMethodEnum.ToLocalizedString("TerminationMode")))
+                if (ImGui.BeginCombo("##ConfigTerminationMethod", Configuration.TerminationMethodEnum.ToLocalizedString()))
                 {
                     foreach (TerminationMode terminationMode in Enum.GetValues(typeof(TerminationMode)))
                         if (terminationMode != TerminationMode.Kill_PC || OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
-                            if (ImGui.Selectable(terminationMode.ToLocalizedString("TerminationMode"), Configuration.TerminationMethodEnum == terminationMode))
+                            if (ImGui.Selectable(terminationMode.ToLocalizedString(), Configuration.TerminationMethodEnum == terminationMode))
                             {
                                 Configuration.TerminationMethodEnum = terminationMode;
                                 Configuration.Save();

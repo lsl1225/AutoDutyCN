@@ -16,6 +16,7 @@ namespace AutoDuty.Helpers
 
     internal static class DeathHelper
     {
+        public static  int             deathCount = 0;
         private static PlayerLifeState deathState = PlayerLifeState.Alive;
         internal static PlayerLifeState DeathState
         {
@@ -35,7 +36,8 @@ namespace AutoDuty.Helpers
                         if (value != deathState)
                         {
                             DebugLog("Player is Dead changing state to Dead");
-                            SchedulerHelper.ScheduleAction(nameof(OnDeath), OnDeath, 500, false); 
+                            SchedulerHelper.ScheduleAction(nameof(OnDeath), OnDeath, 500, false);
+                            deathCount++;
                         }
 
                         break;

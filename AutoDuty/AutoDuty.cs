@@ -281,7 +281,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.assemblyDirectoryInfo = this.assemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 287) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 288) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this.configDirectory.Exists)
@@ -707,8 +707,9 @@ public sealed class AutoDuty : IDalamudPlugin
 
     private void DutyState_DutyStarted(object?     sender, ushort e)
     {
-        this.dutyState     = DutyState.DutyStarted;
-        this.lastDutyStart = DateTime.UtcNow;
+        this.dutyState         = DutyState.DutyStarted;
+        this.lastDutyStart     = DateTime.UtcNow;
+        DeathHelper.deathCount = 0;
     }
 
     private void DutyState_DutyWiped(object?       sender, ushort e) => this.dutyState = DutyState.DutyWiped;
@@ -722,7 +723,7 @@ public sealed class AutoDuty : IDalamudPlugin
 
             ConfigurationMain.StatData stats = ConfigurationMain.Instance.stats;
 
-            stats.dutyRecords.Add(new DutyDataRecord(DateTime.UtcNow, timeSpan, Player.Territory.RowId, Player.CID, InventoryHelper.CurrentItemLevel, Player.Job));
+            stats.dutyRecords.Add(new DutyDataRecord(DateTime.UtcNow, timeSpan, Player.Territory.RowId, Player.CID, InventoryHelper.CurrentItemLevel, Player.Job, DeathHelper.deathCount));
             stats.dungeonsRun++;
             Configuration.Save();
         }

@@ -117,6 +117,8 @@ internal static class StatsTab
             ImGui.Text(ilvl.ToString());
             ImGui.TableNextColumn();
             ImGui.Text(job.ToString());
+            ImGui.TableNextColumn();
+            ImGui.Text(deaths?.ToString() ?? "??");
         }
 
         ImGui.EndTable();

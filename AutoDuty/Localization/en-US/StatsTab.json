@@ -13,7 +13,8 @@
       "Duty": "Duty",
       "Char": "Char",
       "ilvl": "ilvl",
-      "Job": "Job"
+      "Job": "Job",
+      "Deaths": "Deaths"
     }
   }
 }

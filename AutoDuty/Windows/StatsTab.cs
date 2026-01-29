@@ -360,7 +360,7 @@ internal static class StatsTab
                                                                         ddr.ilvl           >= ilvlFilterMin         && ddr.ilvl           <= ilvlFilterMax         &&
                                                                         ddr.CompletionTime >= dateTimeFilterMinDate && ddr.CompletionTime <= dateTimeFilterMaxDate &&
                                                                         ddr.Duration       >= durationFilterMin     && ddr.Duration       <= durationFilterMax     &&
-                                                                        ddr.Deaths         >= deathsFilterMin       && ddr.Deaths         <= deathsFilterMax);
+                                                                        (ddr.Deaths == null || ddr.Deaths >= deathsFilterMin && ddr.Deaths <= deathsFilterMax));
         }
 
 #endregion

@@ -28,17 +28,9 @@
       },
       "WrathCombo.API": {
         "type": "Direct",
-        "requested": "[0.4.3, )",
-        "resolved": "0.4.3",
-        "contentHash": "tVDBloZKc799K8V/WeXyfcYJ//AcsL0t4MThOeUM4p1EmDyH8yvaamb121Qj4NbkeLVaRZ4wBqOeqRq8pBt2Qg==",
-        "dependencies": {
-          "JetBrains.Annotations": "2025.2.4"
-        }
-      },
-      "JetBrains.Annotations": {
-        "type": "Transitive",
-        "resolved": "2025.2.4",
-        "contentHash": "TwbgxAkXxY+vNEhNVx/QXjJ4vqxmepOjsgRvvImQPbHkHMMb4W+ahL3laMsxXKtNT7iMy+E1B3xkqao2hf1n3A=="
+        "requested": "[0.5.2, )",
+        "resolved": "0.5.2",
+        "contentHash": "O8nlZah+j8v0IGPkZbpdzP/YDG3tjySby+Lo7HvDQPa9G5Vtu/qkonSCdHTqYwTDXxnH3ZseVJbDr8ZAOsA4zw=="
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
@@ -120,7 +112,7 @@
       "nightmareui": {
         "type": "Project",
         "dependencies": {
-          "ECommons": "[3.1.0.13, )"
+          "ECommons": "[3.1.0.20, )"
         }
       }
     }

@@ -508,6 +508,6 @@ namespace AutoDuty.Data
             public bool unsynced;
         }
 
-        public readonly record struct DutyDataRecord(DateTime CompletionTime, TimeSpan Duration, uint TerritoryId, ulong CID, int ilvl, Job Job);
+        public readonly record struct DutyDataRecord(DateTime CompletionTime, TimeSpan Duration, uint TerritoryId, ulong CID, int ilvl, Job Job, int? Deaths);
     }
 }

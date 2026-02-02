@@ -278,7 +278,8 @@
         "Kill_PC": "Kill PC",
         "Start_AR_Night_Mode": "Start AR Night Mode"
       },
-      "Jobs": {
+      "JobWithRole": {
+        "None": "None",
         "All": "All",
         "Tanks": "Tanks",
         "Healers": "Healers",

@@ -6,6 +6,8 @@
     "TimeSpent": "Time spent: {0}",
     "DutiesRunHeader": "Duties run",
     "ScrambleNames": "Scramble names",
+    "SelectedMultiCount": "{0} selected",
+    "FilterOnlySelected": "only selected",
     "Unknown": "Unknown ({0})",
     "Columns": {
       "CompletedAt": "Completed At",
@@ -13,7 +15,8 @@
       "Duty": "Duty",
       "Char": "Char",
       "ilvl": "ilvl",
-      "Job": "Job"
+      "Job": "Job",
+      "Deaths": "Deaths"
     }
   }
 }

@@ -610,7 +610,8 @@ namespace AutoDuty.Windows
                                                     if (((Job)gearset->ClassJob).GetCombatRole() == CombatRole.NonCombat)
                                                         continue;
 
-                                                    if (ImGui.Selectable(gearset->NameString, entry.gearset == gearset->Id)) entry.gearset = gearset->Id;
+                                                    if (ImGui.Selectable(gearset->NameString, entry.gearset == gearset->Id)) 
+                                                        entry.gearset = gearset->Id;
                                                 }
 
                                                 ImGui.EndCombo();
@@ -641,7 +642,18 @@ namespace AutoDuty.Windows
                                             ImGui.PushItemWidth((entryContainer.Paths.Count > 1 ? (ImGui.GetContentRegionAvail().X - 107f.Scale()) / 2f : ImGui.GetContentRegionAvail().X - 200f.Scale()));
                                             if (ImGui.BeginCombo($"##Playlist{i}DutySelection", $"({entry.Id}) {entryContent.Name}"))
                                             {
-                                                short level = PlayerHelper.GetCurrentLevelFromSheet();
+                                                Job?    entryJob  = null;
+                                                ushort? entryIlvl = null;
+                                                if(entry.gearset.HasValue)
+                                                {
+                                                    RaptureGearsetModule.GearsetEntry* gearset = gearsetModule->GetGearset((int)entry.gearset);
+                                                    entryJob = (Job)gearset->ClassJob;
+                                                    entryIlvl = (ushort) gearset->ItemLevel;
+                                                }
+
+
+                                                short level = PlayerHelper.GetCurrentLevelFromSheet(entryJob);
+                                                entryIlvl ??= InventoryHelper.CurrentItemLevel;
                                                 DrawSearchBar();
 
                                                 foreach (uint key in ContentPathsManager.DictionaryPaths.Keys)
@@ -651,7 +663,7 @@ namespace AutoDuty.Windows
                                                     if (!string.IsNullOrWhiteSpace(_searchText) && !(content.Name?.Contains(_searchText, StringComparison.InvariantCultureIgnoreCase) ?? false))
                                                         continue;
 
-                                                    if (content.DutyModes.HasFlag(entry.DutyMode) && content.CanRun(level, entry.DutyMode))
+                                                    if (content.DutyModes.HasFlag(entry.DutyMode) && content.CanRun(level, entry.DutyMode, ilvl: entryIlvl))
                                                         if (ImGui.Selectable($"({key}) {content.Name}", entry.Id == key))
                                                             entry.Id = key;
                                                 }

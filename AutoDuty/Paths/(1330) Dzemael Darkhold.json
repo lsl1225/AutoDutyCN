@@ -304,9 +304,9 @@
       "Tag": "None",
       "Name": "Boss",
       "Position": {
-        "X": 61.328613,
-        "Y": -37.990196,
-        "Z": -154.31364
+        "X": 77.634384,
+        "Y": -39.472744,
+        "Z": -164.33348
       },
       "Arguments": [
         ""
@@ -325,6 +325,10 @@
       {
         "Version": 290,
         "Change": "Added safeguards for transitions"
+      },
+      {
+        "Version": 290,
+        "Change": "Moved B3 spot"
       }
     ],
     "Notes": []

@@ -56,7 +56,9 @@
     },
     "LevelingModes": {
       "None": "不开启",
-      "Auto": "自动排队"
+      "Auto": "自动排队",
+      "Trust_Group": "亲信升级",
+      "Trust_Solo": "仅自己"
     }
   }
 }

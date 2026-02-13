@@ -281,7 +281,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.assemblyDirectoryInfo = this.assemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 288) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 291) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this.configDirectory.Exists)
@@ -1071,8 +1071,11 @@ public sealed class AutoDuty : IDalamudPlugin
         {
             this.currentLoop = 1;
             if (Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist) 
+            {
                 Configuration.LoopTimes = Plugin.PlaylistCurrentEntry?.count ?? Configuration.LoopTimes;
+                Plugin.PlaylistCurrentEntry!.curCount = 0;
         }
+    }
     }
 
     internal unsafe void LoopTasks(bool queue = true, bool between = true)

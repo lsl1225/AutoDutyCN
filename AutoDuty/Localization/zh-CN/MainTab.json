@@ -42,7 +42,8 @@
     "RequiresBossModAlt": "AutoDuty 依赖 BossMod 插���处理战斗机制。\n请添加仓库：https://puni.sh/api/repository/veyn",
     "Modes": {
       "Looping": "单副本挂机 (Looping)",
-      "Playlist": "任务列表模式 (Playlist)"
+      "Playlist": "任务列表模式 (Playlist)",
+      "NoviceHall": "初学者学堂"
     },
     "DutyModes": {
       "None": "未选择",
@@ -52,7 +53,8 @@
       "Regular": "常规副本 (匹配/组队)",
       "Trial": "讨伐/歼灭战",
       "Raid": "大型任务 (Raid)",
-      "Variant": "异闻/多变副本"
+      "Variant": "异闻/多变副本",
+      "NoviceHall": "初学者学堂"
     },
     "LevelingModes": {
       "None": "不开启",

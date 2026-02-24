@@ -24,7 +24,8 @@ namespace AutoDuty.Helpers
         private static bool TryGetDawnIndex(uint indexIn, uint ex, out int indexOut)
         {
             indexOut = -1;
-            if (indexIn < 1) return false;
+            if (indexIn < 1) 
+                return false;
             indexOut = DawnIndex(indexIn, ex);
             return true;
         }
@@ -72,7 +73,9 @@ namespace AutoDuty.Helpers
 
             foreach (ContentFinderCondition contentFinderCondition in listContentFinderCondition)
             {
-                if (contentFinderCondition.ContentType.ValueNullable == null || contentFinderCondition.TerritoryType.ValueNullable?.ExVersion.ValueNullable == null || contentFinderCondition.ContentType.Value.RowId is not 2 and not 4 and not 5 and not 30 || contentFinderCondition.Name.ToString().IsNullOrEmpty())
+
+
+                if (contentFinderCondition.ContentType.ValueNullable == null || contentFinderCondition.TerritoryType.ValueNullable?.ExVersion.ValueNullable == null || contentFinderCondition.ContentType.Value.RowId is not (2 or 4 or 5 or 20 or 30) || contentFinderCondition.Name.ToString().IsNullOrEmpty())
                     continue;
 
                 static string CleanName(string name)
@@ -118,6 +121,9 @@ namespace AutoDuty.Helpers
                         break;
                     case 5:
                         content.DutyModes |= DutyMode.Raid;
+                        break;
+                    case 20:
+                        content.DutyModes |= DutyMode.NoviceHall;
                         break;
                     case 30 when contentFinderCondition.TerritoryType.Value.RowId.EqualsAny(ListVVDContent):
                         content.DutyModes |= DutyMode.Variant;
@@ -191,6 +197,10 @@ namespace AutoDuty.Helpers
 
             if (mode.HasFlag(DutyMode.Trust))
                 if (!content.CanTrustRun(trustCheckLevels))
+                    return false;
+
+            if(mode.HasFlag(DutyMode.NoviceHall))
+                if (!content.CanRunNovice())
                     return false;
 
             return true;

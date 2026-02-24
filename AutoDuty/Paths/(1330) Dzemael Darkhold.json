@@ -4,6 +4,18 @@
       "Tag": "None",
       "Name": "MoveTo",
       "Position": {
+        "X": 2.2436545,
+        "Y": 4.735791,
+        "Z": 249.11252
+      },
+      "Arguments": [],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "MoveTo",
+      "Position": {
         "X": 16.979097,
         "Y": 8.3953285,
         "Z": 208.51074
@@ -214,6 +226,34 @@
     },
     {
       "Tag": "None",
+      "Name": "MoveTo",
+      "Position": {
+        "X": -111.099594,
+        "Y": -23.804768,
+        "Z": 4.6238256
+      },
+      "Arguments": [
+        ""
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "MoveTo",
+      "Position": {
+        "X": -111.824066,
+        "Y": -24.439007,
+        "Z": -7.4638395
+      },
+      "Arguments": [
+        "false"
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
       "Name": "Boss",
       "Position": {
         "X": -96.21404,
@@ -283,7 +323,7 @@
             "Z": 0.0
           },
           "operatorValue": "<=",
-          "distance": 100.0
+          "distance": 20.0
         }
       ],
       "Note": ""
@@ -328,7 +368,11 @@
       },
       {
         "Version": 290,
-        "Change": "Moved B3 spot."
+        "Change": "Moved B3 spot"
+      },
+      {
+        "Version": 291,
+        "Change": "Enhanced path stability"
       }
     ],
     "Notes": []

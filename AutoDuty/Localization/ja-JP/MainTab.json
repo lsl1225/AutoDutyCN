@@ -42,7 +42,8 @@
     "RequiresBossModAlt": "AutoDutyでギミック処理を行うにはBossModプラグインのインストールと読み込みが必要です。3rd party repoを追加してください:\nhttps://puni.sh/api/repository/veyn",
     "Modes": {
       "Looping": "ループ",
-      "Playlist": "プレイリスト"
+      "Playlist": "プレイリスト",
+      "NoviceHall": "初心者の館"      
     },
     "DutyModes": {
       "None": "なし",

@@ -442,6 +442,7 @@ namespace AutoDuty.Windows
                             ConditionType.ObjectData => new PathActionConditionObjectData(),
                             ConditionType.Job => new PathActionConditionJob(),
                             ConditionType.ActionStatus => new PathActionConditionActionStatus(),
+                            ConditionType.VariantPath => new PathActionConditionVariantPath(),
                             _ => throw new ArgumentOutOfRangeException()
                         });
                     }

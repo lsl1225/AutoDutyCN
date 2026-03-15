@@ -6,19 +6,22 @@ using System.Text.Json.Serialization;
 
 namespace AutoDuty.Data
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
     using Dalamud.Bindings.ImGui;
     using Dalamud.Game.ClientState.Objects.Types;
+    using Dalamud.Interface;
+    using Dalamud.Interface.Components;
     using ECommons.ExcelServices;
+    using ECommons.GameFunctions;
     using ECommons.ImGuiMethods;
     using FFXIVClientStructs.FFXIV.Client.Game.Object;
     using Helpers;
     using Lumina.Excel.Sheets;
     using Newtonsoft.Json;
-    using ECommons.GameFunctions;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using Dalamud.Interface.Utility.Raii;
 
     public class Classes
     {
@@ -138,6 +141,8 @@ namespace AutoDuty.Data
 
             public abstract bool IsFulfilled();
             public abstract void DrawConfig();
+
+            public abstract IEnumerable<(Vector4 color, string text)> DrawStepEntry();
         }
 
         public class PathActionConditionNot(PathActionCondition condition) : PathActionCondition
@@ -147,6 +152,14 @@ namespace AutoDuty.Data
             public override bool IsFulfilled() => !this.condition.IsFulfilled();
 
             public override void DrawConfig() => this.condition.DrawConfig();
+
+            public override IEnumerable<(Vector4 color, string text)> DrawStepEntry()
+            {
+                yield return (new Vector4(1, 165 / 255f, 0, 1), "Not?");
+
+                foreach ((Vector4 color, string text) step in this.condition.DrawStepEntry())
+                    yield return step;
+        }
         }
 
         public class PathActionConditionJob : PathActionCondition
@@ -160,6 +173,12 @@ namespace AutoDuty.Data
 
             public override void DrawConfig() =>
                 JobWithRoleHelper.DrawCategory(JobWithRole.All, ref this.job);
+
+            public override IEnumerable<(Vector4 color, string text)> DrawStepEntry()
+            {
+                yield return (new Vector4(1, 165 / 255f, 0, 1), $"{ConditionType.Job.ToLocalizedString()} ");
+                yield return (new Vector4(1, 165 / 255f, 0, 1), this.job.ToLocalizedString());
+        }
         }
 
         public class PathActionConditionActionStatus : PathActionCondition
@@ -184,6 +203,12 @@ namespace AutoDuty.Data
                 ImGui.SameLine();
                 ImGui.InputUInt("Status Code", ref this.statusCode);
             }
+
+            public override IEnumerable<(Vector4 color, string text)> DrawStepEntry()
+            {
+                yield return (new Vector4(1, 165 / 255f, 0, 1), $"{ConditionType.ActionStatus.ToLocalizedString()} ");
+                yield return (new Vector4(1, 165 / 255f, 0, 1), $"{this.type.ToLocalizedString()} {this.id} {this.statusCode}");
+        }
         }
 
         public class PathActionConditionItemCount : PathActionCondition
@@ -208,6 +233,12 @@ namespace AutoDuty.Data
                 ImGui.SameLine();
                 ImGuiEx.InputUint("Quantity", ref this.quantity);
             }
+
+            public override IEnumerable<(Vector4 color, string text)> DrawStepEntry()
+            {
+                yield return (new Vector4(1, 165 / 255f, 0, 1), $"{ConditionType.ItemCount.ToLocalizedString()} ");
+                yield return (new Vector4(1, 165 / 255f, 0, 1), $"{this.itemId} {this.operatorValue} {this.quantity}");
+        }
         }
 
         public class PathActionConditionObjectData : PathActionCondition
@@ -246,6 +277,12 @@ namespace AutoDuty.Data
                 ImGui.SameLine();
                 ImGui.InputInt("Value", ref this.value);
             }
+
+            public override IEnumerable<(Vector4 color, string text)> DrawStepEntry()
+            {
+                yield return (new Vector4(1, 165 / 255f, 0, 1), $"{ConditionType.ObjectData.ToLocalizedString()} ");
+                yield return (new Vector4(1, 165 / 255f, 0, 1), $"{this.baseId} {this.property.ToLocalizedString()} {this.value}");
+        }
         }
 
         public class PathActionConditionDistance : PathActionCondition
@@ -298,19 +335,19 @@ namespace AutoDuty.Data
                 {
                     case DistanceLocationTypes.Object:
                         ImGui.SameLine();
-                        ImGuiEx.InputUint("origin_baseID", ref this.originId);
+                        ImGuiEx.InputUint("ID##origin_baseID", ref this.originId);
                         break;
                     case DistanceLocationTypes.Location:
                         ImGui.SameLine();
                         ImGui.PushItemWidth(50f);
                         float x = this.originLoc.X;
-                        ImGui.InputFloat("origin_X", ref x);
+                        ImGui.InputFloat("X##origin_X", ref x);
                         ImGui.SameLine();
                         float y = this.originLoc.Y;
-                        ImGui.InputFloat("origin_Y", ref y);
+                        ImGui.InputFloat("Y##origin_Y", ref y);
                         ImGui.SameLine();
                         float z = this.originLoc.Z;
-                        ImGui.InputFloat("origin_Z", ref z);
+                        ImGui.InputFloat("Z##origin_Z", ref z);
                         this.originLoc = new Vector3(x, y, z);
                         ImGui.PopItemWidth();
                         break;
@@ -326,19 +363,19 @@ namespace AutoDuty.Data
                 {
                     case DistanceLocationTypes.Object:
                         ImGui.SameLine();
-                        ImGuiEx.InputUint("target_baseID", ref this.targetId);
+                        ImGuiEx.InputUint("ID##target_baseID", ref this.targetId);
                         break;
                     case DistanceLocationTypes.Location:
                         ImGui.PushItemWidth(50f);
                         ImGui.SameLine();
                         float x = this.targetLoc.X;
-                        ImGui.InputFloat("target_X", ref x);
+                        ImGui.InputFloat("X##target_X", ref x);
                         ImGui.SameLine();
                         float y = this.targetLoc.Y;
-                        ImGui.InputFloat("target_Y", ref y);
+                        ImGui.InputFloat("Y##target_Y", ref y);
                         ImGui.SameLine();
                         float z = this.targetLoc.Z;
-                        ImGui.InputFloat("target_Z", ref z);
+                        ImGui.InputFloat("Z##target_Z", ref z);
                         this.targetLoc = new Vector3(x, y, z);
                         ImGui.PopItemWidth();
                         break;

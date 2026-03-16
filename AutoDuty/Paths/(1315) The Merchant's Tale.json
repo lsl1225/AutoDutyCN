@@ -28,6 +28,20 @@
     },
     {
       "Tag": "None",
+      "Name": "Wait",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "1000"
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
       "Name": "VariantVote",
       "Position": {
         "X": 0.0,
@@ -1356,6 +1370,31 @@
       },
       "Arguments": [
         "500"
+      ],
+      "Conditions": [
+        {
+          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "pathIndices": [
+            5,
+            6,
+            7,
+            8,
+            13
+          ]
+        }
+      ],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "ConditionAction",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "ObjectData;19139;NamePlateIconId;61721&ModifyIndex;-2"
       ],
       "Conditions": [
         {
@@ -3445,11 +3484,11 @@
     }
   ],
   "Meta": {
-    "CreatedAt": 291,
+    "CreatedAt": 295,
     "Changelog": [
       {
         "Version": 295,
-        "Change": ""
+        "Change": "Stabilized initial vote and right path npc"
       }
     ],
     "Notes": []

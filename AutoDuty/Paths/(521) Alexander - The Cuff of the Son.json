@@ -1,0 +1,201 @@
+{
+  "Actions": [
+    {
+      "Tag": "Unsynced",
+      "Name": "BossMod",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "on"
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "Unsynced",
+      "Name": "Rotation",
+      "Position": {
+        "X": 14.722552,
+        "Y": 15.749659,
+        "Z": 57.353497
+      },
+      "Arguments": [
+        "on"
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "Unsynced",
+      "Name": "MoveTo",
+      "Position": {
+        "X": 15.720591,
+        "Y": 13.089955,
+        "Z": 42.845432
+      },
+      "Arguments": [
+        ""
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "Unsynced",
+      "Name": "WaitFor",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "IsReady"
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "Unsynced",
+      "Name": "MoveTo",
+      "Position": {
+        "X": 27.559937,
+        "Y": 13.272752,
+        "Z": 43.006283
+      },
+      "Arguments": [
+        ""
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "Unsynced",
+      "Name": "WaitFor",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "IsReady"
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "Unsynced",
+      "Name": "MoveTo",
+      "Position": {
+        "X": 0.033288293,
+        "Y": -26.0,
+        "Z": -70.78829
+      },
+      "Arguments": [
+        ""
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "Unsynced",
+      "Name": "MoveTo",
+      "Position": {
+        "X": 0.023508878,
+        "Y": -26.0,
+        "Z": -119.62995
+      },
+      "Arguments": [
+        ""
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "Unsynced",
+      "Name": "Boss",
+      "Position": {
+        "X": 0.023508878,
+        "Y": -26.0,
+        "Z": -119.62995
+      },
+      "Arguments": [
+        "2002735"
+      ],
+      "Conditions": [],
+      "Note": "Blaster"
+    },
+    {
+      "Tag": "Unsynced",
+      "Name": "Boss",
+      "Position": {
+        "X": -0.01,
+        "Y": -20.0,
+        "Z": -184.49
+      },
+      "Arguments": [
+        "5582"
+      ],
+      "Conditions": [],
+      "Note": "Brawler"
+    },
+    {
+      "Tag": "Unsynced",
+      "Name": "Boss",
+      "Position": {
+        "X": 0.03,
+        "Y": -14.0,
+        "Z": -246.32
+      },
+      "Arguments": [
+        "5587"
+      ],
+      "Conditions": [],
+      "Note": "Swindler"
+    },
+    {
+      "Tag": "Unsynced",
+      "Name": "Boss",
+      "Position": {
+        "X": -0.01,
+        "Y": -7.999998,
+        "Z": -312.65
+      },
+      "Arguments": [
+        "5587"
+      ],
+      "Conditions": [],
+      "Note": "Vortexer"
+    },
+    {
+      "Tag": "Treasure",
+      "Name": "TreasureCoffer",
+      "Position": {
+        "X": -1.5140961,
+        "Y": -7.999998,
+        "Z": -331.0326
+      },
+      "Arguments": [],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "Treasure",
+      "Name": "TreasureCoffer",
+      "Position": {
+        "X": 1.5077223,
+        "Y": -7.999999,
+        "Z": -331.02838
+      },
+      "Arguments": [],
+      "Conditions": [],
+      "Note": ""
+    }
+  ],
+  "Meta": {
+    "CreatedAt": 294,
+    "Changelog": [],
+    "Notes": []
+  }
+}

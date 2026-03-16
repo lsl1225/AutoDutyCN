@@ -96,6 +96,11 @@ public class ConfigurationMain
     }
 
     [JsonProperty]
+    public Dictionary<ulong, int> dutyCountSinceReset = [];
+    [JsonProperty]
+    public DateTime dutyCountResetDate;
+
+    [JsonProperty]
     public StatData stats = new();
 
     [JsonObject(MemberSerialization.OptOut)]
@@ -1147,7 +1152,7 @@ public static class ConfigTab
                 }
 
                 if (ImGui.CollapsingHeader("Sheet Check"))
-                    {
+                {
                     ImGuiEx.Text($"{typeof(Achievement).Assembly.GetTypes().Where(x => x.FullName?.StartsWith("Lumina.Excel.Sheets") ?? false).
                                                         Select(x => (x, x.GetProperties().Where(f => f.PropertyType.Name == "RowRef`1" && f.PropertyType.GenericTypeArguments[0] == typeof(Tutorial)))).
                                                         Where(x => x.Item2.Any()).

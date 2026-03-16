@@ -292,7 +292,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.assemblyDirectoryInfo = this.assemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 295) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 296) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this.configDirectory.Exists)
@@ -727,6 +727,16 @@ public sealed class AutoDuty : IDalamudPlugin
         this.dutyState         = DutyState.DutyStarted;
         this.lastDutyStart     = DateTime.UtcNow;
         DeathHelper.deathCount = 0;
+
+        if (ContentHelper.DictionaryContent.TryGetValue(Player.Territory.RowId, out Content? content) && content.DutyModes.HasFlag(DutyMode.Regular))
+        {
+            if(ConfigurationMain.Instance.dutyCountResetDate < TimeHelper.GetLastDateTimeForHour(8))
+                ConfigurationMain.Instance.dutyCountSinceReset.Clear();
+
+            if(!ConfigurationMain.Instance.dutyCountSinceReset.TryAdd(Player.CID, 1))
+                ConfigurationMain.Instance.dutyCountSinceReset[Player.CID]++;
+            ConfigurationMain.Instance.dutyCountResetDate = DateTime.UtcNow;
+        }
     }
 
     private void DutyState_DutyWiped(object?       sender, ushort e) => this.dutyState = DutyState.DutyWiped;

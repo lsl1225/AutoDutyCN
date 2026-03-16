@@ -1578,7 +1578,7 @@ public sealed class AutoDuty : IDalamudPlugin
 
     private void StageMoving()
     {
-        if (!PlayerHelper.IsReady || this.indexer == -1 || this.indexer >= this.Actions.Count)
+        if (!PlayerHelper.IsValid || this.indexer == -1 || this.indexer >= this.Actions.Count)
             return;
 
         this.action = $"{Plugin.Actions[this.indexer].ToCustomString()}";

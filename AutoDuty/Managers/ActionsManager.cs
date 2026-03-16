@@ -62,7 +62,8 @@ namespace AutoDuty.Managers
             ("ConditionAction","condition;args,action;args", "Adds a ConditionAction step to the path; after moving to the position, AutoDuty will check the condition specified and invoke Action."),
             ("ModifyIndex", "what number (0-based)", "Adds a ModifyIndex step to the path; after moving to the position, AutoDuty will modify the index to the number specified."),
             ("Action", "", "Run any action"),
-            ("BLULoad", "enable?;which spell", "Enables or disables a spell from the current BLU loadout")
+            ("BLULoad", "enable?;which spell", "Enables or disables a spell from the current BLU loadout"),
+            ("VariantVote", "which option?", "Votes for the VVD option specified (0-based index)"),
         ];
 
         public void InvokeAction(PathAction action)
@@ -806,6 +807,14 @@ namespace AutoDuty.Managers
                     }
                 }
             }
+        }
+
+        public void VariantVote(PathAction action)
+        {
+            if (action.Arguments.Count == 0)
+                return;
+            if(int.TryParse(action.Arguments[0], out int vote))
+                VariantManager.SelectPath(vote);
         }
 
         public void PausePandora(PathAction _)

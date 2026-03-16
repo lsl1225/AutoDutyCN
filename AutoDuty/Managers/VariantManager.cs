@@ -7,8 +7,10 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace AutoDuty.Managers
 {
-    using System;
+    using ECommons.UIHelpers.AddonMasterImplementations;
     using static Data.Classes;
+    using Action = System.Action;
+
     internal class VariantManager(TaskManager _taskManager)
     {
         internal unsafe void RegisterVariantDuty(Content content)
@@ -43,5 +45,32 @@ namespace AutoDuty.Managers
 
         private static unsafe void OpenVVD() => 
             AgentModule.Instance()->GetAgentByInternalId(AgentId.VVDFinder)->Show();
+
+        public static unsafe bool SelectPath(int option)
+        {
+            if (!GenericHelpers.TryGetAddonByName("VVDVoteRoute", out AtkUnitBase* addon) || !addon->IsReady)
+                return false;
+
+            AddonMaster.VVDVoteRoute voteRoute = new(addon);
+            if (option >= voteRoute.EntryCount)
+            {
+                Svc.Log.Error($"Failed to select path, option {option} is out of range. Entry count: {voteRoute.EntryCount}");
+                return true;
+    }
+
+            if (option == 0)
+            {
+                Plugin.VariantPath = voteRoute.SelectedEntryNPC switch
+                {
+                    1 => 1,
+                    2 => 5,
+                    3 => 9,
+                    _ => 1
+                };
+}
+
+            voteRoute.Entries[option].Select();
+            return true;
+        }
     }
 }

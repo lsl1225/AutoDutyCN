@@ -304,9 +304,9 @@ namespace AutoDuty.Managers
 
         public unsafe void ForceAttack(PathAction action)
         {
-            int tot = action.Arguments[0].IsNullOrEmpty() ? 10000 : int.TryParse(action.Arguments[0], out int time) ? time : 0;
-            if (action.Arguments[0].IsNullOrEmpty())
-                action.Arguments[0] = "10000";
+            int tot = action.Arguments.Count == 0 || action.Arguments[0].IsNullOrEmpty() ? 10000 : int.TryParse(action.Arguments[0], out int time) ? time : 0;
+            if (tot <= 0)
+                tot = 10000;
             taskManager.Enqueue(() => ActionManager.Instance()->UseAction(ActionType.GeneralAction, 16), "ForceAttack-GA16");
             taskManager.Enqueue(() => Svc.Targets.Target != null,                                        "ForceAttack-GA1", new TaskManagerConfiguration(500));
             taskManager.Enqueue(() => ActionManager.Instance()->UseAction(ActionType.GeneralAction, 1),  "ForceAttack-GA1");
@@ -511,9 +511,10 @@ namespace AutoDuty.Managers
             return false;
         }
 
-        public unsafe void Target(PathAction action)
+        public void Target(PathAction action)
         {
-            if (!TryGetObjectIdRegex(action.Arguments[0], out string? objectDataId)) return;
+            if (!TryGetObjectIdRegex(action.Arguments[0], out string? objectDataId)) 
+                return;
 
             IGameObject? gameObject = null;
             Plugin.action = $"Target: {objectDataId}";

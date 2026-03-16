@@ -80,6 +80,17 @@ public sealed class AutoDuty : IDalamudPlugin
         }
     } = null;
 
+    internal byte VariantPath
+    {
+        get => Configuration.AutoDutyModeEnum switch
+        {
+            AutoDutyMode.Playlist when this.states.HasFlag(PluginState.Looping) || !InDungeon => (this.playlistCurrent.Count >= 0 && this.playlistIndex < this.playlistCurrent.Count && this.playlistIndex >= 0) ?
+                                                                                                     this.playlistCurrent[this.playlistIndex].variantPathIndex : (byte) 0,
+            AutoDutyMode.Looping or _ => field
+        };
+        set;
+    }
+
     internal uint currentTerritoryType = 0;
     internal int  currentPath          = -1;
 
@@ -281,7 +292,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.assemblyDirectoryInfo = this.assemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 291) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 295) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this.configDirectory.Exists)
@@ -1567,7 +1578,7 @@ public sealed class AutoDuty : IDalamudPlugin
 
     private void StageMoving()
     {
-        if (!PlayerHelper.IsReady || this.indexer == -1 || this.indexer >= this.Actions.Count)
+        if (!PlayerHelper.IsValid || this.indexer == -1 || this.indexer >= this.Actions.Count)
             return;
 
         this.action = $"{Plugin.Actions[this.indexer].ToCustomString()}";

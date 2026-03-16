@@ -360,7 +360,7 @@ public class ConfigurationMain
         
         public override Type BindToType(string? assemblyName, string typeName)
         {
-            bool isInternal = (assemblyName?.StartsWith("AutoDuty") ?? false);
+            bool isInternal = assemblyName?.StartsWith("AutoDuty") ?? false;
 
             if (isInternal)
             {
@@ -1432,13 +1432,13 @@ public static class ConfigTab
                 if(ImGui.Button(Loc.Get("ConfigTab.Dev.Actions.CheckAction") + "##DevCheckActionStatus"))
                     unsafe
                     {
-                        Svc.Log.Warning(ActionManager.Instance()->GetActionStatus(ActionType.Action, 23282).ToString());
+                        Svc.Log.Warning(ActionManager.Instance()->UseAction(ActionType.GeneralAction, 16).ToString());
                     }
                 ImGui.SameLine();
                 if (ImGui.Button(Loc.Get("ConfigTab.Dev.Actions.CheckAction2") + "##DevCheckActionStatus2"))
                     unsafe
                     {
-                        Svc.Log.Warning(ActionManager.Instance()->GetActionStatus(ActionType.Action, 23277).ToString());
+                        Svc.Log.Warning(ActionManager.Instance()->UseAction(ActionType.GeneralAction, 1).ToString());
                     }
 
                 if (ImGui.Button(Loc.Get("ConfigTab.Dev.Actions.Return") + "##DevReturnButton"))
@@ -1860,21 +1860,21 @@ public static class ConfigTab
             {
                 ImGui.SameLine();
                 int rebuildX = Configuration.RebuildNavmeshAfterStuckXTimes;
-                if(ImGui.InputInt(Loc.Get("ConfigTab.Duty.RebuildNavmeshTimes"), ref rebuildX, 1))
+                if(ImGui.InputInt(Loc.Get("ConfigTab.Duty.RebuildNavmeshTimes") + "###RebuildTimesConfig", ref rebuildX, 1))
                 {
                     Configuration.RebuildNavmeshAfterStuckXTimes = (byte) Math.Clamp(rebuildX, byte.MinValue+1, byte.MaxValue);
                     Configuration.Save();
                 }
             }
 
-            if (ImGui.Checkbox(Loc.Get("ConfigTab.Duty.UseReturnWhenStuck"), ref Configuration.stuckReturn))
+            if (ImGui.Checkbox(Loc.Get("ConfigTab.Duty.UseReturnWhenStuck") + "###UseReturnConfig", ref Configuration.stuckReturn))
                 Configuration.Save();
 
             if (Configuration.StuckReturn)
             {
                 ImGui.SameLine();
                 int returnX = Configuration.StuckReturnX;
-                if (ImGui.InputInt(Loc.Get("ConfigTab.Duty.ReturnTimes"), ref returnX, 1))
+                if (ImGui.InputInt(Loc.Get("ConfigTab.Duty.ReturnTimes") + "###ReturnTimesConfig", ref returnX, 1))
                 {
                     Configuration.StuckReturnX = (byte)Math.Clamp(returnX, byte.MinValue + 1, byte.MaxValue);
                     Configuration.Save();

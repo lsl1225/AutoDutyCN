@@ -52,7 +52,7 @@ namespace AutoDuty.Data
             {
                 foreach (PathActionCondition condition in pathAction.Conditions)
                 {
-                results.Add((v4, " | "));
+                    results.Add((v4, " | "));
                     results.AddRange(condition.DrawStepEntry());
                 }
             }

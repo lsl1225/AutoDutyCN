@@ -159,7 +159,7 @@ namespace AutoDuty.Data
 
                 foreach ((Vector4 color, string text) step in this.condition.DrawStepEntry())
                     yield return step;
-        }
+            }
         }
 
         public class PathActionConditionJob : PathActionCondition
@@ -178,7 +178,7 @@ namespace AutoDuty.Data
             {
                 yield return (new Vector4(1, 165 / 255f, 0, 1), $"{ConditionType.Job.ToLocalizedString()} ");
                 yield return (new Vector4(1, 165 / 255f, 0, 1), this.job.ToLocalizedString());
-        }
+            }
         }
 
         public class PathActionConditionActionStatus : PathActionCondition
@@ -208,7 +208,7 @@ namespace AutoDuty.Data
             {
                 yield return (new Vector4(1, 165 / 255f, 0, 1), $"{ConditionType.ActionStatus.ToLocalizedString()} ");
                 yield return (new Vector4(1, 165 / 255f, 0, 1), $"{this.type.ToLocalizedString()} {this.id} {this.statusCode}");
-        }
+            }
         }
 
         public class PathActionConditionItemCount : PathActionCondition
@@ -238,7 +238,7 @@ namespace AutoDuty.Data
             {
                 yield return (new Vector4(1, 165 / 255f, 0, 1), $"{ConditionType.ItemCount.ToLocalizedString()} ");
                 yield return (new Vector4(1, 165 / 255f, 0, 1), $"{this.itemId} {this.operatorValue} {this.quantity}");
-        }
+            }
         }
 
         public class PathActionConditionObjectData : PathActionCondition
@@ -282,7 +282,7 @@ namespace AutoDuty.Data
             {
                 yield return (new Vector4(1, 165 / 255f, 0, 1), $"{ConditionType.ObjectData.ToLocalizedString()} ");
                 yield return (new Vector4(1, 165 / 255f, 0, 1), $"{this.baseId} {this.property.ToLocalizedString()} {this.value}");
-        }
+            }
         }
 
         public class PathActionConditionDistance : PathActionCondition
@@ -387,6 +387,42 @@ namespace AutoDuty.Data
                 ImGuiEx.Combo("Operation", ref this.operatorValue, operations.Keys);
                 ImGui.SameLine();
                 ImGui.InputFloat("Distance", ref this.distance);
+            }
+
+            public override IEnumerable<(Vector4 color, string text)> DrawStepEntry()
+            {
+                yield return (new Vector4(1, 165 / 255f, 0, 1), ConditionType.Distance.ToLocalizedString());
+            }
+        }
+
+        public class PathActionConditionVariantPath : PathActionCondition
+        {
+            public List<byte> pathIndices = [];
+
+            public override bool IsFulfilled() => 
+                this.pathIndices.Contains(Plugin.VariantPath);
+
+            public override void DrawConfig()
+            {
+                for (int i = 0; i < this.pathIndices.Count; i++)
+                {
+                    byte x = this.pathIndices[i];
+                    ImGui.InputByte($"###Path{i}", ref x, 1);
+                    this.pathIndices[i] = x;
+                }
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.Plus))
+                    this.pathIndices.Add((byte)(this.pathIndices.Count == 0 ? 1 : this.pathIndices.Last() + 1));
+                ImGui.SameLine();
+
+                using ImRaii.IEndObject _ = ImRaii.Disabled(this.pathIndices.Count == 0);
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.Minus))
+                    this.pathIndices.RemoveAt(this.pathIndices.Count-1);
+            }
+
+            public override IEnumerable<(Vector4 color, string text)> DrawStepEntry()
+            {
+                yield return (new Vector4(1, 165 / 255f, 0, 1), $"{ConditionType.VariantPath.ToLocalizedString()} ");
+                yield return (new Vector4(1, 165 / 255f, 0, 1), string.Join(", ", this.pathIndices));
             }
         }
 
@@ -534,6 +570,8 @@ namespace AutoDuty.Data
                     field = value;
                 }
             }
+
+            public byte variantPathIndex = 0;
 
             public string path = string.Empty;
 

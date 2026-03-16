@@ -444,6 +444,11 @@ namespace AutoDuty.Managers
                     taskManager.Enqueue(() => !(GetObjectsByRadius(int.TryParse(waitForWhats[1], out int radius) ? radius : 0)?.Count > 0), $"WaitFor-BNpcInRadius{waitForWhats[1]}");
                     taskManager.Enqueue(() => IsReady, "WaitFor", new TaskManagerConfiguration(int.MaxValue));
                     break;
+                case "Addon":
+                    if (waitForWhats.Length == 1)
+                        return;
+                    taskManager.Enqueue(() => GenericHelpers.TryGetAddonByName(waitForWhats[1], out AtkUnitBase* addon) && addon->IsReady, $"WaitFor-{waitForWhats[1]}", new TaskManagerConfiguration(int.MaxValue));
+                    break;
             }
             taskManager.Enqueue(() => Plugin.action = "");
 

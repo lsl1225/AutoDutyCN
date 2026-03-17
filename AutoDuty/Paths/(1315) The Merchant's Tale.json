@@ -507,6 +507,30 @@
     },
     {
       "Tag": "None",
+      "Name": "ConditionAction",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "ObjectData;19135;NamePlateIconId;61721&ModifyIndex;-3"
+      ],
+      "Conditions": [
+        {
+          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "pathIndices": [
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      ],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
       "Name": "MoveTo",
       "Position": {
         "X": -635.25757,
@@ -859,6 +883,12 @@
           "baseId": 19325,
           "property": "IsTargetable",
           "value": 0
+        },
+        {
+          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "pathIndices": [
+            1
+          ]
         }
       ],
       "Note": ""
@@ -3489,6 +3519,10 @@
       {
         "Version": 295,
         "Change": "Stabilized initial vote and right path npc"
+      },
+      {
+        "Version": 295,
+        "Change": "Fixed path 2"
       }
     ],
     "Notes": []

@@ -2,34 +2,6 @@
   "Actions": [
     {
       "Tag": "Unsynced",
-      "Name": "BossMod",
-      "Position": {
-        "X": 0.0,
-        "Y": 0.0,
-        "Z": 0.0
-      },
-      "Arguments": [
-        "on"
-      ],
-      "Conditions": [],
-      "Note": ""
-    },
-    {
-      "Tag": "Unsynced",
-      "Name": "Rotation",
-      "Position": {
-        "X": 14.722552,
-        "Y": 15.749659,
-        "Z": 57.353497
-      },
-      "Arguments": [
-        "on"
-      ],
-      "Conditions": [],
-      "Note": ""
-    },
-    {
-      "Tag": "Unsynced",
       "Name": "MoveTo",
       "Position": {
         "X": 15.720591,
@@ -88,23 +60,9 @@
       "Tag": "Unsynced",
       "Name": "MoveTo",
       "Position": {
-        "X": 0.033288293,
+        "X": 0.025219874,
         "Y": -26.0,
-        "Z": -70.78829
-      },
-      "Arguments": [
-        ""
-      ],
-      "Conditions": [],
-      "Note": ""
-    },
-    {
-      "Tag": "Unsynced",
-      "Name": "MoveTo",
-      "Position": {
-        "X": 0.023508878,
-        "Y": -26.0,
-        "Z": -119.62995
+        "Z": -85.03012
       },
       "Arguments": [
         ""
@@ -116,86 +74,109 @@
       "Tag": "Unsynced",
       "Name": "Boss",
       "Position": {
-        "X": 0.023508878,
-        "Y": -26.0,
-        "Z": -119.62995
+        "X": -0.10623784,
+        "Y": -26.000002,
+        "Z": -128.63942
       },
       "Arguments": [
-        "2002735"
+        ""
       ],
       "Conditions": [],
       "Note": "Blaster"
     },
     {
       "Tag": "Unsynced",
-      "Name": "Boss",
+      "Name": "MoveTo",
       "Position": {
-        "X": -0.01,
-        "Y": -20.0,
-        "Z": -184.49
+        "X": -0.8329179,
+        "Y": -21.396942,
+        "Z": -155.20612
       },
       "Arguments": [
-        "5582"
+        ""
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "Unsynced",
+      "Name": "Boss",
+      "Position": {
+        "X": 0.305612,
+        "Y": -20.0,
+        "Z": -190.46326
+      },
+      "Arguments": [
+        ""
       ],
       "Conditions": [],
       "Note": "Brawler"
     },
     {
       "Tag": "Unsynced",
-      "Name": "Boss",
+      "Name": "MoveTo",
       "Position": {
-        "X": 0.03,
+        "X": -0.0151876155,
         "Y": -14.0,
-        "Z": -246.32
+        "Z": -223.97705
       },
       "Arguments": [
-        "5587"
+        ""
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "Unsynced",
+      "Name": "Boss",
+      "Position": {
+        "X": 0.3858363,
+        "Y": -14.0,
+        "Z": -256.22778
+      },
+      "Arguments": [
+        ""
       ],
       "Conditions": [],
       "Note": "Swindler"
     },
     {
       "Tag": "Unsynced",
-      "Name": "Boss",
+      "Name": "MoveTo",
       "Position": {
-        "X": -0.01,
-        "Y": -7.999998,
-        "Z": -312.65
+        "X": 0.7536428,
+        "Y": -9.318649,
+        "Z": -284.3627
       },
       "Arguments": [
-        "5587"
+        ""
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "Unsynced",
+      "Name": "Boss",
+      "Position": {
+        "X": -0.5791368,
+        "Y": -7.999998,
+        "Z": -317.81146
+      },
+      "Arguments": [
+        ""
       ],
       "Conditions": [],
       "Note": "Vortexer"
-    },
-    {
-      "Tag": "Treasure",
-      "Name": "TreasureCoffer",
-      "Position": {
-        "X": -1.5140961,
-        "Y": -7.999998,
-        "Z": -331.0326
-      },
-      "Arguments": [],
-      "Conditions": [],
-      "Note": ""
-    },
-    {
-      "Tag": "Treasure",
-      "Name": "TreasureCoffer",
-      "Position": {
-        "X": 1.5077223,
-        "Y": -7.999999,
-        "Z": -331.02838
-      },
-      "Arguments": [],
-      "Conditions": [],
-      "Note": ""
     }
   ],
   "Meta": {
     "CreatedAt": 294,
-    "Changelog": [],
+    "Changelog": [
+      {
+        "Version": 296,
+        "Change": ""
+      }
+    ],
     "Notes": []
   }
 }

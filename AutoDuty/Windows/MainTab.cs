@@ -18,6 +18,7 @@ namespace AutoDuty.Windows
     using Dalamud.Interface.Utility;
     using Data;
     using ECommons.PartyFunctions;
+    using ECommons.Throttlers;
     using FFXIVClientStructs.FFXIV.Client.UI.Misc;
     using static Data.Classes;
     using Vector2 = System.Numerics.Vector2;
@@ -494,6 +495,19 @@ namespace AutoDuty.Windows
                         default:
                             AutoDuty.Configuration.AutoDutyModeEnum = AutoDutyMode.Looping;
                             break;
+                    }
+                    if (Player.Available)
+                    {
+                        if (EzThrottler.Throttle("MainTabRemainingDungeonThrottle", 2000))
+                        {
+                            if (ConfigurationMain.Instance.dutyCountResetDate < TimeHelper.GetLastDateTimeForHour(8))
+                                ConfigurationMain.Instance.dutyCountSinceReset.Clear();
+                        }
+
+
+                        ImGui.SameLine();
+                        ImGui.Text($"|{Loc.Get("MainTab.DungeonsRemaining", 100 - ConfigurationMain.Instance.dutyCountSinceReset.GetValueOrDefault(Player.CID, 0))}");
+                        ImGuiComponents.HelpMarker(Loc.Get("MainTab.DungeonsRemainingExplanation"));
                     }
 
                     DrawTerminationNotice();

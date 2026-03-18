@@ -2,34 +2,6 @@
   "Actions": [
     {
       "Tag": "Unsynced",
-      "Name": "Rotation",
-      "Position": {
-        "X": 0.0,
-        "Y": 0.0,
-        "Z": 0.0
-      },
-      "Arguments": [
-        "on"
-      ],
-      "Conditions": [],
-      "Note": ""
-    },
-    {
-      "Tag": "Unsynced",
-      "Name": "BossMod",
-      "Position": {
-        "X": 0.0,
-        "Y": 0.0,
-        "Z": 0.0
-      },
-      "Arguments": [
-        "on"
-      ],
-      "Conditions": [],
-      "Note": ""
-    },
-    {
-      "Tag": "Unsynced",
       "Name": "MoveTo",
       "Position": {
         "X": 226.71213,
@@ -419,35 +391,16 @@
       ],
       "Conditions": [],
       "Note": "Quickthinx Allthoughts"
-    },
-    {
-      "Tag": "Treasure",
-      "Name": "TreasureCoffer",
-      "Position": {
-        "X": -1.3161144,
-        "Y": 0.0,
-        "Z": -12.092857
-      },
-      "Arguments": [],
-      "Conditions": [],
-      "Note": ""
-    },
-    {
-      "Tag": "Treasure",
-      "Name": "TreasureCoffer",
-      "Position": {
-        "X": 1.2410855,
-        "Y": 0.0,
-        "Z": -11.944928
-      },
-      "Arguments": [],
-      "Conditions": [],
-      "Note": ""
     }
   ],
   "Meta": {
     "CreatedAt": 294,
-    "Changelog": [],
+    "Changelog": [
+      {
+        "Version": 296,
+        "Change": ""
+      }
+    ],
     "Notes": []
   }
 }

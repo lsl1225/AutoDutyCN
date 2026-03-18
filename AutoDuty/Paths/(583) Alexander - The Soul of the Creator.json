@@ -2,34 +2,6 @@
   "Actions": [
     {
       "Tag": "Unsynced",
-      "Name": "BossMod",
-      "Position": {
-        "X": 0.0,
-        "Y": 0.0,
-        "Z": 0.0
-      },
-      "Arguments": [
-        "on"
-      ],
-      "Conditions": [],
-      "Note": ""
-    },
-    {
-      "Tag": "Unsynced",
-      "Name": "Rotation",
-      "Position": {
-        "X": 0.0,
-        "Y": 0.0,
-        "Z": 0.0
-      },
-      "Arguments": [
-        "on"
-      ],
-      "Conditions": [],
-      "Note": ""
-    },
-    {
-      "Tag": "Unsynced",
       "Name": "Boss",
       "Position": {
         "X": 0.448,
@@ -41,47 +13,16 @@
       ],
       "Conditions": [],
       "Note": "Alexander Prime"
-    },
-    {
-      "Tag": "Treasure",
-      "Name": "TreasureCoffer",
-      "Position": {
-        "X": -1.4388007,
-        "Y": 400.0,
-        "Z": -13.808543
-      },
-      "Arguments": [],
-      "Conditions": [],
-      "Note": ""
-    },
-    {
-      "Tag": "Treasure",
-      "Name": "TreasureCoffer",
-      "Position": {
-        "X": 1.5296777,
-        "Y": 400.0,
-        "Z": -13.8355465
-      },
-      "Arguments": [],
-      "Conditions": [],
-      "Note": ""
-    },
-    {
-      "Tag": "Treasure",
-      "Name": "TreasureCoffer",
-      "Position": {
-        "X": 0.09822357,
-        "Y": 400.0,
-        "Z": -15.250761
-      },
-      "Arguments": [],
-      "Conditions": [],
-      "Note": ""
     }
   ],
   "Meta": {
     "CreatedAt": 294,
-    "Changelog": [],
+    "Changelog": [
+      {
+        "Version": 296,
+        "Change": ""
+      }
+    ],
     "Notes": []
   }
 }

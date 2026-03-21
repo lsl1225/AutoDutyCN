@@ -244,12 +244,15 @@ namespace AutoDuty.Managers
         {
             if (!int.TryParse(action.Arguments[0], out int _index))
                 return;
+            this.ModifyIndex(_index, action.Arguments[0][0] is '+' or '-');
+        }
 
-            if (action.Arguments[0][0] is '+' or '-')
-                Plugin.indexer += _index;
+        private void ModifyIndex(int index, bool modify)
+        {
+            if(modify)
+                Plugin.indexer += index;
             else
-                Plugin.indexer = _index;
-
+                Plugin.indexer = index;
             Plugin.Stage = Stage.Reading_Path;
         }
 
@@ -1072,7 +1075,30 @@ namespace AutoDuty.Managers
                             break;
                     }
                     break;
-                default: break;
+
+                //Merchant's Tale
+                case 1315:
+                    switch (action.Arguments[0])
+                    {
+                        case "1":
+                            taskManager.Enqueue(() =>
+                                                {
+                                                    this.Rotation(Player.Object != null && Player.Object.Health < 0.75f);
+                                                }, "DutySpecificCode-MerchantsTale-Path5-HealthCheck");
+                            taskManager.EnqueueDelay(500);
+                            taskManager.Enqueue(() =>
+                                                {
+                                                    if (Svc.Objects.OrderBy(GetDistanceToPlayer).Where(o => o.BaseId == 0x4ACD).
+                                                            Take(action.Arguments.Count > 1 && int.TryParse(action.Arguments[1], out int count) ? count : 1).
+                                                            All(o => ((ICharacter)o).MissingHp <= 0))
+                                                        this.ModifyIndex(-1, true);
+                                                }, "DutySpecificCode-MerchantsTale-Path5");
+                            taskManager.EnqueueDelay(500);
+                            break;
+                    }
+                    break;
+                default: 
+                    break;
             }
         }
     }

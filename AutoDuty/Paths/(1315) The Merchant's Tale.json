@@ -3493,6 +3493,33 @@
       "Tag": "None",
       "Name": "Wait",
       "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "15000"
+      ],
+      "Conditions": [
+        {
+          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "baseId": 19132,
+          "property": "IsTargetable",
+          "value": 0
+        },
+        {
+          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "pathIndices": [
+            10
+          ]
+        }
+      ],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "Wait",
+      "Position": {
         "X": 85.50611,
         "Y": -29.5,
         "Z": -695.016
@@ -4098,6 +4125,10 @@
       {
         "Version": 296,
         "Change": "Path 3,5,9 stabilized"
+      },
+      {
+        "Version": 297,
+        "Change": "Path 10 Golem additional wait step"
       }
     ],
     "Notes": []

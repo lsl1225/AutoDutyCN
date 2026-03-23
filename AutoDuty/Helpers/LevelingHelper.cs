@@ -25,7 +25,7 @@ namespace AutoDuty.Helpers
             1039u, // 24 The Thousand Maws of Toto-Rak
             1041u, // 32 Brayflox's Longstop
             1042u, // 41 Stone Vigil
-            
+
             1142u, // 61 Sirensong Sea
             1144u, // 67 Doma Castle
             1145u, // 69 Castrum Abania
@@ -36,9 +36,9 @@ namespace AutoDuty.Helpers
             822u,  // 79 Mt. Gulg
             952u,  // 81 Tower of Zot
             969u,  // 83 Tower of Babil
-            // 970u,  // Vanaspati
+            970u,  // 85 Vanaspati,
             974u,  // 87 Ktisis Hyperboreia
-            // 978u,  // Aitiascope
+            978u,  // 89 Aitiascope
             1167u, // 91 Ihuykatumu
             1193u, // 93 Worqor Zormor
             1194u, // 95 The Skydeep Cenote
@@ -48,8 +48,9 @@ namespace AutoDuty.Helpers
 
         public static readonly uint[] levelingListExperimental =
         [
-            970u, // 85 Vanaspati,
-            978u // 89 Aitiascope
+            1303u, // 38 Cutter's Cry
+            1330u, // 44 Dzemael Darkhold
+            1331u, // 47 Aurum Vale
         ];
 
         internal static Content[] LevelingDuties
@@ -60,7 +61,7 @@ namespace AutoDuty.Helpers
                 {
                     IEnumerable<uint> ids = levelingList;
 
-                    if (IPCSubscriber_Common.IsReady("SkipCutscene"))
+                    if (IPCSubscriber_Common.IsReady("SkipCutscene") || IPCSubscriber_Common.IsReady("Skippy"))
                     {
                         ids = ids.Concat([
                             1048u, // 45 Porta Decumana
@@ -122,7 +123,7 @@ namespace AutoDuty.Helpers
                         int memberIndex = 0;
                         foreach ((TrustMemberName _, TrustMember member) in TrustHelper.Members.OrderByDescending(tm => tm.Value.Level))
                         {
-                            if (member.LevelIsSet && memberTest.CanSelectMember(member, combatRole)) 
+                            if (member.LevelIsSet && memberTest.CanSelectMember(member, combatRole))
                                 memberTest[memberIndex++] = member;
                             Svc.Log.Debug($"Leveling Mode: Checking {member.Name} level which is {member.Level}");
 

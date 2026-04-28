@@ -2,7 +2,7 @@
   "Actions": [
     {
       "Tag": "None",
-      "Name": "MoveTo",
+      "Name": "Boss",
       "Position": {
         "X": 100.0,
         "Y": 0.0,

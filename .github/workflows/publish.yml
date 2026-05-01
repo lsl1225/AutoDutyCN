@@ -22,7 +22,7 @@ jobs:
 
       - name: Download Dalamud Latest
         run: |
-          wget https://goatcorp.github.io/dalamud-distrib/latest.zip -O ${{ env.DALAMUD_HOME }}.zip
+          wget https://goatcorp.github.io/dalamud-distrib/stg/latest.zip -O ${{ env.DALAMUD_HOME }}.zip
           unzip ${{ env.DALAMUD_HOME }}.zip -d ${{ env.DALAMUD_HOME }}
 
       - name: Restore Project
@@ -40,7 +40,7 @@ jobs:
           version_number: ${{ github.ref_name }}
           path: "AutoDuty/bin/Release/AutoDuty/latest.zip"
           type: "latest"
-          dalamud_version: "14"
+          dalamud_version: "15"
           changelog: ${{ github.event.release.body }}
         env:
           PUBLISHER_KEY: ${{ secrets.PUBLISHER_KEY }}

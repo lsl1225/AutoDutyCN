@@ -174,8 +174,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001123,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Nymian Device"
@@ -194,8 +193,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Tanks, Healers, Samurai, Maiming, Scouting, Aiming, Casters",
-          "ParseKey": "Job"
+          "job": "Tanks, Healers, Samurai, Maiming, Scouting, Aiming, Casters"
         }
       ],
       "Note": ""
@@ -242,8 +240,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002789,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Lantern Oil"
@@ -278,8 +275,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002789,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Lantern Oil"
@@ -314,8 +310,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002789,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Lantern Oil"
@@ -350,8 +345,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002789,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Lantern Oil"
@@ -384,8 +378,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002789,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Lantern Oil"
@@ -420,8 +413,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002789,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Lantern Oil"
@@ -454,8 +446,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002789,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Lantern Oil"
@@ -476,8 +467,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001125,
           "property": "IsTargetable",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         }
       ],
       "Note": "Skips ahead if the Nymian Devices aren't targetable (presumably if you died)."
@@ -512,8 +502,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002789,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Lantern Oil"
@@ -534,8 +523,7 @@
           "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2001071,
           "quantity": 2,
-          "operatorValue": ">",
-          "ParseKey": "ItemCount"
+          "operatorValue": ">"
         }
       ],
       "Note": "Skips ahead if you already have three Lantern Oils."
@@ -570,8 +558,7 @@
           "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2001071,
           "quantity": 3,
-          "operatorValue": "<",
-          "ParseKey": "ItemCount"
+          "operatorValue": "<"
         }
       ],
       "Note": "Goes back if you do not have three Lantern Oils."
@@ -592,8 +579,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001124,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Rusted Nymian Device"
@@ -614,8 +600,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001125,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Rusted Nymian Device"
@@ -636,8 +621,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001126,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Rusted Nymian Device"
@@ -670,8 +654,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Monk",
-          "ParseKey": "Job"
+          "job": "Monk"
         }
       ],
       "Note": ""
@@ -692,8 +675,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001127,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Nymian Device"
@@ -754,8 +736,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002789,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Lantern Oil"
@@ -790,8 +771,7 @@
           "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2001071,
           "quantity": 2,
-          "operatorValue": "<",
-          "ParseKey": "ItemCount"
+          "operatorValue": "<"
         }
       ],
       "Note": "Goes back if you do not have two Lantern Oils."
@@ -826,8 +806,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001128,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Rusted Nymian Device"
@@ -860,8 +839,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001129,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Rusted Nymian Device"
@@ -1030,8 +1008,7 @@
           "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2001071,
           "quantity": 2,
-          "operatorValue": "<",
-          "ParseKey": "ItemCount"
+          "operatorValue": "<"
         }
       ],
       "Note": "Goes back if you do not have two Lantern Oils."

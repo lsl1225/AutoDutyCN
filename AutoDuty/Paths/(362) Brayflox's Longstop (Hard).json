@@ -520,8 +520,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2781,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Waits for Brayflox to open the tunnel before moving on."

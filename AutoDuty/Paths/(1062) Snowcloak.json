@@ -112,8 +112,7 @@
           "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2001447,
           "quantity": 1,
-          "operatorValue": "<",
-          "ParseKey": "ItemCount"
+          "operatorValue": "<"
         }
       ],
       "Note": "Goes back if you don't have the Key."
@@ -348,8 +347,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 3364,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Goes back if an Ice Bomb is targetable (enemies in the first wave)."
@@ -370,8 +368,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 3376,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Goes back if the Hybrid Gator is targetable (an enemy in the second wave)."

@@ -258,8 +258,7 @@
           "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2000263,
           "quantity": 1,
-          "operatorValue": "<",
-          "ParseKey": "ItemCount"
+          "operatorValue": "<"
         }
       ],
       "Note": "Green Key - Skipped if you already have the key (ex. picked it up while looting boss chest)."
@@ -632,8 +631,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001235,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Goes back if the Bloody Parchment hasn't been picked up yet (if Aetherial Flow was clicked first)."
@@ -682,8 +680,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001233,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Sealed Barrier - Skipped if it's already open (ex. if you died somehow before reaching the boss)."

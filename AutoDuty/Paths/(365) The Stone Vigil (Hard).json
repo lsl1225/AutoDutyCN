@@ -259,8 +259,7 @@
             "Z": 0.0
           },
           "operatorValue": "<",
-          "distance": 22.0,
-          "ParseKey": "Distance"
+          "distance": 22.0
         }
       ],
       "Note": "Bertha"
@@ -294,8 +293,7 @@
             "Z": 0.0
           },
           "operatorValue": "<",
-          "distance": 21.0,
-          "ParseKey": "Distance"
+          "distance": 21.0
         }
       ],
       "Note": "Bertha"
@@ -329,8 +327,7 @@
             "Z": 0.0
           },
           "operatorValue": "<",
-          "distance": 20.0,
-          "ParseKey": "Distance"
+          "distance": 20.0
         }
       ],
       "Note": "Bertha"
@@ -392,8 +389,7 @@
             "Z": 0.0
           },
           "operatorValue": ">",
-          "distance": 50.0,
-          "ParseKey": "Distance"
+          "distance": 50.0
         }
       ],
       "Note": "Loops until the encounter is done (a Jura Aevis spawns nearby)."
@@ -638,8 +634,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002735,
           "property": "EventState",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         }
       ],
       "Note": "Goes back if the fight hasn't finished yet (if you one-shot the boss)."

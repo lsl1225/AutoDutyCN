@@ -288,8 +288,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2003313,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Tiny Key"
@@ -322,8 +321,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2003313,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Tiny Key"
@@ -344,8 +342,7 @@
           "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2001189,
           "quantity": 0,
-          "operatorValue": ">",
-          "ParseKey": "ItemCount"
+          "operatorValue": ">"
         }
       ],
       "Note": "Skips ahead if you already have the Key."
@@ -380,8 +377,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2003313,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Tiny Key"
@@ -402,8 +398,7 @@
           "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2001189,
           "quantity": 1,
-          "operatorValue": "<",
-          "ParseKey": "ItemCount"
+          "operatorValue": "<"
         }
       ],
       "Note": "Goes back if you do not have the Key."
@@ -492,8 +487,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2370,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Waits for the Manor Sentry to unlock the door before moving on."

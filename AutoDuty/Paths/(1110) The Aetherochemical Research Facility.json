@@ -82,8 +82,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Tanks",
-          "ParseKey": "Job"
+          "job": "Tanks"
         }
       ],
       "Note": ""
@@ -102,8 +101,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Tanks",
-          "ParseKey": "Job"
+          "job": "Tanks"
         }
       ],
       "Note": ""
@@ -122,8 +120,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Healers, DPS",
-          "ParseKey": "Job"
+          "job": "Healers, DPS"
         }
       ],
       "Note": ""
@@ -394,8 +391,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2005307,
           "property": "IsTargetable",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         }
       ],
       "Note": "Skips ahead if the Lift Terminal isn't targetable (presumably if you died)."

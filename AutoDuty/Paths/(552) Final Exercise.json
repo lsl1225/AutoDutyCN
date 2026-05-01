@@ -28,8 +28,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "DPS",
-          "ParseKey": "Job"
+          "job": "DPS"
         }
       ],
       "Note": ""
@@ -48,8 +47,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Tanks",
-          "ParseKey": "Job"
+          "job": "Tanks"
         }
       ],
       "Note": ""
@@ -68,8 +66,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Healers",
-          "ParseKey": "Job"
+          "job": "Healers"
         }
       ],
       "Note": ""
@@ -102,8 +99,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "DPS",
-          "ParseKey": "Job"
+          "job": "DPS"
         }
       ],
       "Note": "Master of Arms"
@@ -122,8 +118,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Tanks",
-          "ParseKey": "Job"
+          "job": "Tanks"
         }
       ],
       "Note": "Master of Shields"
@@ -142,8 +137,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Healers",
-          "ParseKey": "Job"
+          "job": "Healers"
         }
       ],
       "Note": "Master of Magicks"
@@ -312,8 +306,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "DPS",
-          "ParseKey": "Job"
+          "job": "DPS"
         }
       ],
       "Note": "Master of Arms"
@@ -332,8 +325,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Tanks",
-          "ParseKey": "Job"
+          "job": "Tanks"
         }
       ],
       "Note": "Master of Shields"
@@ -352,8 +344,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Healers",
-          "ParseKey": "Job"
+          "job": "Healers"
         }
       ],
       "Note": "Master of Magicks"

@@ -16,6 +16,7 @@ namespace AutoDuty.Data;
 using System.Linq;
 using System.Numerics;
 using ECommons.GameFunctions;
+using Newtonsoft.Json;
 
 public abstract class PathActionCondition
 {
@@ -23,6 +24,7 @@ public abstract class PathActionCondition
 
     public static readonly Dictionary<ConditionType, Type> PARSE_KEYS;
 
+    [JsonIgnore]
     public virtual ConditionType ParseKey => PARSE_KEY;
 
     static PathActionCondition()

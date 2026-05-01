@@ -188,8 +188,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Tanks",
-          "ParseKey": "Job"
+          "job": "Tanks"
         }
       ],
       "Note": ""
@@ -208,8 +207,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Tanks",
-          "ParseKey": "Job"
+          "job": "Tanks"
         }
       ],
       "Note": ""
@@ -228,8 +226,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Tanks",
-          "ParseKey": "Job"
+          "job": "Tanks"
         }
       ],
       "Note": ""
@@ -260,8 +257,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Tanks",
-          "ParseKey": "Job"
+          "job": "Tanks"
         }
       ],
       "Note": "Carried over from original path. Use unclear. May be detrimental when Synced."
@@ -280,8 +276,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Tanks",
-          "ParseKey": "Job"
+          "job": "Tanks"
         }
       ],
       "Note": ""
@@ -300,8 +295,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Tanks",
-          "ParseKey": "Job"
+          "job": "Tanks"
         }
       ],
       "Note": ""

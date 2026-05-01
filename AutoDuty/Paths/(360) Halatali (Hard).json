@@ -540,8 +540,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002735,
           "property": "EventState",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         }
       ],
       "Note": "Goes back if the fight hasn't finished yet (waiting for the second set of enemies)."

@@ -70,8 +70,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2000162,
           "property": "IsTargetable",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         }
       ],
       "Note": "Skips ahead if the lift is in the proper spot."
@@ -312,8 +311,7 @@
           "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2000441,
           "quantity": 1,
-          "operatorValue": "<",
-          "ParseKey": "ItemCount"
+          "operatorValue": "<"
         }
       ],
       "Note": "Tiny Key - Skipped if the Key was picked up while looting the boss chest."
@@ -374,8 +372,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2000174,
           "property": "IsTargetable",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         }
       ],
       "Note": "Skips ahead if the lift is in the proper spot."

@@ -56,8 +56,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             0
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -81,8 +80,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -106,8 +104,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -132,8 +129,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -181,8 +177,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -203,8 +198,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 19103,
           "property": "IsTargetable",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         },
         {
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
@@ -213,8 +207,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -238,8 +231,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -273,8 +265,7 @@
             "Z": 0.0
           },
           "operatorValue": "<",
-          "distance": 10.0,
-          "ParseKey": "Distance"
+          "distance": 10.0
         },
         {
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
@@ -283,8 +274,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -308,8 +298,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -347,8 +336,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -386,8 +374,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -412,8 +399,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -442,8 +428,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -467,8 +452,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -492,8 +476,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": "Y'nazqha"
@@ -517,8 +500,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -542,8 +524,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -567,8 +548,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -604,8 +584,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": "Rukhkh"
@@ -629,8 +608,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -651,8 +629,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 19114,
           "property": "IsTargetable",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         },
         {
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
@@ -661,8 +638,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -684,8 +660,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -706,16 +681,14 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2015018,
           "property": "IsTargetable",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         },
         {
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -737,8 +710,7 @@
           "pathIndices": [
             1,
             2
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": "Damaged Fence"
@@ -760,8 +732,7 @@
           "pathIndices": [
             1,
             2
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -783,8 +754,7 @@
           "pathIndices": [
             1,
             2
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -806,8 +776,7 @@
           "pathIndices": [
             1,
             2
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -829,8 +798,7 @@
           "pathIndices": [
             1,
             2
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -851,8 +819,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -873,8 +840,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -895,8 +861,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -917,15 +882,13 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 19325,
           "property": "IsTargetable",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         },
         {
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -946,8 +909,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -966,8 +928,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -988,8 +949,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1010,8 +970,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1033,8 +992,7 @@
           "pathIndices": [
             1,
             2
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1055,16 +1013,14 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 19357,
           "property": "IsTargetable",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         },
         {
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1085,8 +1041,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1107,8 +1062,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1129,8 +1083,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1152,8 +1105,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1174,8 +1126,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1196,8 +1147,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1218,8 +1168,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1240,8 +1189,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1262,15 +1210,13 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 19294,
           "property": "IsTargetable",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         },
         {
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1291,8 +1237,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1313,8 +1258,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1335,8 +1279,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1360,8 +1303,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1383,8 +1325,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1406,8 +1347,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1431,8 +1371,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1468,8 +1407,7 @@
             2,
             3,
             4
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": "Pari of Plenty"
@@ -1506,8 +1444,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1532,8 +1469,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": "Perturbed Peasant"
@@ -1558,8 +1494,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1584,8 +1519,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1606,8 +1540,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2015019,
           "property": "IsTargetable",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         },
         {
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
@@ -1617,8 +1550,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": "Scattered Crates"
@@ -1643,8 +1575,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": "Scattered Crates"
@@ -1669,8 +1600,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1695,8 +1625,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": "Unlucky Clerk"
@@ -1721,8 +1650,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1756,8 +1684,7 @@
             "Z": 0.0
           },
           "operatorValue": "<",
-          "distance": 10.0,
-          "ParseKey": "Distance"
+          "distance": 10.0
         },
         {
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
@@ -1767,8 +1694,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1793,8 +1719,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1819,8 +1744,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1845,8 +1769,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1871,8 +1794,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1897,8 +1819,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1921,8 +1842,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1947,8 +1867,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": "Genie of the Lamp"
@@ -1973,8 +1892,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -1997,8 +1915,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2023,8 +1940,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2049,8 +1965,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2075,8 +1990,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2098,8 +2012,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             6
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2124,8 +2037,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2150,8 +2062,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": "Y'nazqha"
@@ -2174,8 +2085,7 @@
             5,
             6,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2197,8 +2107,7 @@
           "pathIndices": [
             7,
             8
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2223,8 +2132,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2247,8 +2155,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2273,8 +2180,7 @@
             7,
             8,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2296,8 +2202,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2319,8 +2224,7 @@
           "pathIndices": [
             6,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": "Yawning Maw"
@@ -2342,8 +2246,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             6
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2366,8 +2269,7 @@
             5,
             6,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2388,8 +2290,7 @@
             5,
             6,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2410,8 +2311,7 @@
             5,
             6,
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2433,8 +2333,7 @@
           "pathIndices": [
             5,
             6
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": "Tangled Seaweed Barrier"
@@ -2456,8 +2355,7 @@
           "pathIndices": [
             5,
             6
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2479,8 +2377,7 @@
           "pathIndices": [
             7,
             8
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2501,16 +2398,14 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 19123,
           "property": "IsTargetable",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         },
         {
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             7,
             8
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2531,8 +2426,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             7
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2553,8 +2447,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             7
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": "Giant Conch Shell"
@@ -2576,8 +2469,7 @@
           "pathIndices": [
             7,
             8
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2598,16 +2490,14 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 19125,
           "property": "IsTargetable",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         },
         {
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             7,
             8
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2629,8 +2519,7 @@
           "pathIndices": [
             7,
             8
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2650,8 +2539,7 @@
           "pathIndices": [
             7,
             8
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2675,8 +2563,7 @@
             6,
             7,
             8
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2698,8 +2585,7 @@
             6,
             7,
             8
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2723,8 +2609,7 @@
             6,
             7,
             8
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": "Darya the Sea-maid"
@@ -2760,8 +2645,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2785,8 +2669,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2820,8 +2703,7 @@
             "Z": 0.0
           },
           "operatorValue": "<",
-          "distance": 15.0,
-          "ParseKey": "Distance"
+          "distance": 15.0
         },
         {
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
@@ -2830,8 +2712,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2855,8 +2736,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2880,8 +2760,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2905,8 +2784,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2930,8 +2808,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2953,8 +2830,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -2978,8 +2854,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": "Rukhkh"
@@ -3003,8 +2878,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3026,8 +2900,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3051,8 +2924,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3076,8 +2948,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3101,8 +2972,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3126,8 +2996,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3151,8 +3020,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": "Y'nazqha"
@@ -3174,8 +3042,7 @@
           "pathIndices": [
             9,
             10
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3197,8 +3064,7 @@
           "pathIndices": [
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3222,8 +3088,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3245,8 +3110,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3270,8 +3134,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3293,8 +3156,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             10
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3316,8 +3178,7 @@
           "pathIndices": [
             9,
             10
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3339,8 +3200,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3361,15 +3221,13 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 19132,
           "property": "IsTargetable",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         },
         {
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             10
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3391,8 +3249,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             10
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3413,8 +3270,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             11
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3435,8 +3291,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             11
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3458,8 +3313,7 @@
           "pathIndices": [
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3480,16 +3334,14 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 19125,
           "property": "IsTargetable",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         },
         {
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3510,8 +3362,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             11
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3535,8 +3386,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3558,8 +3408,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3581,8 +3430,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3604,8 +3452,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3629,8 +3476,7 @@
             10,
             11,
             12
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": "Lone Swordmaster"
@@ -3663,8 +3509,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3685,8 +3530,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3707,8 +3551,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3729,8 +3572,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3751,8 +3593,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3773,8 +3614,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3795,8 +3635,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3817,8 +3656,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3839,8 +3677,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3861,8 +3698,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3883,8 +3719,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3905,8 +3740,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3940,15 +3774,13 @@
             "Z": 0.0
           },
           "operatorValue": "<",
-          "distance": 15.0,
-          "ParseKey": "Distance"
+          "distance": 15.0
         },
         {
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3969,8 +3801,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -3991,8 +3822,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": ""
@@ -4013,8 +3843,7 @@
           "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ],
-          "ParseKey": "VariantPath"
+          ]
         }
       ],
       "Note": "Deadly Dandan"

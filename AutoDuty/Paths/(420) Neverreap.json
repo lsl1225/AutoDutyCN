@@ -28,8 +28,7 @@
           "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2001568,
           "quantity": 5,
-          "operatorValue": "!=",
-          "ParseKey": "ItemCount"
+          "operatorValue": "!="
         }
       ],
       "Note": "Tonu Vanu"

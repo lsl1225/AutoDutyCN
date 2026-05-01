@@ -189,8 +189,7 @@
             "Z": 0.0
           },
           "operatorValue": "<",
-          "distance": 100.0,
-          "ParseKey": "Distance"
+          "distance": 100.0
         }
       ],
       "Note": "Goes back if you haven't taken the Transporter."
@@ -370,8 +369,7 @@
             "Z": 0.0
           },
           "operatorValue": "<=",
-          "distance": 20.0,
-          "ParseKey": "Distance"
+          "distance": 20.0
         }
       ],
       "Note": "Goes back if you haven't taken the Transporter."

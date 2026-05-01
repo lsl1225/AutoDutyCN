@@ -502,8 +502,7 @@
           "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2000566,
           "quantity": 0,
-          "operatorValue": ">",
-          "ParseKey": "ItemCount"
+          "operatorValue": ">"
         }
       ],
       "Note": ""
@@ -538,8 +537,7 @@
           "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2000566,
           "quantity": 0,
-          "operatorValue": ">",
-          "ParseKey": "ItemCount"
+          "operatorValue": ">"
         }
       ],
       "Note": "Goes back if you still have the Fruit of Knowledge."
@@ -574,8 +572,7 @@
           "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2000565,
           "quantity": 0,
-          "operatorValue": ">",
-          "ParseKey": "ItemCount"
+          "operatorValue": ">"
         }
       ],
       "Note": ""
@@ -610,8 +607,7 @@
           "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2000565,
           "quantity": 0,
-          "operatorValue": ">",
-          "ParseKey": "ItemCount"
+          "operatorValue": ">"
         }
       ],
       "Note": "Goes back if you still have the Flame of Knowledge."
@@ -646,8 +642,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2000658,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Goes back if The Scales of Judgment weren't properly interacted with."
@@ -668,8 +663,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2000430,
           "property": "EventState",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         }
       ],
       "Note": "Skips ahead if the Treasure Room is inaccessible."

@@ -111,8 +111,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage",
-          "ParseKey": "Job"
+          "job": "Blue_Mage"
         }
       ],
       "Note": ""
@@ -162,8 +161,7 @@
           "$type": "AutoDuty.Data.PathActionConditionActionStatus, AutoDuty",
           "type": "Action",
           "id": 23282,
-          "statusCode": 573,
-          "ParseKey": "ActionStatus"
+          "statusCode": 573
         }
       ],
       "Note": "Checks if Hydropull is available. Waits 2.5sec if not."
@@ -183,8 +181,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage",
-          "ParseKey": "Job"
+          "job": "Blue_Mage"
         }
       ],
       "Note": "Surecast"
@@ -203,8 +200,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage",
-          "ParseKey": "Job"
+          "job": "Blue_Mage"
         }
       ],
       "Note": ""
@@ -224,8 +220,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage",
-          "ParseKey": "Job"
+          "job": "Blue_Mage"
         }
       ],
       "Note": "Hydro Pull"
@@ -244,8 +239,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage",
-          "ParseKey": "Job"
+          "job": "Blue_Mage"
         }
       ],
       "Note": ""
@@ -264,8 +258,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage",
-          "ParseKey": "Job"
+          "job": "Blue_Mage"
         }
       ],
       "Note": ""
@@ -285,8 +278,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage",
-          "ParseKey": "Job"
+          "job": "Blue_Mage"
         }
       ],
       "Note": "The Ram's Voice"
@@ -305,8 +297,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage",
-          "ParseKey": "Job"
+          "job": "Blue_Mage"
         }
       ],
       "Note": ""
@@ -325,8 +316,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage",
-          "ParseKey": "Job"
+          "job": "Blue_Mage"
         }
       ],
       "Note": ""
@@ -346,8 +336,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage",
-          "ParseKey": "Job"
+          "job": "Blue_Mage"
         }
       ],
       "Note": "Ultravibration"
@@ -366,8 +355,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage",
-          "ParseKey": "Job"
+          "job": "Blue_Mage"
         }
       ],
       "Note": ""
@@ -386,8 +374,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage",
-          "ParseKey": "Job"
+          "job": "Blue_Mage"
         }
       ],
       "Note": ""

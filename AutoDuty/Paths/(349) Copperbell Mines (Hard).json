@@ -40,8 +40,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002901,
           "property": "IsTargetable",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         }
       ],
       "Note": "Skips ahead if the Lift is in the proper spot."
@@ -452,8 +451,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002735,
           "property": "EventState",
-          "value": 0,
-          "ParseKey": "ObjectData"
+          "value": 0
         }
       ],
       "Note": "Goes back if the fight hasn't finished yet (waiting for Biggy to spawn)."

@@ -40,8 +40,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Tanks, Melee, Aiming",
-          "ParseKey": "Job"
+          "job": "Tanks, Melee, Aiming"
         }
       ],
       "Note": ""
@@ -60,8 +59,7 @@
       "Conditions": [
         {
           "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
-          "job": "Healers, Casters",
-          "ParseKey": "Job"
+          "job": "Healers, Casters"
         }
       ],
       "Note": ""

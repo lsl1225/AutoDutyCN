@@ -272,8 +272,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2004054,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Picks up the Stone Tablet if it dropped."
@@ -294,8 +293,7 @@
           "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2000986,
           "quantity": 0,
-          "operatorValue": ">",
-          "ParseKey": "ItemCount"
+          "operatorValue": ">"
         }
       ],
       "Note": "Skips ahead if you have the Tablet."
@@ -371,8 +369,7 @@
             "Z": -138.72
           },
           "operatorValue": "<",
-          "distance": 5.0,
-          "ParseKey": "Distance"
+          "distance": 5.0
         }
       ],
       "Note": "Walks off the wooden platform (if you're on it)."
@@ -406,8 +403,7 @@
             "Z": -143.91
           },
           "operatorValue": "<",
-          "distance": 3.0,
-          "ParseKey": "Distance"
+          "distance": 3.0
         }
       ],
       "Note": "Walks off the other wooden platform (if you're on it)."
@@ -491,8 +487,7 @@
             "Z": 0.0
           },
           "operatorValue": ">",
-          "distance": 70.0,
-          "ParseKey": "Distance"
+          "distance": 70.0
         }
       ],
       "Note": "Skips ahead if the Coffer below is not in range."
@@ -541,8 +536,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2004055,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Picks up the Stone Tablet if it dropped."
@@ -563,8 +557,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2004056,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Picks up the Stone Tablet if it dropped."
@@ -598,8 +591,7 @@
             "Z": 0.0
           },
           "operatorValue": ">",
-          "distance": 70.0,
-          "ParseKey": "Distance"
+          "distance": 70.0
         }
       ],
       "Note": "Skips ahead if the Coffer below is not in range."
@@ -620,8 +612,7 @@
           "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2000986,
           "quantity": 1,
-          "operatorValue": ">",
-          "ParseKey": "ItemCount"
+          "operatorValue": ">"
         }
       ],
       "Note": "Skips ahead if you already have both Tablets."
@@ -670,8 +661,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2004055,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Picks up the Stone Tablet if it dropped."
@@ -692,8 +682,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2004056,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Picks up the Stone Tablet if it dropped."
@@ -727,8 +716,7 @@
             "Z": 0.0
           },
           "operatorValue": ">",
-          "distance": 70.0,
-          "ParseKey": "Distance"
+          "distance": 70.0
         }
       ],
       "Note": "Skips ahead if the Coffer below is not in range."
@@ -749,8 +737,7 @@
           "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2000986,
           "quantity": 1,
-          "operatorValue": ">",
-          "ParseKey": "ItemCount"
+          "operatorValue": ">"
         }
       ],
       "Note": "Skips ahead if you already have both Tablets."
@@ -799,8 +786,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2004055,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Picks up the Stone Tablet if it dropped."
@@ -821,8 +807,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2004056,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Picks up the Stone Tablet if it dropped."
@@ -856,8 +841,7 @@
             "Z": 0.0
           },
           "operatorValue": ">",
-          "distance": 70.0,
-          "ParseKey": "Distance"
+          "distance": 70.0
         }
       ],
       "Note": "Skips ahead if the Coffer below is not in range."
@@ -878,8 +862,7 @@
           "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2000986,
           "quantity": 1,
-          "operatorValue": ">",
-          "ParseKey": "ItemCount"
+          "operatorValue": ">"
         }
       ],
       "Note": "Skips ahead if you already have both Tablets."
@@ -928,8 +911,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2004055,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Picks up the Stone Tablet if it dropped."
@@ -950,8 +932,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2004056,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Picks up the Stone Tablet if it dropped."
@@ -985,15 +966,13 @@
             "Z": 0.0
           },
           "operatorValue": "<",
-          "distance": 30.0,
-          "ParseKey": "Distance"
+          "distance": 30.0
         },
         {
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 276,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Treasure Coffer - AD will attempt to click it until it despawns because it's an Interactable step (since it's position is not static)."
@@ -1027,15 +1006,13 @@
             "Z": 0.0
           },
           "operatorValue": "<",
-          "distance": 30.0,
-          "ParseKey": "Distance"
+          "distance": 30.0
         },
         {
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 277,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Treasure Coffer - AD will attempt to click it until it despawns because it's an Interactable step (since it's position is not static)."
@@ -1069,8 +1046,7 @@
             "Z": -135.453
           },
           "operatorValue": ">",
-          "distance": 50.0,
-          "ParseKey": "Distance"
+          "distance": 50.0
         }
       ],
       "Note": "Moves to the second set of chests if you're at the first."
@@ -1104,8 +1080,7 @@
             "Z": -167.64
           },
           "operatorValue": "<",
-          "distance": 35.0,
-          "ParseKey": "Distance"
+          "distance": 35.0
         }
       ],
       "Note": "Continues moving to the second set of chests if you're interrupted by combat."
@@ -1126,8 +1101,7 @@
           "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2000986,
           "quantity": 2,
-          "operatorValue": "<",
-          "ParseKey": "ItemCount"
+          "operatorValue": "<"
         }
       ],
       "Note": "Goes back if you still need Tablets."
@@ -1160,8 +1134,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 276,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Checks for Coffers (necessary if you reached the second area with both Tablets already)."
@@ -1182,8 +1155,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 277,
           "property": "IsTargetable",
-          "value": 1,
-          "ParseKey": "ObjectData"
+          "value": 1
         }
       ],
       "Note": "Checks for Coffers (necessary if you reached the second area with both Tablets already)."

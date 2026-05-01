@@ -412,8 +412,7 @@
           "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2004707,
           "property": "EventState",
-          "value": 7,
-          "ParseKey": "ObjectData"
+          "value": 7
         }
       ],
       "Note": "Goes back if the Aetherial Flow hasn't appeared yet."

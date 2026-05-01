@@ -650,6 +650,10 @@
   "Meta": {
     "CreatedAt": 302,
     "Changelog": [
+      {
+        "Version": 304,
+        "Change": "Version update"
+      }
     ],
     "Notes": []
   }

@@ -81,8 +81,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -100,8 +101,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -119,8 +121,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Healers, DPS"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Healers, DPS",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -388,10 +391,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2005307,
           "property": "IsTargetable",
-          "value": 0
+          "value": 0,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Skips ahead if the Lift Terminal isn't targetable (presumably if you died)."
@@ -752,6 +756,10 @@
       {
         "Version": 300,
         "Change": "Added Coords to the KillInRange on the Elevator. Added False on MoveTo steps after the elevators to prevent the possibility of skipping them. Adjusted the Coords of MoveTo's in transition walls to be farther in the wall."
+      },
+      {
+        "Version": 304,
+        "Change": "Version update"
       }
     ],
     "Notes": []

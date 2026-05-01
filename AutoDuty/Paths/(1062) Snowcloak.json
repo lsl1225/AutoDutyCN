@@ -109,10 +109,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionItemCount, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2001447,
           "quantity": 1,
-          "operatorValue": "<"
+          "operatorValue": "<",
+          "ParseKey": "ItemCount"
         }
       ],
       "Note": "Goes back if you don't have the Key."
@@ -344,10 +345,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 3364,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Goes back if an Ice Bomb is targetable (enemies in the first wave)."
@@ -365,10 +367,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 3376,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Goes back if the Hybrid Gator is targetable (an enemy in the second wave)."
@@ -490,6 +493,10 @@
       {
         "Version": 299,
         "Change": "Added Trash/Boss Comments & Boss Names. Added Unsynced Steps. Added KillInRange steps. Replaced the Boss step in the Gauntlet after the second boss with a Condition loop."
+      },
+      {
+        "Version": 304,
+        "Change": "Version update"
       }
     ],
     "Notes": []

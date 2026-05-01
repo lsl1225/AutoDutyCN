@@ -187,8 +187,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -206,8 +207,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -225,8 +227,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -256,8 +259,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Carried over from original path. Use unclear. May be detrimental when Synced."
@@ -275,8 +279,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -294,8 +299,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -455,6 +461,10 @@
       {
         "Version": 299,
         "Change": "Added Trash/Boss Comments. Added KillInRange steps. Added missing Treasure Chest. Adjusted the W2W section and added the Tank Condition."
+      },
+      {
+        "Version": 304,
+        "Change": "Version update"
       }
     ],
     "Notes": []

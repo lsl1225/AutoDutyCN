@@ -255,10 +255,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionItemCount, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2000263,
           "quantity": 1,
-          "operatorValue": "<"
+          "operatorValue": "<",
+          "ParseKey": "ItemCount"
         }
       ],
       "Note": "Green Key - Skipped if you already have the key (ex. picked it up while looting boss chest)."
@@ -628,10 +629,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001235,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Goes back if the Bloody Parchment hasn't been picked up yet (if Aetherial Flow was clicked first)."
@@ -677,10 +679,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001233,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Sealed Barrier - Skipped if it's already open (ex. if you died somehow before reaching the boss)."
@@ -804,6 +807,10 @@
       {
         "Version": 300,
         "Change": "Added Unsynced StopForCombat:True and KillInRange before Interactables. Removed unnecessary Unsynced StopForCombat steps between second and third bosses. Adjusted the Wait after the first boss to an appropriate WaitFor. Added an extra step before the final boss so that nothing important is skipped by anyone watching the cutscene."
+      },
+      {
+        "Version": 304,
+        "Change": "Version update"
       }
     ],
     "Notes": []

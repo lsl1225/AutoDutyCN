@@ -537,10 +537,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002735,
           "property": "EventState",
-          "value": 0
+          "value": 0,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Goes back if the fight hasn't finished yet (waiting for the second set of enemies)."
@@ -556,6 +557,10 @@
       {
         "Version": 299,
         "Change": "Added Trash/Boss Comments & Boss Names. Added Unsynced Steps. Added Treasure steps. Added WaitFor:IsReady during transitions. Added KillInRange. Added Condition to not leave the 3rd boss fight early. Added appropriate Revival steps. Removed excess MoveTo steps."
+      },
+      {
+        "Version": 304,
+        "Change": "Version update"
       }
     ],
     "Notes": []

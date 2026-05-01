@@ -53,10 +53,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             0
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -74,13 +75,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -98,13 +100,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -122,14 +125,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -171,13 +175,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -195,19 +200,21 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 19103,
           "property": "IsTargetable",
-          "value": 0
+          "value": 0,
+          "ParseKey": "ObjectData"
         },
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -225,13 +232,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -249,7 +257,7 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionDistance, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionDistance, AutoDuty",
           "origin": "Player",
           "originId": 0,
           "originLoc": {
@@ -265,16 +273,18 @@
             "Z": 0.0
           },
           "operatorValue": "<",
-          "distance": 10.0
+          "distance": 10.0,
+          "ParseKey": "Distance"
         },
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -292,13 +302,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -330,13 +341,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -368,13 +380,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -392,14 +405,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -417,7 +431,7 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
@@ -428,7 +442,8 @@
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -446,13 +461,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -470,13 +486,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": "Y'nazqha"
@@ -494,13 +511,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -518,13 +536,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -542,13 +561,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -578,13 +598,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": "Rukhkh"
@@ -602,13 +623,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -626,19 +648,21 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 19114,
           "property": "IsTargetable",
-          "value": 0
+          "value": 0,
+          "ParseKey": "ObjectData"
         },
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -654,13 +678,14 @@
       "Arguments": [],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -678,17 +703,19 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2015018,
           "property": "IsTargetable",
-          "value": 0
+          "value": 0,
+          "ParseKey": "ObjectData"
         },
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -706,11 +733,12 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": "Damaged Fence"
@@ -728,11 +756,12 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -750,11 +779,12 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -772,11 +802,12 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -794,11 +825,12 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -816,10 +848,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -837,10 +870,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -858,10 +892,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -879,16 +914,18 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 19325,
           "property": "IsTargetable",
-          "value": 0
+          "value": 0,
+          "ParseKey": "ObjectData"
         },
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -906,10 +943,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -925,10 +963,11 @@
       "Arguments": [],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -946,10 +985,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -967,10 +1007,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -988,11 +1029,12 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1010,17 +1052,19 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 19357,
           "property": "IsTargetable",
-          "value": 0
+          "value": 0,
+          "ParseKey": "ObjectData"
         },
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1038,10 +1082,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1059,10 +1104,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1080,10 +1126,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1102,10 +1149,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1123,10 +1171,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1144,10 +1193,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1165,10 +1215,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1186,10 +1237,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1207,16 +1259,18 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 19294,
           "property": "IsTargetable",
-          "value": 0
+          "value": 0,
+          "ParseKey": "ObjectData"
         },
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1234,10 +1288,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1255,10 +1310,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1276,10 +1332,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             3
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1297,13 +1354,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1319,13 +1377,14 @@
       "Arguments": [],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1341,13 +1400,14 @@
       "Arguments": [],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1365,13 +1425,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1401,13 +1462,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             1,
             2,
             3,
             4
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": "Pari of Plenty"
@@ -1437,14 +1499,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1462,14 +1525,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": "Perturbed Peasant"
@@ -1487,14 +1551,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1512,14 +1577,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1537,20 +1603,22 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2015019,
           "property": "IsTargetable",
-          "value": 0
+          "value": 0,
+          "ParseKey": "ObjectData"
         },
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": "Scattered Crates"
@@ -1568,14 +1636,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": "Scattered Crates"
@@ -1593,14 +1662,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1618,14 +1688,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": "Unlucky Clerk"
@@ -1643,14 +1714,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1668,7 +1740,7 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionDistance, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionDistance, AutoDuty",
           "origin": "Player",
           "originId": 0,
           "originLoc": {
@@ -1684,17 +1756,19 @@
             "Z": 0.0
           },
           "operatorValue": "<",
-          "distance": 10.0
+          "distance": 10.0,
+          "ParseKey": "Distance"
         },
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1712,14 +1786,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1737,14 +1812,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1762,14 +1838,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1787,14 +1864,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1812,14 +1890,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1835,14 +1914,15 @@
       "Arguments": [],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1860,14 +1940,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": "Genie of the Lamp"
@@ -1885,14 +1966,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1908,14 +1990,15 @@
       "Arguments": [],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1933,14 +2016,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1958,14 +2042,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -1983,14 +2068,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2009,10 +2095,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             6
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2030,14 +2117,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2055,14 +2143,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": "Y'nazqha"
@@ -2080,12 +2169,13 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2103,11 +2193,12 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             7,
             8
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2125,14 +2216,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2148,14 +2240,15 @@
       "Arguments": [],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2173,14 +2266,15 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2199,10 +2293,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2220,11 +2315,12 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             6,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": "Yawning Maw"
@@ -2243,10 +2339,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             6
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2264,12 +2361,13 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2285,12 +2383,13 @@
       "Arguments": [],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2306,12 +2405,13 @@
       "Arguments": [],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2329,11 +2429,12 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": "Tangled Seaweed Barrier"
@@ -2351,11 +2452,12 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2373,11 +2475,12 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             7,
             8
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2395,17 +2498,19 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 19123,
           "property": "IsTargetable",
-          "value": 0
+          "value": 0,
+          "ParseKey": "ObjectData"
         },
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             7,
             8
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2423,10 +2528,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             7
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2444,10 +2550,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             7
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": "Giant Conch Shell"
@@ -2465,11 +2572,12 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             7,
             8
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2487,17 +2595,19 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 19125,
           "property": "IsTargetable",
-          "value": 0
+          "value": 0,
+          "ParseKey": "ObjectData"
         },
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             7,
             8
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2515,11 +2625,12 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             7,
             8
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2535,11 +2646,12 @@
       "Arguments": [],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             7,
             8
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2557,13 +2669,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2579,13 +2692,14 @@
       "Arguments": [],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2603,13 +2717,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             5,
             6,
             7,
             8
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": "Darya the Sea-maid"
@@ -2639,13 +2754,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2663,13 +2779,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2687,7 +2804,7 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionDistance, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionDistance, AutoDuty",
           "origin": "Player",
           "originId": 0,
           "originLoc": {
@@ -2703,16 +2820,18 @@
             "Z": 0.0
           },
           "operatorValue": "<",
-          "distance": 15.0
+          "distance": 15.0,
+          "ParseKey": "Distance"
         },
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2730,13 +2849,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2754,13 +2874,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2778,13 +2899,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2802,13 +2924,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2824,13 +2947,14 @@
       "Arguments": [],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2848,13 +2972,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": "Rukhkh"
@@ -2872,13 +2997,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2894,13 +3020,14 @@
       "Arguments": [],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2918,13 +3045,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2942,13 +3070,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2966,13 +3095,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -2990,13 +3120,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3014,13 +3145,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": "Y'nazqha"
@@ -3038,11 +3170,12 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3060,11 +3193,12 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3082,13 +3216,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3104,13 +3239,14 @@
       "Arguments": [],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3128,13 +3264,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3153,10 +3290,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             10
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3174,11 +3312,12 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3197,10 +3336,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3218,16 +3358,18 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 19132,
           "property": "IsTargetable",
-          "value": 0
+          "value": 0,
+          "ParseKey": "ObjectData"
         },
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             10
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3246,10 +3388,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             10
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3267,10 +3410,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             11
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3288,10 +3432,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             11
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3309,11 +3454,12 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3331,17 +3477,19 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 19125,
           "property": "IsTargetable",
-          "value": 0
+          "value": 0,
+          "ParseKey": "ObjectData"
         },
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3359,10 +3507,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             11
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3380,13 +3529,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3402,13 +3552,14 @@
       "Arguments": [],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3424,13 +3575,14 @@
       "Arguments": [],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3446,13 +3598,14 @@
       "Arguments": [],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3470,13 +3623,14 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             9,
             10,
             11,
             12
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": "Lone Swordmaster"
@@ -3506,10 +3660,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3527,10 +3682,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3548,10 +3704,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3569,10 +3726,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3590,10 +3748,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3611,10 +3770,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3632,10 +3792,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3653,10 +3814,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3674,10 +3836,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3695,10 +3858,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3716,10 +3880,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3737,10 +3902,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3758,7 +3924,7 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionDistance, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionDistance, AutoDuty",
           "origin": "Player",
           "originId": 0,
           "originLoc": {
@@ -3774,13 +3940,15 @@
             "Z": 0.0
           },
           "operatorValue": "<",
-          "distance": 15.0
+          "distance": 15.0,
+          "ParseKey": "Distance"
         },
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3798,10 +3966,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3819,10 +3988,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": ""
@@ -3840,10 +4010,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionVariantPath, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionVariantPath, AutoDuty",
           "pathIndices": [
             13
-          ]
+          ],
+          "ParseKey": "VariantPath"
         }
       ],
       "Note": "Deadly Dandan"
@@ -3871,6 +4042,10 @@
       {
         "Version": 300,
         "Change": "Paths 5,6,9,10 updated with new bossmod modules"
+      },
+      {
+        "Version": 304,
+        "Change": "Version update"
       }
     ],
     "Notes": []

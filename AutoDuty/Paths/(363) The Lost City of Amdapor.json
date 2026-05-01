@@ -307,8 +307,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Casters"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Casters",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Uses Addle on the Wamoura to aggro it."
@@ -326,8 +327,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Aiming"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Aiming",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Uses Foot Graze on the Wamoura to aggro it."
@@ -345,8 +347,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Uses Provoke on the Wamoura to aggro it."
@@ -364,8 +367,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Healers"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Healers",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Uses Repose on the Wamoura to aggro it."
@@ -383,8 +387,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Melee"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Melee",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -402,7 +407,7 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionDistance, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionDistance, AutoDuty",
           "origin": "Player",
           "originId": 0,
           "originLoc": {
@@ -418,11 +423,13 @@
             "Z": 0.0
           },
           "operatorValue": "<",
-          "distance": 5.0
+          "distance": 5.0,
+          "ParseKey": "Distance"
         },
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Melee"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Melee",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Moves back a bit if the Wamoura is close to you as a Melee."
@@ -440,8 +447,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Melee"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Melee",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Uses Feint on the Wamoura to aggro it."
@@ -459,8 +467,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks, DPS"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks, DPS",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Waits for the Ramoura to face you."
@@ -478,8 +487,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Healers"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Healers",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Waits for the cast to finish and for the Ramoura to face you."
@@ -647,6 +657,10 @@
       {
         "Version": 300,
         "Change": "Adjusted the Coords of the MoveTo in the transition wall to be farther in said wall."
+      },
+      {
+        "Version": 304,
+        "Change": "Version update"
       }
     ],
     "Notes": []

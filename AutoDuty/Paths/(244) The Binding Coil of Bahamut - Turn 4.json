@@ -41,10 +41,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2000615,
           "property": "EventState",
-          "value": 7
+          "value": 7,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Goes back if the gauntlet is still ongoing."
@@ -80,6 +81,10 @@
       {
         "Version": 300,
         "Change": ""
+      },
+      {
+        "Version": 304,
+        "Change": "Version update"
       }
     ],
     "Notes": []

@@ -67,10 +67,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2000162,
           "property": "IsTargetable",
-          "value": 0
+          "value": 0,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Skips ahead if the lift is in the proper spot."
@@ -308,10 +309,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionItemCount, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2000441,
           "quantity": 1,
-          "operatorValue": "<"
+          "operatorValue": "<",
+          "ParseKey": "ItemCount"
         }
       ],
       "Note": "Tiny Key - Skipped if the Key was picked up while looting the boss chest."
@@ -369,10 +371,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2000174,
           "property": "IsTargetable",
-          "value": 0
+          "value": 0,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Skips ahead if the lift is in the proper spot."
@@ -766,6 +769,10 @@
       {
         "Version": 300,
         "Change": "Added False on MoveTo steps after the elevators to prevent the possibility of skipping them. Adjusted the step before the final boss so that it won't be skipped by anyone watching the cutscene."
+      },
+      {
+        "Version": 304,
+        "Change": "Version update"
       }
     ],
     "Notes": []

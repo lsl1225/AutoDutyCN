@@ -110,8 +110,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Blue_Mage",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -158,10 +159,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionActionStatus, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionActionStatus, AutoDuty",
           "type": "Action",
           "id": 23282,
-          "statusCode": 573
+          "statusCode": 573,
+          "ParseKey": "ActionStatus"
         }
       ],
       "Note": "Checks if Hydropull is available. Waits 2.5sec if not."
@@ -180,8 +182,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Blue_Mage",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Surecast"
@@ -199,8 +202,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Blue_Mage",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -219,8 +223,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Blue_Mage",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Hydro Pull"
@@ -238,8 +243,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Blue_Mage",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -257,8 +263,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Blue_Mage",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -277,8 +284,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Blue_Mage",
+          "ParseKey": "Job"
         }
       ],
       "Note": "The Ram's Voice"
@@ -296,8 +304,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Blue_Mage",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -315,8 +324,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Blue_Mage",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -335,8 +345,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Blue_Mage",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Ultravibration"
@@ -354,8 +365,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Blue_Mage",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -373,8 +385,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Blue_Mage"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Blue_Mage",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -880,6 +893,10 @@
       {
         "Version": 299,
         "Change": "Added Various Comment steps. Added Boss names for the first two bosses. Added Notes to some of the BLU steps & made sure they all had the BLU Class Condition. Added WaitFor:IsReady during transitions & after Hydropull."
+      },
+      {
+        "Version": 304,
+        "Change": "Version update"
       }
     ],
     "Notes": []

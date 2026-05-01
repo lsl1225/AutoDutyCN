@@ -27,10 +27,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2006966,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Exhaust Duct α"
@@ -188,10 +189,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2006966,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Exhaust Duct α"
@@ -399,6 +401,10 @@
       {
         "Version": 296,
         "Change": ""
+      },
+      {
+        "Version": 304,
+        "Change": "Version update"
       }
     ],
     "Notes": []

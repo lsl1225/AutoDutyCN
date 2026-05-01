@@ -25,10 +25,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionItemCount, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2001568,
           "quantity": 5,
-          "operatorValue": "!="
+          "operatorValue": "!=",
+          "ParseKey": "ItemCount"
         }
       ],
       "Note": "Tonu Vanu"
@@ -684,6 +685,10 @@
       {
         "Version": 299,
         "Change": "Added logic to reset index if hit by tornadoes, added W2W/StopForCombat logic"
+      },
+      {
+        "Version": 304,
+        "Change": "Version update"
       }
     ],
     "Notes": []

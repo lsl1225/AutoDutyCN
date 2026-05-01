@@ -27,8 +27,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "DPS"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "DPS",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -46,8 +47,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -65,8 +67,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Healers"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Healers",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -98,8 +101,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "DPS"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "DPS",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Master of Arms"
@@ -117,8 +121,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Master of Shields"
@@ -136,8 +141,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Healers"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Healers",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Master of Magicks"
@@ -295,8 +301,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "DPS"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "DPS",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -314,8 +321,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -333,8 +341,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Healers"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Healers",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -364,8 +373,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "DPS"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "DPS",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Master of Arms"
@@ -383,8 +393,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Master of Shields"
@@ -402,8 +413,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Healers"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Healers",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Master of Magicks"
@@ -425,7 +437,12 @@
   ],
   "Meta": {
     "CreatedAt": 291,
-    "Changelog": [],
+    "Changelog": [
+      {
+        "Version": 304,
+        "Change": "Version update"
+      }
+    ],
     "Notes": []
   }
 }

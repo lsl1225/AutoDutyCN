@@ -369,6 +369,9 @@ public class ConfigurationMain
 
             if (isInternal)
             {
+                if (typeName.Contains("AutoDuty.Data.Classes+PathActionCondition"))
+                    typeName = typeName.Replace("AutoDuty.Data.Classes+PathActionCondition", "AutoDuty.Data.PathActionCondition");
+
                 Type? type = typeof(Configuration).Assembly.GetType(typeName);
                 if (type != null)
                     return type;

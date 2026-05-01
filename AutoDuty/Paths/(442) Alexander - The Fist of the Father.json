@@ -39,8 +39,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks, Melee, Aiming"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks, Melee, Aiming",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -58,8 +59,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Healers, Casters"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Healers, Casters",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -85,6 +87,10 @@
       {
         "Version": 298,
         "Change": ""
+      },
+      {
+        "Version": 304,
+        "Change": "Version update"
       }
     ],
     "Notes": []

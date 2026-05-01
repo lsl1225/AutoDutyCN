@@ -173,7 +173,7 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionDistance, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionDistance, AutoDuty",
           "origin": "Location",
           "originId": 0,
           "originLoc": {
@@ -189,7 +189,8 @@
             "Z": 0.0
           },
           "operatorValue": "<",
-          "distance": 100.0
+          "distance": 100.0,
+          "ParseKey": "Distance"
         }
       ],
       "Note": "Goes back if you haven't taken the Transporter."
@@ -353,7 +354,7 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionDistance, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionDistance, AutoDuty",
           "origin": "Location",
           "originId": 0,
           "originLoc": {
@@ -369,7 +370,8 @@
             "Z": 0.0
           },
           "operatorValue": "<=",
-          "distance": 20.0
+          "distance": 20.0,
+          "ParseKey": "Distance"
         }
       ],
       "Note": "Goes back if you haven't taken the Transporter."
@@ -481,6 +483,10 @@
       {
         "Version": 299,
         "Change": "Added Trash/Boss Comments. Added Unsynced steps. Removed excess MoveTo steps (kept the notable ones from previous Changes)."
+      },
+      {
+        "Version": 304,
+        "Change": "Version update"
       }
     ],
     "Notes": []

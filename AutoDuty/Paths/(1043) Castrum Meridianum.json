@@ -81,8 +81,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Gives Tanks time to AoE the second pack."
@@ -100,8 +101,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Runs back in range of the healer."
@@ -119,8 +121,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Healers, DPS"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Healers, DPS",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Runs back to the tank."
@@ -206,8 +209,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Gives Tanks time to AoE the second pack."
@@ -225,8 +229,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Runs back in range of the healer."
@@ -244,8 +249,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Faces the pack away from the group."
@@ -263,8 +269,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Healers, DPS"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Healers, DPS",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Runs back to the tank."
@@ -418,8 +425,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Gives Tanks time to AoE the second pack."
@@ -437,8 +445,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Runs back in range of the healer."
@@ -456,8 +465,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Healers, DPS"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Healers, DPS",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Runs back to the tank."
@@ -557,8 +567,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Gives Tanks time to AoE the second pack."
@@ -576,8 +587,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Runs back in range of the healer."
@@ -595,8 +607,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Healers, DPS"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Healers, DPS",
+          "ParseKey": "Job"
         }
       ],
       "Note": "Runs back to the tank."
@@ -746,6 +759,10 @@
       {
         "Version": 299,
         "Change": "Merged the Regular & W2W paths. Added Trash/Boss Comments & Boss names. Adjusted and expanded the W2W steps."
+      },
+      {
+        "Version": 304,
+        "Change": "Version update"
       }
     ],
     "Notes": []

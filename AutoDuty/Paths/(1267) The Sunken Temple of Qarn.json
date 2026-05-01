@@ -499,10 +499,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionItemCount, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2000566,
           "quantity": 0,
-          "operatorValue": ">"
+          "operatorValue": ">",
+          "ParseKey": "ItemCount"
         }
       ],
       "Note": ""
@@ -534,10 +535,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionItemCount, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2000566,
           "quantity": 0,
-          "operatorValue": ">"
+          "operatorValue": ">",
+          "ParseKey": "ItemCount"
         }
       ],
       "Note": "Goes back if you still have the Fruit of Knowledge."
@@ -569,10 +571,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionItemCount, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2000565,
           "quantity": 0,
-          "operatorValue": ">"
+          "operatorValue": ">",
+          "ParseKey": "ItemCount"
         }
       ],
       "Note": ""
@@ -604,10 +607,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionItemCount, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2000565,
           "quantity": 0,
-          "operatorValue": ">"
+          "operatorValue": ">",
+          "ParseKey": "ItemCount"
         }
       ],
       "Note": "Goes back if you still have the Flame of Knowledge."
@@ -639,10 +643,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2000658,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Goes back if The Scales of Judgment weren't properly interacted with."
@@ -660,10 +665,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2000430,
           "property": "EventState",
-          "value": 0
+          "value": 0,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Skips ahead if the Treasure Room is inaccessible."
@@ -755,6 +761,10 @@
       {
         "Version": 300,
         "Change": "Added Unsynced KillInRange steps to ensure ghosts are killed for the GC Hunting Log. Added an extra step before the final boss so that nothing important is skipped by anyone watching the cutscene. Added failsafes for the Interacts at the end. Removed unnecessary KillInRange steps after the first boss. Removed the Treasure steps required for any Coffer that only gives Elemental Shards."
+      },
+      {
+        "Version": 304,
+        "Change": "Version update"
       }
     ],
     "Notes": []

@@ -189,10 +189,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002735,
           "property": "EventState",
-          "value": 0
+          "value": 0,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Goes back if the fight hasn't finished yet (waiting for the boss to reform)."
@@ -598,6 +599,10 @@
       {
         "Version": 300,
         "Change": "Adjusted the Coords of MoveTo's in transition walls to be farther in the wall."
+      },
+      {
+        "Version": 304,
+        "Change": "Version update"
       }
     ],
     "Notes": []

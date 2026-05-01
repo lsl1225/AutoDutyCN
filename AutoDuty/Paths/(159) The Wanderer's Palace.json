@@ -171,10 +171,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001123,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Nymian Device"
@@ -192,8 +193,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Tanks, Healers, Samurai, Maiming, Scouting, Aiming, Casters"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Tanks, Healers, Samurai, Maiming, Scouting, Aiming, Casters",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -237,10 +239,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002789,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Lantern Oil"
@@ -272,10 +275,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002789,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Lantern Oil"
@@ -307,10 +311,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002789,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Lantern Oil"
@@ -342,10 +347,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002789,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Lantern Oil"
@@ -375,10 +381,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002789,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Lantern Oil"
@@ -410,10 +417,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002789,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Lantern Oil"
@@ -443,10 +451,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002789,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Lantern Oil"
@@ -464,10 +473,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001125,
           "property": "IsTargetable",
-          "value": 0
+          "value": 0,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Skips ahead if the Nymian Devices aren't targetable (presumably if you died)."
@@ -499,10 +509,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002789,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Lantern Oil"
@@ -520,10 +531,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionItemCount, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2001071,
           "quantity": 2,
-          "operatorValue": ">"
+          "operatorValue": ">",
+          "ParseKey": "ItemCount"
         }
       ],
       "Note": "Skips ahead if you already have three Lantern Oils."
@@ -555,10 +567,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionItemCount, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2001071,
           "quantity": 3,
-          "operatorValue": "<"
+          "operatorValue": "<",
+          "ParseKey": "ItemCount"
         }
       ],
       "Note": "Goes back if you do not have three Lantern Oils."
@@ -576,10 +589,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001124,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Rusted Nymian Device"
@@ -597,10 +611,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001125,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Rusted Nymian Device"
@@ -618,10 +633,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001126,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Rusted Nymian Device"
@@ -653,8 +669,9 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionJob, AutoDuty",
-          "job": "Monk"
+          "$type": "AutoDuty.Data.PathActionConditionJob, AutoDuty",
+          "job": "Monk",
+          "ParseKey": "Job"
         }
       ],
       "Note": ""
@@ -672,10 +689,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001127,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Nymian Device"
@@ -733,10 +751,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2002789,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Lantern Oil"
@@ -768,10 +787,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionItemCount, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2001071,
           "quantity": 2,
-          "operatorValue": "<"
+          "operatorValue": "<",
+          "ParseKey": "ItemCount"
         }
       ],
       "Note": "Goes back if you do not have two Lantern Oils."
@@ -803,10 +823,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001128,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Rusted Nymian Device"
@@ -836,10 +857,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001129,
           "property": "IsTargetable",
-          "value": 1
+          "value": 1,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Rusted Nymian Device"
@@ -1005,10 +1027,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionItemCount, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2001071,
           "quantity": 2,
-          "operatorValue": "<"
+          "operatorValue": "<",
+          "ParseKey": "ItemCount"
         }
       ],
       "Note": "Goes back if you do not have two Lantern Oils."
@@ -1100,6 +1123,10 @@
       {
         "Version": 300,
         "Change": "Added Unsynced KillInRange before Interactable."
+      },
+      {
+        "Version": 304,
+        "Change": "Version update"
       }
     ],
     "Notes": []

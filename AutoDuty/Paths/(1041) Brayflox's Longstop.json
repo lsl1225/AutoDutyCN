@@ -39,10 +39,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionObjectData, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionObjectData, AutoDuty",
           "baseId": 2001462,
           "property": "IsTargetable",
-          "value": 0
+          "value": 0,
+          "ParseKey": "ObjectData"
         }
       ],
       "Note": "Skips ahead if the Gate is already open."
@@ -88,10 +89,11 @@
       ],
       "Conditions": [
         {
-          "$type": "AutoDuty.Data.Classes+PathActionConditionItemCount, AutoDuty",
+          "$type": "AutoDuty.Data.PathActionConditionItemCount, AutoDuty",
           "itemId": 2000521,
           "quantity": 1,
-          "operatorValue": "<"
+          "operatorValue": "<",
+          "ParseKey": "ItemCount"
         }
       ],
       "Note": "Goes back if you don't have the Key."
@@ -517,6 +519,10 @@
       {
         "Version": 300,
         "Change": "Removed the Treasure Tag from the KillInRange before the second boss, so that the enemies on the cliff are always killed (to avoid targeting issues during the second boss). Adjusted the step before the final boss so that it won't be skipped by anyone watching the cutscene."
+      },
+      {
+        "Version": 304,
+        "Change": "Version update"
       }
     ],
     "Notes": []

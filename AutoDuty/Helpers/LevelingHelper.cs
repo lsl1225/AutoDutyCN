@@ -24,8 +24,11 @@ namespace AutoDuty.Helpers
             1037u, // 16 TamTara Deepcroft
             1039u, // 24 The Thousand Maws of Toto-Rak
             1041u, // 32 Brayflox's Longstop
+            1303u, // 38 Cutter's Cry
             1042u, // 41 Stone Vigil
-            
+            1330u, // 44 Dzemael Darkhold
+            1331u, // 47 Aurum Vale
+
             1142u, // 61 Sirensong Sea
             1144u, // 67 Doma Castle
             1145u, // 69 Castrum Abania
@@ -48,9 +51,7 @@ namespace AutoDuty.Helpers
 
         public static readonly uint[] levelingListExperimental =
         [
-            1303u, // 38 Cutter's Cry
-            1330u, // 44 Dzemael Darkhold
-            1331u, // 47 Aurum Vale
+            1367u, // 63 Shisui of the Violet Tides
         ];
 
         internal static Content[] LevelingDuties
@@ -64,12 +65,13 @@ namespace AutoDuty.Helpers
                     if (IPCSubscriber_Common.IsReady("SkipCutscene") || IPCSubscriber_Common.IsReady("Skippy"))
                     {
                         ids = ids.Concat([
-                            1048u, // 45 Porta Decumana
+                            1048u, // 50 Porta Decumana
                         ]);
                     } else
                     {
                         ids = ids.Concat([
                             1043u, // 50 Castrum Meridianum
+                            1366u, // 51 Dusk Vigil
                             1064u, // 53 Sohm Al
                             1065u, // 55 The Aery
                             1066u, // 57 The Vault

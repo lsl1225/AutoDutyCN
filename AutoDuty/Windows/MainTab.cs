@@ -66,7 +66,7 @@ namespace AutoDuty.Windows
                 if (Plugin.CurrentTerritoryContent == null || !PlayerHelper.IsReady)
                     return;
 
-                using ImRaii.IEndObject? d = ImRaii.Disabled(InDungeon && Plugin is { Stage: > 0 });
+                using ImRaii.DisabledDisposable? d = ImRaii.Disabled(InDungeon && Plugin is { Stage: > 0 });
 
                 if (ContentPathsManager.DictionaryPaths.TryGetValue(Plugin.CurrentTerritoryContent.TerritoryType, out ContentPathsManager.ContentPathContainer? container))
                 {
@@ -143,7 +143,7 @@ namespace AutoDuty.Windows
 
             if (InDungeon)
             {
-                if (Plugin.CurrentTerritoryContent == null)
+                if (Plugin.CurrentTerritoryContent == null || Plugin.CurrentTerritoryContent.TerritoryType != Svc.ClientState.TerritoryType)
                 {
                     Plugin.LoadPath();
                 }
@@ -206,10 +206,10 @@ namespace AutoDuty.Windows
 
                         if(dutyMode == DutyMode.Variant)
                         {
-                            using ImRaii.IEndObject _ = ImRaii.ItemWidth(150 * ImGuiHelpers.GlobalScale);
+                            using ImRaii.ItemWidthDisposable _ = ImRaii.ItemWidth(150 * ImGuiHelpers.GlobalScale);
                             ImGui.AlignTextToFramePadding();
                             ImGui.Text(Loc.Get("MainTab.CurrentVariantPath"));
-                            using ImRaii.IEndObject __ = ImRaii.Disabled(AutoDuty.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist);
+                            using ImRaii.DisabledDisposable __ = ImRaii.Disabled(AutoDuty.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist);
                             ImGui.SameLine();
                             byte variantPath = Plugin.VariantPath;
                             ImGui.InputByte($"###Path", ref variantPath, 1);

@@ -47,7 +47,7 @@ jobs:
           version_number: ${{ github.ref_name }}
           path: "AutoDuty/bin/Release/AutoDuty/latest.zip"
           type: "testing"
-          dalamud_version: "14"
+          dalamud_version: "15"
           changelog: ${{ github.event.release.body }}
         env:
           PUBLISHER_KEY: ${{ secrets.PUBLISHER_KEY }}

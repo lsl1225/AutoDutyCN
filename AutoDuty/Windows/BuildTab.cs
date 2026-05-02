@@ -80,7 +80,7 @@ namespace AutoDuty.Windows
 
         private static void DrawPathElements()
         {
-            using ImRaii.IEndObject? d = ImRaii.Disabled(!InDungeon || Plugin.Stage > 0 || !Player.Available);
+            using ImRaii.DisabledDisposable d = ImRaii.Disabled(!InDungeon || Plugin.Stage > 0 || !Player.Available);
             ImGui.Text(Loc.Get("BuildTab.BuildPath", Svc.ClientState.TerritoryType, ContentHelper.DictionaryContent.TryGetValue(Svc.ClientState.TerritoryType, out Classes.Content? content) ? content.Name : TerritoryName.GetTerritoryName(Svc.ClientState.TerritoryType)));
 
             ImGui.AlignTextToFramePadding();
@@ -415,14 +415,19 @@ namespace AutoDuty.Windows
                 int delIndex = -1;
                 for (int index = 0; index < _conditions.Count; index++)
                 {
+                    using ImRaii.IdDisposable _ = ImRaii.PushId($"BuildTab_Condition_{index}");
+
                     PathActionCondition condition = _conditions[index];
                     if (ImGuiComponents.IconButton(FontAwesomeIcon.TrashAlt))
                         delIndex = index;
                     ImGui.SameLine();
                     ImGui.AlignTextToFramePadding();
-                    ImGui.Text(Loc.Get("BuildTab.Condition"));
+                    ImGui.Text(condition.ParseKey.ToLocalizedString());
                     ImGui.SameLine();
+                    float indent = ImGui.GetCursorPosX();
+                    ImGui.Indent(indent);
                     condition.DrawConfig();
+                    ImGui.Unindent(indent);
                     ImGui.Separator();
                 }
 
@@ -430,23 +435,9 @@ namespace AutoDuty.Windows
                     _conditions.RemoveAt(delIndex);
 
 
-                ConditionType newConditionType = ConditionType.None;
-                if (ImGuiEx.EnumCombo(Loc.Get("BuildTab.AddNewCondition"), ref newConditionType))
-                {
-                    if (newConditionType != ConditionType.None)
-                    {
-                        _conditions.Add(newConditionType switch
-                        {
-                            ConditionType.Distance => new PathActionConditionDistance(),
-                            ConditionType.ItemCount => new PathActionConditionItemCount(),
-                            ConditionType.ObjectData => new PathActionConditionObjectData(),
-                            ConditionType.Job => new PathActionConditionJob(),
-                            ConditionType.ActionStatus => new PathActionConditionActionStatus(),
-                            ConditionType.VariantPath => new PathActionConditionVariantPath(),
-                            _ => throw new ArgumentOutOfRangeException()
-                        });
-                    }
-                }
+                PathActionCondition? actionCondition = PathActionCondition.ConditionSelection();
+                if (actionCondition != null)
+                    _conditions.Add(actionCondition);
             }
         }
 

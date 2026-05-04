@@ -18,6 +18,7 @@ namespace AutoDuty.IPC
     using Helpers;
     using Dalamud.Plugin;
     using ECommons.IPC.Subscribers.RotationSolverReborn;
+    using ECommons.IPC.Subscribers.Skippy;
     using WrathCombo.API;
     using WrathCombo.API.Enum;
 
@@ -364,6 +365,15 @@ namespace AutoDuty.IPC
 
         public static void RotationStop() => RotationSolverReborn.ChangeOperatingMode(RotationSolverRebornIPC.StateCommandType.Off);
     }
+
+    public static class Skippy_IPCSubscriber
+    {
+        internal static bool IsEnabled => IPCSubscriber_Common.IsReady("Skippy") && Skippy.IsEnabled();
+        public static Dictionary<string, bool> GetConfig() => Skippy.GetConfig();
+        public static bool MSQSkipEnabled() => 
+            IsEnabled && Skippy.GetSkippedCategories().Contains(SkippyIPC.SkippedCategory.SkipMSQRoulette);
+    }
+
 
     internal class IPCSubscriber_Common
     {

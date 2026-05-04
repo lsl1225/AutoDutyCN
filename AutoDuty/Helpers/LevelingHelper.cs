@@ -62,7 +62,7 @@ namespace AutoDuty.Helpers
                 {
                     IEnumerable<uint> ids = levelingList;
 
-                    if (IPCSubscriber_Common.IsReady("SkipCutscene") || IPCSubscriber_Common.IsReady("Skippy"))
+                    if (IPCSubscriber_Common.IsReady("SkipCutscene") || Skippy_IPCSubscriber.MSQSkipEnabled())
                     {
                         ids = ids.Concat([
                             1048u, // 50 Porta Decumana

@@ -1,8 +1,8 @@
 {
   "Overlay": {
     "Button": {
-      "Goto": "Goto",
-      "TurnIn": "GC 납품",
+      "Goto": "바로가기",
+      "TurnIn": "총사령부 납품",
       "Desynth": "분해",
       "Extract": "정제",
       "Repair": "수리",

@@ -9,17 +9,17 @@
     "None": "없음",
     "Start": "시작",
     "Times": "회",
-    "NoPathFound": "다음 경로 파일을 찾을 수 없습니다:\n{0}\n({1}.json)\nPaths 폴더:\n{2}\n아래에서 다운로드하거나:\n{3}\nBuild 탭에서 작성해주세요",
-    "RequiresVNavmesh": "AutoDuty를 사용하려면 VNavmesh 플러그인 설치 및 로딩이 필요합니다\n3rd party repo를 추가해주세요:\nhttps://puni.sh/api/repository/veyn",
-    "RequiresBossMod": "AutoDuty를 사용하려면 BossMod 플러그인 설치 및 로딩이 필요합니다\n3rd party repo를 추가해주세요:\nhttps://puni.sh/api/repository/veyn",
+    "NoPathFound": "다음 경로 파일을 찾을 수 없습니다:\n{0}\n({1}.json)\n경로 폴더:\n{2}\n아래에서 다운로드하거나:\n{3}\n빌드 탭에서 작성해주세요",
+    "RequiresVNavmesh": "AutoDuty를 사용하려면 VNavmesh 플러그인 설치 및 로딩이 필요합니다\n서드파티 repo를 추가해주세요:\nhttps://puni.sh/api/repository/veyn",
+    "RequiresBossMod": "AutoDuty를 사용하려면 BossMod 플러그인 설치 및 로딩이 필요합니다\n서드파티 repo를 추가해주세요:\nhttps://puni.sh/api/repository/veyn",
     "RequiresRotation": "AutoDuty를 사용하려면 딜사이클 플러그인 설치 및 로딩이 필요합니다 (Wrath Combo / Rotation Solver Reborn / BossMod AutoRotation)",
     "SelectMode": "모드 선택: ",
     "Run": "실행",
     "Error": "오류",
     "ErrorSelectVersion": "실행할 던전의\n버전을 선택해주세요",
     "ErrorNotInParty": "임무 지원 / 모험가 소대 / 트러스트 실행 시에는 파티 미참여 상태여야 합니다",
-    "ErrorGroupOf4": "일반 Duty는 4인 파티여야 합니다",
-    "ErrorPartyMakeup": "일반 Duty를 실행하려면 적절한 파티 구성이 필요합니다",
+    "ErrorGroupOf4": "일반 임무는 4인 파티여야 합니다",
+    "ErrorPartyMakeup": "일반 임무를 실행하려면 적절한 파티 구성이 필요합니다",
     "ErrorNoPath": "{0} {1}의 경로를 찾을 수 없습니다",
     "SelectDutyMode": "콘텐츠 종류: ",
     "SelectLevelingMode": "레벨링 모드 선택: ",
@@ -38,10 +38,13 @@
     "SelectSupportTrust": "Duty 목록을 표시하려면\n임무 지원 / 트러스트 / 모험가 소대 / 던전 중 하나를 선택해주세요",
     "CurrentGearset": "현재 기어셋",
     "Busy": "처리 중...",
-    "RequiresVNavmeshAlt": "AutoDuty가 올바르게 이동하려면 vnavmesh 플러그인 설치 및 로딩이 필요합니다. 3rd party repo를 추가해주세요:\nhttps://puni.sh/api/repository/veyn",
-    "RequiresBossModAlt": "AutoDuty로 기믹을 처리하려면 BossMod 플러그인 설치 및 로딩이 필요합니다. 3rd party repo를 추가해주세요:\nhttps://puni.sh/api/repository/veyn",
+    "RequiresVNavmeshAlt": "AutoDuty가 올바르게 이동하려면 vnavmesh 플러그인 설치 및 로딩이 필요합니다. 서드파티 repo를 추가해주세요:\nhttps://puni.sh/api/repository/veyn",
+    "RequiresBossModAlt": "AutoDuty로 기믹을 처리하려면 BossMod 플러그인 설치 및 로딩이 필요합니다. 서드파티 repo를 추가해주세요:\nhttps://puni.sh/api/repository/veyn",
+    "DungeonsRemaining": "남은 던전 수: {0}",
+    "DungeonsRemainingExplanation": "일일 최대 100회 제한에 도달하기 전에 추가로 진행할 수 있는 던전 수의 예상치입니다.",
+    "CurrentVariantPath": "변형던전 경로 선택",
     "Modes": {
-      "Looping": "루프",
+      "Looping": "반복",
       "Playlist": "플레이리스트",
       "NoviceHall": "초보자의 집"
     },
@@ -53,14 +56,14 @@
       "Regular": "던전",
       "Trial": "토벌전",
       "Raid": "레이드",
-      "Variant": "변형",
+      "Variant": "변형 던전",
       "NoviceHall": "초보자의 집"
     },
     "LevelingModes": {
       "None": "없음",
       "Support": "자동",
-      "Trust_Group": "페이스 그룹",
-      "Trust_Solo": "페이스 솔로"
+      "Trust_Group": "트러스트 그룹 전체 레벨링",
+      "Trust_Solo": "트러스트 플레이어 기준 레벨링"
     }
   }
 }

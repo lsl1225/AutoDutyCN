@@ -246,37 +246,37 @@
         "Apartment": "아파트",
         "Personal_Home": "개인 주택",
         "FC_Estate": "자유부대",
-        "Limsa_Lominsa_Lower_Decks": "림사 로민사 하층 갑판",
-        "Old_Gridania": "그리다니아 구시가지",
-        "Uldah_Steps_of_Thal": "울다하 달 회랑",
-        "The_Pillars": "이슈가르드 상층",
-        "Rhalgrs_Reach": "랄거의 손길",
+        "Limsa_Lominsa_Lower_Decks": "림사 로민사: 하갑판층",
+        "Old_Gridania": "그리다니아: 구시가지",
+        "Uldah_Steps_of_Thal": "울다하: 잘 회랑",
+        "The_Pillars": "이슈가르드: 상층",
+        "Rhalgrs_Reach": "랄거스 리치",
         "Kugane": "쿠가네",
-        "The_Doman_Enclave": "도마 도읍지",
+        "The_Doman_Enclave": "도마 마을",
         "The_Crystarium": "크리스타리움",
         "Eulmore": "율모어",
         "Old_Sharlayan": "올드 샬레이안",
         "Radz_at_Han": "라자한",
-        "Tuliyollal": "툴라이욜라",
+        "Tuliyollal": "툴리욜랄",
         "Nexus_Arcade": "넥서스 아케이드"
       },
       "SalvageItemCategory": {
         "InventoryEquipment": "소지품: 장비",
         "InventoryHousing": "소지품: 하우징",
-        "ArmouryMainOff": "장비: 주/부",
-        "ArmouryHeadBodyHands": "장비: 머리/몸통/손",
-        "ArmouryLegsFeet": "장비: 다리/발",
-        "ArmouryNeckEars": "장비: 목/귀",
-        "ArmouryWristsRings": "장비: 팔찌/반지",
-        "Equipped": "장착 중"
+        "ArmouryMainOff": "장비함: 주무기/보조무기",
+        "ArmouryHeadBodyHands": "장비함: 머리/몸통/손",
+        "ArmouryLegsFeet": "장비함: 다리/발",
+        "ArmouryNeckEars": "장비함: 목/귀",
+        "ArmouryWristsRings": "장비함: 팔찌/반지",
+        "Equipped": "장비 중"
       },
       "TerminationMode": {
         "Do_Nothing": "아무것도 안 함",
         "Logout": "로그아웃",
-        "Start_AR_Multi_Mode": "AR 멀티 모드 시작",
+        "Start_AR_Multi_Mode": "AutoRetainer 멀티 모드 시작",
         "Kill_Client": "클라이언트 종료",
         "Kill_PC": "PC 종료",
-        "Start_AR_Night_Mode": "AR 나이트 모드 시작"
+        "Start_AR_Night_Mode": "AutoRetainer 야간 모드 시작"
       },
       "JobWithRole": {
         "None": "없음",
@@ -312,72 +312,23 @@
         "Red_Mage": "적마도사",
         "Pictomancer": "픽토맨서",
         "Blue_Mage": "청마도사"
-      }
-    },
-    "Dev": {
-      "Header": "개발 설정",
-      "UpdatePathsOnStartup": "시작 시 경로 업데이트",
-      "PrintModList": "Mod 목록 출력",
-      "InvitedBy": "초대자: ",
-      "DutySupport": {
-        "Header": "사용 가능한 Duty Support",
-        "Selected": "선택됨: ",
-        "Cnt": "개수: "
       },
-      "Squadron": {
-        "Header": "사용 가능한 Squadron 정보",
-        "Duties": "Duties",
-        "AvailableMembers": "사용 가능 멤버",
-        "Columns": {
-          "Enabled": "활성화?",
-          "Completed": "완료",
-          "Name": "이름",
-          "Level": "레벨",
-          "Synced": "동기화",
-          "Selected": "선택",
-          "Class": "클래스",
-          "ClassId": "클래스 ID",
-          "Physical": "물리",
-          "Mental": "정신",
-          "Tactical": "전술",
-          "Chemistry": "케미스트리",
-          "Tactics": "전술"
-        }
+      "ConditionType": {
+        "VariantPath": "변형던전 경로",
+        "Distance": "거리",
+        "ObjectData": "오프젝트",
+        "ItemCount": "아이템",
+        "Job": "직업",
+        "ActionStatus": "행동 상태"
       },
-      "TTCards": {
-        "Header": "사용 가능 TT 카드",
-        "Cnt": "개수: "
+      "ObjectDataProperty": {
+        "EventState": "이벤트 상태",
+        "IsTargetable": "대상 지정 가능"
       },
-      "Partycheck": {
-        "Header": "파티 체크",
-        "PartySize": "파티 인원: ",
-        "Valid": "유효: "
-      },
-      "BLU": {
-        "Header": "BLU 로드아웃",
-        "NothingLoaded": "미로드",
-        "Unload": "해제",
-        "Load": "로드"
-      },
-      "RetainerPrices": {
-        "Header": "리테이너 소지품 가격"
-      },
-      "Buddy": {
-        "Header": "버디 체크"
-      },
-      "Actions": {
-        "CheckAction": "Action 확인",
-        "CheckAction2": "Action 확인2",
-        "Return": "Return?",
-        "RotationOn": "딜사이클 ON",
-        "RotationOff": "딜사이클 OFF",
-        "BetweenLoopActions": "루프 간 Action",
-        "BossLootTest": "보스 전리품 테스트"
-      },
-      "Teleport": {
-        "Header": "텔레포트 검증",
-        "Warps": "워프",
-        "LevelTest": "레벨 테스트"
+       "DistanceLocationTypes": {
+        "Player": "플레이어",
+        "Object": "오브젝트",
+        "Location": "위치"
       }
     }
   }

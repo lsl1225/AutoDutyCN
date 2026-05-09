@@ -1,21 +1,21 @@
 {
 "Common": {
-"Start": "Start",
-"Stop": "Stop",
-"Pause": "Pause",
+"Start": "시작",
+"Stop": "중지",
+"Pause": "일시정지",
 "Resume": "재개",
-"Save": "Save",
-"Cancel": "Cancel",
-"Close": "Close",
-"Refresh": "Refresh",
+"Save": "저장",
+"Cancel": "취소",
+"Close": "닫기",
+"Refresh": "새로고침",
 "Add": "추가",
-"Delete": "Delete",
-"Edit": "Edit",
-"Copy": "Copy",
-"Clear": "Clear",
-"Open": "Open",
-"Load": "Load",
-"Run": "Run",
-"Build": "Build"
+"Delete": "삭제",
+"Edit": "수정",
+"Copy": "복사",
+"Clear": "지우기",
+"Open": "열기",
+"Load": "불러오기",
+"Run": "실행",
+"Build": "구성"
 }
 }

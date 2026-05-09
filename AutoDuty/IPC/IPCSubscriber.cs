@@ -18,6 +18,7 @@ namespace AutoDuty.IPC
     using Helpers;
     using Dalamud.Plugin;
     using ECommons.IPC.Subscribers.RotationSolverReborn;
+    using ECommons.IPC.Subscribers.Skippy;
     using WrathCombo.API;
     using WrathCombo.API.Enum;
 
@@ -57,6 +58,14 @@ namespace AutoDuty.IPC
         internal static bool IsEnabled => IPCSubscriber_Common.IsReady("BossMod") || IPCSubscriber_Common.IsReady("BossModReborn");
 
         public static bool HasModuleByDataId(uint id) => BossMod.HasModuleByDataId(id);
+        public static void DisableModule(string moduleName, bool disable)
+        {
+            if(Configuration.AutoManageBossModAISettings)
+            {
+                Svc.Log.Debug($"BossMod IPC - Disabling Module: {moduleName}, Disable: {disable}");
+                BossMod.DisableModule(moduleName, disable);
+            }
+        }
 
         public static void AddPreset(string name, string preset)
         {
@@ -357,11 +366,20 @@ namespace AutoDuty.IPC
         public static void RotationStop() => RotationSolverReborn.ChangeOperatingMode(RotationSolverRebornIPC.StateCommandType.Off);
     }
 
+    public static class Skippy_IPCSubscriber
+    {
+        internal static bool IsEnabled => IPCSubscriber_Common.IsReady("Skippy") && Skippy.IsEnabled();
+        public static Dictionary<string, bool> GetConfig() => Skippy.GetConfig();
+        public static bool MSQSkipEnabled() => 
+            IsEnabled && Skippy.GetSkippedCategories().Contains(SkippyIPC.SkippedCategory.SkipMSQRoulette);
+    }
+
+
     internal class IPCSubscriber_Common
     {
         internal static bool IsReady(string pluginName) => DalamudReflector.TryGetDalamudPlugin(pluginName, out _, false, true);
 
-        internal static Version Version(string pluginName) => DalamudReflector.TryGetDalamudPlugin(pluginName, out IDalamudPlugin dalamudPlugin, false, true) ? dalamudPlugin.GetType().Assembly.GetName().Version : new Version(0, 0, 0, 0);
+        internal static Version Version(string pluginName) => DalamudReflector.TryGetDalamudPlugin(pluginName, out object dalamudPlugin, false, true) ? dalamudPlugin.GetType().Assembly.GetName().Version : new Version(0, 0, 0, 0);
 
         internal static void DisposeAll(EzIPCDisposalToken[] _disposalTokens)
         {

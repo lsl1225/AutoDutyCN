@@ -385,7 +385,11 @@
             ItemCount,
             ObjectData,
             Job,
-            ActionStatus
+            ActionStatus,
+            VariantPath,
+            Not,
+            Or,
+            And
         }
 
         public enum ObjectDataProperty

@@ -22,11 +22,12 @@ using static AutoDuty.Helpers.PlayerHelper;
 
 namespace AutoDuty.Managers
 {
+    using ECommons.ExcelServices;
+    using FFXIVClientStructs.FFXIV.Client.Game.Object;
+    using global::AutoDuty.Properties;
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using ECommons.ExcelServices;
-    using FFXIVClientStructs.FFXIV.Client.Game.Object;
     using System.Reflection;
     using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
@@ -62,7 +63,9 @@ namespace AutoDuty.Managers
             ("ConditionAction","condition;args,action;args", "Adds a ConditionAction step to the path; after moving to the position, AutoDuty will check the condition specified and invoke Action."),
             ("ModifyIndex", "what number (0-based)", "Adds a ModifyIndex step to the path; after moving to the position, AutoDuty will modify the index to the number specified."),
             ("Action", "", "Run any action"),
-            ("BLULoad", "enable?;which spell", "Enables or disables a spell from the current BLU loadout")
+            ("BLULoad", "enable?;which spell", "Enables or disables a spell from the current BLU loadout"),
+            ("VariantVote", "which option?", "Votes for the VVD option specified (0-based index)"),
+            ("DisableBMModule", "which module?, disable?", "Disables the BossMod module specified by name"),
         ];
 
         public void InvokeAction(PathAction action)
@@ -243,12 +246,15 @@ namespace AutoDuty.Managers
         {
             if (!int.TryParse(action.Arguments[0], out int _index))
                 return;
+            this.ModifyIndex(_index, action.Arguments[0][0] is '+' or '-');
+        }
 
-            if (action.Arguments[0][0] is '+' or '-')
-                Plugin.indexer += _index;
+        private void ModifyIndex(int index, bool modify)
+        {
+            if(modify)
+                Plugin.indexer += index;
             else
-                Plugin.indexer = _index;
-
+                Plugin.indexer = index;
             Plugin.Stage = Stage.Reading_Path;
         }
 
@@ -304,9 +310,9 @@ namespace AutoDuty.Managers
 
         public unsafe void ForceAttack(PathAction action)
         {
-            int tot = action.Arguments[0].IsNullOrEmpty() ? 10000 : int.TryParse(action.Arguments[0], out int time) ? time : 0;
-            if (action.Arguments[0].IsNullOrEmpty())
-                action.Arguments[0] = "10000";
+            int tot = action.Arguments.Count == 0 || action.Arguments[0].IsNullOrEmpty() ? 10000 : int.TryParse(action.Arguments[0], out int time) ? time : 0;
+            if (tot <= 0)
+                tot = 10000;
             taskManager.Enqueue(() => ActionManager.Instance()->UseAction(ActionType.GeneralAction, 16), "ForceAttack-GA16");
             taskManager.Enqueue(() => Svc.Targets.Target != null,                                        "ForceAttack-GA1", new TaskManagerConfiguration(500));
             taskManager.Enqueue(() => ActionManager.Instance()->UseAction(ActionType.GeneralAction, 1),  "ForceAttack-GA1");
@@ -443,6 +449,11 @@ namespace AutoDuty.Managers
                     taskManager.Enqueue(() => !(GetObjectsByRadius(int.TryParse(waitForWhats[1], out int radius) ? radius : 0)?.Count > 0), $"WaitFor-BNpcInRadius{waitForWhats[1]}");
                     taskManager.Enqueue(() => IsReady, "WaitFor", new TaskManagerConfiguration(int.MaxValue));
                     break;
+                case "Addon":
+                    if (waitForWhats.Length == 1)
+                        return;
+                    taskManager.Enqueue(() => GenericHelpers.TryGetAddonByName(waitForWhats[1], out AtkUnitBase* addon) && addon->IsReady, $"WaitFor-{waitForWhats[1]}", new TaskManagerConfiguration(int.MaxValue));
+                    break;
             }
             taskManager.Enqueue(() => Plugin.action = "");
 
@@ -511,9 +522,10 @@ namespace AutoDuty.Managers
             return false;
         }
 
-        public unsafe void Target(PathAction action)
+        public void Target(PathAction action)
         {
-            if (!TryGetObjectIdRegex(action.Arguments[0], out string? objectDataId)) return;
+            if (!TryGetObjectIdRegex(action.Arguments[0], out string? objectDataId)) 
+                return;
 
             IGameObject? gameObject = null;
             Plugin.action = $"Target: {objectDataId}";
@@ -532,6 +544,8 @@ namespace AutoDuty.Managers
                 return;
             
             Plugin.action = $"Killing in {range}y";
+
+            taskManager.Enqueue(() => BossMod_IPCSubscriber.SetMovement(true), "KillInRange-StopForCombat");
 
             taskManager.Enqueue(() =>
                                 {
@@ -559,6 +573,11 @@ namespace AutoDuty.Managers
 
                                     return false;
                                 }, "KillInRange-Main", new TaskManagerConfiguration(int.MaxValue));
+            taskManager.Enqueue(() =>
+                                {
+                                    if(!Plugin.stopForCombat)
+                                        BossMod_IPCSubscriber.SetMovement(false);
+                                }, "KillInRange-StopForCombat");
             taskManager.Enqueue(() => Plugin.action = "");
         }
 
@@ -591,7 +610,8 @@ namespace AutoDuty.Managers
 
             if (EzThrottler.Throttle("Interactable", 1000))
             {
-                if (!TryGetObjectByDataId(gameObject?.BaseId ?? 0, igo => igo.IsTargetable, out gameObject)) return true;
+                if (!TryGetObjectByDataId(gameObject?.BaseId ?? 0, igo => igo.IsTargetable, out gameObject)) 
+                    return true;
                 
                 if (GetBattleDistanceToPlayer(gameObject!) > 2f)
                 {
@@ -650,6 +670,12 @@ namespace AutoDuty.Managers
                     }
                 }
             }, "Interactable-LoopCheck");
+            taskManager.EnqueueDelay(100);
+            taskManager.Enqueue(() =>
+                                {
+                                    if (VNavmesh_IPCSubscriber.Path_IsRunning)
+                                        VNavmesh_IPCSubscriber.Path_Stop();
+                                });
         }
 
         public unsafe void Interactable(PathAction action)
@@ -807,6 +833,14 @@ namespace AutoDuty.Managers
             }
         }
 
+        public void VariantVote(PathAction action)
+        {
+            if (action.Arguments.Count == 0)
+                return;
+            if(int.TryParse(action.Arguments[0], out int vote))
+                VariantManager.SelectPath(vote);
+        }
+
         public void PausePandora(PathAction _)
         {
             return;
@@ -829,6 +863,11 @@ namespace AutoDuty.Managers
                     Plugin.overrideCamera.Face(facingPos);
                 }
             }
+        }
+
+        public void DisableBMModule(PathAction action)
+        {
+            BossMod_IPCSubscriber.DisableModule(action.Arguments[0], bool.Parse(action.Arguments[1]));
         }
 
         public enum OID : uint
@@ -1057,7 +1096,62 @@ namespace AutoDuty.Managers
                             break;
                     }
                     break;
-                default: break;
+
+                //Merchant's Tale
+                case 1315:
+                    switch (action.Arguments[0])
+                    {
+                        case "1":
+                            taskManager.Enqueue(() =>
+                                                {
+                                                    this.Rotation(Player.Object != null && Player.Object.Health < 0.75f);
+                                                }, "DutySpecificCode-MerchantsTale-HealthCheck");
+                            taskManager.EnqueueDelay(500);
+                            taskManager.Enqueue(() =>
+                                                {
+                                                    if (Svc.Objects.OrderBy(GetDistanceToPlayer).Where(o => o.BaseId == 0x4ACD).
+                                                            Take(action.Arguments.Count > 1 && int.TryParse(action.Arguments[1], out int count) ? count : 1).
+                                                            All(o => ((ICharacter)o).MissingHp <= 0))
+                                                        this.ModifyIndex(-1, true);
+                                                }, "DutySpecificCode-MerchantsTale");
+                            taskManager.EnqueueDelay(500);
+                            break;
+                        case "2":
+                            
+                            taskManager.Enqueue(() =>
+                                                {
+                                                    this.Rotation(false);
+                                                    Plugin.stopForCombat = false;
+                                                }, "DutySpecificCode-MerchantsTale-2-Setup");
+                            taskManager.EnqueueDelay(500);
+                            taskManager.Enqueue(() =>
+                                                {
+                                                    IGameObject? target = ObjectHelper.GetObjectByDataId(uint.Parse(action.Arguments[1]));
+                                                    if (target != null)
+                                                    {
+                                                        if(!InCombat && !VNavmesh_IPCSubscriber.Path_IsRunning)
+                                                            VNavmesh_IPCSubscriber.SimpleMove_PathfindAndMoveTo(target.Position, false);
+
+                                                        
+                                                        if(Player.Object != null && Player.Object.Health < 0.75f)
+                                                            BossMod_IPCSubscriber.SetPreset("AutoDuty", Resources.AutoDutyPreset);
+                                                        else
+                                                            BossMod_IPCSubscriber.SetPreset("AutoDuty Passive", Resources.AutoDutyPassivePreset);
+                                                        return false;
+                                                    }
+                                                    return true;
+                                                }, "DutySpecificCode-MerchantsTale", new TaskManagerConfiguration(300000));
+                            taskManager.EnqueueDelay(500);
+                            taskManager.Enqueue(() =>
+                                                {
+                                                    this.Rotation(true);
+                                                    Plugin.stopForCombat = true;
+                                                }, "DutySpecificCode-MerchantsTale-RotationOn");
+                            break;
+                    }
+                    break;
+                default: 
+                    break;
             }
         }
     }

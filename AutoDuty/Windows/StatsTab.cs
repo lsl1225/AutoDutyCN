@@ -370,7 +370,7 @@ internal static class StatsTab
         {
             ImGui.TableNextRow();
             ImGui.TableNextColumn();
-            ImGui.Text(completionTime.ToString("yyyy-MM-dd HH:mm:ss"));
+            ImGui.Text((Censor.Config.Enabled ? completionTime : completionTime.ToLocalTime()).ToString("yyyy-MM-dd HH:mm:ss"));
             ImGui.TableNextColumn();
             ImGui.Text(duration.ToString(TimeSpanFormat));
             ImGui.TableNextColumn();

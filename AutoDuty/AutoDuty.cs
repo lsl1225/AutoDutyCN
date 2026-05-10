@@ -755,6 +755,7 @@ public sealed class AutoDuty : IDalamudPlugin
             stats.dutyRecords.Add(new DutyDataRecord(DateTime.UtcNow, timeSpan, Player.Territory.RowId, Player.CID, InventoryHelper.CurrentItemLevel, Player.Job, DeathHelper.deathCount));
             stats.dungeonsRun++;
             Configuration.Save();
+            StatsTab.refilter = true;
         }
 
         this.CheckFinishing();

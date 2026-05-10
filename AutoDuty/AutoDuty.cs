@@ -1163,10 +1163,22 @@ public sealed class AutoDuty : IDalamudPlugin
                 {
                     Plugin.PlaylistCurrentEntry!.curCount = 0;
 
+                    Svc.Log.Debug($"entry with gearset {Plugin.PlaylistCurrentEntry.gearset}");
+
                     if (Plugin.PlaylistCurrentEntry.gearset.HasValue && RaptureGearsetModule.Instance()->IsValidGearset(Plugin.PlaylistCurrentEntry.gearset.Value))
                     {
-                        this.taskManager.Enqueue(() => RaptureGearsetModule.Instance()->EquipGearset(Plugin.PlaylistCurrentEntry.gearset.Value));
-                        this.taskManager.Enqueue(() => PlayerHelper.IsReadyFull);
+                        void GearSwitch()
+                        {
+                            this.taskManager.InsertMulti(
+                                    new TaskManagerTask(() => RaptureGearsetModule.Instance()->EquipGearset(Plugin.PlaylistCurrentEntry.gearset.Value)),
+                                    new TaskManagerTask(() => PlayerHelper.IsReadyFull),
+                                    new TaskManagerTask(() =>
+                                                        {
+                                                            if (RaptureGearsetModule.Instance()->CurrentGearsetIndex != Plugin.PlaylistCurrentEntry.gearset.Value)
+                                                                this.taskManager.Insert(GearSwitch);
+                                                        }));
+                        }
+                        this.taskManager.Enqueue(GearSwitch);
                     }
                 }
             }

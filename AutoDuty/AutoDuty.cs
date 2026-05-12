@@ -710,7 +710,10 @@ public sealed class AutoDuty : IDalamudPlugin
                                 if (curAction.Name.Equals("KillInRange") && int.TryParse(curAction.Arguments[0], out int radius) && radius > 0)
                                 {
                                     uint colorU32 = ImGui.GetColorU32(new Vector4(0.4f, 0.2f, 0f, alpha*0.1f));
-                                    drawList.AddCircleFilled(curAction.Position, radius, colorU32, mainColor);
+                                    drawList.AddCircleFilled(curAction.Position, radius, colorU32, mainColor, p: new PctDxParams()
+                                                                                                                 {
+                                                                                                                     ProjectionHeight = 5f,
+                                                                                                                 });
                                 }
                             }
                             lastPos = curAction.Position;

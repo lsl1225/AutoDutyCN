@@ -506,6 +506,17 @@ public sealed class AutoDuty : IDalamudPlugin
                                                                                       Svc.Log.Info($"{obj?.BaseId}");
                                                                                       ImGui.SetClipboardText($"{obj?.BaseId}");
                                                                                   }),
+                (["leveling"], "Enables leveling mode (0 = disabled)", argsArray =>
+                                                                       {
+                                                                           if(argsArray.Length == 2)
+                                                                               if(int.TryParse(argsArray[1], out int levelingMode))
+                                                                               {
+                                                                                   this.LevelingModeEnum = (LevelingMode) levelingMode;
+                                                                                   return;
+                                                                               }
+
+                                                                           this.LevelingModeEnum = LevelingMode.None;
+                                                                       }),
             ];
             this.commands = [.. this.commands.Concat(ActiveHelper.activeHelpers.Where(iah => iah.Commands != null).
                                                                   Select<IActiveHelper, (string[], string, Action<string[]>)>(iah => (iah.Commands!, iah.CommandDescription!, iah.OnCommand)))];

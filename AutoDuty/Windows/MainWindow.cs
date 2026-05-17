@@ -271,6 +271,14 @@ public sealed class MainWindow : Window, IDisposable
                     TripleTriadCardSellHelper.Invoke();
                 ImGui.EndPopup();
             }
+
+            ImGui.SameLine(0, 5);
+
+            using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
+            {
+                if (ImGui.Button(Loc.Get("Overlay.Button.Armoire")))
+                    ArmoireHelper.Invoke();
+            }
         }
     }
 

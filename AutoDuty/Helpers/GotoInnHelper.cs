@@ -42,6 +42,15 @@ namespace AutoDuty.Helpers
             base.Stop();
         }
 
+        internal static bool InGCInn(GrandCompany grandCompany = GrandCompany.Unemployed)
+        {
+            whichGrandCompany = grandCompany is GrandCompany.Unemployed or > GrandCompany.ImmortalFlames ?
+                                    PlayerHelper.GetGrandCompany() :
+                                    grandCompany;
+
+            return Svc.ClientState.TerritoryType == InnTerritoryType(whichGrandCompany);
+        }
+
         internal static uint InnTerritoryType(GrandCompany grandCompany) => grandCompany switch
         {
             GrandCompany.Maelstrom => 177u,

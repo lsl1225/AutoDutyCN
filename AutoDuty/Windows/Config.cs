@@ -22,21 +22,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Game.ClientState.Party;
 using Data;
 using ECommons.Configuration;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
-using ECommons.PartyFunctions;
-using ECommons.UIHelpers.AddonMasterImplementations;
-using ECommons.UIHelpers.AtkReaderImplementations;
-using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.Group;
-using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Excel.Sheets;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -48,8 +40,6 @@ using ECommons.IPC.Subscribers.RotationSolverReborn;
 using Multibox;
 using NightmareUI.Censoring;
 using Achievement = Lumina.Excel.Sheets.Achievement;
-using Buddy = FFXIVClientStructs.FFXIV.Client.Game.UI.Buddy;
-using Map = Lumina.Excel.Sheets.Map;
 using Vector2 = FFXIVClientStructs.FFXIV.Common.Math.Vector2;
 
 [JsonObject(MemberSerialization.OptIn)]
@@ -743,6 +733,8 @@ public class Configuration
     public int  AutoGCTurninSlotsLeft     = 5;
     public bool AutoGCTurninSlotsLeftBool = false;
     public bool AutoGCTurninUseTicket     = false;
+
+    public bool ArmoireEntrust = false;
 
     public bool TripleTriadRegister;
     public bool TripleTriadSell;
@@ -2235,7 +2227,11 @@ public static class ConfigTab
                 }
 
                 ImGui.Columns(1);
-                
+
+                if(ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.ArmoireEntrust") + "##ArmoireEntrust", ref Configuration.ArmoireEntrust))
+                    Configuration.Save();
+                ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.BetweenLoop.ArmoireEntrustHelp"));
+
 
                 using (ImGuiHelper.RequiresPlugin(ExternalPlugin.AutoRetainer, "AR", inline: true))
                 {

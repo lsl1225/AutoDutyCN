@@ -1203,6 +1203,9 @@ public sealed class AutoDuty : IDalamudPlugin
         {
             this.AutoEquipRecommendedGear();
 
+            if(Configuration.ArmoireEntrust)
+                EnqueueActiveHelper<ArmoireHelper>();
+
             if (Configuration.AutoRepair && InventoryHelper.CanRepair()) 
                 EnqueueActiveHelper<RepairHelper>();
 

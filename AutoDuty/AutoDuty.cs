@@ -506,6 +506,17 @@ public sealed class AutoDuty : IDalamudPlugin
                                                                                       Svc.Log.Info($"{obj?.BaseId}");
                                                                                       ImGui.SetClipboardText($"{obj?.BaseId}");
                                                                                   }),
+                (["leveling"], "Enables leveling mode (0 = disabled)", argsArray =>
+                                                                       {
+                                                                           if(argsArray.Length == 2)
+                                                                               if(int.TryParse(argsArray[1], out int levelingMode))
+                                                                               {
+                                                                                   this.LevelingModeEnum = (LevelingMode) levelingMode;
+                                                                                   return;
+                                                                               }
+
+                                                                           this.LevelingModeEnum = LevelingMode.None;
+                                                                       }),
             ];
             this.commands = [.. this.commands.Concat(ActiveHelper.activeHelpers.Where(iah => iah.Commands != null).
                                                                   Select<IActiveHelper, (string[], string, Action<string[]>)>(iah => (iah.Commands!, iah.CommandDescription!, iah.OnCommand)))];
@@ -710,7 +721,10 @@ public sealed class AutoDuty : IDalamudPlugin
                                 if (curAction.Name.Equals("KillInRange") && int.TryParse(curAction.Arguments[0], out int radius) && radius > 0)
                                 {
                                     uint colorU32 = ImGui.GetColorU32(new Vector4(0.4f, 0.2f, 0f, alpha*0.1f));
-                                    drawList.AddCircleFilled(curAction.Position, radius, colorU32, mainColor);
+                                    drawList.AddCircleFilled(curAction.Position, radius, colorU32, mainColor, p: new PctDxParams()
+                                                                                                                 {
+                                                                                                                     ProjectionHeight = 5f,
+                                                                                                                 });
                                 }
                             }
                             lastPos = curAction.Position;
@@ -1188,6 +1202,9 @@ public sealed class AutoDuty : IDalamudPlugin
         if (between)
         {
             this.AutoEquipRecommendedGear();
+
+            if(Configuration.ArmoireEntrust)
+                EnqueueActiveHelper<ArmoireHelper>();
 
             if (Configuration.AutoRepair && InventoryHelper.CanRepair()) 
                 EnqueueActiveHelper<RepairHelper>();

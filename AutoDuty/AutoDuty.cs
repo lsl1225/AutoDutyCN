@@ -745,12 +745,16 @@ public sealed class AutoDuty : IDalamudPlugin
 
         if (ContentHelper.DictionaryContent.TryGetValue(Player.Territory.RowId, out Content? content) && content.DutyModes.HasFlag(DutyMode.Regular))
         {
-            if(ConfigurationMain.Instance.dutyCountResetDate < TimeHelper.GetLastDateTimeForHour(8))
+            if(ConfigurationMain.Instance.dutyCountResetDate <= DateTime.UtcNow)
                 ConfigurationMain.Instance.dutyCountSinceReset.Clear();
 
-            if(!ConfigurationMain.Instance.dutyCountSinceReset.TryAdd(Player.CID, 1))
-                ConfigurationMain.Instance.dutyCountSinceReset[Player.CID]++;
-            ConfigurationMain.Instance.dutyCountResetDate = DateTime.UtcNow;
+            if (ConfigurationMain.Instance.dutyCountSinceReset.TryAdd(Player.CID, 0))
+            {
+                ConfigurationMain.Instance.dutyCountResetDate = TimeHelper.GetNextDateTimeForHour(8);
+                Svc.Log.Debug($"[DutyCount] Added {Player.CID} and set date to {TimeHelper.GetNextDateTimeForHour(8)}");
+            }
+
+            ConfigurationMain.Instance.dutyCountSinceReset[Player.CID]++;
         }
     }
 

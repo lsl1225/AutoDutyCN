@@ -2,70 +2,70 @@
   "Actions": [
     {
       "Tag": "None",
-      "Name": "Wait",
+      "Name": "MoveTo",
       "Position": {
-        "X": -99.00445,
-        "Y": 103.59964,
-        "Z": 376.65997
+        "X": 13.28,
+        "Y": 6.56,
+        "Z": 334.42
       },
       "Arguments": [
-        "10000"
+        ""
       ],
       "Conditions": [],
       "Note": ""
     },
     {
       "Tag": "None",
-      "Name": "Wait",
+      "Name": "MoveTo",
       "Position": {
-        "X": -100.60854,
-        "Y": 103.59963,
-        "Z": 372.23575
+        "X": 16.043818,
+        "Y": -4.195037,
+        "Z": 242.31487
       },
       "Arguments": [
-        "2000"
+        ""
       ],
       "Conditions": [],
       "Note": ""
     },
     {
       "Tag": "None",
-      "Name": "ConditionAction",
+      "Name": "MoveTo",
+      "Position": {
+        "X": -17.991009,
+        "Y": -4.8132205,
+        "Z": 227.8885
+      },
+      "Arguments": [
+        ""
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "WaitFor",
       "Position": {
         "X": 0.0,
         "Y": 0.0,
         "Z": 0.0
       },
       "Arguments": [
-        "ObjectSpawned;11481;false&ModifyIndex;-1"
+        "IsReady"
       ],
       "Conditions": [],
       "Note": ""
     },
     {
       "Tag": "None",
-      "Name": "MoveTo",
-      "Position": {
-        "X": -92.98828,
-        "Y": 103.59964,
-        "Z": 371.5518
-      },
-      "Arguments": [
-        ""
-      ],
-      "Conditions": [],
-      "Note": ""
-    },
-    {
-      "Tag": "None",
-      "Name": "Wait",
+      "Name": "WaitFor",
       "Position": {
         "X": 0.0,
         "Y": 0.0,
         "Z": 0.0
       },
       "Arguments": [
-        "2000"
+        "IsReady"
       ],
       "Conditions": [],
       "Note": ""
@@ -74,9 +74,93 @@
       "Tag": "None",
       "Name": "MoveTo",
       "Position": {
-        "X": -86.42,
-        "Y": 103.42,
-        "Z": 369.15
+        "X": -57.11319,
+        "Y": 3.7425582,
+        "Z": 201.71149
+      },
+      "Arguments": [
+        ""
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "MoveTo",
+      "Position": {
+        "X": -35.020584,
+        "Y": 6.619874,
+        "Z": 147.1723
+      },
+      "Arguments": [
+        ""
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "MoveTo",
+      "Position": {
+        "X": -43.31986,
+        "Y": 6.6967535,
+        "Z": 136.57643
+      },
+      "Arguments": [
+        ""
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "MoveTo",
+      "Position": {
+        "X": -22.402245,
+        "Y": 6.8564825,
+        "Z": 133.63194
+      },
+      "Arguments": [
+        ""
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "WaitFor",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "IsReady"
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "WaitFor",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "IsReady"
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "MoveTo",
+      "Position": {
+        "X": -0.07,
+        "Y": 15.98,
+        "Z": 102.5
       },
       "Arguments": [
         ""
@@ -88,35 +172,23 @@
       "Tag": "None",
       "Name": "Boss",
       "Position": {
-        "X": -41.2,
-        "Y": 95.0,
-        "Z": 289.25
+        "X": 1.4391799,
+        "Y": 18.500015,
+        "Z": 72.20198
       },
       "Arguments": [
         ""
       ],
       "Conditions": [],
-      "Note": "Unknown"
-    },
-    {
-      "Tag": "Treasure",
-      "Name": "TreasureCoffer",
-      "Position": {
-        "X": 37.606304,
-        "Y": 100.0,
-        "Z": 140.59793
-      },
-      "Arguments": [],
-      "Conditions": [],
-      "Note": ""
+      "Note": "Amikiri"
     },
     {
       "Tag": "None",
       "Name": "MoveTo",
       "Position": {
-        "X": 24.091856,
-        "Y": 98.99975,
-        "Z": 124.692085
+        "X": 31.8,
+        "Y": 26.0,
+        "Z": -93.56
       },
       "Arguments": [
         ""
@@ -128,9 +200,9 @@
       "Tag": "None",
       "Name": "MoveTo",
       "Position": {
-        "X": 41.400528,
-        "Y": 99.0,
-        "Z": 102.49915
+        "X": 29.94,
+        "Y": 26.0,
+        "Z": -128.21
       },
       "Arguments": [
         ""
@@ -142,23 +214,9 @@
       "Tag": "None",
       "Name": "MoveTo",
       "Position": {
-        "X": 24.148745,
-        "Y": 98.999825,
-        "Z": 78.436104
-      },
-      "Arguments": [
-        ""
-      ],
-      "Conditions": [],
-      "Note": ""
-    },
-    {
-      "Tag": "None",
-      "Name": "MoveTo",
-      "Position": {
-        "X": 24.968142,
-        "Y": 99.99999,
-        "Z": 64.068504
+        "X": 4.72,
+        "Y": 26.0,
+        "Z": -136.05
       },
       "Arguments": [
         ""
@@ -170,101 +228,9 @@
       "Tag": "Treasure",
       "Name": "TreasureCoffer",
       "Position": {
-        "X": 53.504543,
-        "Y": 105.0,
-        "Z": 16.329103
-      },
-      "Arguments": [],
-      "Conditions": [],
-      "Note": ""
-    },
-    {
-      "Tag": "None",
-      "Name": "MoveTo",
-      "Position": {
-        "X": 21.391466,
-        "Y": 109.999985,
-        "Z": -23.137564
-      },
-      "Arguments": [
-        ""
-      ],
-      "Conditions": [],
-      "Note": ""
-    },
-    {
-      "Tag": "None",
-      "Name": "MoveTo",
-      "Position": {
-        "X": 20.398846,
-        "Y": 110.0,
-        "Z": -48.04471
-      },
-      "Arguments": [
-        "false"
-      ],
-      "Conditions": [],
-      "Note": ""
-    },
-    {
-      "Tag": "None",
-      "Name": "Boss",
-      "Position": {
-        "X": 19.82,
-        "Y": 110.0,
-        "Z": -81.68
-      },
-      "Arguments": [
-        ""
-      ],
-      "Conditions": [],
-      "Note": "Kyklops"
-    },
-    {
-      "Tag": "Treasure",
-      "Name": "TreasureCoffer",
-      "Position": {
-        "X": 70.17852,
-        "Y": 92.0,
-        "Z": -245.00423
-      },
-      "Arguments": [],
-      "Conditions": [],
-      "Note": ""
-    },
-    {
-      "Tag": "Treasure",
-      "Name": "TreasureCoffer",
-      "Position": {
-        "X": -22.191095,
-        "Y": 92.0,
-        "Z": -216.63824
-      },
-      "Arguments": [],
-      "Conditions": [],
-      "Note": ""
-    },
-    {
-      "Tag": "None",
-      "Name": "MoveTo",
-      "Position": {
-        "X": 19.97,
-        "Y": 92.0,
-        "Z": -299.34
-      },
-      "Arguments": [
-        ""
-      ],
-      "Conditions": [],
-      "Note": ""
-    },
-    {
-      "Tag": "None",
-      "Name": "MoveTo",
-      "Position": {
-        "X": 20.011305,
-        "Y": 92.49989,
-        "Z": -328.35825
+        "X": -7.84,
+        "Y": 26.08,
+        "Z": -165.77
       },
       "Arguments": [
         ""
@@ -276,19 +242,87 @@
       "Tag": "None",
       "Name": "Boss",
       "Position": {
-        "X": 0.3,
-        "Y": -200.0,
-        "Z": -449.94
+        "X": 0.021009624,
+        "Y": 26.602757,
+        "Z": -214.25894
       },
       "Arguments": [
         ""
       ],
       "Conditions": [],
-      "Note": "Rukshs Dheem"
+      "Note": "Ruby Princess"
+    },
+    {
+      "Tag": "None",
+      "Name": "MoveTo",
+      "Position": {
+        "X": -72.352264,
+        "Y": 25.92187,
+        "Z": -284.30087
+      },
+      "Arguments": [],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "Treasure",
+      "Name": "TreasureCoffer",
+      "Position": {
+        "X": 59.02,
+        "Y": 35.92,
+        "Z": -318.2
+      },
+      "Arguments": [
+        ""
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "Treasure",
+      "Name": "TreasureCoffer",
+      "Position": {
+        "X": -30.76,
+        "Y": 40.92,
+        "Z": -360.16
+      },
+      "Arguments": [
+        ""
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "MoveTo",
+      "Position": {
+        "X": -0.1,
+        "Y": 40.92,
+        "Z": -373.29
+      },
+      "Arguments": [
+        ""
+      ],
+      "Conditions": [],
+      "Note": ""
+    },
+    {
+      "Tag": "None",
+      "Name": "Boss",
+      "Position": {
+        "X": 0.12632892,
+        "Y": 45.92187,
+        "Z": -434.57175
+      },
+      "Arguments": [
+        ""
+      ],
+      "Conditions": [],
+      "Note": "Shisui Yohi"
     }
   ],
   "Meta": {
-    "CreatedAt": 106,
+    "CreatedAt": 142,
     "Changelog": [
       {
         "Version": 161,
@@ -307,15 +341,13 @@
         "Change": "Adjusted tags to string values"
       },
       {
-        "Version": 304,
-        "Change": "Version update"
+        "Version": 224,
+        "Change": "ensured crab after b2 is pulled"
       },
       {
-        "Version": 307,
-        "Change": "Modernized"
+        "Version": 304,
+        "Change": "Duty Support update"
       }
-      
-        
     ],
     "Notes": []
   }

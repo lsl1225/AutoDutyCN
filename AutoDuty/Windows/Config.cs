@@ -1146,6 +1146,11 @@ public static class ConfigTab
                     Svc.Log.Debug(treasures.Count() + "\n" + string.Join("\n", treasures.Select(igo => igo.Position.ToString())));
                 }
 
+                unsafe
+                {
+                    //RaptureAtkModule.Instance().item
+                }
+
                 if (ImGui.CollapsingHeader("Sheet Check"))
                 {
                     ImGuiEx.Text($"{typeof(Achievement).Assembly.GetTypes().Where(x => x.FullName?.StartsWith("Lumina.Excel.Sheets") ?? false).

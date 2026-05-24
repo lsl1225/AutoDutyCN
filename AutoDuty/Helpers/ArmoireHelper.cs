@@ -10,7 +10,10 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using IPC;
 using Dalamud.Game.ClientState.Objects.Types;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using Cabinet = Lumina.Excel.Sheets.Cabinet;
 
 internal class ArmoireHelper : ActiveHelperBase<ArmoireHelper>
 {
@@ -42,13 +45,6 @@ internal class ArmoireHelper : ActiveHelperBase<ArmoireHelper>
         if (GotoInnHelper.State == ActionState.Running)
             return;
 
-        if (!GotoInnHelper.InGCInn())
-        {
-            this.DebugLog("Not in the correct territory for the inn.");
-            GotoInnHelper.Invoke();
-            return;
-        }
-
         Plugin.action = "Armoire";
 
         if(Svc.Targets.Target == null || !this.armoireIDs.Contains(Svc.Targets.Target.BaseId))
@@ -56,7 +52,14 @@ internal class ArmoireHelper : ActiveHelperBase<ArmoireHelper>
             this.DebugLog("Target is not the armoire.");
             IGameObject? armoire = ObjectHelper.GetObjectByDataIds(this.armoireIDs);
             if (armoire != null)
+            {
                 Svc.Targets.Target = armoire;
+            }
+            else if (!GotoInnHelper.InGCInn())
+            {
+                this.DebugLog("Not in the correct territory for the inn.");
+                GotoInnHelper.Invoke();
+            }
             return;
         }
 
@@ -78,14 +81,13 @@ internal class ArmoireHelper : ActiveHelperBase<ArmoireHelper>
             return;
         }
 
-        AgentCabinet* cabinet = AgentCabinet.Instance();
-        if (cabinet->IsAddonReady() && GenericHelpers.TryGetAddonByName("Cabinet", out AtkUnitBase* addonCabinet))
+        AgentCabinet* agentCabinet = AgentCabinet.Instance();
+        if (agentCabinet->IsAddonReady() && GenericHelpers.TryGetAddonByName("Cabinet", out AtkUnitBase* addonCabinet))
         {
             this.DebugLog("Cabinet addon is ready.");
 
-            NumberArrayData* data = RaptureAtkModule.Instance()->GetNumberArrayData(48);
 
-            //data->IntArray[1] Category Index
+            NumberArrayData* data = RaptureAtkModule.Instance()->GetNumberArrayData(48);
 
             if (data->IntArray[0] <= this.skippedEntries) // Number of items in the current category
             {
@@ -95,14 +97,19 @@ internal class ArmoireHelper : ActiveHelperBase<ArmoireHelper>
 
             int baseIndex = 8 + this.skippedEntries * 7;
 
-            if (data->IntArray[baseIndex + 1] < 30_000)
+            RaptureAtkModule.ItemCache itemCache = agentCabinet->ItemCaches[this.skippedEntries];
+            uint                       cabinetId = this.ItemToCabinetIds[itemCache.Id];
+
+            this.DebugLog(UIState.Instance()->Cabinet.IsItemInCabinet(cabinetId).ToString());
+
+            if (data->IntArray[baseIndex + 1] < 30_000 || UIState.Instance()->Cabinet.IsItemInCabinet(cabinetId))
             {
                 this.skippedEntries++;
-                this.DebugLog($"Skipping item because it's below our threshold. Skipped entries: {this.skippedEntries}");
+                this.DebugLog($"Skipping item. Skipped entries: {this.skippedEntries}");
                 return;
             }
 
-            AddonHelper.FireCallBack(addonCabinet, true, 0, data->IntArray[baseIndex+4]);
+            AddonHelper.FireCallBack(addonCabinet, true, 0, data->IntArray[baseIndex + 4]);
             return;
         }
 
@@ -113,11 +120,25 @@ internal class ArmoireHelper : ActiveHelperBase<ArmoireHelper>
             return;
         }
 
-        if (!cabinet->IsAddonShown())
+        if (!agentCabinet->IsAddonShown())
         {
             this.DebugLog("Interact with Cabinet");
             ObjectHelper.InteractWithObject(Svc.Targets.Target);
             return;
+        }
+    }
+
+    public Dictionary<uint, uint> ItemToCabinetIds
+    {
+        get
+        {
+            if (field == null)
+            {
+                field = [];
+                foreach (Cabinet cabinet in Svc.Data.GetExcelSheet<Cabinet>().ToList())
+                    field[cabinet.Item.RowId] = cabinet.RowId;
+            }
+            return field;
         }
     }
 }

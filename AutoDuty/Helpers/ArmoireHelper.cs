@@ -9,6 +9,8 @@ using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using IPC;
 using Dalamud.Game.ClientState.Objects.Types;
+using System;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 
 internal class ArmoireHelper : ActiveHelperBase<ArmoireHelper>
 {
@@ -20,6 +22,8 @@ internal class ArmoireHelper : ActiveHelperBase<ArmoireHelper>
     protected override string[] AddonsToClose { get; } = {"SelectYesno", "Cabinet", "SelectString"};
 
     private int  skippedEntries = 0;
+
+    private readonly uint[] armoireIDs = {2001405, 2001406, 2001407, 2005630, 2007709};
 
     internal override void Start()
     {
@@ -47,10 +51,10 @@ internal class ArmoireHelper : ActiveHelperBase<ArmoireHelper>
 
         Plugin.action = "Armoire";
 
-        if(Svc.Targets.Target?.BaseId != 2001405)
+        if(Svc.Targets.Target == null || !this.armoireIDs.Contains(Svc.Targets.Target.BaseId))
         {
             this.DebugLog("Target is not the armoire.");
-            IGameObject? armoire = ObjectHelper.GetObjectByDataId(2001405);
+            IGameObject? armoire = ObjectHelper.GetObjectByDataIds(this.armoireIDs);
             if (armoire != null)
                 Svc.Targets.Target = armoire;
             return;

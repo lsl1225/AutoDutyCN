@@ -466,7 +466,7 @@ public class Configuration
         {
             this.hideOverlayWhenStopped = value;
             if (Plugin.Overlay != null) 
-                SchedulerHelper.ScheduleAction("LockOverlaySetter", () => Plugin.Overlay.IsOpen = !value || Plugin.states.HasAnyFlag(PluginState.Looping, PluginState.Navigating), () => Plugin.Overlay != null);
+                SchedulerHelper.ScheduleAction("LockOverlaySetter", () => Plugin.Overlay.IsOpen = !value || Plugin.States.HasAnyFlag(PluginState.Looping, PluginState.Navigating), () => Plugin.Overlay != null);
         }
     }
     internal bool lockOverlay = false;
@@ -616,6 +616,8 @@ public class Configuration
 
     public bool PathDrawEnabled   = false;
     public int  PathDrawStepCount = 5;
+
+    public bool DisableRenderWhileActive = false;
 
     public bool       OverridePartyValidation        = false;
     public bool       UsingAlternativeRotationPlugin = false;
@@ -1135,7 +1137,7 @@ public static class ConfigTab
                 if (ImGui.Button("Between Loop Actions##DevBetweenLoops"))
                 {
                     Plugin.CurrentTerritoryContent =  ContentHelper.DictionaryContent.Values.First();
-                    Plugin.states                  |= PluginState.Other;
+                    Plugin.States                  |= PluginState.Other;
                     Plugin.LoopTasks(false);
                 }
 
@@ -1537,6 +1539,9 @@ public static class ConfigTab
                 ImGui.Unindent();
             }
 
+            if (ImGui.Checkbox(Loc.Get("ConfigTab.Duty.DisableRenderWhileActive"), ref Configuration.DisableRenderWhileActive))
+                Configuration.Save();
+            ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.Duty.DisableRenderWhileActiveHelp"));
 
 
             ImGui.PushStyleVar(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f));

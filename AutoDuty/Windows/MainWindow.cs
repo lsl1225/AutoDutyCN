@@ -85,7 +85,7 @@ public sealed class MainWindow : Window, IDisposable
 
     internal static void StopResumePause()
     {
-        using (ImRaii.Disabled(!Plugin.states.HasFlag(PluginState.Looping) && !Plugin.states.HasFlag(PluginState.Navigating) && RepairHelper.State != ActionState.Running && GotoHelper.State != ActionState.Running && GotoInnHelper.State != ActionState.Running && GotoBarracksHelper.State != ActionState.Running && GCTurninHelper.State != ActionState.Running && ExtractHelper.State != ActionState.Running && DesynthHelper.State != ActionState.Running))
+        using (ImRaii.Disabled(!Plugin.States.HasFlag(PluginState.Looping) && !Plugin.States.HasFlag(PluginState.Navigating) && RepairHelper.State != ActionState.Running && GotoHelper.State != ActionState.Running && GotoInnHelper.State != ActionState.Running && GotoBarracksHelper.State != ActionState.Running && GCTurninHelper.State != ActionState.Running && ExtractHelper.State != ActionState.Running && DesynthHelper.State != ActionState.Running))
         {
             if (ImGui.Button($"Stop###Stop2"))
             {
@@ -95,7 +95,7 @@ public sealed class MainWindow : Window, IDisposable
             ImGui.SameLine(0, 5);
         }
 
-        using (ImRaii.Disabled((!Plugin.states.HasFlag(PluginState.Looping) && !Plugin.states.HasFlag(PluginState.Navigating) && RepairHelper.State != ActionState.Running && GotoHelper.State != ActionState.Running && GotoInnHelper.State != ActionState.Running && GotoBarracksHelper.State != ActionState.Running && GCTurninHelper.State != ActionState.Running && ExtractHelper.State != ActionState.Running && DesynthHelper.State != ActionState.Running) || Plugin.CurrentTerritoryContent == null))
+        using (ImRaii.Disabled((!Plugin.States.HasFlag(PluginState.Looping) && !Plugin.States.HasFlag(PluginState.Navigating) && RepairHelper.State != ActionState.Running && GotoHelper.State != ActionState.Running && GotoInnHelper.State != ActionState.Running && GotoBarracksHelper.State != ActionState.Running && GCTurninHelper.State != ActionState.Running && ExtractHelper.State != ActionState.Running && DesynthHelper.State != ActionState.Running) || Plugin.CurrentTerritoryContent == null))
         {
             if (Plugin.Stage == Stage.Paused)
             {
@@ -103,7 +103,7 @@ public sealed class MainWindow : Window, IDisposable
                 {
                     Plugin.taskManager.StepMode = false;
                     Plugin.Stage = Plugin.previousStage;
-                    Plugin.states &= ~PluginState.Paused;
+                    Plugin.States &= ~PluginState.Paused;
                 }
             }
             else
@@ -121,18 +121,18 @@ public sealed class MainWindow : Window, IDisposable
 
     internal static void GotoAndActions()
     {
-        if(Plugin.states.HasFlag(PluginState.Other))
+        if(Plugin.States.HasFlag(PluginState.Other))
         {
             if(ImGui.Button("Stop###Stop1"))
                 StopAndReset();
             ImGui.SameLine(0,5);
         }
 
-        using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Looping) || Plugin.states.HasFlag(PluginState.Navigating)))
+        using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Looping) || Plugin.States.HasFlag(PluginState.Navigating)))
         {
             using (ImRaii.Disabled(AutoDuty.Configuration is { OverrideOverlayButtons: true, GotoButton: false }))
             {
-                using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
+                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
                     if (ImGui.Button(Loc.Get("Overlay.Button.Goto")))
                     {
@@ -161,7 +161,7 @@ public sealed class MainWindow : Window, IDisposable
             ImGui.SameLine(0, 5);
             using (ImRaii.Disabled(AutoDuty.Configuration is { AutoGCTurnin: false, OverrideOverlayButtons: false } || !AutoDuty.Configuration.TurninButton))
             {
-                using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
+                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
                     if (ImGui.Button(Loc.Get("Overlay.Button.TurnIn")))
                     {
@@ -179,7 +179,7 @@ public sealed class MainWindow : Window, IDisposable
             ImGui.SameLine(0, 5);
             using (ImRaii.Disabled(AutoDuty.Configuration is { AutoDesynth: false, OverrideOverlayButtons: false } || !AutoDuty.Configuration.DesynthButton))
             {
-                using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
+                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
                     if (ImGui.Button(Loc.Get("Overlay.Button.Desynth")))
                         DesynthHelper.Invoke();
@@ -190,7 +190,7 @@ public sealed class MainWindow : Window, IDisposable
             ImGui.SameLine(0, 5);
             using (ImRaii.Disabled(AutoDuty.Configuration is { AutoExtract: false, OverrideOverlayButtons: false } || !AutoDuty.Configuration.ExtractButton))
             {
-                using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
+                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
                     if (ImGui.Button(Loc.Get("Overlay.Button.Extract")))
                     {
@@ -209,7 +209,7 @@ public sealed class MainWindow : Window, IDisposable
             ImGui.SameLine(0, 5);
             using (ImRaii.Disabled(AutoDuty.Configuration is { AutoRepair: false, OverrideOverlayButtons: false } || !AutoDuty.Configuration.RepairButton))
             {
-                using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
+                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
                     if (ImGui.Button(Loc.Get("Overlay.Button.Repair")))
                     {
@@ -228,7 +228,7 @@ public sealed class MainWindow : Window, IDisposable
             ImGui.SameLine(0, 5);
             using (ImRaii.Disabled(AutoDuty.Configuration is { AutoEquipRecommendedGear: false, OverrideOverlayButtons: false } || !AutoDuty.Configuration.EquipButton))
             {
-                using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
+                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
                     if (ImGui.Button(Loc.Get("Overlay.Button.Equip")))
                     {
@@ -247,7 +247,7 @@ public sealed class MainWindow : Window, IDisposable
             ImGui.SameLine(0, 5);
             using (ImRaii.Disabled(AutoDuty.Configuration is { AutoOpenCoffers: false, OverrideOverlayButtons: false } || !AutoDuty.Configuration.CofferButton))
             {
-                using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
+                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
                     if (ImGui.Button(Loc.Get("Overlay.Button.Coffers")))
                         CofferHelper.Invoke();
@@ -258,7 +258,7 @@ public sealed class MainWindow : Window, IDisposable
 
             using (ImRaii.Disabled(!(AutoDuty.Configuration.TripleTriadRegister || AutoDuty.Configuration.TripleTriadSell) && (!AutoDuty.Configuration.OverrideOverlayButtons || !AutoDuty.Configuration.TTButton)))
             {
-                using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
+                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
                     if (ImGui.Button(Loc.Get("Overlay.Button.TripleTriad")))
                         ImGui.OpenPopup("TTPopup");
@@ -277,7 +277,7 @@ public sealed class MainWindow : Window, IDisposable
 
             ImGui.SameLine(0, 5);
 
-            using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Other)))
+            using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
             {
                 if (ImGui.Button(Loc.Get("Overlay.Button.Armoire")))
                     ArmoireHelper.Invoke();

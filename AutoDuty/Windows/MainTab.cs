@@ -175,7 +175,7 @@ namespace AutoDuty.Windows
                     }
 
                     DrawPathSelection();
-                    if (!Plugin.states.HasFlag(PluginState.Looping) && !Plugin.Overlay.IsOpen)
+                    if (!Plugin.States.HasFlag(PluginState.Looping) && !Plugin.Overlay.IsOpen)
                         MainWindow.GotoAndActions();
                     using (ImRaii.Disabled(!VNavmesh_IPCSubscriber.IsEnabled || !InDungeon || !VNavmesh_IPCSubscriber.Nav_IsReady || !BossMod_IPCSubscriber.IsEnabled))
                     {
@@ -259,11 +259,11 @@ namespace AutoDuty.Windows
             }
             else
             {
-                if (!Plugin.states.HasFlag(PluginState.Looping) && !Plugin.Overlay.IsOpen)
+                if (!Plugin.States.HasFlag(PluginState.Looping) && !Plugin.Overlay.IsOpen)
                     MainWindow.GotoAndActions();
                 
 
-                using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Looping)))
+                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Looping)))
                 {
                     ImGui.AlignTextToFramePadding();
                     ImGui.TextColored(ImGuiHelper.StateGoodColor, Loc.Get("MainTab.SelectMode"));
@@ -291,7 +291,7 @@ namespace AutoDuty.Windows
 
                 using (ImRaii.Disabled(Plugin.CurrentTerritoryContent == null))
                 {
-                    if (!Plugin.states.HasFlag(PluginState.Looping))
+                    if (!Plugin.States.HasFlag(PluginState.Looping))
                     {
                         if (ImGui.Button(Loc.Get("MainTab.Run")))
                         {
@@ -318,7 +318,7 @@ namespace AutoDuty.Windows
 
 
                 
-                using (ImRaii.Disabled(Plugin.states.HasFlag(PluginState.Looping)))
+                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Looping)))
                 {
                     switch (AutoDuty.Configuration.AutoDutyModeEnum)
                     {

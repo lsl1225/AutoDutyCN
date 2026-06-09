@@ -1540,7 +1540,15 @@ public static class ConfigTab
             }
 
             if (ImGui.Checkbox(Loc.Get("ConfigTab.Duty.DisableRenderWhileActive"), ref Configuration.DisableRenderWhileActive))
+            {
+                if (!Configuration.DisableRenderWhileActive)
+                    RenderDisableManager.RemoveRequest();
+                else if (Plugin.States != PluginState.None)
+                    RenderDisableManager.PlaceRequest();
+
                 Configuration.Save();
+            }
+
             ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.Duty.DisableRenderWhileActiveHelp"));
 
 

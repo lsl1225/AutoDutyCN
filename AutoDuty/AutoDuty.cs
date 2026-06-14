@@ -261,7 +261,7 @@ public sealed class AutoDuty : IDalamudPlugin
     private           LevelingMode             levelingModeEnum  = LevelingMode.None;
     private const     string                   CommandName       = "/autoduty";
     private readonly  DirectoryInfo            configDirectory   = null!;
-    private readonly  ActionsManager           actions           = null!;
+    public readonly   ActionsManager           actions           = null!;
     private readonly  SquadronManager          squadronManager   = null!;
     private readonly  VariantManager           variantManager    = null!;
     private readonly  OverrideAFK              overrideAfk       = null!;
@@ -338,7 +338,6 @@ public sealed class AutoDuty : IDalamudPlugin
             this.squadronManager = new SquadronManager(this.taskManager);
             this.variantManager  = new VariantManager(this.taskManager);
             this.actions         = new ActionsManager(Plugin, this.taskManager);
-            BuildTab.ActionsList  = this.actions.actionsList;
             this.overrideCamera   = new OverrideCamera();
             this.Overlay          = new Overlay();
             this.MainWindow       = new MainWindow();

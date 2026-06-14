@@ -1150,7 +1150,8 @@ public static class ConfigTab
 
                 unsafe
                 {
-                    //RaptureAtkModule.Instance().item
+                    ImGui.Text($"In Area: " + GotoHousingHelper.InHousingArea(Housing.FC_Estate));
+                    ImGui.Text($"Indoors: " + GotoHousingHelper.InPrivateHouse(Housing.FC_Estate));
                 }
 
                 if (ImGui.CollapsingHeader("Sheet Check"))

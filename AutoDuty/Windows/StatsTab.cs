@@ -12,6 +12,7 @@ using Dalamud.Interface.Utility.Raii;
 using Data;
 using ECommons.ExcelServices;
 using ECommons.ImGuiMethods;
+using ECommons.Throttlers;
 using Helpers;
 using Managers;
 using NightmareUI.Censoring;
@@ -349,6 +350,8 @@ internal static class StatsTab
                     refilter = true;
         }
 
+        if(EzThrottler.Throttle("StatsTabAutomaticRefilter", 60_000))
+            refilter = true;
 
         if (refilter)
         {

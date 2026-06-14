@@ -864,7 +864,8 @@ public sealed class AutoDuty : IDalamudPlugin
          (Configuration.StopItemQty && (Configuration.StopItemAll ?
                                             Configuration.StopItemQtyItemDictionary.All(x => InventoryManager.Instance()->GetInventoryItemCount(x.Key) >= x.Value.Value) :
                                             Configuration.StopItemQtyItemDictionary.Any(x => InventoryManager.Instance()->GetInventoryItemCount(x.Key) >= x.Value.Value))) ||
-         (Configuration.StopWhenDutyGathered && GlamourLog_IPCSubscriber.AllStoredFromDungeon(Plugin.CurrentTerritoryContent.TerritoryType, Configuration.StopWhenDutyGatheredSetsOnly)));
+         (Configuration.StopWhenDutyGathered && GlamourLog_IPCSubscriber.AllStoredFromDungeon(Plugin.CurrentTerritoryContent.TerritoryType, Configuration.StopWhenDutyGatheredSetsOnly)) ||
+         (Configuration.TerminationInventoryFree && Configuration.TerminationInventoryFreeSlots >= InventoryHelper.SlotsFree));
 
     private void TrustLeveling()
     {

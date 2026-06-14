@@ -751,19 +751,22 @@ public class Configuration
     #endregion
 
     #region Termination
-    public bool                                        EnableTerminationActions     = true;
-    public bool                                        StopLevel                    = false;
-    public int                                         StopLevelInt                 = 1;
-    public bool                                        StopNoRestedXP               = false;
-    public bool                                        StopItemQty                  = false;
-    public bool                                        StopItemAll                  = false;
-    public Dictionary<uint, KeyValuePair<string, int>> StopItemQtyItemDictionary    = [];
-    public int                                         StopItemQtyInt               = 1;
-    public bool                                        StopWhenDutyGathered         = false;
-    public bool                                        StopWhenDutyGatheredSetsOnly = false;
-    public bool                                        TerminationBLUSpellsEnabled  = false;
-    public List<uint>                                  TerminationBLUSpells         = [];
-    public bool                                        TerminationBLUSpellsAll      = false;
+    public bool                                        EnableTerminationActions      = true;
+    public bool                                        StopLevel                     = false;
+    public int                                         StopLevelInt                  = 1;
+    public bool                                        StopNoRestedXP                = false;
+    public bool                                        StopItemQty                   = false;
+    public bool                                        StopItemAll                   = false;
+    public Dictionary<uint, KeyValuePair<string, int>> StopItemQtyItemDictionary     = [];
+    public int                                         StopItemQtyInt                = 1;
+    public bool                                        StopWhenDutyGathered          = false;
+    public bool                                        StopWhenDutyGatheredSetsOnly  = false;
+    public bool                                        TerminationBLUSpellsEnabled   = false;
+    public List<uint>                                  TerminationBLUSpells          = [];
+    public bool                                        TerminationBLUSpellsAll       = false;
+    public bool                                        TerminationInventoryFree      = false;
+    public int                                         TerminationInventoryFreeSlots = 0;
+
     public bool                                        ExecuteCommandsTermination   = false;
     public List<string>                                CustomCommandsTermination    = [];
     public bool                                        PlayEndSound                 = false;
@@ -2465,6 +2468,28 @@ public static class ConfigTab
 
                     ImGui.Unindent();
                 }
+
+                if(ImGui.Checkbox(Loc.Get("ConfigTab.Termination.StopWhenInventoryFull") + "###StopWhenInventoryFull", ref Configuration.TerminationInventoryFree))
+                    Configuration.Save();
+
+                if (Configuration.TerminationInventoryFree)
+                {
+                    ImGui.Indent();
+                    ImGui.PushItemWidth(150f.Scale());
+
+                    ImGui.AlignTextToFramePadding();
+                    ImGui.Text(Loc.Get("ConfigTab.Termination.StopWhenInventoryFullSlots"));
+                    ImGui.SameLine();
+                    if(ImGui.InputInt("###StopWhenInventoryFullSlotsInput", ref Configuration.TerminationInventoryFreeSlots, 1, 5))
+                    {
+                        Configuration.TerminationInventoryFreeSlots = Math.Clamp(Configuration.TerminationInventoryFreeSlots, 0, 139);
+                        Configuration.Save();
+                    }
+
+                    ImGui.PopItemWidth();
+                    ImGui.Unindent();
+                }
+
 
                 MakeCommands(Loc.Get("ConfigTab.Termination.ExecuteCommandsOnTermination"), ref Configuration.ExecuteCommandsTermination,  ref Configuration.CustomCommandsTermination, ref terminationCommand, "CommandsTermination");
 

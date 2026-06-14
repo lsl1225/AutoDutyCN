@@ -14,11 +14,14 @@ namespace AutoDuty.IPC
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using ECommons.GameFunctions;
     using Helpers;
-    using Dalamud.Plugin;
+    using Data;
     using ECommons.IPC.Subscribers.RotationSolverReborn;
     using ECommons.IPC.Subscribers.Skippy;
+    using Lumina.Excel;
+    using Lumina.Excel.Sheets;
     using WrathCombo.API;
     using WrathCombo.API.Enum;
 
@@ -141,7 +144,7 @@ namespace AutoDuty.IPC
         {
             if (Configuration.AutoManageBossModAISettings)
             {
-                string role = boss ? "None" : nameof(Role.Tank);
+                string role = boss ? "None" : nameof(Enums.Role.Tank);
 
                 BossMod.Presets_AddTransientStrategy("AutoDuty",         "BossMod.Autorotation.MiscAI.StayCloseToPartyRole", "Role", role);
                 BossMod.Presets_AddTransientStrategy("AutoDuty Passive", "BossMod.Autorotation.MiscAI.StayCloseToPartyRole", "Role", role);
@@ -375,6 +378,42 @@ namespace AutoDuty.IPC
         public static Dictionary<string, bool> GetConfig() => Skippy.GetConfig();
         public static bool MSQSkipEnabled() => 
             IsEnabled && Skippy.GetSkippedCategories().Contains(SkippyIPC.SkippedCategory.SkipMSQRoulette);
+    }
+
+    public static class GlamourLog_IPCSubscriber
+    {
+        internal static bool IsEnabled => GlamourLog.Available;
+
+        public static List<uint> FromDungeon(uint territory) => 
+            !ContentHelper.DictionaryContent.TryGetValue(territory, out Classes.Content items) ? 
+                [] : 
+                GlamourLog.GetItemsFromContent(items.RowId);
+
+        public static bool IsStored(uint itemId) => 
+            GlamourLog.IsItemOwned(itemId);
+        
+        public static bool AllStoredFromDungeon(uint territoryType, bool setsOnly)
+        {
+            if (!IsEnabled)
+                return false;
+
+            ExcelSheet<MirageStoreSetItemLookup> sheet = Svc.Data.GetExcelSheet<MirageStoreSetItemLookup>();
+
+            List<(uint itemId, MirageStoreSetItemLookup sets)> items = FromDungeon(territoryType).Select(item => (item, 
+                                                                                                             sheet.TryGetRow(item, out MirageStoreSetItemLookup setItemData) ? 
+                                                                                                                 setItemData : default)).ToList();
+
+            IEnumerable<InventoryItem> inventory = InventoryHelper.GetInventorySelection([.. InventoryHelper.Bag, .. InventoryHelper.Armory]);
+
+            if(setsOnly)
+                items = items.Where(item => item.itemId == item.sets.RowId).ToList();
+
+            Svc.Log.Debug(string.Join("\n", items.Select(item => $"Item ID: {item} {IsStored(item.itemId) || inventory.Any(inv => inv.ItemId == item.itemId)}")));
+
+            return items.TrueForAll(i => 
+                                        (IsStored(i.itemId)) || // && i.sets.Item.All(si => si.RowId <= 0 || GlamourLog.IsSetComplete(si.RowId))) || 
+                                        inventory.Any(inv => inv.ItemId == i.itemId));
+        }
     }
 
 

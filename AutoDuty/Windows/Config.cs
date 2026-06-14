@@ -751,26 +751,28 @@ public class Configuration
     #endregion
 
     #region Termination
-    public bool                                        EnableTerminationActions    = true;
-    public bool                                        StopLevel                   = false;
-    public int                                         StopLevelInt                = 1;
-    public bool                                        StopNoRestedXP              = false;
-    public bool                                        StopItemQty                 = false;
-    public bool                                        StopItemAll                 = false;
-    public Dictionary<uint, KeyValuePair<string, int>> StopItemQtyItemDictionary   = [];
-    public int                                         StopItemQtyInt              = 1;
-    public bool                                        TerminationBLUSpellsEnabled = false;
-    public List<uint>                                  TerminationBLUSpells        = [];
-    public bool                                        TerminationBLUSpellsAll     = false;
-    public bool                                        ExecuteCommandsTermination  = false;
-    public List<string>                                CustomCommandsTermination   = [];
-    public bool                                        PlayEndSound                = false;
-    public bool                                        CustomSound                 = false;
-    public float                                       CustomSoundVolume           = 0.5f;
-    public Sounds                                      SoundEnum                   = Sounds.None;
-    public string                                      SoundPath                   = "";
-    public TerminationMode                             TerminationMethodEnum       = TerminationMode.Do_Nothing;
-    public bool                                        TerminationKeepActive       = true;
+    public bool                                        EnableTerminationActions     = true;
+    public bool                                        StopLevel                    = false;
+    public int                                         StopLevelInt                 = 1;
+    public bool                                        StopNoRestedXP               = false;
+    public bool                                        StopItemQty                  = false;
+    public bool                                        StopItemAll                  = false;
+    public Dictionary<uint, KeyValuePair<string, int>> StopItemQtyItemDictionary    = [];
+    public int                                         StopItemQtyInt               = 1;
+    public bool                                        StopWhenDutyGathered         = false;
+    public bool                                        StopWhenDutyGatheredSetsOnly = false;
+    public bool                                        TerminationBLUSpellsEnabled  = false;
+    public List<uint>                                  TerminationBLUSpells         = [];
+    public bool                                        TerminationBLUSpellsAll      = false;
+    public bool                                        ExecuteCommandsTermination   = false;
+    public List<string>                                CustomCommandsTermination    = [];
+    public bool                                        PlayEndSound                 = false;
+    public bool                                        CustomSound                  = false;
+    public float                                       CustomSoundVolume            = 0.5f;
+    public Sounds                                      SoundEnum                    = Sounds.None;
+    public string                                      SoundPath                    = "";
+    public TerminationMode                             TerminationMethodEnum        = TerminationMode.Do_Nothing;
+    public bool                                        TerminationKeepActive        = true;
     #endregion
 
     public static void Save() => 
@@ -2404,6 +2406,20 @@ public static class ConfigTab
                     ImGui.EndListBox();
                     if (ImGui.Checkbox(Loc.Get("ConfigTab.Termination.StopOnlyWhenAllItems"), ref Configuration.StopItemAll))
                         Configuration.Save();
+                }
+
+                using (ImGuiHelper.RequiresPlugin(ExternalPlugin.GlamourLog, "StopWhenDutyGatheredGlamourLog", inline: true))
+                {
+                    if (ImGui.Checkbox(Loc.Get("ConfigTab.Termination.StopWhenDutyGathered"), ref Configuration.StopWhenDutyGathered))
+                        Configuration.Save();
+                    ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.Termination.StopWhenDutyGatheredHelp"));
+                }
+                if (Configuration.StopWhenDutyGathered)
+                {
+                    ImGui.Indent();
+                    if (ImGui.Checkbox(Loc.Get("ConfigTab.Termination.StopWhenDutyGatheredSetsOnly"), ref Configuration.StopWhenDutyGatheredSetsOnly))
+                        Configuration.Save();
+                    ImGui.Unindent();
                 }
 
                 if (ImGui.Checkbox(Loc.Get("ConfigTab.Termination.StopBLUSpell"), ref Configuration.TerminationBLUSpellsEnabled))

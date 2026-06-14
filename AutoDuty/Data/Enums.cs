@@ -375,7 +375,8 @@
             Stylist,
             Lifestream,
             AntiAFK,
-            Pandora
+            Pandora,
+            GlamourLog
         }
 
         public enum ConditionType

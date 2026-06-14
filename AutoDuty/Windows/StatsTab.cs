@@ -71,7 +71,7 @@ internal static class StatsTab
             if (ImGuiComponents.IconButton(FontAwesomeIcon.TrashAlt))
             {
                 ConfigurationMain.Instance.stats = new ConfigurationMain.StatData();
-                return;
+                refilter                         = true;
             }
         }
         ImGui.SameLine();

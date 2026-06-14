@@ -197,6 +197,9 @@
       "StopBLUSpell": "Stop Looping when BLU spell unlocked",
       "SelectBLUSpell": "Select BLU spell",
       "StopOnlyWhenAllSpells": "Stop Looping Only When All Spells Unlocked",
+      "StopWhenInventoryFull": "Stop Looping when Inventory is full",
+      "StopWhenInventoryFullSlots": "Free Slots left: ",
+
       "ExecuteCommandsOnTermination": "Execute commands on termination of all loops",
       "PlaySoundOnCompletion": "Play Sound on Completion of All Loops: ",
       "OnCompletionOfAllLoops": "On Completion of All Loops: ",

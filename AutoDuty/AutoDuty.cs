@@ -858,13 +858,14 @@ public sealed class AutoDuty : IDalamudPlugin
         (this.CurrentTerritoryContent == null                                                                     ||
          (Configuration.StopLevel      && Player.Level                             >= Configuration.StopLevelInt) ||
          (Configuration.StopNoRestedXP && AgentHUD.Instance()->ExpRestedExperience == 0)                          ||
-         (Configuration.TerminationBLUSpellsEnabled && (Configuration.TerminationBLUSpellsEnabled ?
+         (Configuration.TerminationBLUSpellsEnabled && (Configuration.TerminationBLUSpellsAll ?
                                                             Configuration.TerminationBLUSpells.All(BLUHelper.SpellUnlocked) :
                                                             Configuration.TerminationBLUSpells.Any(BLUHelper.SpellUnlocked))) ||
          (Configuration.StopItemQty && (Configuration.StopItemAll ?
                                             Configuration.StopItemQtyItemDictionary.All(x => InventoryManager.Instance()->GetInventoryItemCount(x.Key) >= x.Value.Value) :
                                             Configuration.StopItemQtyItemDictionary.Any(x => InventoryManager.Instance()->GetInventoryItemCount(x.Key) >= x.Value.Value))) ||
-         (Configuration.StopWhenDutyGathered && GlamourLog_IPCSubscriber.AllStoredFromDungeon(Plugin.CurrentTerritoryContent.TerritoryType, Configuration.StopWhenDutyGatheredSetsOnly)));
+         (Configuration.StopWhenDutyGathered && GlamourLog_IPCSubscriber.AllStoredFromDungeon(Plugin.CurrentTerritoryContent.TerritoryType, Configuration.StopWhenDutyGatheredSetsOnly)) ||
+         (Configuration.TerminationInventoryFree && Configuration.TerminationInventoryFreeSlots >= InventoryHelper.SlotsFree));
 
     private void TrustLeveling()
     {

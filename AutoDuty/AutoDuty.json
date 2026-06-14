@@ -7,7 +7,7 @@
   "DalamudApiLevel": "15",
   "MinimumDalamudVersion": "15.0.0.0",
   "RepoUrl": "https://github.com/erdelf/AutoDuty",
-  "IconUrl": "https://s3.puni.sh/media/plugin/54/icon-15ug2vnr9m1.png",
+  "IconUrl": "https://puni.sh/api/plugins/icon/54",
   "ImageUrls": [
     "https://s3.puni.sh/media/plugin/54/image-15l1o9gf3yg.png",
     "https://s3.puni.sh/media/plugin/54/image-gc84lu4pdpb.png",

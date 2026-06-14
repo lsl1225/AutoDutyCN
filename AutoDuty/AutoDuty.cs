@@ -858,7 +858,7 @@ public sealed class AutoDuty : IDalamudPlugin
         (this.CurrentTerritoryContent == null                                                                     ||
          (Configuration.StopLevel      && Player.Level                             >= Configuration.StopLevelInt) ||
          (Configuration.StopNoRestedXP && AgentHUD.Instance()->ExpRestedExperience == 0)                          ||
-         (Configuration.TerminationBLUSpellsEnabled && (Configuration.TerminationBLUSpellsEnabled ?
+         (Configuration.TerminationBLUSpellsEnabled && (Configuration.TerminationBLUSpellsAll ?
                                                             Configuration.TerminationBLUSpells.All(BLUHelper.SpellUnlocked) :
                                                             Configuration.TerminationBLUSpells.Any(BLUHelper.SpellUnlocked))) ||
          (Configuration.StopItemQty && (Configuration.StopItemAll ?

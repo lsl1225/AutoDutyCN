@@ -26,8 +26,8 @@ internal class ArmoireHelper : ActiveHelperBase<ArmoireHelper>
     protected override string[] AddonsToClose { get; } = {"SelectYesno", "Cabinet", "SelectString"};
 
     private int  skippedEntries = 0;
-    //                                    Inns                                        Housing Barracks
-    private readonly uint[] armoireIDs = {2001405, 2001406, 2001407, 2005630, 2007709, 196914, 2001405 };
+    //                                    Inns                                        Housing
+    private readonly uint[] armoireIDs = {2001405, 2001406, 2001407, 2005630, 2007709, 196914};
 
     internal override void Start()
     {

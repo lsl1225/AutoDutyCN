@@ -49,6 +49,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Dalamud.Game.DutyState;
+using FFXIVClientStructs.FFXIV.Client.UI.Arrays;
 using Multibox;
 using static Data.Classes;
 using TaskManager = ECommons.Automation.NeoTaskManager.TaskManager;
@@ -310,7 +311,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.assemblyDirectoryInfo = this.assemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 314) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 315) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this.configDirectory.Exists)
@@ -1771,6 +1772,39 @@ public sealed class AutoDuty : IDalamudPlugin
 
         if (PartyHelper.PartyInCombat())
         {
+            if (Plugin.pathAction?.Name != "Boss")
+            {
+                unsafe
+                {
+                    IBattleChara?[] inCombatEnemies = [.. EnemyListNumberArray.Instance()->Enemies.ToArray().Where(x => x.MaxHPPercent > 0).
+                                                                                                   Select(x => Svc.Objects.FirstOrDefault(y => y.EntityId == x.EntityId) as IBattleChara)];
+
+                    if (inCombatEnemies.Length > 0 && inCombatEnemies.All(x =>
+                                                                              x != null               &&
+                                                                              !ObjectHelper.IsBoss(x) &&
+                                                                              (ObjectHelper.GetDistanceToPlayer(x) > 25 ||
+                                                                               !x.IsTargetable)))
+                    {
+                        if (EzThrottler.Throttle("CombatRangeCheck", 500))
+                            foreach (IBattleChara? enemy in inCombatEnemies)
+                            {
+                                Vector3? vector3 = VNavmesh_IPCSubscriber.Query_Mesh_PointOnFloor(enemy!.Position, false, 5f);
+                                if (vector3.HasValue)
+                                {
+                                    VNavmesh_IPCSubscriber.SimpleMove_PathfindAndMoveTo(vector3.Value, false);
+                                    return;
+                                }
+                            }
+                        else
+                            return;
+                    }
+                    else
+                    {
+                        VNavmesh_IPCSubscriber.Path_Stop();
+                    }
+                }
+            }
+
             if (Svc.Targets.Target == null)
             {
                 //find and target closest attackable npc, if we are not targeting

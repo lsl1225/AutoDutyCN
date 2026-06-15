@@ -17,6 +17,9 @@ namespace AutoDuty.Helpers
     internal static unsafe class InventoryHelper
     {
         internal static InventoryType[] Bag       => [InventoryType.Inventory1, InventoryType.Inventory2, InventoryType.Inventory3, InventoryType.Inventory4];
+        internal static InventoryType[] Armory    => [InventoryType.ArmoryBody, InventoryType.ArmoryEar, InventoryType.ArmoryFeets, InventoryType.ArmoryHands,
+            InventoryType.ArmoryHead, InventoryType.ArmoryLegs, InventoryType.ArmoryMainHand, InventoryType.ArmoryOffHand, InventoryType.ArmoryNeck, 
+            InventoryType.ArmoryWaist, InventoryType.ArmorySoulCrystal, InventoryType.ArmoryWrist];
         internal static uint            SlotsFree => InventoryManager.Instance()->GetEmptySlotsInBag();
         internal static uint            MySeals   => InventoryManager.Instance()->GetCompanySeals(PlayerState.Instance()->GrandCompany);
         internal static uint            MaxSeals  => InventoryManager.Instance()->GetMaxCompanySeals(PlayerState.Instance()->GrandCompany);

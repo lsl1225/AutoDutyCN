@@ -261,7 +261,7 @@ public sealed class AutoDuty : IDalamudPlugin
     private           LevelingMode             levelingModeEnum  = LevelingMode.None;
     private const     string                   CommandName       = "/autoduty";
     private readonly  DirectoryInfo            configDirectory   = null!;
-    private readonly  ActionsManager           actions           = null!;
+    public readonly   ActionsManager           actions           = null!;
     private readonly  SquadronManager          squadronManager   = null!;
     private readonly  VariantManager           variantManager    = null!;
     private readonly  OverrideAFK              overrideAfk       = null!;
@@ -338,7 +338,6 @@ public sealed class AutoDuty : IDalamudPlugin
             this.squadronManager = new SquadronManager(this.taskManager);
             this.variantManager  = new VariantManager(this.taskManager);
             this.actions         = new ActionsManager(Plugin, this.taskManager);
-            BuildTab.ActionsList  = this.actions.actionsList;
             this.overrideCamera   = new OverrideCamera();
             this.Overlay          = new Overlay();
             this.MainWindow       = new MainWindow();
@@ -856,15 +855,17 @@ public sealed class AutoDuty : IDalamudPlugin
 
     private unsafe bool StopLoop =>
         Configuration.EnableTerminationActions &&
-        (this.CurrentTerritoryContent == null                                                                               ||
-         (Configuration.StopLevel      && Player.Level >= Configuration.StopLevelInt) ||
-         (Configuration.StopNoRestedXP && AgentHUD.Instance()->ExpRestedExperience == 0)                               ||
-         (Configuration.TerminationBLUSpellsEnabled && (Configuration.TerminationBLUSpellsEnabled ?
+        (this.CurrentTerritoryContent == null                                                                     ||
+         (Configuration.StopLevel      && Player.Level                             >= Configuration.StopLevelInt) ||
+         (Configuration.StopNoRestedXP && AgentHUD.Instance()->ExpRestedExperience == 0)                          ||
+         (Configuration.TerminationBLUSpellsEnabled && (Configuration.TerminationBLUSpellsAll ?
                                                             Configuration.TerminationBLUSpells.All(BLUHelper.SpellUnlocked) :
                                                             Configuration.TerminationBLUSpells.Any(BLUHelper.SpellUnlocked))) ||
          (Configuration.StopItemQty && (Configuration.StopItemAll ?
                                             Configuration.StopItemQtyItemDictionary.All(x => InventoryManager.Instance()->GetInventoryItemCount(x.Key) >= x.Value.Value) :
-                                            Configuration.StopItemQtyItemDictionary.Any(x => InventoryManager.Instance()->GetInventoryItemCount(x.Key) >= x.Value.Value))));
+                                            Configuration.StopItemQtyItemDictionary.Any(x => InventoryManager.Instance()->GetInventoryItemCount(x.Key) >= x.Value.Value))) ||
+         (Configuration.StopWhenDutyGathered && GlamourLog_IPCSubscriber.AllStoredFromDungeon(Plugin.CurrentTerritoryContent.TerritoryType, Configuration.StopWhenDutyGatheredSetsOnly)) ||
+         (Configuration.TerminationInventoryFree && Configuration.TerminationInventoryFreeSlots >= InventoryHelper.SlotsFree));
 
     private void TrustLeveling()
     {

@@ -766,6 +766,8 @@ public class Configuration
     public bool                                        TerminationBLUSpellsAll       = false;
     public bool                                        TerminationInventoryFree      = false;
     public int                                         TerminationInventoryFreeSlots = 0;
+    public bool                                        TerminationiLvl               = false;
+    public int                                         TerminationiLvlInt            = 0;
 
     public bool                                        ExecuteCommandsTermination   = false;
     public List<string>                                CustomCommandsTermination    = [];
@@ -2325,7 +2327,7 @@ public static class ConfigTab
         {
             if (ImGui.Checkbox($"{Loc.Get("ConfigTab.Termination.Enable")}###TerminationEnable", ref Configuration.EnableTerminationActions))
                 Configuration.Save();
-
+            ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.Termination.Help"));
             using (ImRaii.Disabled(!Configuration.EnableTerminationActions))
             {
                 ImGui.Separator();
@@ -2355,15 +2357,41 @@ public static class ConfigTab
                     }
                     ImGui.PopItemWidth();
                 }
-                ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.Termination.StopAtLevelHelp"));
+
                 if (ImGui.Checkbox(Loc.Get("ConfigTab.Termination.StopNoRestedXP"), ref Configuration.StopNoRestedXP))
                     Configuration.Save();
 
-                ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.Termination.StopNoRestedXPHelp"));
+                if (ImGui.Checkbox(Loc.Get("ConfigTab.Termination.StopAtILevel"), ref Configuration.TerminationiLvl))
+                    Configuration.Save();
+
+                if (Configuration.TerminationiLvl)
+                {
+                    ImGui.SameLine(0, 10);
+                    ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
+                    if (Configuration.UseSliderInputs)
+                    {
+                        if (ImGui.SliderInt("##ItemLevel", ref Configuration.TerminationiLvlInt, 1, 100))
+                        {
+                            Configuration.TerminationiLvlInt = Math.Clamp(Configuration.TerminationiLvlInt, 1, 100);
+                            Configuration.Save();
+                        }
+                    }
+                    else
+                    {
+                        if (ImGui.InputInt("##ItemLevel", ref Configuration.TerminationiLvlInt, 1, 5))
+                        {
+                            Configuration.TerminationiLvlInt = Math.Clamp(Configuration.TerminationiLvlInt, 1, 100);
+                            Configuration.Save();
+                        }
+                    }
+                    ImGui.PopItemWidth();
+                }
+
+
+
                 if (ImGui.Checkbox(Loc.Get("ConfigTab.Termination.StopAtItemQty"), ref Configuration.StopItemQty))
                     Configuration.Save();
 
-                ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.Termination.StopAtItemQtyHelp"));
                 if (Configuration.StopItemQty)
                 {
                     ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 125 * ImGuiHelpers.GlobalScale);

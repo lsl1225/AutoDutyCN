@@ -179,10 +179,10 @@
     "Termination": {
       "Header": "Loop Termination Settings",
       "Enable": "Enable",
+      "Help": "Looping will stop when these conditions are reached, so long as an adequate number of loops have been allocated.",
       "StopAtLevel": "Stop Looping @ Level",
-      "StopAtLevelHelp": "Looping will stop when these conditions are reached, so long as an adequate number of loops have been allocated.",
+      "StopAtILevel": "Stop Looping @ Item Level",
       "StopNoRestedXP": "Stop When No Rested XP",
-      "StopNoRestedXPHelp": "Looping will stop when these conditions are reached, so long as an adequate number of loops have been allocated.",
       "StopAtItemQty": "Stop Looping When Reach Item Qty",
       "StopAtItemQtyHelp": "Looping will stop when these conditions are reached, so long as an adequate number of loops have been allocated.",
       "SelectItem": "Select Item",

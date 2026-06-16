@@ -388,6 +388,7 @@
             Job,
             ActionStatus,
             VariantPath,
+            ConditionFlag,
             Not,
             Or,
             And

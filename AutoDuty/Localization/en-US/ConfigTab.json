@@ -330,6 +330,7 @@
         "ItemCount": "Item",
         "Job": "Job",
         "ActionStatus": "ActionStatus",
+        "ConditionFlag": "Condition Flag", 
         "Not": "Not",
         "Or": "Or",
         "And": "And"

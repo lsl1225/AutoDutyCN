@@ -118,7 +118,7 @@ namespace AutoDuty.Helpers
             return 0;
         }
 
-        internal static ushort CurrentItemLevel => *(ushort*)((nint)(AgentStatus.Instance()) + 48);
+        internal static ushort CurrentItemLevel => UIState.Instance()->CurrentItemLevel;
 
         /*internal unsafe static uint CurrentItemLevelUI()
         {

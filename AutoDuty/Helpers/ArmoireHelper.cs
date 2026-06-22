@@ -14,7 +14,10 @@ using IPC;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ECommons.GameFunctions;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using Cabinet = Lumina.Excel.Sheets.Cabinet;
+using EventHandler = FFXIVClientStructs.FFXIV.Client.Game.Event.EventHandler;
 
 internal class ArmoireHelper : ActiveHelperBase<ArmoireHelper>
 {
@@ -26,8 +29,6 @@ internal class ArmoireHelper : ActiveHelperBase<ArmoireHelper>
     protected override string[] AddonsToClose { get; } = {"SelectYesno", "Cabinet", "SelectString"};
 
     private int  skippedEntries = 0;
-    //                                    Inns                                        Housing Barracks
-    private readonly uint[] armoireIDs = {2001405, 2001406, 2001407, 2005630, 2007709, 196914, 2001405 };
 
     internal override void Start()
     {
@@ -57,10 +58,15 @@ internal class ArmoireHelper : ActiveHelperBase<ArmoireHelper>
 
         Plugin.action = "Armoire";
 
-        if(Svc.Targets.Target == null || !this.armoireIDs.Contains(Svc.Targets.Target.BaseId))
+        if(Svc.Targets.Target == null || Svc.Targets.Target.Struct()->EventHandler->Info.EventId != 720978)
         {
             this.DebugLog("Target is not the armoire.");
-            IGameObject? armoire = ObjectHelper.GetObjectByDataIds(this.armoireIDs);
+            IGameObject? armoire = Svc.Objects.OrderBy(ObjectHelper.GetDistanceToPlayer).FirstOrDefault(o =>
+                                                                                                        {
+                                                                                                            EventHandler* eventHandler = o.Struct()->EventHandler;
+                                                                                                            return eventHandler != null && eventHandler->Info.EventId == 720978;
+                                                                                                        });
+
             if (armoire != null)
             {
                 Svc.Targets.Target = armoire;

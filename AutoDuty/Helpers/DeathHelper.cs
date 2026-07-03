@@ -165,15 +165,15 @@ namespace AutoDuty.Helpers
 
         private static void FindShortcut()
         {
-            if (GameObject == null && Environment.TickCount <= (findShortcutStartTime + 5000))
+            if (GameObject is not { IsTargetable: true })
+            {
+                if (Environment.TickCount <= (findShortcutStartTime + 5000))
             {
                 Svc.Log.Debug($"OnRevive: Searching for shortcut");
                 SchedulerHelper.ScheduleAction("FindShortcut", FindShortcut, 500);
                 return;
             }
             
-            if (GameObject is not { IsTargetable: true })
-            {
                 Svc.Log.Debug($"OnRevive: Couldn't find shortcut");
                 Plugin.indexer = 0;
                 //Stop();

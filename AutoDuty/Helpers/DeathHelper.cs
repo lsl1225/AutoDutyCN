@@ -65,7 +65,7 @@ namespace AutoDuty.Helpers
                 SchedulerHelper.DescheduleAction(nameof(OnDeath));
             }
 
-            Plugin.stopForCombat = true;
+            Plugin.DutyData?.StopForCombat = true;
             Plugin.skipTreasureCoffer = true;
 
             if (VNavmesh_IPCSubscriber.Path_IsRunning)
@@ -168,12 +168,12 @@ namespace AutoDuty.Helpers
             if (GameObject is not { IsTargetable: true })
             {
                 if (Environment.TickCount <= (findShortcutStartTime + 5000))
-            {
-                Svc.Log.Debug($"OnRevive: Searching for shortcut");
-                SchedulerHelper.ScheduleAction("FindShortcut", FindShortcut, 500);
-                return;
-            }
-            
+                {
+                    Svc.Log.Debug($"OnRevive: Searching for shortcut");
+                    SchedulerHelper.ScheduleAction("FindShortcut", FindShortcut, 500);
+                    return;
+                }
+
                 Svc.Log.Debug($"OnRevive: Couldn't find shortcut");
                 Plugin.indexer = 0;
                 //Stop();

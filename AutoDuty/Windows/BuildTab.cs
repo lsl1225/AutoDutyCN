@@ -514,12 +514,12 @@ namespace AutoDuty.Windows
                     }
                 }
 
-                    ImGui.SameLine(ImGui.GetContentRegionAvail().X - 10f.Scale());
-                    if (ImGui.Button("X"))
-                    {
-                        this.Close();
-                        return;
-                    }
+                ImGui.SameLine(ImGui.GetContentRegionAvail().X - 10f.Scale());
+                if (ImGui.Button("X"))
+                {
+                    this.Close();
+                    return;
+                }
 
                 if (!(this.actionDefinition.arguments.Length <= 0 || _comment))
                 {
@@ -557,6 +557,8 @@ namespace AutoDuty.Windows
                             {
                                 this.action.Arguments.RemoveAt(i);
                                 i--;
+                                if (i == -1)
+                                    return;
                             }
                         }
 

@@ -401,6 +401,7 @@ namespace AutoDuty.Windows
             {
                 Plugin.Actions[_buildListSelected] = _action;
             }
+            ActionWindow.Close();
 
             ClearAll();
         }

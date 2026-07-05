@@ -127,12 +127,12 @@ namespace AutoDuty.Windows
 
                     if (ImGui.Selectable(item.actionName))
                     {
-                        _action = new PathAction { Name = _actionText};
-
                         _buildListSelected = -1;
                         _actionText        = item.actionName;
                         _addActionButton   = Loc.Get("BuildTab.Add");
                         _comment           = item.actionName.Equals("<-- Comment -->", StringComparison.InvariantCultureIgnoreCase);
+
+                        _action = new PathAction { Name = _actionText };
 
                         switch (item.actionName)
                         {

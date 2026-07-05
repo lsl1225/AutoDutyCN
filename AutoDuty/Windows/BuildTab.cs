@@ -127,12 +127,12 @@ namespace AutoDuty.Windows
 
                     if (ImGui.Selectable(item.actionName))
                     {
-                        _action = new PathAction { Name = _actionText};
-
                         _buildListSelected = -1;
                         _actionText        = item.actionName;
                         _addActionButton   = Loc.Get("BuildTab.Add");
                         _comment           = item.actionName.Equals("<-- Comment -->", StringComparison.InvariantCultureIgnoreCase);
+
+                        _action = new PathAction { Name = _actionText };
 
                         switch (item.actionName)
                         {
@@ -401,6 +401,7 @@ namespace AutoDuty.Windows
             {
                 Plugin.Actions[_buildListSelected] = _action;
             }
+            ActionWindow.Close();
 
             ClearAll();
         }
@@ -484,6 +485,7 @@ namespace AutoDuty.Windows
                         {
                             AddAction();
                         }
+                        return;
                     }
                 }
 
@@ -512,14 +514,13 @@ namespace AutoDuty.Windows
                             }
                         }
                     }
+                }
 
-                    ImGui.SameLine(ImGui.GetContentRegionAvail().X - 10f.Scale());
-                    if (ImGui.Button("X"))
-                    {
-                        this.Close();
-                        return;
-                    }
-
+                ImGui.SameLine(ImGui.GetContentRegionAvail().X - 10f.Scale());
+                if (ImGui.Button("X"))
+                {
+                    this.Close();
+                    return;
                 }
 
                 if (!(this.actionDefinition.arguments.Length <= 0 || _comment))
@@ -558,6 +559,8 @@ namespace AutoDuty.Windows
                             {
                                 this.action.Arguments.RemoveAt(i);
                                 i--;
+                                if (i == -1)
+                                    return;
                             }
                         }
 

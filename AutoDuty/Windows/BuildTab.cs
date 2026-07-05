@@ -485,6 +485,7 @@ namespace AutoDuty.Windows
                         {
                             AddAction();
                         }
+                        return;
                     }
                 }
 

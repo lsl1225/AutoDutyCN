@@ -373,13 +373,15 @@ public class PathActionConditionConditionFlag : PathActionCondition
 
     public override void DrawConfig()
     {
-        ImGuiEx.EnumCombo("ConditionFlag", ref this.flag);
+        Dictionary<ConditionFlag, string> dictionary = Enum.GetValues<ConditionFlag>().Distinct().
+                                                            ToDictionary(value => value, value => $"({(int)value}) {value}");
+        ImGuiEx.EnumCombo("ConditionFlag", ref this.flag, names: dictionary);
     }
 
     public override IEnumerable<(Vector4 color, string text)> DrawStepEntry()
     {
         yield return (new Vector4(1, 165 / 255f, 0, 1), $"{ConditionType.ConditionFlag.ToLocalizedString()} ");
-        yield return (new Vector4(1, 165 / 255f, 0, 1), this.flag.ToLocalizedString());
+        yield return (new Vector4(1, 165 / 255f, 0, 1), this.flag.ToString());
     }
 }
 

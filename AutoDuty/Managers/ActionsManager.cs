@@ -301,7 +301,7 @@ namespace AutoDuty.Managers
             if (!Player.Available)
                 return;
 
-            Plugin.stopForCombat = stop;
+            Plugin.DutyData?.StopForCombat = stop;
             taskManager.Enqueue(() => BossMod_IPCSubscriber.SetMovement(stop), "StopForCombat");
             if (stop && waitAfter)
                 this.Wait(500);
@@ -390,11 +390,11 @@ namespace AutoDuty.Managers
 
         public unsafe void Wait(int ms)
         {
-            if (Plugin.stopForCombat)
+            if (Plugin.DutyData?.StopForCombat ?? true)
                 taskManager.Enqueue(() => !Player.Character->InCombat, "Wait", new TaskManagerConfiguration(int.MaxValue));
             taskManager.Enqueue(() => EzThrottler.Throttle("Wait", ms), "Wait");
             taskManager.Enqueue(() => EzThrottler.Check("Wait"),                                          "Wait", new TaskManagerConfiguration(ms));
-            if (Plugin.stopForCombat)
+            if (Plugin.DutyData?.StopForCombat ?? true)
                 taskManager.Enqueue(() => !Player.Character->InCombat, "Wait", new TaskManagerConfiguration(int.MaxValue));
         }
 
@@ -574,7 +574,7 @@ namespace AutoDuty.Managers
                                 }, "KillInRange-Main", new TaskManagerConfiguration(int.MaxValue));
             taskManager.Enqueue(() =>
                                 {
-                                    if(!Plugin.stopForCombat)
+                                    if(!Plugin.DutyData?.StopForCombat ?? true)
                                         BossMod_IPCSubscriber.SetMovement(false);
                                 }, "KillInRange-StopForCombat");
             taskManager.Enqueue(() => Plugin.action = "");
@@ -695,12 +695,12 @@ namespace AutoDuty.Managers
 
             IGameObject? gameObject = null;
             Plugin.action = $"Interactable";
-            taskManager.Enqueue(() => Player.Character->InCombat && Plugin.stopForCombat || 
+            taskManager.Enqueue(() => Player.Character->InCombat && (Plugin.DutyData?.StopForCombat ?? true) || 
                                       (gameObject = Svc.Objects.Where(x => x.BaseId.EqualsAny(dataIds) && x.IsTargetable).OrderBy(GetDistanceToPlayer).FirstOrDefault()) != null, "Interactable-GetGameObjectUnlessInCombat");
             taskManager.Enqueue(() => { Plugin.action = $"Interactable: {gameObject?.BaseId}"; }, "Interactable-SetActionVar");
             taskManager.Enqueue(() =>
             {
-                if (Player.Character->InCombat && Plugin.stopForCombat)
+                if (Player.Character->InCombat && (Plugin.DutyData?.StopForCombat ?? true))
                 {
                     taskManager.Abort();
                     taskManager.Enqueue(() => !Player.Character->InCombat, "Interactable-InCombatWait", new TaskManagerConfiguration(int.MaxValue));
@@ -930,14 +930,14 @@ namespace AutoDuty.Managers
                     switch (action.Arguments[0])
                     {
                         case "1":
-                            Plugin.FrameworkUpdateInDuty += this.PraeFrameworkUpdateMount;
+                            Plugin.DutyData?.FrameworkUpdateInDuty += this.PraeFrameworkUpdateMount;
                             this.Interactable(new PathAction { Arguments = ["2012819"] });
                             break;
                         case "2":
-                            Plugin.FrameworkUpdateInDuty -= this.PraeFrameworkUpdateMount;
+                            Plugin.DutyData?.FrameworkUpdateInDuty -= this.PraeFrameworkUpdateMount;
                             break;
                         case "3":
-                            Plugin.FrameworkUpdateInDuty += this.PraeFrameworkUpdateGaius;
+                            Plugin.DutyData?.FrameworkUpdateInDuty += this.PraeFrameworkUpdateGaius;
                             break;
                     }
                     break;
@@ -1120,7 +1120,7 @@ namespace AutoDuty.Managers
                             taskManager.Enqueue(() =>
                                                 {
                                                     this.Rotation(false);
-                                                    Plugin.stopForCombat = false;
+                                                    Plugin.DutyData?.StopForCombat = false;
                                                 }, "DutySpecificCode-MerchantsTale-2-Setup");
                             taskManager.EnqueueDelay(500);
                             taskManager.Enqueue(() =>
@@ -1144,7 +1144,7 @@ namespace AutoDuty.Managers
                             taskManager.Enqueue(() =>
                                                 {
                                                     this.Rotation(true);
-                                                    Plugin.stopForCombat = true;
+                                                    Plugin.DutyData?.StopForCombat = true;
                                                 }, "DutySpecificCode-MerchantsTale-RotationOn");
                             break;
                     }

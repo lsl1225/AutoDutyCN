@@ -172,12 +172,9 @@ namespace AutoDuty.Helpers
                                                   ImGui.SameLine(0, 1);
                                                   ImGui.TextColored(LinkColor, plugin.GetExternalPluginName());
 
-                                                  if(plugin != ExternalPlugin.GlamourLog)
-                                                  {
-                                                      ImGui.SameLine(0, 5);
-                                                      if (ImGui.Button($"Install##InstallExternalPlugin_{plugin}_{id}"))
-                                                          PluginInstaller.InstallPlugin(plugin);
-                                                  }
+                                                  ImGui.SameLine(0, 5);
+                                                  if (ImGui.Button($"Install##InstallExternalPlugin_{plugin}_{id}"))
+                                                      PluginInstaller.InstallPlugin(plugin);
                                               }, true);
             }
         }

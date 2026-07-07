@@ -140,7 +140,7 @@ namespace AutoDuty.IPC
             }
         }
 
-        public static void InBoss(bool boss)
+        public static void StayCloseToTank(bool boss)
         {
             if (Configuration.AutoManageBossModAISettings)
             {

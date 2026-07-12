@@ -14,14 +14,11 @@ namespace AutoDuty.IPC
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using ECommons.GameFunctions;
     using Helpers;
     using Data;
     using ECommons.IPC.Subscribers.RotationSolverReborn;
     using ECommons.IPC.Subscribers.Skippy;
-    using Lumina.Excel;
-    using Lumina.Excel.Sheets;
     using WrathCombo.API;
     using WrathCombo.API.Enum;
 
@@ -388,36 +385,24 @@ namespace AutoDuty.IPC
             !ContentHelper.DictionaryContent.TryGetValue(territory, out Classes.Content items) ? 
                 [] : 
                 GlamourLog.GetItemsFromContent(items.RowId);
+        
+        public static bool Busy =>
+            !GlamourLog.Available || GlamourLog.IsBusy();
+
+        public static bool Entrust() => 
+            GlamourLog.Available && GlamourLog.EntrustAll();
 
         public static bool IsStored(uint itemId) => 
             GlamourLog.IsItemOwned(itemId);
         
-        public static bool AllStoredFromDungeon(uint territoryType, bool setsOnly)
-        {
-            if (!IsEnabled)
-                return false;
-
-            ExcelSheet<MirageStoreSetItemLookup> sheet = Svc.Data.GetExcelSheet<MirageStoreSetItemLookup>();
-
-            List<(uint itemId, MirageStoreSetItemLookup sets)> items = FromDungeon(territoryType).Select(item => (item, 
-                                                                                                             sheet.TryGetRow(item, out MirageStoreSetItemLookup setItemData) ? 
-                                                                                                                 setItemData : default)).ToList();
-
-            IEnumerable<InventoryItem> inventory = InventoryHelper.GetInventorySelection([.. InventoryHelper.Bag, .. InventoryHelper.Armory]);
-
-            if(setsOnly)
-                items = items.Where(item => item.itemId == item.sets.RowId).ToList();
-
-            Svc.Log.Debug(string.Join("\n", items.Select(item => $"Item ID: {item} {IsStored(item.itemId) || inventory.Any(inv => inv.ItemId == item.itemId)}")));
-
-            return items.TrueForAll(i => 
-                                        (IsStored(i.itemId)) || // && i.sets.Item.All(si => si.RowId <= 0 || GlamourLog.IsSetComplete(si.RowId))) || 
-                                        inventory.Any(inv => inv.ItemId == i.itemId));
-        }
+        public static bool AllStoredFromDungeon(uint territoryType) => 
+            IsEnabled &&
+            ContentHelper.DictionaryContent.TryGetValue(territoryType, out Classes.Content content) && 
+            GlamourLog.IsContentComplete(content.RowId);
     }
 
 
-    internal class IPCSubscriber_Common
+    internal static class IPCSubscriber_Common
     {
         internal static bool IsReady(string pluginName) => DalamudReflector.TryGetDalamudPlugin(pluginName, out _, false, true);
 

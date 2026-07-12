@@ -312,7 +312,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.assemblyDirectoryInfo = this.assemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 315) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 325) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this.configDirectory.Exists)
@@ -865,7 +865,7 @@ public sealed class AutoDuty : IDalamudPlugin
          (Configuration.StopItemQty && (Configuration.StopItemAll ?
                                             Configuration.StopItemQtyItemDictionary.All(x => InventoryManager.Instance()->GetInventoryItemCount(x.Key) >= x.Value.Value) :
                                             Configuration.StopItemQtyItemDictionary.Any(x => InventoryManager.Instance()->GetInventoryItemCount(x.Key) >= x.Value.Value))) ||
-         (Configuration.StopWhenDutyGathered && GlamourLog_IPCSubscriber.AllStoredFromDungeon(Plugin.CurrentTerritoryContent.TerritoryType, Configuration.StopWhenDutyGatheredSetsOnly)) ||
+         (Configuration.StopWhenDutyGathered && GlamourLog_IPCSubscriber.AllStoredFromDungeon(Plugin.CurrentTerritoryContent.TerritoryType)) ||
          (Configuration.TerminationInventoryFree && Configuration.TerminationInventoryFreeSlots >= InventoryHelper.SlotsFree) ||
          (Configuration.TerminationiLvl && InventoryHelper.CurrentItemLevel >= Configuration.TerminationiLvlInt));
 
@@ -1228,6 +1228,9 @@ public sealed class AutoDuty : IDalamudPlugin
         if (between)
         {
             this.AutoEquipRecommendedGear();
+
+            if(Configuration.GlamourChestEntrust)
+                EnqueueActiveHelper<GlamourChestHelper>();
 
             if(Configuration.ArmoireEntrust)
                 EnqueueActiveHelper<ArmoireHelper>();

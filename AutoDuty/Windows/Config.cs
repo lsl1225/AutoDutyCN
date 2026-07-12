@@ -736,7 +736,8 @@ public class Configuration
     public bool AutoGCTurninSlotsLeftBool = false;
     public bool AutoGCTurninUseTicket     = false;
 
-    public bool ArmoireEntrust = false;
+    public bool ArmoireEntrust      = false;
+    public bool GlamourChestEntrust = false;
 
     public bool TripleTriadRegister;
     public bool TripleTriadSell;
@@ -760,7 +761,6 @@ public class Configuration
     public Dictionary<uint, KeyValuePair<string, int>> StopItemQtyItemDictionary     = [];
     public int                                         StopItemQtyInt                = 1;
     public bool                                        StopWhenDutyGathered          = false;
-    public bool                                        StopWhenDutyGatheredSetsOnly  = false;
     public bool                                        TerminationBLUSpellsEnabled   = false;
     public List<uint>                                  TerminationBLUSpells          = [];
     public bool                                        TerminationBLUSpellsAll       = false;
@@ -2262,10 +2262,24 @@ public static class ConfigTab
 
                 ImGui.Columns(1);
 
-                if(ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.ArmoireEntrust") + "##ArmoireEntrust", ref Configuration.ArmoireEntrust))
-                    Configuration.Save();
-                ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.BetweenLoop.ArmoireEntrustHelp"));
+                using (ImGuiHelper.RequiresPlugin(ExternalPlugin.GlamourLog, "EntrustGlamourLog"))
+                {
+                    ImGui.Columns(2);
 
+                    if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.GlamourEntrust") + "##GlamourEntrust", ref Configuration.GlamourChestEntrust))
+                        Configuration.Save();
+                    ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.BetweenLoop.GlamourEntrustHelp"));
+
+                    ImGui.NextColumn();
+                    float x = ImGui.GetCursorPosX() - 100f.Scale();
+
+                    if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.ArmoireEntrust") + "##ArmoireEntrust", ref Configuration.ArmoireEntrust))
+                        Configuration.Save();
+                    ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.BetweenLoop.ArmoireEntrustHelp"));
+                    ImGui.Columns(1);
+
+                    ImGui.SetCursorPosX(x);
+                }
 
                 using (ImGuiHelper.RequiresPlugin(ExternalPlugin.AutoRetainer, "AR", inline: true))
                 {
@@ -2444,13 +2458,6 @@ public static class ConfigTab
                     if (ImGui.Checkbox(Loc.Get("ConfigTab.Termination.StopWhenDutyGathered"), ref Configuration.StopWhenDutyGathered))
                         Configuration.Save();
                     ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.Termination.StopWhenDutyGatheredHelp"));
-                }
-                if (Configuration.StopWhenDutyGathered)
-                {
-                    ImGui.Indent();
-                    if (ImGui.Checkbox(Loc.Get("ConfigTab.Termination.StopWhenDutyGatheredSetsOnly"), ref Configuration.StopWhenDutyGatheredSetsOnly))
-                        Configuration.Save();
-                    ImGui.Unindent();
                 }
 
                 if (ImGui.Checkbox(Loc.Get("ConfigTab.Termination.StopBLUSpell"), ref Configuration.TerminationBLUSpellsEnabled))

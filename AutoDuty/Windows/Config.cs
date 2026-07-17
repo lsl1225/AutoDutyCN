@@ -2226,7 +2226,6 @@ public static class ConfigTab
                     }
 
                 ImGui.Columns(2, "TripleTriadColumns");
-                ImGui.SetColumnWidth(0, 200 * ImGuiHelpers.GlobalScale);
                 if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.RegisterTripleTriadCards"), ref Configuration.TripleTriadRegister))
                     Configuration.Save();
                 ImGui.NextColumn();

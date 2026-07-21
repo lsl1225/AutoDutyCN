@@ -17,28 +17,29 @@ using static AutoDuty.Windows.ConfigTab;
 
 namespace AutoDuty.Windows;
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Dalamud.Game.ClientState.Objects.Types;
 using Data;
 using ECommons.Configuration;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
+using ECommons.IPC.Subscribers.RotationSolverReborn;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using Lumina.Excel.Sheets;
+using Multibox;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
-using Properties;
-using System.Numerics;
-using System.Text;
-using ECommons.IPC.Subscribers.RotationSolverReborn;
-using Multibox;
 using NightmareUI.Censoring;
+using Properties;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Numerics;
+using System.Runtime.InteropServices;
+using System.Text;
 using Achievement = Lumina.Excel.Sheets.Achievement;
 using Vector2 = FFXIVClientStructs.FFXIV.Common.Math.Vector2;
 
@@ -2039,12 +2040,11 @@ public static class ConfigTab
                                 Configuration.Save();
                             }
 
-                            for (int i = 0; i < module->NumGearsets; i++)
+                            foreach (RaptureGearsetModule.GearsetEntry gearsetEntry in module->Entries)
                             {
-                                RaptureGearsetModule.GearsetEntry* gearset = module->GetGearset(i);
-                                if(ImGui.Selectable(gearset->NameString, Configuration.AutoOpenCoffersGearset == gearset->Id))
+                                if (module->IsValidGearset(gearsetEntry.Id) && ImGui.Selectable($"{gearsetEntry.Id+1}: {gearsetEntry.NameString}", Configuration.AutoOpenCoffersGearset == gearsetEntry.Id))
                                 {
-                                    Configuration.AutoOpenCoffersGearset = gearset->Id;
+                                    Configuration.AutoOpenCoffersGearset = gearsetEntry.Id;
                                     Configuration.Save();
                                 }
                             }

@@ -17,28 +17,29 @@ using static AutoDuty.Windows.ConfigTab;
 
 namespace AutoDuty.Windows;
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Dalamud.Game.ClientState.Objects.Types;
 using Data;
 using ECommons.Configuration;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
+using ECommons.IPC.Subscribers.RotationSolverReborn;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using Lumina.Excel.Sheets;
+using Multibox;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
-using Properties;
-using System.Numerics;
-using System.Text;
-using ECommons.IPC.Subscribers.RotationSolverReborn;
-using Multibox;
 using NightmareUI.Censoring;
+using Properties;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Numerics;
+using System.Runtime.InteropServices;
+using System.Text;
 using Achievement = Lumina.Excel.Sheets.Achievement;
 using Vector2 = FFXIVClientStructs.FFXIV.Common.Math.Vector2;
 
@@ -1428,13 +1429,13 @@ public static class ConfigTab
                     using (ImRaii.Disabled(Configuration.positionalRoleBased))
                     {
                         ImGui.SameLine(0, 10);
-                        if (ImGui.Button(Configuration.PositionalEnum.ToCustomString()))
+                        if (ImGui.Button(Configuration.PositionalEnum.ToLocalizedString()))
                             ImGui.OpenPopup("PositionalPopup");
             
                         if (ImGui.BeginPopup("PositionalPopup"))
                         {
                             foreach (Positional positional in Enum.GetValues(typeof(Positional)))
-                                if (ImGui.Selectable(positional.ToCustomString(), Configuration.PositionalEnum == positional))
+                                if (ImGui.Selectable(positional.ToLocalizedString(), Configuration.PositionalEnum == positional))
                                 {
                                     Configuration.PositionalEnum = positional;
                                     Configuration.Save();
@@ -1637,7 +1638,7 @@ public static class ConfigTab
             using (ImRaii.Disabled(!Configuration.EnablePreLoopActions))
             {
                 ImGui.Separator();
-                MakeCommands(Loc.Get("ConfigTab.PreLoop.ExecuteCommands"), ref Configuration.ExecuteCommandsPreLoop, ref Configuration.CustomCommandsPreLoop, ref preLoopCommand, "CommandsPreLoop");
+                MakeCommands("ConfigTab.PreLoop.ExecuteCommands", ref Configuration.ExecuteCommandsPreLoop, ref Configuration.CustomCommandsPreLoop, ref preLoopCommand, "CommandsPreLoop");
 
                 ImGui.Separator();
 
@@ -1989,7 +1990,7 @@ public static class ConfigTab
                 ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.BetweenLoop.WaitTimeHelp"));
                 ImGui.Separator();
 
-                MakeCommands(Loc.Get("ConfigTab.BetweenLoop.ExecuteCommands"), ref Configuration.ExecuteCommandsBetweenLoop, ref Configuration.CustomCommandsBetweenLoop, ref betweenLoopCommand, "CommandsBetweenLoop");
+                MakeCommands("ConfigTab.BetweenLoop.ExecuteCommands", ref Configuration.ExecuteCommandsBetweenLoop, ref Configuration.CustomCommandsBetweenLoop, ref betweenLoopCommand, "CommandsBetweenLoop");
 
                 if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.AutoExtract"), ref Configuration.AutoExtract))
                     Configuration.Save();
@@ -2039,12 +2040,11 @@ public static class ConfigTab
                                 Configuration.Save();
                             }
 
-                            for (int i = 0; i < module->NumGearsets; i++)
+                            foreach (RaptureGearsetModule.GearsetEntry gearsetEntry in module->Entries)
                             {
-                                RaptureGearsetModule.GearsetEntry* gearset = module->GetGearset(i);
-                                if(ImGui.Selectable(gearset->NameString, Configuration.AutoOpenCoffersGearset == gearset->Id))
+                                if (module->IsValidGearset(gearsetEntry.Id) && ImGui.Selectable($"{gearsetEntry.Id+1}: {gearsetEntry.NameString}", Configuration.AutoOpenCoffersGearset == gearsetEntry.Id))
                                 {
-                                    Configuration.AutoOpenCoffersGearset = gearset->Id;
+                                    Configuration.AutoOpenCoffersGearset = gearsetEntry.Id;
                                     Configuration.Save();
                                 }
                             }
@@ -2525,7 +2525,7 @@ public static class ConfigTab
                 }
 
 
-                MakeCommands(Loc.Get("ConfigTab.Termination.ExecuteCommandsOnTermination"), ref Configuration.ExecuteCommandsTermination,  ref Configuration.CustomCommandsTermination, ref terminationCommand, "CommandsTermination");
+                MakeCommands("ConfigTab.Termination.ExecuteCommandsOnTermination", ref Configuration.ExecuteCommandsTermination,  ref Configuration.CustomCommandsTermination, ref terminationCommand, "CommandsTermination");
 
                 if (ImGui.Checkbox(Loc.Get("ConfigTab.Termination.PlaySoundOnCompletion"), ref Configuration.PlayEndSound)) //Heavily Inspired by ChatAlerts
                     Configuration.Save();
@@ -2812,10 +2812,10 @@ public static class ConfigTab
 
         static void MakeCommands(string checkbox, ref bool execute, ref List<string> commands, ref string curCommand, string id)
         {
-            if (ImGui.Checkbox($"{checkbox}{(execute ? ":" : string.Empty)} ", ref execute))
+            if (ImGui.Checkbox($"{Loc.Get(checkbox)}{(execute ? ":" : string.Empty)} ", ref execute))
                 Configuration.Save();
 
-            ImGuiComponents.HelpMarker($"{checkbox}.\nFor example, /echo test");
+            ImGuiComponents.HelpMarker(Loc.Get(checkbox + "Help", "/echo test"));
 
             if (execute)
             {

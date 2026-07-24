@@ -4,14 +4,14 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using ECommons;
 using ECommons.DalamudServices;
+using ECommons.GameFunctions;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using IPC;
 using System.Collections.Generic;
 using System.Linq;
-using ECommons.GameFunctions;
 using Cabinet = Lumina.Excel.Sheets.Cabinet;
 using EventHandler = FFXIVClientStructs.FFXIV.Client.Game.Event.EventHandler;
 
@@ -98,19 +98,10 @@ internal class ArmoireHelper : ActiveHelperBase<ArmoireHelper>
         }
 
         AgentCabinet* agentCabinet = AgentCabinet.Instance();
-        if (agentCabinet->IsAddonReady() && GenericHelpers.TryGetAddonByName("Cabinet", out AtkUnitBase* addonCabinet))
+        if (agentCabinet->IsAddonReady() && GenericHelpers.TryGetAddonByName("Cabinet", out AtkUnitBase* _) &&
+            UIState.Instance()->Cabinet.IsCabinetLoaded())
         {
             this.DebugLog("Cabinet addon is ready.");
-
-
-            NumberArrayData* data = RaptureAtkModule.Instance()->GetNumberArrayData(48);
-
-            if (data->IntArray[0] <= 0) // Number of items in the current category
-            {
-                this.DebugLog("no items left.");
-                this.Stop();
-                return;
-            }
 
             this.DebugLog("Activating Glamour Log");
 

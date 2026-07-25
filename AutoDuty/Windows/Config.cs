@@ -779,12 +779,15 @@ public class Configuration
     public string                                      SoundPath                    = "";
     public TerminationMode                             TerminationMethodEnum        = TerminationMode.Do_Nothing;
     public bool                                        TerminationKeepActive        = true;
-    #endregion
+	#endregion
 
-    public static void Save() => 
-        EzConfig.Save();
+	public static void Save()
+	{
+        if (!ConfigOverrideHelper.HasOverrides)
+		    EzConfig.Save();
+	}
 
-    public TrustMemberName?[] SelectedTrustMembers = new TrustMemberName?[3];
+	public TrustMemberName?[] SelectedTrustMembers = new TrustMemberName?[3];
 }
 
 public static class ConfigTab

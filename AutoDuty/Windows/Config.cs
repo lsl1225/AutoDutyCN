@@ -881,6 +881,11 @@ public static class ConfigTab
 
         ImGui.Separator();
 
+        bool overridesActive = ConfigOverrideHelper.HasOverrides;
+        if (overridesActive)
+            ImGuiEx.TextWrapped(Loc.Get("ConfigTab.Profile.ConfigOverridesActiveNote"));
+        using ImRaii.DisabledDisposable overrideLock = ImRaii.Disabled(overridesActive);
+
         //Start of Profile Selection
         ImGui.AlignTextToFramePadding();
         ImGui.Text(Loc.Get("ConfigTab.Profile.CurrentlySelected"));

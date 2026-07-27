@@ -779,12 +779,15 @@ public class Configuration
     public string                                      SoundPath                    = "";
     public TerminationMode                             TerminationMethodEnum        = TerminationMode.Do_Nothing;
     public bool                                        TerminationKeepActive        = true;
-    #endregion
+	#endregion
 
-    public static void Save() => 
-        EzConfig.Save();
+	public static void Save()
+	{
+        if (!ConfigOverrideHelper.HasOverrides)
+		    EzConfig.Save();
+	}
 
-    public TrustMemberName?[] SelectedTrustMembers = new TrustMemberName?[3];
+	public TrustMemberName?[] SelectedTrustMembers = new TrustMemberName?[3];
 }
 
 public static class ConfigTab
@@ -880,6 +883,11 @@ public static class ConfigTab
             ImGui.SetTooltip(Loc.Get("ConfigTab.LanguageHelp"));
 
         ImGui.Separator();
+
+        bool overridesActive = ConfigOverrideHelper.HasOverrides;
+        if (overridesActive)
+            ImGuiEx.TextWrapped(Loc.Get("ConfigTab.Profile.ConfigOverridesActiveNote"));
+        using ImRaii.DisabledDisposable overrideLock = ImRaii.Disabled(overridesActive);
 
         //Start of Profile Selection
         ImGui.AlignTextToFramePadding();

@@ -192,7 +192,7 @@ public class ConfigurationMain
         if (this.profileByName.ContainsKey(name))
         {
             this.activeProfileName = name;
-            EzConfig.Save();
+            Save();
             return true;
         }
         return false;
@@ -203,7 +203,7 @@ public class ConfigurationMain
         if (this.profileByName.ContainsKey(this.ActiveProfileName))
         {
             this.DefaultConfigName = this.ActiveProfileName;
-            EzConfig.Save();
+            Save();
         }
     }
 
@@ -290,7 +290,7 @@ public class ConfigurationMain
         config.Name                 = newName;
         this.activeProfileName      = newName;
 
-        EzConfig.Save();
+        Save();
 
         return true;
     }
@@ -318,7 +318,7 @@ public class ConfigurationMain
                                                               Name  = Player.Name,
                                                               World = Player.CurrentWorldName
                                                           };
-                                    EzConfig.Save();
+                                    Save();
 
                                     LevelingHelper.ResetLevelingDuties();
                                 });
@@ -334,11 +334,18 @@ public class ConfigurationMain
                                     this.profileByName[this.ActiveProfileName].CIDs.Remove(cid);
                                     this.profileByCID.Remove(cid);
 
-                                    EzConfig.Save();
+                                    Save();
                                 });
 
     public static void DebugLog(string message) => 
         Svc.Log.Debug($"Configuration Main: {message}");
+
+    public static void Save()
+    {
+        if (!ConfigOverrideHelper.HasOverrides)
+            EzConfig.Save();
+    }
+
 
     public static JsonSerializerSettings JsonSerializerSettings { get; } = new()
                                                                            {

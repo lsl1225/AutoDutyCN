@@ -2296,6 +2296,8 @@ public sealed class AutoDuty : IDalamudPlugin
 
     private void StopAndResetAll()
     {
+        ConfigOverrideHelper.Pop();
+
         if (this.bareModeSettingsActive != SettingsActive.None)
         {
             Configuration.EnablePreLoopActions     = this.bareModeSettingsActive.HasFlag(SettingsActive.PreLoop_Enabled);

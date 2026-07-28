@@ -11,6 +11,7 @@
       "Delete": "Delete Config",
       "DeleteHelp": "Delete Config\nHold ctrl to enable",
       "BareProfileNote": "The bare profile is for just running a duty, and nothing else. You can duplicate it to make edits.",
+      "ConfigOverridesActiveNote": "Config is locked while IPC config overrides are active. Stop AutoDuty to edit again.",
       "NewProfileName": "New Profile Name",
       "ChangeProfileName": "Change Profile Name"
     },

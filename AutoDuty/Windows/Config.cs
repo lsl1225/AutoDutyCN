@@ -192,7 +192,7 @@ public class ConfigurationMain
         if (this.profileByName.ContainsKey(name))
         {
             this.activeProfileName = name;
-            EzConfig.Save();
+            Save();
             return true;
         }
         return false;
@@ -203,7 +203,7 @@ public class ConfigurationMain
         if (this.profileByName.ContainsKey(this.ActiveProfileName))
         {
             this.DefaultConfigName = this.ActiveProfileName;
-            EzConfig.Save();
+            Save();
         }
     }
 
@@ -290,7 +290,7 @@ public class ConfigurationMain
         config.Name                 = newName;
         this.activeProfileName      = newName;
 
-        EzConfig.Save();
+        Save();
 
         return true;
     }
@@ -318,7 +318,7 @@ public class ConfigurationMain
                                                               Name  = Player.Name,
                                                               World = Player.CurrentWorldName
                                                           };
-                                    EzConfig.Save();
+                                    Save();
 
                                     LevelingHelper.ResetLevelingDuties();
                                 });
@@ -334,11 +334,18 @@ public class ConfigurationMain
                                     this.profileByName[this.ActiveProfileName].CIDs.Remove(cid);
                                     this.profileByCID.Remove(cid);
 
-                                    EzConfig.Save();
+                                    Save();
                                 });
 
     public static void DebugLog(string message) => 
         Svc.Log.Debug($"Configuration Main: {message}");
+
+    public static void Save()
+    {
+        if (!ConfigOverrideHelper.HasOverrides)
+            EzConfig.Save();
+    }
+
 
     public static JsonSerializerSettings JsonSerializerSettings { get; } = new()
                                                                            {
@@ -779,12 +786,15 @@ public class Configuration
     public string                                      SoundPath                    = "";
     public TerminationMode                             TerminationMethodEnum        = TerminationMode.Do_Nothing;
     public bool                                        TerminationKeepActive        = true;
-    #endregion
+	#endregion
 
-    public static void Save() => 
-        EzConfig.Save();
+	public static void Save()
+	{
+        if (!ConfigOverrideHelper.HasOverrides)
+		    EzConfig.Save();
+	}
 
-    public TrustMemberName?[] SelectedTrustMembers = new TrustMemberName?[3];
+	public TrustMemberName?[] SelectedTrustMembers = new TrustMemberName?[3];
 }
 
 public static class ConfigTab
@@ -880,6 +890,11 @@ public static class ConfigTab
             ImGui.SetTooltip(Loc.Get("ConfigTab.LanguageHelp"));
 
         ImGui.Separator();
+
+        bool overridesActive = ConfigOverrideHelper.HasOverrides;
+        if (overridesActive)
+            ImGuiEx.TextWrapped(Loc.Get("ConfigTab.Profile.ConfigOverridesActiveNote"));
+        using ImRaii.DisabledDisposable overrideLock = ImRaii.Disabled(overridesActive);
 
         //Start of Profile Selection
         ImGui.AlignTextToFramePadding();

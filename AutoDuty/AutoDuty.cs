@@ -171,6 +171,9 @@ public sealed class AutoDuty : IDalamudPlugin
                     break;
             }
 
+            if(value is not Stage.Paused)
+                this.taskManager.StepMode = false;
+
             if (value is Stage.Stopped or Stage.Paused && !this.runStartTime.Equals(DateTime.UnixEpoch))
             {
                 ConfigurationMain.Instance.stats.timeSpent += DateTime.UtcNow.Subtract(this.runStartTime);
@@ -678,6 +681,9 @@ public sealed class AutoDuty : IDalamudPlugin
 
     private void ClientStateOnLogin()
     {
+        if (this.Stage != Stage.Stopped || AutoRetainerMultiModeHelper.State == ActionState.Running)
+            return;
+
         ConfigurationMain.Instance.SetProfileToDefault();
 
         SchedulerHelper.ScheduleAction("LoginConfig", () =>
@@ -899,7 +905,7 @@ public sealed class AutoDuty : IDalamudPlugin
             }
         }
 
-        if (this.Stage == Stage.Stopped)
+        if (this.Stage is Stage.Stopped or Stage.Paused)
             return;
 
         Svc.Log.Debug($"ClientState_TerritoryChanged: t={t}");
@@ -1164,22 +1170,28 @@ public sealed class AutoDuty : IDalamudPlugin
             if (Configuration.AutoOpenCoffers)
                 EnqueueActiveHelper<CofferHelper>();
 
-            if (AutoRetainer_IPCSubscriber.RetainersAvailable())
-            {
-                this.taskManager.Enqueue(() => Svc.Log.Debug($"AutoRetainer BetweenLoop Actions"));
-                if (Configuration.EnableAutoRetainer)
+            if(AutoRetainer_IPCSubscriber.IsEnabled)
+                if(Configuration.EnableAutoRetainerMultiMode)
                 {
-                    this.taskManager.Enqueue(() => AutoRetainerHelper.Invoke(), "Loop-AutoRetainer");
+                    this.taskManager.Enqueue(() => AutoRetainerMultiModeHelper.Invoke(), "Loop-AutoRetainerMultiMode");
                     this.taskManager.EnqueueDelay(50);
-                    this.taskManager.Enqueue(() => AutoRetainerHelper.State != ActionState.Running, "Loop-WaitAutoRetainerComplete", new TaskManagerConfiguration(int.MaxValue));
-                }
-                else
+                    this.taskManager.Enqueue(() => AutoRetainerMultiModeHelper.State != ActionState.Running, "Loop-WaitAutoRetainerMultiModeComplete", new TaskManagerConfiguration(int.MaxValue));
+                } else if (AutoRetainer_IPCSubscriber.RetainersAvailable())
                 {
-                    this.taskManager.Enqueue(() => AutoRetainer_IPCSubscriber.IsBusy(),  "Loop-AutoRetainerIntegrationDisabledWait15sRetainerSense", new TaskManagerConfiguration(15000));
-                    this.taskManager.Enqueue(() => !AutoRetainer_IPCSubscriber.IsBusy(), "Loop-AutoRetainerIntegrationDisabledWaitARNotBusy", new TaskManagerConfiguration(int.MaxValue));
-                    this.taskManager.Enqueue(() => AutoRetainerHelper.ForceStop(),       "Loop-AutoRetainerStop");
+                    this.taskManager.Enqueue(() => Svc.Log.Debug($"AutoRetainer BetweenLoop Actions"));
+                    if (Configuration.EnableAutoRetainer)
+                    {
+                        this.taskManager.Enqueue(() => AutoRetainerHelper.Invoke(), "Loop-AutoRetainer");
+                        this.taskManager.EnqueueDelay(50);
+                        this.taskManager.Enqueue(() => AutoRetainerHelper.State != ActionState.Running, "Loop-WaitAutoRetainerComplete", new TaskManagerConfiguration(int.MaxValue));
+                    }
+                    else
+                    {
+                        this.taskManager.Enqueue(() => AutoRetainer_IPCSubscriber.IsBusy(),  "Loop-AutoRetainerIntegrationDisabledWait15sRetainerSense", new TaskManagerConfiguration(15000));
+                        this.taskManager.Enqueue(() => !AutoRetainer_IPCSubscriber.IsBusy(), "Loop-AutoRetainerIntegrationDisabledWaitARNotBusy",        new TaskManagerConfiguration(int.MaxValue));
+                        this.taskManager.Enqueue(() => AutoRetainerHelper.ForceStop(),       "Loop-AutoRetainerStop");
+                    }
                 }
-            }
         }
 
 

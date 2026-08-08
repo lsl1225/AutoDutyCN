@@ -175,6 +175,8 @@
       "SellTripleTriadCards": "Sell Triple Triad Cards",
       "SlotsOccupied": "Slots occupied",
       "CardCount": "Card count",
+      "EnableAutoRetainerMultiMode": "Enable AutoRetainer MultiMode",
+      "EnableAutoRetainerMultiModeHelp": "Will cycle through all your characters in ARs MultiMode once and then return to running the duty",
       "EnableAutoRetainer": "Enable AutoRetainer Integration",
       "PreferredSummoningBell": "Preferred Summoning Bell Location: ",
       "PreferredSummoningBellHelp": "No matter what location is chosen, if there is a summoning bell in the location you are in when this is invoked it will go there instead",
@@ -334,6 +336,11 @@
         "Red_Mage": "Red Mage",
         "Pictomancer": "Pictomancer",
         "Blue_Mage": "Blue Mage"
+      },
+      "MultiModeType": {
+        "Retainers": "Retainers",
+        "Submersibles": "Submersibles",
+        "Everything": "Everything"
       },
       "ConditionType": {
         "VariantPath": "Path",

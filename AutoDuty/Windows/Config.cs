@@ -38,8 +38,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using System.Text;
+using ECommons.IPC.Subscribers.AutoRetainer;
 using Achievement = Lumina.Excel.Sheets.Achievement;
 using Vector2 = FFXIVClientStructs.FFXIV.Common.Math.Vector2;
 
@@ -209,6 +209,7 @@ public class ConfigurationMain
 
     public void SetProfileToDefault()
     {
+        DebugLog(Environment.StackTrace);
         this.SetProfile(CONFIGNAME_BARE);
         Svc.Framework.RunOnTick(() =>
         {
@@ -757,6 +758,10 @@ public class Configuration
     public bool                   EnableAutoRetainer         = false;
     public SummoningBellLocations PreferredSummoningBellEnum = 0;
     public long                   AutoRetainer_RemainingTime = 0L;
+
+    public bool          EnableAutoRetainerMultiMode = false;
+    public MultiModeType AutoRetainerMultiModeType   = MultiModeType.Everything;
+    
     #endregion
 
     #region Termination
@@ -2300,9 +2305,39 @@ public static class ConfigTab
                     if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.EnableAutoRetainer"), ref Configuration.EnableAutoRetainer))
                         Configuration.Save();
                 }
+
                 if (Configuration.EnableAutoRetainer)
                 {
                     ImGui.Indent();
+                    using (ImGuiHelper.RequiresPlugin(ExternalPlugin.Lifestream, "ARM", inline: true))
+                        if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.EnableAutoRetainerMultiMode"), ref Configuration.EnableAutoRetainerMultiMode))
+                            Configuration.Save();
+
+                    ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.BetweenLoop.EnableAutoRetainerMultiModeHelp"));
+
+                    ImGui.Separator();
+
+                    if (Configuration.EnableAutoRetainerMultiMode)
+                    {
+                        ImGui.Indent();
+
+                        if (ImGui.BeginCombo("##MultiModeType", Configuration.AutoRetainerMultiModeType.ToLocalizedString()))
+                        {
+                            foreach (MultiModeType multiModeType in Enum.GetValues<MultiModeType>())
+                                if (ImGui.Selectable(multiModeType.ToLocalizedString()))
+                                {
+                                    Configuration.AutoRetainerMultiModeType = multiModeType;
+                                    Configuration.Save();
+                                }
+                            ImGui.EndCombo();
+                        }
+
+                        ImGui.Unindent();
+                    }
+
+                    if (Configuration.EnableAutoRetainerMultiMode)
+                        ImGui.BeginDisabled();
+
                     ImGui.Text(Loc.Get("ConfigTab.BetweenLoop.PreferredSummoningBell"));
                     ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.BetweenLoop.PreferredSummoningBellHelp"));
                     if (ImGui.BeginCombo("##PreferredBell", Configuration.PreferredSummoningBellEnum.ToLocalizedString()))
@@ -2331,13 +2366,23 @@ public static class ConfigTab
                     ImGui.Text(Loc.Get("ConfigTab.BetweenLoop.Seconds"));
                     ImGui.PopItemWidth();
                     ImGui.Unindent();
+
+                    if (Configuration.EnableAutoRetainerMultiMode)
+                        ImGui.EndDisabled();
                 }
+
                 if (!AutoRetainer_IPCSubscriber.IsEnabled)
                     if (Configuration.EnableAutoRetainer)
                     {
                         Configuration.EnableAutoRetainer = false;
+                        Configuration.EnableAutoRetainerMultiMode = false;
                         Configuration.Save();
                     }
+                if(!Lifestream_IPCSubscriber.IsEnabled)
+                {
+                    Configuration.EnableAutoRetainerMultiMode = false;
+                    Configuration.Save();
+                }
             }
         }
 

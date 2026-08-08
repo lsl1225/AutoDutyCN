@@ -82,7 +82,7 @@ namespace AutoDuty.Helpers
                 tutorials.AddRange(TutorialsTank);
             if (JobsAllowedHealer.HasJob(job))
                 tutorials.AddRange(TutorialsHealer);
-            if (job.GetCombatRole() != CombatRole.NonCombat)
+            if (job.GetCombatRole() != CombatRole.NonCombat && PlayerHelper.GetCurrentLevelFromSheet(job) >= 49)
                 tutorials.AddRange(TutorialsGimmick);
 
             foreach (Tutorial tutorial in tutorials)

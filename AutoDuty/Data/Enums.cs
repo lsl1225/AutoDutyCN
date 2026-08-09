@@ -390,6 +390,7 @@
             ActionStatus,
             VariantPath,
             ConditionFlag,
+            Collision,
             Not,
             Or,
             And

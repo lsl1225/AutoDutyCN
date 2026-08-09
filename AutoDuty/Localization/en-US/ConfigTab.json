@@ -350,6 +350,7 @@
         "Job": "Job",
         "ActionStatus": "ActionStatus",
         "ConditionFlag": "Condition Flag",
+        "Collision": "Collision",
         "Not": "Not",
         "Or": "Or",
         "And": "And"

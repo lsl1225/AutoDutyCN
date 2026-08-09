@@ -1646,7 +1646,7 @@ public sealed class AutoDuty : IDalamudPlugin
             return;
         }
 
-        this.DutyData?.StayCloseToTank = this.pathAction.Name.Equals("Boss") || this.pathAction.Note.Contains("!TankClose"); //todo  still hacky. Due to requiring a path change, delayed till testing done
+        this.DutyData?.StayCloseToTank = !(this.pathAction.Name.Equals("Boss") || this.pathAction.Flags.HasFlag(PathActionFlags.NoPartyCoherency));
 
         if(MultiboxUtility.Config.Host)
             MultiboxUtility.MultiboxBlockingNextStep = false;

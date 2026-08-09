@@ -363,6 +363,13 @@
         }
 
         [Flags]
+        public enum PathActionFlags : int
+        {
+            None = 0,
+            NoPartyCoherency = 1 << 0
+        }
+
+        [Flags]
         public enum ExternalPlugin
         {
             None                 = 0,

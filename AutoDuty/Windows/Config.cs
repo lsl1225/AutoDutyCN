@@ -56,7 +56,6 @@ public class ConfigurationMain
     [JsonProperty]
     internal string Language { get; set; } = LocalizationManager.BASE_LANGUAGE;
 
-    [JsonProperty]
     private string activeProfileName = CONFIGNAME_BARE;
     
     public  string ActiveProfileName => this.activeProfileName;
@@ -85,6 +84,10 @@ public class ConfigurationMain
         public readonly override int GetHashCode() => 
             this.CID.GetHashCode();
     }
+
+    public const string PLAYLISTNAME_EPHEMERAL = "Ephemeral";
+    [JsonProperty]
+    public List<Playlist> Playlists { get; set; } = [];
 
     [JsonProperty]
     public Dictionary<ulong, int> dutyCountSinceReset = [];
@@ -162,7 +165,7 @@ public class ConfigurationMain
 
             if(this.profileData.Count == 0)
                 this.profileData.Add(new ProfileData { Name = "Default", Config = new Configuration() });
-            }
+        }
 
         void RegisterProfileData(ProfileData profile)
         {
@@ -189,6 +192,14 @@ public class ConfigurationMain
                             });
 
         this.SetProfileToDefault();
+
+        if(this.Playlists.Count == 0)
+            this.Playlists.Add(new Playlist());
+
+        this.Playlists[0] = new Playlist { Name = PLAYLISTNAME_EPHEMERAL };
+
+        Plugin.PlaylistCurrent = this.Playlists[0].JSONClone();
+        MainTab.playlistName   = PLAYLISTNAME_EPHEMERAL;
     }
 
     public bool SetProfile(string name)
@@ -197,7 +208,6 @@ public class ConfigurationMain
         if (this.profileByName.ContainsKey(name))
         {
             this.activeProfileName = name;
-            Save();
             return true;
         }
         return false;
@@ -214,7 +224,6 @@ public class ConfigurationMain
 
     public void SetProfileToDefault()
     {
-        DebugLog(Environment.StackTrace);
         this.SetProfile(CONFIGNAME_BARE);
         Svc.Framework.RunOnTick(() =>
         {

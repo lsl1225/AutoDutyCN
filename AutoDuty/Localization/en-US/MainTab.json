@@ -64,6 +64,10 @@
       "Support": "Auto",
       "Trust_Group": "Trust Group",
       "Trust_Solo": "Trust Solo"
+    },
+    "Playlist": {
+      "DeleteHelp": "Deletes the saved Playlist\nHold ctrl to enable",
+      "SaveHelp": "Saves the current Playlist with the name written\nHold ctrl to enable"
     }
   }
 }

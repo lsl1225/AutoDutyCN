@@ -71,8 +71,8 @@ public sealed class AutoDuty : IDalamudPlugin
     {
         get => Configuration.AutoDutyModeEnum switch
         {
-            AutoDutyMode.Playlist when this.States.HasFlag(PluginState.Looping) || !InDungeon => (this.playlistCurrent.Count >= 0 && this.playlistIndex < this.playlistCurrent.Count && this.playlistIndex >= 0) ?
-                                                                                                              this.playlistCurrent[this.playlistIndex].Content : null,
+            AutoDutyMode.Playlist when this.States.HasFlag(PluginState.Looping) || !InDungeon => (this.PlaylistCurrent.Entries.Count >= 0 && this.playlistIndex < this.PlaylistCurrent.Entries.Count && this.playlistIndex >= 0) ?
+                                                                                                     this.PlaylistCurrent.Entries[this.playlistIndex].Content : null,
             AutoDutyMode.Looping or _ => field
         };
         set
@@ -86,8 +86,8 @@ public sealed class AutoDuty : IDalamudPlugin
     {
         get => Configuration.AutoDutyModeEnum switch
         {
-            AutoDutyMode.Playlist when this.States.HasFlag(PluginState.Looping) || !InDungeon => (this.playlistCurrent.Count >= 0 && this.playlistIndex < this.playlistCurrent.Count && this.playlistIndex >= 0) ?
-                                                                                                     this.playlistCurrent[this.playlistIndex].variantPathIndex : (byte) 0,
+            AutoDutyMode.Playlist when this.States.HasFlag(PluginState.Looping) || !InDungeon => (this.PlaylistCurrent.Entries.Count >= 0 && this.playlistIndex < this.PlaylistCurrent.Entries.Count && this.playlistIndex >= 0) ?
+                                                                                                     this.PlaylistCurrent.Entries[this.playlistIndex].variantPathIndex : (byte) 0,
             AutoDutyMode.Looping or _ => field
         };
         set;
@@ -96,11 +96,24 @@ public sealed class AutoDuty : IDalamudPlugin
     internal uint currentTerritoryType = 0;
     internal int  currentPath          = -1;
 
-    internal readonly List<PlaylistEntry> playlistCurrent = [];
-    internal          int                 playlistIndex   = 0;
+    internal Playlist PlaylistCurrent
+    {
+        get => field;
+        set
+        {
+            if (field != value)
+            {
+                field = value;
 
-    internal PlaylistEntry? PlaylistCurrentEntry => this.playlistIndex >= 0 && this.playlistIndex < this.playlistCurrent.Count ?
-                                                        this.playlistCurrent[this.playlistIndex] : null;
+                this.playlistIndex = 0;
+            }
+        }
+    } = new();
+
+    internal int      playlistIndex   = 0;
+
+    internal PlaylistEntry? PlaylistCurrentEntry => this.playlistIndex >= 0 && this.playlistIndex < this.PlaylistCurrent.Entries.Count ?
+                                                        this.PlaylistCurrent.Entries[this.playlistIndex] : null;
 
     internal bool SupportLevelingEnabled => this.LevelingModeEnum == LevelingMode.Support;
     internal bool TrustLevelingEnabled   => this.LevelingModeEnum.IsTrustLeveling();
@@ -297,15 +310,9 @@ public sealed class AutoDuty : IDalamudPlugin
 
             //EzConfig.Init<ConfigurationMain>();
             EzConfig.DefaultSerializationFactory = new AutoDutySerializationFactory();
-            (ConfigurationMain.Instance = EzConfig.Init<ConfigurationMain>()).Init();
-
-            // Initialize localization system
-            LocalizationManager.Initialize();
-
-
 
             //Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-            
+
             ConfigTab.BuildManuals();
             this.configDirectory      = PluginInterface.ConfigDirectory;
             this.configFile            = PluginInterface.ConfigFile;
@@ -335,7 +342,12 @@ public sealed class AutoDuty : IDalamudPlugin
             ContentHelper.PopulateDuties();
             RepairNPCHelper.PopulateRepairNPCs();
             FileHelper.Init();
+
+            (ConfigurationMain.Instance = EzConfig.Init<ConfigurationMain>()).Init();
+
             Patcher.Patch(startup: true);
+
+            LocalizationManager.Initialize();
 
             this.overrideAfk     = new OverrideAFK();
             this.ipcProvider     = new IPCProvider();
@@ -834,7 +846,7 @@ public sealed class AutoDuty : IDalamudPlugin
 
                 if (this.States.HasFlag(PluginState.Looping) && Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
                 {
-                    string? s = this.PlaylistCurrentEntry?.path ?? null;
+                    string? s = this.PlaylistCurrentEntry?.Path ?? null;
                     if (s != null)
                         this.currentPath = container.Paths.IndexOf(dp => dp.FileName.Equals(s, StringComparison.InvariantCultureIgnoreCase));
                 }
@@ -1206,7 +1218,7 @@ public sealed class AutoDuty : IDalamudPlugin
             {
                 Svc.Log.Debug("next playlist entry");
                 Plugin.playlistIndex++;
-                if (Plugin.playlistIndex >= Plugin.playlistCurrent.Count)
+                if (Plugin.playlistIndex >= Plugin.PlaylistCurrent.Entries.Count)
                 {
                     Svc.Log.Debug("playlist done");
                     queue                = false;
@@ -2335,7 +2347,7 @@ public sealed class AutoDuty : IDalamudPlugin
         if (Configuration.AutoManageBossModAISettings) 
             BossMod_IPCSubscriber.DisablePresets();
 
-        this.actions.Rotation(true, false);
+        this.actions?.Rotation(true, false);
 
         this.SetGeneralSettings(true);
         if (Configuration is { AutoManageRotationPluginState: true, UsingAlternativeRotationPlugin: false }) 

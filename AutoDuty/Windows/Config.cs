@@ -149,6 +149,7 @@ public class ConfigurationMain
     public void Init()
     {
         if (this.profileData.Count == 0)
+        {
             if (Svc.PluginInterface.ConfigFile.Exists)
             {
                 Configuration? configuration = EzConfig.DefaultSerializationFactory.Deserialize<Configuration>(File.ReadAllText(Svc.PluginInterface.ConfigFile.FullName, Encoding.UTF8));
@@ -157,6 +158,10 @@ public class ConfigurationMain
                     this.CreateProfile("Migrated", configuration);
                     this.SetProfileAsDefault();
                 }
+            }
+
+            if(this.profileData.Count == 0)
+                this.profileData.Add(new ProfileData { Name = "Default", Config = new Configuration() });
             }
 
         void RegisterProfileData(ProfileData profile)

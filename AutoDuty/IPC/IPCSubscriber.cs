@@ -144,11 +144,11 @@ namespace AutoDuty.IPC
             }
         }
 
-        public static void StayCloseToTank(bool boss)
+        public static void StayCloseToTank(bool close)
         {
             if (Configuration.AutoManageBossModAISettings)
             {
-                string role = boss ? "None" : nameof(Enums.Role.Tank);
+                string role = close ? nameof(Enums.Role.Tank) : "None";
 
                 BossMod.Presets_AddTransientStrategy("AutoDuty",         "BossMod.Autorotation.MiscAI.StayCloseToPartyRole", "Role", role);
                 BossMod.Presets_AddTransientStrategy("AutoDuty Passive", "BossMod.Autorotation.MiscAI.StayCloseToPartyRole", "Role", role);

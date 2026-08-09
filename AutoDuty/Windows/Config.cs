@@ -40,6 +40,10 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using ECommons.IPC.Subscribers.AutoRetainer;
+using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
+using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
+using FFXIVClientStructs.Interop;
+using FFXIVClientStructs.STD;
 using Achievement = Lumina.Excel.Sheets.Achievement;
 using Vector2 = FFXIVClientStructs.FFXIV.Common.Math.Vector2;
 
@@ -1194,6 +1198,18 @@ public static class ConfigTab
                 {
                     ImGui.Text($"In Area: " + GotoHousingHelper.InHousingArea(Housing.FC_Estate));
                     ImGui.Text($"Indoors: " + GotoHousingHelper.InPrivateHouse(Housing.FC_Estate));
+                }
+
+                unsafe
+                {
+                    static V* FindPtr<K, V>(ref StdMap<K, Pointer<V>> map, K key) where K : unmanaged, IComparable where V : unmanaged => 
+                        map.TryGetValuePointer(key, out Pointer<V>* ptr) && ptr != null ? ptr->Value : null;
+
+                    LayoutManager*                           layout = LayoutWorld.Instance()->ActiveLayout;
+                    StdMap<ulong, Pointer<ILayoutInstance>>* insts  = layout != null ? FindPtr(ref layout->InstancesByType, InstanceType.CollisionBox) : null;
+                    ILayoutInstance*                         inst   = insts  != null ? FindPtr(ref *insts,                  0x0063AE21_0B000000ul) : null;
+                    Collider*                                coll   = inst   != null ? inst->GetCollider() : null;
+                    ImGui.Text("Collider present: " + (inst != null && inst->IsColliderActive()));
                 }
 
                 if (ImGui.CollapsingHeader("Sheet Check"))

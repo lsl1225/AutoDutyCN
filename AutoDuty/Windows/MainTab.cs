@@ -29,11 +29,12 @@ namespace AutoDuty.Windows
         internal static ContentPathsManager.ContentPathContainer? DutySelected;
         internal static readonly (string Normal, string GameFont) Digits = ("0123456789", "");
 
-        private static int _currentStepIndex = -1;
-        private static readonly string _pathsURL = "https://github.com/erdelf/AutoDuty/tree/master/AutoDuty/Paths";
+        private static          int    currentStepIndex = -1;
+        private static readonly string pathsURL         = "https://github.com/erdelf/AutoDuty/tree/master/AutoDuty/Paths";
 
         // New search text field for filtering duties
-        private static string _searchText = string.Empty;
+        private static string searchText    = string.Empty;
+        public static string playlistName = string.Empty;
 
         internal static void Draw()
         {
@@ -53,12 +54,12 @@ namespace AutoDuty.Windows
                 // Set the width of the search box to the calculated width
                 ImGui.SetNextItemWidth(inputMaxWidth);
                 
-                ImGui.InputTextWithHint("##search", Loc.Get("MainTab.SearchDuties"), ref _searchText, inputMaxLength);
+                ImGui.InputTextWithHint("##search", Loc.Get("MainTab.SearchDuties"), ref searchText, inputMaxLength);
 
                 // Apply filtering based on the search text
-                if (_searchText.Length > 0)
+                if (searchText.Length > 0)
                     // Trim and convert to lowercase for case-insensitive search
-                    _searchText = _searchText.Trim().ToLower();
+                    searchText = searchText.Trim().ToLower();
             }
 
             static void DrawPathSelection()
@@ -141,6 +142,13 @@ namespace AutoDuty.Windows
                     ImGui.TextColoredWrapped(EzColor.Cyan, Loc.Get("MainTab.TerminationNotice"));
             }
 
+            static void LoadPlaylist(Playlist playlist)
+            {
+                playlist.AdjustToCurrentChar();
+                Plugin.PlaylistCurrent = playlist;
+                playlistName           = playlist.Name;
+            }
+
             if (InDungeon)
             {
                 if (Plugin.CurrentTerritoryContent == null || Plugin.CurrentTerritoryContent.TerritoryType != Svc.ClientState.TerritoryType)
@@ -186,7 +194,7 @@ namespace AutoDuty.Windows
                                 if (ImGui.Button(Loc.Get("MainTab.Start")))
                                 {
                                     Plugin.LoadPath();
-                                    _currentStepIndex = -1;
+                                    currentStepIndex = -1;
                                     if (Plugin.mainListClicked)
                                         Plugin.Run(Svc.ClientState.TerritoryType, 0, !Plugin.mainListClicked);
                                     else
@@ -227,22 +235,22 @@ namespace AutoDuty.Windows
                             foreach ((PathAction Value, int Index) item in Plugin.Actions.Select((Value, Index) => (Value, Index))) item.Value.DrawCustomText(item.Index, () => ItemClicked(item));
                             //var text = item.Value.Name.StartsWith("<--", StringComparison.InvariantCultureIgnoreCase) ? item.Value.Note : $"{item.Value.ToCustomString()}";
                             ////////////////////////////////////////////////////////////////
-                            if (_currentStepIndex != Plugin.indexer && _currentStepIndex > -1 && Plugin.Stage > 0)
+                            if (currentStepIndex != Plugin.indexer && currentStepIndex > -1 && Plugin.Stage > 0)
                             {
                                 float lineHeight = ImGui.GetTextLineHeightWithSpacing();
-                                _currentStepIndex = Plugin.indexer;
-                                if (_currentStepIndex > 1)
-                                    ImGui.SetScrollY((_currentStepIndex - 1) * lineHeight);
+                                currentStepIndex = Plugin.indexer;
+                                if (currentStepIndex > 1)
+                                    ImGui.SetScrollY((currentStepIndex - 1) * lineHeight);
                             }
-                            else if (_currentStepIndex == -1 && Plugin.Stage > 0)
+                            else if (currentStepIndex == -1 && Plugin.Stage > 0)
                             {
-                                _currentStepIndex = 0;
-                                ImGui.SetScrollY(_currentStepIndex);
+                                currentStepIndex = 0;
+                                ImGui.SetScrollY(currentStepIndex);
                             }
 
                             if (InDungeon && Plugin is { Actions.Count: < 1 } && !ContentPathsManager.DictionaryPaths.ContainsKey(Plugin.CurrentTerritoryContent.TerritoryType))
                                 ImGui.TextColored(new Vector4(0, 255, 0, 1),
-                                                  Loc.Get("MainTab.NoPathFound", TerritoryName.GetTerritoryName(Plugin.CurrentTerritoryContent.TerritoryType).Split('|')[1].Trim(), Plugin.CurrentTerritoryContent.TerritoryType.ToString(), Plugin.pathsDirectory.FullName.Replace('\\', '/'), _pathsURL));
+                                                  Loc.Get("MainTab.NoPathFound", TerritoryName.GetTerritoryName(Plugin.CurrentTerritoryContent.TerritoryType).Split('|')[1].Trim(), Plugin.CurrentTerritoryContent.TerritoryType.ToString(), Plugin.pathsDirectory.FullName.Replace('\\', '/'), pathsURL));
                         }
                         else
                         {
@@ -281,8 +289,7 @@ namespace AutoDuty.Windows
                         if (ImGui.Selectable(Loc.Get("MainTab.Modes.NoviceHall")))
                         {
                             AutoDuty.Configuration.AutoDutyModeEnum = AutoDutyMode.Playlist;
-                            Plugin.playlistCurrent.Clear();
-                            Plugin.playlistCurrent.AddRange(NoviceHelper.CreatePlaylist());
+                            LoadPlaylist(NoviceHelper.CreatePlaylist());
                         }
                         ImGui.EndCombo();
                     }
@@ -512,6 +519,76 @@ namespace AutoDuty.Windows
 
                     DrawTerminationNotice();
 
+                    if (AutoDuty.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
+                    {
+                        using ImRaii.DisabledDisposable _ = ImRaii.Disabled(Plugin.States != PluginState.None);
+
+                        ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 180 * ImGuiHelpers.GlobalScale);
+                        ImGui.SetItemAllowOverlap();
+                        using (ImRaii.ComboDisposable configCombo = ImRaii.Combo("##PlaylistCombo", Plugin.PlaylistCurrent.Name))
+                        {
+                            if (configCombo)
+                                for (int index = 0; index < ConfigurationMain.Instance.Playlists.Count; index++)
+                                {
+                                    Playlist playlist = ConfigurationMain.Instance.Playlists[index];
+
+                                    float textX = ImGui.GetCursorPosX();
+                                    ImGui.SetItemAllowOverlap();
+                                    if (ImGui.Selectable($"###{playlist.Name}_{index}PlaylistSelectable", playlist.Name == Plugin.PlaylistCurrent.Name))
+                                        LoadPlaylist(playlist);
+
+                                    ImGui.SameLine(textX);
+                                    ImGui.Text(playlist.Name);
+                                }
+                        }
+
+                        ImGui.PopItemWidth();
+
+                        ImGui.SameLine(0, 15f);
+
+                        using (ImRaii.Disabled(!ImGui.GetIO().KeyCtrl || Plugin.PlaylistCurrent.Name == ConfigurationMain.PLAYLISTNAME_EPHEMERAL))
+                        {
+                            if (ImGuiComponents.IconButton(FontAwesomeIcon.TrashAlt))
+                            {
+                                ConfigurationMain.Instance.Playlists.RemoveAll(p => p.Name == Plugin.PlaylistCurrent.Name);
+                                
+                                LoadPlaylist(ConfigurationMain.Instance.Playlists[0]);
+
+                                Configuration.Save();
+                            }
+                        }
+
+                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                            ImGui.SetTooltip(Loc.Get("MainTab.Playlist.DeleteHelp"));
+
+                        ImGui.InputText("##PlaylistNameInput", ref playlistName);
+                        ImGui.SameLine();
+                        using (ImRaii.Disabled(!ImGui.GetIO().KeyCtrl || playlistName == ConfigurationMain.PLAYLISTNAME_EPHEMERAL))
+                        {
+                            if (ImGuiComponents.IconButton(FontAwesomeIcon.Save))
+                            {
+                                Playlist clone = Plugin.PlaylistCurrent.JSONClone(ConfigurationMain.JsonSerializerSettings);
+
+                                int index = ConfigurationMain.Instance.Playlists.IndexOf(playlist => playlist.Name == playlistName);
+                                if (index == -1)
+                                {
+                                    clone.Name = playlistName;
+                                    ConfigurationMain.Instance.Playlists.Add(clone);
+                                    LoadPlaylist(clone);
+                                }
+                                else
+                                {
+                                    ConfigurationMain.Instance.Playlists[index] = clone;
+                                }
+
+                                Configuration.Save();
+                            }
+                        }
+
+                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                            ImGui.SetTooltip(Loc.Get("MainTab.Playlist.SaveHelp"));
+                    }
+
                     ushort ilvl = InventoryHelper.CurrentItemLevel;
                     if (!ImGui.BeginListBox("##DutyList", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y))) 
                         return;
@@ -578,7 +655,7 @@ namespace AutoDuty.Windows
                                             foreach ((uint _, Content content) in dictionary)
                                             {
                                                 // Apply search filter
-                                                if (!string.IsNullOrWhiteSpace(_searchText) && !(content.Name?.Contains(_searchText, StringComparison.OrdinalIgnoreCase) ?? false))
+                                                if (!string.IsNullOrWhiteSpace(searchText) && !(content.Name?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false))
                                                     continue; // Skip duties that do not match the search text
 
                                                 bool canRun = content.CanRun(level);
@@ -607,9 +684,9 @@ namespace AutoDuty.Windows
                                     unsafe
                                     {
                                         RaptureGearsetModule* gearsetModule = RaptureGearsetModule.Instance();
-                                        for (int i = 0; i < Plugin.playlistCurrent.Count; i++)
+                                        for (int i = 0; i < Plugin.PlaylistCurrent.Entries.Count; i++)
                                         {
-                                            PlaylistEntry entry = Plugin.playlistCurrent[i];
+                                            PlaylistEntry entry = Plugin.PlaylistCurrent.Entries[i];
 
                                             ImGui.AlignTextToFramePadding();
                                             ImGui.SetItemAllowOverlap();
@@ -693,7 +770,7 @@ namespace AutoDuty.Windows
                                                 {
                                                     Content content = ContentHelper.DictionaryContent[key];
 
-                                                    if (!string.IsNullOrWhiteSpace(_searchText) && !(content.Name?.Contains(_searchText, StringComparison.InvariantCultureIgnoreCase) ?? false))
+                                                    if (!string.IsNullOrWhiteSpace(searchText) && !(content.Name?.Contains(searchText, StringComparison.InvariantCultureIgnoreCase) ?? false))
                                                         continue;
 
                                                     if (content.DutyModes.HasFlag(entry.DutyMode) && content.CanRun(level, entry.DutyMode, ilvl: entryIlvl))
@@ -710,11 +787,11 @@ namespace AutoDuty.Windows
                                             if (entryContainer.Paths.Count > 1)
                                             {
                                                 ImGui.SameLine();
-                                                if (ImGui.BeginCombo($"##Playlist{i}PathSelection", entryContainer.Paths.First(dp => dp.FileName == entry.path).Name))
+                                                if (ImGui.BeginCombo($"##Playlist{i}PathSelection", entryContainer.Paths.First(dp => dp.FileName == entry.Path).Name))
                                                 {
                                                     foreach (ContentPathsManager.DutyPath path in entryContainer.Paths)
-                                                        if(ImGui.Selectable(path.Name, path.FileName == entry.path)) 
-                                                            entry.path = path.FileName;
+                                                        if(ImGui.Selectable(path.Name, path.FileName == entry.Path)) 
+                                                            entry.Path = path.FileName;
 
                                                     ImGui.EndCombo();
                                                 }
@@ -731,8 +808,8 @@ namespace AutoDuty.Windows
                                             {
                                                 if (ImGuiComponents.IconButton($"Playlist{i}Up", FontAwesomeIcon.ArrowUp))
                                                 {
-                                                    Plugin.playlistCurrent.Remove(entry);
-                                                    Plugin.playlistCurrent.Insert(i - 1, entry);
+                                                    Plugin.PlaylistCurrent.Entries.Remove(entry);
+                                                    Plugin.PlaylistCurrent.Entries.Insert(i - 1, entry);
                                                 }
                                             }
 
@@ -746,24 +823,24 @@ namespace AutoDuty.Windows
 
                                             ImGui.SameLine();
 
-                                            using(ImRaii.Disabled(Plugin.playlistCurrent.Count <= i+1))
+                                            using(ImRaii.Disabled(Plugin.PlaylistCurrent.Entries.Count <= i+1))
                                             {
                                                 if (ImGuiComponents.IconButton($"Playlist{i}Down", FontAwesomeIcon.ArrowDown))
                                                 {
-                                                    Plugin.playlistCurrent.Remove(entry);
-                                                    Plugin.playlistCurrent.Insert(i+1, entry);
+                                                    Plugin.PlaylistCurrent.Entries.Remove(entry);
+                                                    Plugin.PlaylistCurrent.Entries.Insert(i+1, entry);
                                                 }
                                             }
 
                                             ImGui.SameLine();
 
                                             if (ImGuiComponents.IconButton($"Playlist{i}Trash", FontAwesomeIcon.TrashAlt))
-                                                Plugin.playlistCurrent.RemoveAt(i);
+                                                Plugin.PlaylistCurrent.Entries.RemoveAt(i);
                                         }
 
 
                                         if (ImGuiComponents.IconButton("PlaylistAdd", FontAwesomeIcon.Plus)) 
-                                            Plugin.playlistCurrent.Add(new PlaylistEntry { DutyMode = Plugin.playlistCurrent.Count != 0 ? Plugin.playlistCurrent.Last().DutyMode : DutyMode.Support });
+                                            Plugin.PlaylistCurrent.Entries.Add(new PlaylistEntry { DutyMode = Plugin.PlaylistCurrent.Entries.Count != 0 ? Plugin.PlaylistCurrent.Entries.Last().DutyMode : DutyMode.Support });
 
                                         break;
                                     }

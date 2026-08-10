@@ -22,10 +22,16 @@ using Data;
 using ECommons.Configuration;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
+using ECommons.IPC.Subscribers.AutoRetainer;
 using ECommons.IPC.Subscribers.RotationSolverReborn;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
+using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
+using FFXIVClientStructs.Interop;
+using FFXIVClientStructs.STD;
 using Lumina.Excel.Sheets;
 using Multibox;
 using Newtonsoft.Json;
@@ -39,11 +45,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using ECommons.IPC.Subscribers.AutoRetainer;
-using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
-using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
-using FFXIVClientStructs.Interop;
-using FFXIVClientStructs.STD;
+using FFXIVClientStructs.FFXIV.Client.Game.InstanceContent;
 using Achievement = Lumina.Excel.Sheets.Achievement;
 using Vector2 = FFXIVClientStructs.FFXIV.Common.Math.Vector2;
 
@@ -1210,6 +1212,26 @@ public static class ConfigTab
                     ILayoutInstance*                         inst   = insts  != null ? FindPtr(ref *insts,                  0x0063AE21_0B000000ul) : null;
                     Collider*                                coll   = inst   != null ? inst->GetCollider() : null;
                     ImGui.Text("Collider present: " + (inst != null && inst->IsColliderActive()));
+                }
+
+                unsafe
+                {
+                    if (ImGui.CollapsingHeader("ToDo Director"))
+                    {
+                        ContentDirector* cd = EventFramework.Instance()->GetContentDirector();
+                        if (cd != null)
+                        {
+                            StdVector<DirectorTodo>* todo = cd->GetDirectorTodos();
+                            if (todo != null)
+                            {
+                                for (int i = 0; i < todo->Count; i++)
+                                {
+                                    DirectorTodo item = (*todo)[i];
+                                    ImGuiEx.Text($"{item.Text} - {item.CurrentCount}/{item.NeededCount} - {item.NeededPercentage}% ~ {item.Enabled} - {item.Type} - Complete: {item.Complete} - {item.CurrentCount == item.NeededCount}");
+                                }
+                            }
+                        }
+                    }
                 }
 
                 if (ImGui.CollapsingHeader("Sheet Check"))

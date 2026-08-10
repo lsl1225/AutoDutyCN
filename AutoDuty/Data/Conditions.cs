@@ -9,20 +9,25 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using AutoDuty.Data;
+
 // ReSharper disable UnusedType.Global
 
 namespace AutoDuty.Data;
 
-using System.Globalization;
-using System.Linq;
-using System.Numerics;
 using Dalamud.Game.ClientState.Conditions;
 using ECommons.DalamudServices;
 using ECommons.GameFunctions;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using FFXIVClientStructs.FFXIV.Client.Game.InstanceContent;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
 using FFXIVClientStructs.Interop;
 using FFXIVClientStructs.STD;
 using Newtonsoft.Json;
+using System.Globalization;
+using System.Linq;
+using System.Numerics;
 
 public abstract class PathActionCondition
 {
@@ -66,6 +71,7 @@ public abstract class PathActionCondition
                     ConditionType.VariantPath => new PathActionConditionVariantPath(),
                     ConditionType.ConditionFlag => new PathActionConditionConditionFlag(),
                     ConditionType.Collision => new PathActionConditionCollision(),
+                    ConditionType.ToDo => new PathActionConditionToDo(),
                     ConditionType.Not => new PathActionConditionNot(),
                     ConditionType.Or => new PathActionConditionOr() ,
                     ConditionType.And => new PathActionConditionAnd(),
@@ -470,6 +476,65 @@ public class PathActionConditionVariantPath : PathActionCondition
     {
         yield return (new Vector4(1, 165 / 255f, 0, 1), $"{ConditionType.VariantPath.ToLocalizedString()} ");
         yield return (new Vector4(1, 165 / 255f, 0, 1), string.Join(", ", this.pathIndices));
+    }
+}
+
+public class PathActionConditionToDo : PathActionCondition
+{
+    public new const ConditionType PARSE_KEY = ConditionType.ToDo;
+    public override  ConditionType ParseKey => PARSE_KEY;
+
+    public byte index        = 0;
+    public int  count = 0;
+
+    public string operatorValue = operations.Keys.First();
+
+    public override unsafe bool IsFulfilled()
+    {
+        ContentDirector* cd = EventFramework.Instance()->GetContentDirector();
+        if (cd != null)
+        {
+            StdVector<DirectorTodo>* todo = cd->GetDirectorTodos();
+            if (todo != null)
+                if (this.index < todo->Count)
+                {
+                    DirectorTodo item = (*todo)[this.index];
+                    
+                    return operations.TryGetValue(this.operatorValue, out Func<object, object, bool>? operationFunc) &&
+                           operationFunc(item.CurrentCount, this.count);
+                }
+        }
+
+        return false;
+    }
+
+    public override unsafe void DrawConfig()
+    {
+        if(ImGui.BeginCombo("Objective", this.index.ToString()))
+        {
+            ContentDirector* cd = EventFramework.Instance()->GetContentDirector();
+            if (cd != null)
+            {
+                StdVector<DirectorTodo>* todo = cd->GetDirectorTodos();
+                if (todo != null)
+                    for (int i = 0; i < todo->Count; i++)
+                    {
+                        DirectorTodo item = (*todo)[i];
+                        if(ImGui.Selectable($"{i}: {item.Text} - {item.CurrentCount}/{item.NeededCount}"))
+                            this.index = (byte)i;
+                    }
+            }
+            ImGui.EndCombo();
+        }
+        ImGui.SameLine();
+        ImGuiEx.Combo("Operation", ref this.operatorValue, operations.Keys);
+        ImGui.SameLine();
+        ImGui.InputInt("Count", ref this.count);
+    }
+
+    public override IEnumerable<(Vector4 color, string text)> DrawStepEntry()
+    {
+        yield return (new Vector4(1, 165 / 255f, 0, 1), $"{ConditionType.ToDo.ToLocalizedString()} ");
     }
 }
 

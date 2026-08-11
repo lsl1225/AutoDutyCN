@@ -12,14 +12,14 @@
         protected override string Name        { get; } = "Plugin Installer";
         protected override string DisplayName { get; } = "Plugin Installer";
 
-        private static ExternalPlugin? pluginToInstall;
-        private Task<bool>?     installTask;
-        private        int             retries = 0;
+        private static ExternalPlugin pluginsToInstall;
+        private        Task<bool>?    installTask;
+        private        int            retries = 0;
 
 
         internal static void InstallPlugin(ExternalPlugin plugin)
         {
-            pluginToInstall = plugin;
+            pluginsToInstall = plugin;
             Invoke();
         }
 
@@ -30,7 +30,7 @@
                 this.DebugLog("Plugin installation already in progress");
                 return;
             }
-            if(pluginToInstall == null)
+            if(pluginsToInstall == ExternalPlugin.None)
             {
                 this.DebugLog("No plugin specified for installation");
                 return;
@@ -41,7 +41,7 @@
 
         protected override void HelperUpdate(IFramework framework)
         {
-            if(!pluginToInstall.HasValue)
+            if(pluginsToInstall == ExternalPlugin.None)
             {
                 this.Stop();
                 return;
@@ -53,33 +53,40 @@
             if (this.installTask == null)
             {
                 this.DebugLog("Getting plugin data");
-                (string url, string name) = pluginToInstall.Value.GetExternalPluginData();
+
+                ExternalPlugin plugin = pluginsToInstall.GetFlags().Last();
+                this.retries = 0;
+
+                (string url, string name) = plugin.GetExternalPluginData();
                 this.DebugLog($"{url} | {name}");
-                this.installTask             = DalamudReflector.AddPlugin(url, name);
+                this.installTask = DalamudReflector.AddPlugin(url, name);
                 return;
             }
             if(this.installTask.IsCompleted)
             {
                 this.DebugLog("task completed");
-                string pluginName = pluginToInstall.Value.GetExternalPluginData().name;
+
+                ExternalPlugin plugin = pluginsToInstall.GetFlags().Last();
+                string pluginName = plugin.GetExternalPluginData().name;
                 if (this.installTask.Result || IPCSubscriber_Common.IsReady(pluginName))
                 {
                     this.DebugLog("Successfully installed");
-                    this.Stop();
+                    pluginsToInstall &= ~plugin;
                     return;
                 } else
                 {
                     if(PluginInterface.InstalledPlugins.Any(iep => iep.InternalName == pluginName))
                     {
                         this.DebugLog("Plugin already installed but not ready, stopping installation");
-                        this.Stop();
+
+                        pluginsToInstall &= ~plugin;
                         return;
                     }
 
                     this.DebugLog("Failed to install plugin");
                     this.retries++;
                     if(this.retries > 5)
-                        this.Stop();
+                        pluginsToInstall &= ~plugin;
                     else
                         this.installTask = null;
                 }
@@ -88,9 +95,8 @@
 
         internal override void Stop()
         {
-            pluginToInstall  = null;
+            pluginsToInstall = ExternalPlugin.None;
             this.installTask = null;
-            this.retries     = 0;
             base.Stop();
         }
     }

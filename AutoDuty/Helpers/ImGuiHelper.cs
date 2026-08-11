@@ -13,6 +13,7 @@ namespace AutoDuty.Helpers
     using ECommons.ImGuiMethods;
     using IPC;
     using System;
+    using System.Linq;
     using System.Numerics;
 
     internal static class ImGuiHelper
@@ -134,12 +135,14 @@ namespace AutoDuty.Helpers
             ImGui.SameLine();
         }
 
-        internal static IDisposable RequiresPlugin(ExternalPlugin plugin, string id, string? message = null, bool inline = false, bool write = true)
+        internal static IDisposable RequiresPlugin(ExternalPlugin plugins, string id, string? message = null, bool inline = false, bool write = true)
         {
-            if (plugin == ExternalPlugin.None)
+            if (plugins == ExternalPlugin.None)
                 return new EndUnconditionally();
 
-            if (IPCSubscriber_Common.IsReady(plugin.GetExternalPluginData().name) || (plugin == ExternalPlugin.BossMod && IPCSubscriber_Common.IsReady("BossModReborn")))
+            ExternalPlugin[] pluginsArray = plugins.GetFlags();
+
+            if (pluginsArray.All(plugin => IPCSubscriber_Common.IsReady(plugin.GetExternalPluginData().name) || (plugin == ExternalPlugin.BossMod && IPCSubscriber_Common.IsReady("BossModReborn"))))
             {
                 return new EndUnconditionally(() =>
                                               {
@@ -150,7 +153,7 @@ namespace AutoDuty.Helpers
                                                       ImGui.SameLine();
                                                   ImGui.Text($"{(inline ? "| " : "\t")}powered by ");
                                                   ImGui.SameLine(0, 1);
-                                                  ImGui.TextColored(LinkColor, plugin.GetExternalPluginName());
+                                                  ImGui.TextColored(LinkColor, string.Join(", ", pluginsArray.Select(plugin => plugin.GetExternalPluginName())));
                                               }, true);
             }
             else
@@ -170,11 +173,11 @@ namespace AutoDuty.Helpers
                                                       ImGui.SameLine();
                                                   ImGui.Text(message ?? $"{(inline ? "| " : "\t")} requires ");
                                                   ImGui.SameLine(0, 1);
-                                                  ImGui.TextColored(LinkColor, plugin.GetExternalPluginName());
+                                                  ImGui.TextColored(LinkColor, string.Join(",^", pluginsArray.Select(plugin => plugin.GetExternalPluginName())));
 
                                                   ImGui.SameLine(0, 5);
-                                                  if (ImGui.Button($"Install##InstallExternalPlugin_{plugin}_{id}"))
-                                                      PluginInstaller.InstallPlugin(plugin);
+                                                  if (ImGui.Button($"Install##InstallExternalPlugin_{plugins}_{id}"))
+                                                      PluginInstaller.InstallPlugin(plugins);
                                               }, true);
             }
         }

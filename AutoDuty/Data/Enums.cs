@@ -362,21 +362,29 @@
             LargeBlue = 60781,
         }
 
+        [Flags]
+        public enum PathActionFlags : int
+        {
+            None = 0,
+            NoPartyCoherency = 1 << 0
+        }
+
+        [Flags]
         public enum ExternalPlugin
         {
-            None,
-            vnav,
-            BossMod,
-            Avarice,
-            RotationSolverReborn,
-            WrathCombo,
-            AutoRetainer,
-            Gearsetter,
-            Stylist,
-            Lifestream,
-            AntiAFK,
-            Pandora,
-            GlamourLog
+            None                 = 0,
+            vnav                 = 1 << 0,
+            BossMod              = 1 << 1,
+            Avarice              = 1 << 2,
+            RotationSolverReborn = 1 << 3,
+            WrathCombo           = 1 << 4,
+            AutoRetainer         = 1 << 5,
+            Gearsetter           = 1 << 6,
+            Stylist              = 1 << 7,
+            Lifestream           = 1 << 8,
+            AntiAFK              = 1 << 9,
+            Pandora              = 1 << 10,
+            GlamourLog           = 1 << 11
         }
 
         public enum ConditionType
@@ -389,6 +397,8 @@
             ActionStatus,
             VariantPath,
             ConditionFlag,
+            Collision,
+            ToDo,
             Not,
             Or,
             And
@@ -414,7 +424,7 @@
                 parameter.Any(enu => instance.HasFlag(enu));
 
             public T[] GetFlags() =>
-                [.. Enum.GetValues(typeof(T)).Cast<T>().Where(t => instance.HasFlag(t))];
+                [.. Enum.GetValues(typeof(T)).Cast<T>().Where(t => instance.HasFlag(t) && (int)(object)t != 0)];
         }
     }
 

@@ -37,6 +37,10 @@ internal class GlamourChestHelper : ActiveHelperBase<GlamourChestHelper>
         if (!GlamourLog_IPCSubscriber.IsEnabled)
             return;
 
+        if (!QuestManager.IsQuestComplete(68553))
+            Svc.Log.Info("Materia Extraction requires having completed quest: If I Had a Glamour");
+
+
         ExcelSheet<MirageStoreSetItemLookup> setLookups = Svc.Data.GetExcelSheet<MirageStoreSetItemLookup>();
         IEnumerable<InventoryItem> items = InventoryHelper.GetInventorySelection(InventoryHelper.Bag).Where(item => setLookups.HasRow(item.ItemId)).ToList();
 

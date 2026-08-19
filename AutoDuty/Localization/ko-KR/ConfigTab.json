@@ -11,6 +11,7 @@
       "Delete": "설정 삭제",
       "DeleteHelp": "설정 삭제\nCtrl 길게 누르면 활성화",
       "BareProfileNote": "Bare 프로필은 임무 실행 전용입니다. 필요하면 복제하여 편집하세요.",
+      "ConfigOverridesActiveNote": "IPC 설정 오버라이드가 활성화된 동안에는 설정이 잠깁니다. 다시 편집하려면 AutoDuty를 정지하세요.",
       "NewProfileName": "새 프로필 이름",
       "ChangeProfileName": "프로필 이름 변경"
     },
@@ -174,6 +175,8 @@
       "SellTripleTriadCards": "트리플 트라이어드 카드 판매",
       "SlotsOccupied": "사용 슬롯",
       "CardCount": "카드 수",
+      "EnableAutoRetainerMultiMode": "AutoRetainer 멀티 모드 활성화",
+      "EnableAutoRetainerMultiModeHelp": "AutoRetainer 멀티 모드로 모든 캐릭터를 한 바퀴 순회한 뒤 임무 실행으로 복귀합니다",
       "EnableAutoRetainer": "AutoRetainer 연동 활성화",
       "PreferredSummoningBell": "선호 집사 초인종 위치: ",
       "PreferredSummoningBellHelp": "어떤 위치를 선택하든 실행 시 현재 위치에 집사 초인종이 있으면 그쪽을 우선합니다",
@@ -334,6 +337,11 @@
         "Pictomancer": "픽토맨서",
         "Blue_Mage": "청마도사"
       },
+      "MultiModeType": {
+        "Retainers": "집사",
+        "Submersibles": "잠수함",
+        "Everything": "전부"
+      },
       "ConditionType": {
         "VariantPath": "변형던전 경로",
         "Distance": "거리",
@@ -341,7 +349,12 @@
         "ItemCount": "아이템",
         "Job": "직업",
         "ActionStatus": "행동 상태",
-        "ConditionFlag": "조건 플래그"
+        "ConditionFlag": "조건 플래그",
+        "Collision": "충돌",
+        "ToDo": "ToDo",
+        "Not": "아님",
+        "Or": "또는",
+        "And": "그리고"
       },
       "ObjectDataProperty": {
         "EventState": "이벤트 상태",

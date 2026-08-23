@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Numerics;
+    using Configurations;
     using Dalamud.Interface.Utility.Raii;
     using ECommons.ExcelServices;
     using Dalamud.Bindings.ImGui;
@@ -490,7 +491,7 @@
                 if (ImGui.CheckboxFlags(jwr.ToLocalizedString(), ref flag, (int)jwr))
                 {
                     config = (JobWithRole)flag;
-                    Windows.Configuration.Save();
+                    ConfigurationProfileV2.Save();
                     return true;
                 }
             }

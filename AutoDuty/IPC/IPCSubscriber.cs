@@ -14,6 +14,7 @@ namespace AutoDuty.IPC
 {
     using System;
     using System.Collections.Generic;
+    using Configurations;
     using ECommons.GameFunctions;
     using Helpers;
     using Data;
@@ -49,11 +50,11 @@ namespace AutoDuty.IPC
 
         public static bool RetainersAvailable()
         {
-            if (Configuration.EnableAutoRetainer && IsEnabled)
+            if (AutoDuty.Configuration.Loop.Between.EnableAutoRetainer && IsEnabled)
             {
                 long? remaining = AutoRetainer.GetClosestRetainerVentureSecondsRemaining(Player.CID);
                 Svc.Log.Debug($"AutoRetainer IPC - Closest Retainer Venture Remaining Time: {remaining}");
-                return remaining.HasValue && remaining < Configuration.AutoRetainer_RemainingTime;
+                return remaining.HasValue && remaining < AutoDuty.Configuration.Loop.Between.AutoRetainerRemainingTime;
             }
 
             return false;
@@ -67,7 +68,7 @@ namespace AutoDuty.IPC
         public static bool HasModuleByDataId(uint id) => BossMod.HasModuleByDataId(id);
         public static void DisableModule(string moduleName, bool disable)
         {
-            if(Configuration.AutoManageBossModAISettings)
+            if(AutoDuty.Configuration.DutyConfig.AutoManageBossModAISettings)
             {
                 Svc.Log.Debug($"BossMod IPC - Disabling Module: {moduleName}, Disable: {disable}");
                 BossMod.DisableModule(moduleName, disable);
@@ -89,7 +90,7 @@ namespace AutoDuty.IPC
 
         public static void SetPreset(string name, string preset)
         {
-            if (Configuration.AutoManageBossModAISettings)
+            if (AutoDuty.Configuration.DutyConfig.AutoManageBossModAISettings)
                 if (BossMod.Presets_GetActive() != name)
                 {
                     Svc.Log.Debug($"BossMod Setting Preset: {name}");
@@ -100,7 +101,7 @@ namespace AutoDuty.IPC
 
         public static void DisablePresets()
         {
-            if (Configuration.AutoManageBossModAISettings)
+            if (AutoDuty.Configuration.DutyConfig.AutoManageBossModAISettings)
                 if (BossMod.Presets_GetActive() != null)
                 {
                     Svc.Log.Debug($"BossMod Disabling Presets");
@@ -110,7 +111,7 @@ namespace AutoDuty.IPC
 
         public static void SetRange(float range)
         {
-            if (Configuration.AutoManageBossModAISettings)
+            if (AutoDuty.Configuration.DutyConfig.AutoManageBossModAISettings)
             {
                 Svc.Log.Debug($"BossMod Setting Range to: {range}");
 
@@ -123,7 +124,7 @@ namespace AutoDuty.IPC
 
         public static void SetMovement(bool on)
         {
-            if (Configuration.AutoManageBossModAISettings)
+            if (AutoDuty.Configuration.DutyConfig.AutoManageBossModAISettings)
             {
                 Svc.Log.Debug($"BossMod Setting Movement: {on}");
 
@@ -136,7 +137,7 @@ namespace AutoDuty.IPC
 
         public static void SetPositional(Positional positional)
         {
-            if (Configuration.AutoManageBossModAISettings)
+            if (AutoDuty.Configuration.DutyConfig.AutoManageBossModAISettings)
             {
                 Svc.Log.Debug($"BossMod Setting Positional: {positional}");
 
@@ -146,7 +147,7 @@ namespace AutoDuty.IPC
 
         public static void StayCloseToTank(bool close)
         {
-            if (Configuration.AutoManageBossModAISettings)
+            if (AutoDuty.Configuration.DutyConfig.AutoManageBossModAISettings)
             {
                 string role = close ? nameof(Enums.Role.Tank) : "None";
 
@@ -257,8 +258,8 @@ namespace AutoDuty.IPC
                     Register();
                     return false;
                 case SetResult.BlacklistedLease:
-                    Configuration.AutoManageRotationPluginState = false;
-                    Windows.Configuration.Save();
+                    AutoDuty.Configuration.DutyConfig.AutoManageRotationPluginState = false;
+                    ConfigurationProfileV2.Save();
                     return false;
                 case SetResult.IPCDisabled:
                 case SetResult.Duplicate:
@@ -290,8 +291,8 @@ namespace AutoDuty.IPC
                     WrathIPCWrapper.SetAutoRotationConfigState(_curLease.Value, AutoRotationConfigOption.AutoCleanse,        true);
 
                     DPSRotationMode dpsConfig = Plugin.currentPlayerItemLevelAndClassJob.Value.GetCombatRole() == CombatRole.Tank ?
-                                                    Configuration.Wrath_TargetingTank :
-                                                    Configuration.Wrath_TargetingNonTank;
+                                                    AutoDuty.Configuration.DutyConfig.Wrath.TargetingTank :
+                                                    AutoDuty.Configuration.DutyConfig.Wrath.TargetingNonTank;
                     WrathIPCWrapper.SetAutoRotationConfigState(_curLease.Value, AutoRotationConfigOption.DPSRotationMode,              dpsConfig);
                     WrathIPCWrapper.SetAutoRotationConfigState(_curLease.Value, AutoRotationConfigOption.HealerRotationMode,           HealerRotationMode.Lowest_Current);
                     WrathIPCWrapper.SetAutoRotationConfigState(_curLease.Value, AutoRotationConfigOption.DPSAlwaysHardTarget,          true);
@@ -311,8 +312,8 @@ namespace AutoDuty.IPC
 
                 if (_curLease == null && IsEnabled)
                 {
-                    Configuration.AutoManageRotationPluginState = false;
-                    Windows.Configuration.Save();
+                    AutoDuty.Configuration.DutyConfig.AutoManageRotationPluginState = false;
+                    ConfigurationProfileV2.Save();
                 }
             }
             return _curLease != null;
@@ -323,8 +324,8 @@ namespace AutoDuty.IPC
             switch ((CancellationReason) reason)
             {
                 case CancellationReason.WrathUserManuallyCancelled:
-                    Configuration.AutoManageRotationPluginState = false;
-                    Windows.Configuration.Save();
+                    AutoDuty.Configuration.DutyConfig.AutoManageRotationPluginState = false;
+                    ConfigurationProfileV2.Save();
                     break;
                 case CancellationReason.LeaseePluginDisabled:
                 case CancellationReason.WrathPluginDisabled:
@@ -365,12 +366,12 @@ namespace AutoDuty.IPC
 
         public static void RotationAuto()
         {
-            RotationSolverReborn.OtherCommand(RotationSolverRebornIPC.OtherCommandType.Settings, $"HostileType {Configuration.RSR_TargetHostileType}");
+            RotationSolverReborn.OtherCommand(RotationSolverRebornIPC.OtherCommandType.Settings, $"HostileType {AutoDuty.Configuration.DutyConfig.RSR.TargetHostileType}");
             RotationSolverReborn.OtherCommand(RotationSolverRebornIPC.OtherCommandType.Settings, "FriendlyPartyNpcHealRaise3 true");
             RotationSolverReborn.OtherCommand(RotationSolverRebornIPC.OtherCommandType.Settings, "AutoOffAfterCombat false");
             RotationSolverReborn.AutodutyChangeOperatingMode(RotationSolverRebornIPC.StateCommandType.AutoDuty, Plugin.currentPlayerItemLevelAndClassJob.Value.GetCombatRole() == CombatRole.Tank ?
-                                                                                                                    Configuration.RSR_TargetingTypeTank :
-                                                                                                                    Configuration.RSR_TargetingTypeNonTank);
+                                                                                                                    AutoDuty.Configuration.DutyConfig.RSR.TargetingTypeTank :
+                                                                                                                    AutoDuty.Configuration.DutyConfig.RSR.TargetingTypeNonTank);
         }
 
         public static void RotationStop() => RotationSolverReborn.ChangeOperatingMode(RotationSolverRebornIPC.StateCommandType.Off);
@@ -389,7 +390,7 @@ namespace AutoDuty.IPC
         internal static bool IsEnabled => 
             IPCSubscriber_Common.IsReady("Lifestream");
 
-        public static void ChangeCharacter(Windows.ConfigurationMain.CharData ch) =>
+        public static void ChangeCharacter(ConfigurationMain.CharData ch) =>
             Lifestream.ChangeCharacter(ch.Name, ch.World);
 
         public static void ChangeCharacter(string name, string world) =>

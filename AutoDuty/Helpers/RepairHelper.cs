@@ -21,7 +21,7 @@ namespace AutoDuty.Helpers
         public override string[]? Commands { get; init; } = ["repair"];
         public override string? CommandDescription { get; init; } = "Repairs your gear";
 
-        protected override int      TimeOut       => Configuration.AutoRepairSelf ? 300000 : 600000;
+        protected override int      TimeOut       => Configuration.Loop.Pre.AutoRepairSelf ? 300000 : 600000;
         protected override string[] AddonsToClose { get; } = ["SelectYesno", "SelectIconString", "Repair", "SelectString"];
 
         internal override void Start()
@@ -60,7 +60,7 @@ namespace AutoDuty.Helpers
         private static unsafe AtkUnitBase* addonRepair = null;
         private static unsafe AtkUnitBase* addonSelectYesno = null;
         private static unsafe AtkUnitBase* addonSelectIconString = null;
-        private static RepairNPCHelper.RepairNpcData? PreferredRepairNpc => Configuration.PreferredRepairNPC;
+        private static RepairNPCHelper.RepairNpcData? PreferredRepairNpc => Configuration.Loop.Pre.PreferredRepairNPC;
 
         protected override unsafe void HelperStopUpdate(IFramework framework)
         {
@@ -97,7 +97,7 @@ namespace AutoDuty.Helpers
 
             Plugin.action = "Repairing";
 
-            if (Configuration.AutoRepairSelf)
+            if (Configuration.Loop.Pre.AutoRepairSelf)
             {
                 if (EzThrottler.Throttle("GearCheck"))
                 {

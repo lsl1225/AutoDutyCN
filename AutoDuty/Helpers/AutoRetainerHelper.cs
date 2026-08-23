@@ -23,7 +23,7 @@ namespace AutoDuty.Helpers
         public override string? CommandDescription { get; init; } = "Automatically manages retainers using the AutoRetainer plugin";
 
 
-        protected override int TimeOut => 600_000 + ((int) Configuration.AutoRetainer_RemainingTime*60);
+        protected override int TimeOut => 600_000 + ((int) Configuration.Loop.Between.AutoRetainerRemainingTime * 60);
 
         protected override string[] AddonsToClose { get; } = ["RetainerList", "SelectYesno", "SelectString", "RetainerTaskAsk"];
 
@@ -53,7 +53,7 @@ namespace AutoDuty.Helpers
 
         private        bool         _autoRetainerStarted = false;
         private        bool         _autoRetainerStopped = false;
-        private static IGameObject? SummoningBellGameObject => Svc.Objects.FirstOrDefault(x => x.BaseId == SummoningBellHelper.SummoningBellDataIds((uint)Configuration.PreferredSummoningBellEnum));
+        private static IGameObject? SummoningBellGameObject => Svc.Objects.FirstOrDefault(x => x.BaseId == SummoningBellHelper.SummoningBellDataIds((uint)Configuration.Loop.Between.PreferredSummoningBellEnum));
 
         protected override unsafe void HelperStopUpdate(IFramework framework)
         {
@@ -139,7 +139,7 @@ namespace AutoDuty.Helpers
             else if ((SummoningBellGameObject == null || SummoningBellHelper.HousingZones.Contains(Player.Territory.RowId)) && GotoHelper.State != ActionState.Running)
             {
                 this.DebugLog("Moving to Summoning Bell Location");
-                SummoningBellHelper.Invoke(Configuration.PreferredSummoningBellEnum);
+                SummoningBellHelper.Invoke(Configuration.Loop.Between.PreferredSummoningBellEnum);
             }
             else if (SummoningBellGameObject != null && ObjectHelper.GetDistanceToPlayer(SummoningBellGameObject) <= 4 && !this._autoRetainerStarted && !GenericHelpers.TryGetAddonByName("RetainerList", out AtkUnitBase* _) && (ObjectHelper.InteractWithObjectUntilAddon(SummoningBellGameObject, "RetainerList") == null))
             {

@@ -138,7 +138,7 @@ namespace AutoDuty.Helpers
                                         return isCard;
                                     });
             
-            return cardCount >= Configuration.TripleTriadSellMinItemCount && slotCount >= Configuration.TripleTriadSellMinSlotCount;
+            return cardCount >= Configuration.Loop.Between.TripleTriadSellMinItemCount && slotCount >= Configuration.Loop.Between.TripleTriadSellMinSlotCount;
         }
     }
 }

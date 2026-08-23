@@ -16,6 +16,7 @@ namespace AutoDuty.Helpers
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Configurations;
     using Lumina.Excel;
     using static Data.Classes;
 
@@ -74,13 +75,13 @@ namespace AutoDuty.Helpers
             Job        playerJob  = PlayerHelper.GetJob();
             CombatRole playerRole = playerJob.GetCombatRole();
 
-            if (Members.All(tm => tm.Value.Level >= tm.Value.LevelCap) && Configuration.SelectedTrustMembers.All(tmn => tmn.HasValue))
+            if (Members.All(tm => tm.Value.Level >= tm.Value.LevelCap) && AutoDuty.Configuration.SelectedTrustMembers.All(tmn => tmn.HasValue))
             {
                 bool test = true;
 
                 for (int i = 0; i < 3 && test; i++)
                 {
-                    TrustMember?[] curMembers = [..Configuration.SelectedTrustMembers.Select(tmn => Members[tmn!.Value])];
+                    TrustMember?[] curMembers = [..AutoDuty.Configuration.SelectedTrustMembers.Select(tmn => Members[tmn!.Value])];
                     TrustMember    testMember = curMembers[i]!;
                     curMembers[i] = null;
                     test &= curMembers.CanSelectMember(testMember, playerRole);
@@ -93,7 +94,7 @@ namespace AutoDuty.Helpers
                 }
             }
 
-            Configuration.SelectedTrustMembers = new TrustMemberName?[3];
+            AutoDuty.Configuration.SelectedTrustMembers = new TrustMemberName?[3];
 
             TrustMember?[] trustMembers = new TrustMember?[3];
 
@@ -129,8 +130,8 @@ namespace AutoDuty.Helpers
 
             if (trustMembers.All(tm => tm != null))
             {
-                Configuration.SelectedTrustMembers = [..trustMembers.Select(tm => tm?.MemberName)];
-                Windows.Configuration.Save();
+                AutoDuty.Configuration.SelectedTrustMembers = [..trustMembers.Select(tm => tm?.MemberName)];
+                ConfigurationProfileV2.Save();
                 return true;
             }
 
@@ -200,11 +201,11 @@ namespace AutoDuty.Helpers
         {
             if (!PlayerHelper.IsValid) return;
 
-            if (Configuration.SelectedTrustMembers.Count(x => x is not null) == 3)
+            if (AutoDuty.Configuration.SelectedTrustMembers.Count(x => x is not null) == 3)
             {
                 CombatRole playerRole = Player.Job.GetCombatRole();
 
-                TrustMember[] trustMembers = [.. Configuration.SelectedTrustMembers.Select(name => Members[(TrustMemberName)name!])];
+                TrustMember[] trustMembers = [.. AutoDuty.Configuration.SelectedTrustMembers.Select(name => Members[(TrustMemberName)name!])];
 
                 int dps = trustMembers.Count(x => x.Role is TrustRole.DPS);
                 int healers = trustMembers.Count(x => x.Role is TrustRole.Healer);
@@ -220,8 +221,8 @@ namespace AutoDuty.Helpers
 
                 if (needsReset)
                 {
-                    Configuration.SelectedTrustMembers = new TrustMemberName?[3];
-                    Windows.Configuration.Save();
+                    AutoDuty.Configuration.SelectedTrustMembers = new TrustMemberName?[3];
+                    ConfigurationProfileV2.Save();
                 }
             }
         }

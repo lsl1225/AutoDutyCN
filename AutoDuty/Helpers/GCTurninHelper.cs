@@ -112,7 +112,7 @@ namespace AutoDuty.Helpers
             if (GotoHelper.State != ActionState.Running && Svc.ClientState.TerritoryType != PlayerHelper.GetGrandCompanyTerritoryType(PlayerHelper.GetGrandCompany()))
             {
                 this.DebugLog("Moving to GC Supply");
-                if (Configuration.AutoGCTurninUseTicket && InventoryHelper.ItemCount(AetheryteTicketId) > 0)
+                if (Configuration.Loop.Between.AutoGCTurninUseTicket && InventoryHelper.ItemCount(AetheryteTicketId) > 0)
                 {
                     if (!PlayerHelper.IsCasting)
                         InventoryHelper.UseItem(AetheryteTicketId);

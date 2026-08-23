@@ -37,7 +37,7 @@ namespace AutoDuty.Helpers
 
         internal static void Invoke(Content? content, DutyMode dutyMode)
         {
-            if (State != ActionState.Running && content != null && dutyMode != DutyMode.None && (!_dutyMode.HasAnyFlag(DutyMode.Regular, DutyMode.Trial, DutyMode.Raid) || AutoDuty.Configuration.Unsynced || AutoDuty.Configuration.OverridePartyValidation))
+            if (State != ActionState.Running && content != null && dutyMode != DutyMode.None && (!_dutyMode.HasAnyFlag(DutyMode.Regular, DutyMode.Trial, DutyMode.Raid) || AutoDuty.Configuration.Meta.Unsynced || AutoDuty.Configuration.DutyConfig.OverridePartyValidation))
             {
                 _dutyMode = dutyMode;
                 _content = content;
@@ -202,9 +202,9 @@ namespace AutoDuty.Helpers
         }
 
         public static bool ShouldBeUnSynced() =>
-            AutoDuty.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist ? 
+            AutoDuty.Configuration.Meta.AutoDutyModeEnum == AutoDutyMode.Playlist ? 
                 (Plugin.PlaylistCurrentEntry?.unsynced == true && Plugin.PlaylistCurrentEntry?.DutyMode.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial) == true) : 
-                AutoDuty.Configuration.Unsynced && AutoDuty.Configuration.DutyModeEnum.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial);
+                AutoDuty.Configuration.Meta.Unsynced && Configuration.Meta.DutyModeEnum.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial);
 
         private void QueueRegular()
         {

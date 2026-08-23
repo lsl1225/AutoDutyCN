@@ -64,7 +64,7 @@ namespace AutoDuty.Managers
             ReaderGCArmyMemberList armyMemberList = null!;
             _taskManager.Enqueue(() => armyMemberList = new ReaderGCArmyMemberList(memberListAddon), "RegisterSquadron-GetReader");
 
-            if (Configuration.SquadronAssignLowestMembers)
+            if (Configuration.Meta.SquadronAssignLowestMembers)
             {
                 // disable active members
                 _taskManager.Enqueue(() =>

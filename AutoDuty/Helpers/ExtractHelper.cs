@@ -28,7 +28,7 @@ namespace AutoDuty.Helpers
             {
                 base.Start();
 
-                this._stoppingCategory = Configuration.AutoExtractAll ? 6 : 0;
+                this._stoppingCategory = Configuration.Loop.Between.AutoExtractAll ? 6 : 0;
             }
         }
 

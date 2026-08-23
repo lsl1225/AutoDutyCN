@@ -20,6 +20,7 @@ using ECommons.DalamudServices;
 using ECommons.Reflection;
 using global::AutoDuty.Multibox;
 using System;
+using Configurations;
 
 public sealed class MainWindow : Window, IDisposable
 {
@@ -70,16 +71,17 @@ public sealed class MainWindow : Window, IDisposable
     {
         using ImRaii.DisabledDisposable _ = ImRaii.Disabled(MultiboxUtility.Config.MultiBox && !MultiboxUtility.Config.Host);
 
-        if ((AutoDuty.Configuration.UseSliderInputs  && ImGui.SliderInt("Times", ref AutoDuty.Configuration.LoopTimes, 1, 100)) ||
-            (!AutoDuty.Configuration.UseSliderInputs && ImGui.InputInt("Times", ref AutoDuty.Configuration.LoopTimes, 1)))
+        int loopTimes = AutoDuty.Configuration.Meta.LoopTimes;
+        if ((AutoDuty.Configuration.Overlay.UseSliderInputs  && ImGui.SliderInt("Times", ref loopTimes, 1, 100)) ||
+            (!AutoDuty.Configuration.Overlay.UseSliderInputs && ImGui.InputInt("Times", ref loopTimes, 1)))
         {
-            if (AutoDuty.Configuration.LoopTimes <= 0)
-                AutoDuty.Configuration.LoopTimes = 1;
+            if (loopTimes <= 0)
+                loopTimes = 1;
 
-            if (AutoDuty.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist)
-                Plugin.PlaylistCurrentEntry?.count = AutoDuty.Configuration.LoopTimes;
-
-            Configuration.Save();
+            if (AutoDuty.Configuration.Meta.AutoDutyModeEnum == AutoDutyMode.Playlist)
+                Plugin.PlaylistCurrentEntry?.count = loopTimes;
+            AutoDuty.Configuration.Meta.LoopTimes = loopTimes;
+            ConfigurationProfileV2.Save();
         }
     }
 
@@ -130,7 +132,7 @@ public sealed class MainWindow : Window, IDisposable
 
         using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Looping) || Plugin.States.HasFlag(PluginState.Navigating)))
         {
-            using (ImRaii.Disabled(AutoDuty.Configuration is { OverrideOverlayButtons: true, GotoButton: false }))
+            //using (ImRaii.Disabled(AutoDuty.Configuration.Overlay is { OverrideOverlayButtons: true, GotoButton: false }))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
@@ -147,7 +149,7 @@ public sealed class MainWindow : Window, IDisposable
                 if (ImGui.Selectable(Loc.Get("MainWindow.Goto.Inn"))) GotoInnHelper.Invoke();
                 if (ImGui.Selectable(Loc.Get("MainWindow.Goto.GCSupply"))) GotoHelper.Invoke(PlayerHelper.GetGrandCompanyTerritoryType(PlayerHelper.GetGrandCompany()), [GCTurninHelper.GCSupplyLocation], 0.25f, 3f);
                 if (ImGui.Selectable(Loc.Get("MainWindow.Goto.FlagMarker"))) MapHelper.MoveToMapMarker();
-                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.SummoningBell"))) SummoningBellHelper.Invoke(AutoDuty.Configuration.PreferredSummoningBellEnum);
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.SummoningBell"))) SummoningBellHelper.Invoke(AutoDuty.Configuration.Loop.Between.PreferredSummoningBellEnum);
                 if (ImGui.Selectable(Loc.Get("MainWindow.Goto.Apartment"))) GotoHousingHelper.Invoke(Housing.Apartment);
                 if (ImGui.Selectable(Loc.Get("MainWindow.Goto.PersonalHome"))) GotoHousingHelper.Invoke(Housing.Personal_Home);
                 if (ImGui.Selectable(Loc.Get("MainWindow.Goto.FCEstate"))) GotoHousingHelper.Invoke(Housing.FC_Estate);
@@ -159,7 +161,7 @@ public sealed class MainWindow : Window, IDisposable
 
 
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(AutoDuty.Configuration is { AutoGCTurnin: false, OverrideOverlayButtons: false } || !AutoDuty.Configuration.TurninButton))
+            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Between.AutoGCTurnin: false /*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.TurninButton*/}))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
@@ -177,18 +179,18 @@ public sealed class MainWindow : Window, IDisposable
                 }
             }
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(AutoDuty.Configuration is { AutoDesynth: false, OverrideOverlayButtons: false } || !AutoDuty.Configuration.DesynthButton))
+            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Between.AutoDesynth: false /*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.DesynthButton*/}))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
                     if (ImGui.Button(Loc.Get("Overlay.Button.Desynth")))
                         DesynthHelper.Invoke();
                     ToolTip(Loc.Get("Overlay.Tooltip.Desynth"));
-                    
+
                 }
             }
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(AutoDuty.Configuration is { AutoExtract: false, OverrideOverlayButtons: false } || !AutoDuty.Configuration.ExtractButton))
+            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Between.AutoExtract: false /*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.ExtractButton*/}))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
@@ -207,7 +209,7 @@ public sealed class MainWindow : Window, IDisposable
             }
             
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(AutoDuty.Configuration is { AutoRepair: false, OverrideOverlayButtons: false } || !AutoDuty.Configuration.RepairButton))
+            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Pre.AutoRepair: false /*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.RepairButton*/}))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
@@ -226,7 +228,7 @@ public sealed class MainWindow : Window, IDisposable
                 }
             }
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(AutoDuty.Configuration is { AutoEquipRecommendedGear: false, OverrideOverlayButtons: false } || !AutoDuty.Configuration.EquipButton))
+            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Pre.AutoEquipRecommendedGear: false /*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.EquipButton*/}))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
@@ -245,7 +247,7 @@ public sealed class MainWindow : Window, IDisposable
             }
 
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(AutoDuty.Configuration is { AutoOpenCoffers: false, OverrideOverlayButtons: false } || !AutoDuty.Configuration.CofferButton))
+            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Between.AutoOpenCoffers: false /*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.CofferButton*/}))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
@@ -256,7 +258,7 @@ public sealed class MainWindow : Window, IDisposable
             }
             ImGui.SameLine(0, 5);
 
-            using (ImRaii.Disabled(!(AutoDuty.Configuration.TripleTriadRegister || AutoDuty.Configuration.TripleTriadSell) && (!AutoDuty.Configuration.OverrideOverlayButtons || !AutoDuty.Configuration.TTButton)))
+            using (ImRaii.Disabled(!(AutoDuty.Configuration.Loop.Between.TripleTriadRegister || AutoDuty.Configuration.Loop.Between.TripleTriadSell)/* && (!AutoDuty.Configuration.Overlay.OverrideOverlayButtons || !AutoDuty.Configuration.Overlay.TTButton)*/))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
@@ -360,9 +362,9 @@ public sealed class MainWindow : Window, IDisposable
         ImGui.BeginTabBar(id, flags);
 
 
-        bool valid = (BossMod_IPCSubscriber.IsEnabled  || AutoDuty.Configuration.UsingAlternativeBossPlugin)     &&
-                     (VNavmesh_IPCSubscriber.IsEnabled || AutoDuty.Configuration.UsingAlternativeMovementPlugin) &&
-                     (BossMod_IPCSubscriber.IsEnabled  || AutoDuty.Configuration.UsingAlternativeRotationPlugin);
+        bool valid = (BossMod_IPCSubscriber.IsEnabled  || AutoDuty.Configuration.DutyConfig.UsingAlternativeBossPlugin)     &&
+                     (VNavmesh_IPCSubscriber.IsEnabled || AutoDuty.Configuration.DutyConfig.UsingAlternativeMovementPlugin) &&
+                     (BossMod_IPCSubscriber.IsEnabled  || AutoDuty.Configuration.DutyConfig.UsingAlternativeRotationPlugin);
 
         if (!valid)
             openTab = "Info";

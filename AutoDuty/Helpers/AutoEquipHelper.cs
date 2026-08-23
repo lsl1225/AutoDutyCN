@@ -17,7 +17,7 @@ namespace AutoDuty.Helpers
 
         internal override void Start()
         {
-            switch (Configuration.AutoEquipRecommendedGearSource)
+            switch (Configuration.Loop.Pre.AutoEquipRecommendedGearSource)
             {
                 case GearsetUpdateSource.Gearsetter when Gearsetter_IPCSubscriber.IsEnabled:
                     this.TimeOut = 10_000;
@@ -154,7 +154,7 @@ namespace AutoDuty.Helpers
                         return;
                     }
 
-                    if (Configuration.AutoEquipRecommendedGearGearsetterOldToInventory && equipSlotIndex is not RaptureGearsetModule.GearsetItemIndex.MainHand and not RaptureGearsetModule.GearsetItemIndex.OffHand &&
+                    if (Configuration.Loop.Pre.AutoEquipRecommendedGearGearsetterOldToInventory && equipSlotIndex is not RaptureGearsetModule.GearsetItemIndex.MainHand and not RaptureGearsetModule.GearsetItemIndex.OffHand &&
                         !InventoryManager.Instance()->GetInventoryContainer(InventoryType.EquippedItems)->Items[(int)equipSlotIndex].IsEmpty())
                     {
                         if (InventoryManager.Instance()->GetEmptySlotsInBag() < 1)

@@ -69,8 +69,8 @@ namespace AutoDuty.Helpers
             else if (GenericHelpers.TryGetAddonByName("SalvageDialog", out AtkUnitBase* addonSalvageDialog) && GenericHelpers.IsAddonReady(addonSalvageDialog))
             {
                 this.DebugLog("Confirming SalvageDialog");
-                AddonHelper.FireCallBack(addonSalvageDialog, true, 15, Configuration.AutoDesynthNQOnly);
-                AddonHelper.FireCallBack(addonSalvageDialog, true, 0, false);
+                AddonHelper.FireCallBack(addonSalvageDialog, true, 15, Configuration.Loop.Between.AutoDesynthNQOnly);
+                AddonHelper.FireCallBack(addonSalvageDialog, true, 0,  false);
                 return;
             }
 
@@ -110,9 +110,9 @@ namespace AutoDuty.Helpers
                         if (itemLevel == null || itemSheetRow == null || desynthLevel <= 0) 
                             continue;
 
-                        if (!Configuration.AutoDesynthSkillUp || (desynthLevel < itemLevel + Configuration.AutoDesynthSkillUpLimit && desynthLevel < this._maxDesynthLevel))
+                        if (!Configuration.Loop.Between.AutoDesynthSkillUp || (desynthLevel < itemLevel + Configuration.Loop.Between.AutoDesynthSkillUpLimit && desynthLevel < this._maxDesynthLevel))
                         {
-                            if (Configuration.AutoDesynthNoGearset)
+                            if (Configuration.Loop.Between.AutoDesynthNoGearset)
                             {
                                 if (gearsetItemIds == null)
                                 {
@@ -168,7 +168,7 @@ namespace AutoDuty.Helpers
             AgentSalvage.SalvageItemCategory[]? categories = Enum.GetValues<AgentSalvage.SalvageItemCategory>();
             for (int i = reset ? 0 : (int) this.curCategory + 1; i < categories.Length; i++)
             {
-                if(Bitmask.IsBitSet(Configuration.AutoDesynthCategories, i))
+                if(Bitmask.IsBitSet(Configuration.Loop.Between.AutoDesynthCategories, i))
                 {
                     this.curCategory = categories[i];
                     return true;

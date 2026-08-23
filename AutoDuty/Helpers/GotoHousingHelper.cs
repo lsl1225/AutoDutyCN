@@ -61,8 +61,8 @@ namespace AutoDuty.Helpers
         };
         private static Housing whichHousing = Housing.Apartment;
         private static List<Vector3> EntrancePath => whichHousing == Housing.Personal_Home ? 
-                                                          Configuration.PersonalHomeEntrancePath : 
-                                                          Configuration.FCEstateEntrancePath;
+                                                          Configuration.Loop.Pre.PersonalHomeEntrancePath : 
+                                                          Configuration.Loop.Pre.FCEstateEntrancePath;
         private int index = 0;
 
         protected override void HelperUpdate(IFramework framework)

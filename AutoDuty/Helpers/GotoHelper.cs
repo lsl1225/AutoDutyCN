@@ -233,7 +233,7 @@ namespace AutoDuty.Helpers
                 case "ar":
                 case "bell":
                 case "summoningbell":
-                    SummoningBellHelper.Invoke(Configuration.PreferredSummoningBellEnum);
+                    SummoningBellHelper.Invoke(Configuration.Loop.Between.PreferredSummoningBellEnum);
                     break;
                 case "ap":
                 case "apartment":

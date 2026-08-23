@@ -7,6 +7,7 @@ namespace AutoDuty.Helpers
     using System.Collections;
     using System.Globalization;
     using System.Linq;
+    using Configurations;
 
     internal static class ConfigHelper
     {
@@ -27,7 +28,7 @@ namespace AutoDuty.Helpers
             }
             else
             {
-                return field.GetValue(Configuration)?.ToString() ?? string.Empty;
+                return field.GetValue(AutoDuty.Configuration)?.ToString() ?? string.Empty;
             }
         }
 
@@ -77,11 +78,11 @@ namespace AutoDuty.Helpers
                     switch (levelingMode)
                     {
                         case LevelingMode.Support:
-                            Configuration.DutyModeEnum = DutyMode.Support;
+                            AutoDuty.Configuration.Meta.DutyModeEnum = DutyMode.Support;
                             break;
                         case LevelingMode.Trust_Group:
                         case LevelingMode.Trust_Solo:
-                            Configuration.DutyModeEnum = DutyMode.Trust;
+                            AutoDuty.Configuration.Meta.DutyModeEnum = DutyMode.Trust;
                             break;
                         case LevelingMode.None:
                         default:
@@ -114,7 +115,7 @@ namespace AutoDuty.Helpers
 
                 if (configType.IsAssignableTo(typeof(IList)))
                 {
-                    IList valueList      = (IList)field.GetValue(Configuration)!;
+                    IList valueList      = (IList)field.GetValue(AutoDuty.Configuration)!;
                     Type  enumerableType = configType.GetElementType() ?? configType.GenericTypeArguments.First();
 
                     switch (configValues[0])
@@ -207,12 +208,12 @@ namespace AutoDuty.Helpers
                     object? newValue = ModifyConfig(configType, configValues[0], out string failReason);
 
                     if (newValue != null)
-                        field.SetValue(Configuration, newValue);
+                        field.SetValue(AutoDuty.Configuration, newValue);
                     else
                         PrintError(failReason);
                 }
 
-                Windows.Configuration.Save();
+                ConfigurationProfileV2.Save();
             }
             return false;
         }
@@ -223,7 +224,7 @@ namespace AutoDuty.Helpers
             if (i == null) return;
             foreach (FieldInfo? field in i)
                 if (!field.FieldType.ToString().Contains("Dalamud.Plugin", StringComparison.InvariantCultureIgnoreCase) && !field.Name.Replace(">k__BackingField", "").Replace("<", "").Equals("Version",StringComparison.InvariantCultureIgnoreCase))
-                    Svc.Log.Info($"{field.Name.Replace(">k__BackingField", "").Replace("<", "")} = {field.GetValue(Configuration)} ({field.FieldType.ToString().Replace("System.", "")})");
+                    Svc.Log.Info($"{field.Name.Replace(">k__BackingField", "").Replace("<", "")} = {field.GetValue(AutoDuty.Configuration)} ({field.FieldType.ToString().Replace("System.", "")})");
         }
 
         internal static FieldInfo? FindConfig(string configName)

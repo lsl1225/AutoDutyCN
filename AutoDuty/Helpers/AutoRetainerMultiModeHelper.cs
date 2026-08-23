@@ -8,6 +8,7 @@ namespace AutoDuty.Helpers
     using ECommons.Automation;
     using FFXIVClientStructs.FFXIV.Client.Game;
     using System;
+    using Configurations;
 
     internal class AutoRetainerMultiModeHelper : ActiveHelperBase<AutoRetainerMultiModeHelper>
     {
@@ -77,7 +78,7 @@ namespace AutoDuty.Helpers
                 this.CID = Player.CID;
 
                 this.autoRetainerStarted = true;
-                AutoRetainer_IPCSubscriber.EnableSingleMultiMode(Configuration.AutoRetainerMultiModeType);
+                AutoRetainer_IPCSubscriber.EnableSingleMultiMode(AutoDuty.Configuration.Loop.Between.AutoRetainerMultiModeType);
                 this.priorStage = Plugin.Stage;
 
                 if (Plugin.Stage is not (Stage.Stopped or Stage.Paused))
@@ -95,7 +96,7 @@ namespace AutoDuty.Helpers
                 }
 
                 this.DebugLog("Multi-mode finished. Moving Home now");
-                Lifestream_IPCSubscriber.ChangeCharacter(Windows.ConfigurationMain.Instance.charByCID[this.CID]);
+                Lifestream_IPCSubscriber.ChangeCharacter(ConfigurationMain.Instance.charByCID[this.CID]);
             }
         }
     }

@@ -276,24 +276,24 @@ public class Configuration
 #endregion
 
 #region PreLoop
-    public bool                                                 EnablePreLoopActions     = true;
-    public bool                                                 ExecuteCommandsPreLoop   = false;
-    public List<string>                                         CustomCommandsPreLoop    = [];
-    public bool                                                 RetireMode               = false;
-    public RetireLocation                                       RetireLocationEnum       = RetireLocation.Inn;
-    public List<Vector3>                                        PersonalHomeEntrancePath = [];
-    public List<Vector3>                                        FCEstateEntrancePath     = [];
-    public bool                                                 AutoEquipRecommendedGear;
-    public GearsetUpdateSource                                  AutoEquipRecommendedGearSource;
-    public bool                                                 AutoEquipRecommendedGearGearsetterOldToInventory;
-    public bool                                                 AutoRepair              = false;
-    public uint                                                 AutoRepairPct           = 50;
-    public bool                                                 AutoRepairSelf          = false;
-    public RepairNPCHelper.RepairNpcData?                       PreferredRepairNPC      = null;
-    public bool                                                 AutoConsume             = false;
-    public bool                                                 AutoConsumeIgnoreStatus = false;
-    public int                                                  AutoConsumeTime         = 29;
-    public List<KeyValuePair<ushort, ConfigTab.ConsumableItem>> AutoConsumeItemsList    = [];
+    public bool                                                                    EnablePreLoopActions     = true;
+    public bool                                                                    ExecuteCommandsPreLoop   = false;
+    public List<string>                                                            CustomCommandsPreLoop    = [];
+    public bool                                                                    RetireMode               = false;
+    public RetireLocation                                                          RetireLocationEnum       = RetireLocation.Inn;
+    public List<Vector3>                                                           PersonalHomeEntrancePath = [];
+    public List<Vector3>                                                           FCEstateEntrancePath     = [];
+    public bool                                                                    AutoEquipRecommendedGear;
+    public GearsetUpdateSource                                                     AutoEquipRecommendedGearSource;
+    public bool                                                                    AutoEquipRecommendedGearGearsetterOldToInventory;
+    public bool                                                                    AutoRepair              = false;
+    public uint                                                                    AutoRepairPct           = 50;
+    public bool                                                                    AutoRepairSelf          = false;
+    public RepairNPCHelper.RepairNpcData?                                          PreferredRepairNPC      = null;
+    public bool                                                                    AutoConsume             = false;
+    public bool                                                                    AutoConsumeIgnoreStatus = false;
+    public int                                                                     AutoConsumeTime         = 29;
+    public List<KeyValuePair<ushort, ConsumeItemsLoopActionConfig.ConsumableItem>> AutoConsumeItemsList    = [];
 #endregion
 
 

@@ -31,52 +31,6 @@
             All                  = 3
         }
 
-        public enum ClassJobType
-        {
-            Adventurer = 0,
-            Gladiator = 1,
-            Pugilist = 2,
-            Marauder = 3,
-            Lancer = 4,
-            Archer = 5,
-            Conjurer = 6,
-            Thaumaturge = 7,
-            Carpenter = 8,
-            Blacksmith = 9,
-            Armorer = 10,
-            Goldsmith = 11,
-            Leatherworker = 12,
-            Weaver = 13,
-            Alchemist = 14,
-            Culinarian = 15,
-            Miner = 16,
-            Botanist = 17,
-            Fisher = 18,
-            Paladin = 19,
-            Monk = 20,
-            Warrior = 21,
-            Dragoon = 22,
-            Bard = 23,
-            White_Mage = 24,
-            Black_Mage = 25,
-            Arcanist = 26,
-            Summoner = 27,
-            Scholar = 28,
-            Rogue = 29,
-            Ninja = 30,
-            Machinist = 31,
-            Dark_Knight = 32,
-            Astrologian = 33,
-            Samurai = 34,
-            RedMage = 35,
-            BlueMage = 36,
-            Gunbreaker = 37,
-            Dancer = 38,
-            Reaper = 39,
-            Sage = 40,
-            Pictomancer = 42
-        }
-
         [Flags]
         public enum JobWithRole
         {
@@ -97,7 +51,8 @@
             Samurai     = 1 << 11,
             Reaper      = 1 << 12,
             Viper       = 1 << 13,
-            Striking    = Monk     | Samurai,
+            Beastmaster = 1 << 22,
+            Striking    = Monk     | Samurai | Beastmaster ,
             Maiming     = Dragoon  | Reaper,
             Scouting    = Ninja    | Viper,
             Melee       = Striking | Maiming | Scouting,
@@ -156,6 +111,7 @@
             Personal_Home = 2,
             FC_Estate = 3,
             GC_Barracks = 4,
+            Lifestream_Auto = 5
         }
         public enum TerminationMode : int
         {

@@ -10,14 +10,13 @@ namespace AutoDuty.Helpers
     using System;
     using Configurations;
 
-    internal class AutoRetainerMultiModeHelper : ActiveHelperBase<AutoRetainerMultiModeHelper>
+    public class AutoRetainerMultiModeHelper : ActiveHelperBase<AutoRetainerMultiModeHelper, AutoRetainerMultiModeLoopActionConfig>
     {
-        protected override string Name { get; } = nameof(AutoRetainerMultiModeHelper);
-        protected override string DisplayName { get; } = "AutoRetainerMultiMode";
+        public override string Name { get; } = nameof(AutoRetainerMultiModeHelper);
+        public override string DisplayName { get; } = "AutoRetainerMultiMode";
 
         public override string[]? Commands { get; init; } = ["arm", "autoretainermulti"];
         public override string? CommandDescription { get; init; } = "Runs one cycle of AutoRetainer's Multi Mode";
-
 
         protected override int TimeOut => (int)(TimeSpan.MillisecondsPerHour * 2);
 
@@ -78,7 +77,7 @@ namespace AutoDuty.Helpers
                 this.CID = Player.CID;
 
                 this.autoRetainerStarted = true;
-                AutoRetainer_IPCSubscriber.EnableSingleMultiMode(AutoDuty.Configuration.Loop.Between.AutoRetainerMultiModeType);
+                AutoRetainer_IPCSubscriber.EnableSingleMultiMode(this.ActionConfig.MultiModeType);
                 this.priorStage = Plugin.Stage;
 
                 if (Plugin.Stage is not (Stage.Stopped or Stage.Paused))

@@ -1,17 +1,24 @@
 namespace AutoDuty.Configurations;
 
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
+using Dalamud.Interface.Components;
+using Dalamud.Interface.Utility;
+using Dalamud.Interface.Utility.Raii;
 using Data;
 using ECommons;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
+using ECommons.ImGuiMethods;
 using ECommons.IPC.Subscribers.AutoRetainer;
 using ECommons.IPC.Subscribers.RotationSolverReborn;
 using Helpers;
 using Multibox;
 using Newtonsoft.Json;
 using Serilog.Events;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using Windows;
 
@@ -76,6 +83,8 @@ public class ConfigurationProfileV2
         public bool SquadronAssignLowestMembers    { get; set; } = true;
 
         public bool ShowMainWindowOnStartup { get; set; } = false;
+
+        public bool UseSliderInputs { get; set; } = false;
     }
 
     public LogConfig Log { get; set; }
@@ -98,7 +107,7 @@ public class ConfigurationProfileV2
         [JsonIgnore]
         private readonly ConfigurationProfileV2 config = config;
 
-        public bool ShowOverlay
+        public bool Show
         {
             get;
             set
@@ -108,7 +117,7 @@ public class ConfigurationProfileV2
             }
         } = true;
 
-        public bool HideOverlayWhenStopped
+        public bool HideWhenStopped
         {
             get;
             set
@@ -119,7 +128,7 @@ public class ConfigurationProfileV2
             }
         } = false;
 
-        public bool LockOverlay
+        public bool Lock
         {
             get;
             set
@@ -140,7 +149,7 @@ public class ConfigurationProfileV2
             }
         } = false;
 
-        public bool OverlayNoBG
+        public bool NoBG
         {
             get;
             set
@@ -161,10 +170,9 @@ public class ConfigurationProfileV2
             }
         } = false;
 
-        public bool OverlayAnchorBottom    { get; set; } = false;
+        public bool AnchorBottom    { get; set; } = false;
         public bool ShowDutyLoopText       { get; set; } = true;
         public bool ShowActionText         { get; set; } = true;
-        public bool UseSliderInputs        { get; set; } = false;
     }
 
     public DutyConfigConfig DutyConfig { get; set; }
@@ -242,10 +250,10 @@ public class ConfigurationProfileV2
 
             public float MaxDistanceToTargetRoleMelee  { get; set; } = 2.6f;
             public float MaxDistanceToTargetRoleRanged { get; set; } = 10f;
-        }
 
-        internal bool       PositionalAvarice { get; set; } = true;
-        public   Positional PositionalEnum    { get; set; } = Positional.Any;
+            internal bool       PositionalAvarice { get; set; } = true;
+            public   Positional PositionalEnum    { get; set; } = Positional.Any;
+        }
 
         public  bool       AutoManageVnavAlignCamera      { get; set; } = true;
         public  bool       LootTreasure                   { get; set; } = true;
@@ -333,8 +341,8 @@ public class ConfigurationProfileV2
         public LoopConfig(ConfigurationProfileV2 config)
         {
             this.config      = config;
-            this.Pre     = new PreLoopConfig(this);
-            this.Between = new BetweenLoopConfig(this);
+            this.Pre         = new PreLoopConfig(this);
+            this.Between     = new BetweenLoopConfig(this);
             this.Termination = new TerminationConfig(this);
         }
 
@@ -346,24 +354,9 @@ public class ConfigurationProfileV2
             [JsonIgnore]
             private readonly LoopConfig config = config;
 
-            public bool                                                 Enabled                             { get; set; } = true;
-            public bool                                                 ExecuteCommands                           { get; set; } = false;
-            public List<string>                                         CustomCommands                            { get; set; } = [];
-            public bool                                                 RetireMode                                       { get; set; } = false;
-            public RetireLocation                                       RetireLocationEnum                               { get; set; } = RetireLocation.Inn;
-            public List<Vector3>                                        PersonalHomeEntrancePath                         { get; set; } = [];
-            public List<Vector3>                                        FCEstateEntrancePath                             { get; set; } = [];
-            public bool                                                 AutoEquipRecommendedGear                         { get; set; }
-            public GearsetUpdateSource                                  AutoEquipRecommendedGearSource                   { get; set; } = GearsetUpdateSource.Vanilla;
-            public bool                                                 AutoEquipRecommendedGearGearsetterOldToInventory { get; set; }
-            public bool                                                 AutoRepair                                       { get; set; } = false;
-            public uint                                                 AutoRepairPct                                    { get; set; } = 50;
-            public bool                                                 AutoRepairSelf                                   { get; set; } = false;
-            public RepairNPCHelper.RepairNpcData?                       PreferredRepairNPC                               { get; set; } = null;
-            public bool                                                 AutoConsume                                      { get; set; } = false;
-            public bool                                                 AutoConsumeIgnoreStatus                          { get; set; } = false;
-            public int                                                  AutoConsumeTime                                  { get; set; } = 29;
-            public List<KeyValuePair<ushort, ConfigTab.ConsumableItem>> AutoConsumeItemsList                             { get; set; } = [];
+            public bool Enabled { get; set; } = true;
+
+            public LoopActions Actions { get; set; } = [];
         }
 
         
@@ -375,78 +368,10 @@ public class ConfigurationProfileV2
             [JsonIgnore]
             private readonly LoopConfig config = config;
 
-            public bool         Enabled         { get; set; } = true;
-            public bool         ExecuteLastLoop { get; set; } = false;
-            public int          WaitTimeBeforeAfterLoopActions   { get; set; } = 0;
-            public bool         ExecuteCommands       { get; set; } = false;
-            public List<string> CustomCommands        { get; set; } = [];
-            public bool         AutoExtract                      { get; set; } = false;
+            public bool Enabled         { get; set; } = true;
+            public bool ExecuteLastLoop { get; set; } = false;
 
-            public bool                     AutoOpenCoffers             { get; set; }
-            public byte?                    AutoOpenCoffersGearset      { get; set; }
-            public bool                     AutoOpenCoffersBlacklistUse { get; set; }
-            public Dictionary<uint, string> AutoOpenCoffersBlacklist    { get; set; } = [];
-
-            public bool AutoExtractAll { get; set; }
-
-            public bool AutoDesynth
-            {
-                get;
-                set
-                {
-                    field = value;
-                    if (value && !this.AutoDesynthSkillUp)
-                        this.AutoGCTurnin = false;
-                }
-            }
-
-            public bool AutoDesynthSkillUp
-            {
-                get;
-                set
-                {
-                    field = value;
-                    if (!value && this.AutoGCTurnin)
-                        this.AutoDesynth = false;
-                }
-            }
-
-            public int   AutoDesynthSkillUpLimit { get; set; } = 50;
-            public bool  AutoDesynthNQOnly       { get; set; } = false;
-            public bool  AutoDesynthNoGearset    { get; set; } = true;
-            public ulong AutoDesynthCategories   { get; set; } = 0x1;
-
-            public bool AutoGCTurnin
-            {
-                get;
-                set
-                {
-                    field = value;
-                    if (value && !this.AutoDesynthSkillUp)
-                        this.AutoDesynth = false;
-                }
-            }
-
-            public int  AutoGCTurninSlotsLeft     { get; set; } = 5;
-            public bool AutoGCTurninSlotsLeftBool { get; set; } = false;
-            public bool AutoGCTurninUseTicket     { get; set; } = false;
-
-            public bool ArmoireEntrust      { get; set; } = false;
-            public bool GlamourChestEntrust { get; set; } = false;
-
-            public bool TripleTriadRegister         { get; set; }
-            public bool TripleTriadSell             { get; set; }
-            public int  TripleTriadSellMinItemCount { get; set; } = 1;
-            public int  TripleTriadSellMinSlotCount { get; set; } = 1;
-
-            public bool DiscardItems { get; set; }
-
-            public bool                   EnableAutoRetainer         { get; set; } = false;
-            public SummoningBellLocations PreferredSummoningBellEnum { get; set; } = 0;
-            public long                   AutoRetainerRemainingTime  { get; set; } = 0L;
-
-            public bool          EnableAutoRetainerMultiMode { get; set; } = false;
-            public MultiModeType AutoRetainerMultiModeType   { get; set; } = MultiModeType.Everything;
+            public LoopActions Actions { get; set; } = [ new PlaylistSwitchLoopActionConfig(), new AutoRetainerLoopActionConfig(), new AutoEquipLoopActionConfig() ];
         }
 
         public TerminationConfig Termination { get; set; }
@@ -457,6 +382,7 @@ public class ConfigurationProfileV2
             private readonly LoopConfig config = config;
 
             public bool                                        Enabled      { get; set; } = true;
+
             public bool                                        StopLevel                     { get; set; }
             public int                                         StopLevelInt                  { get; set; } = 1;
             public bool                                        StopNoRestedXP                { get; set; }
@@ -473,23 +399,142 @@ public class ConfigurationProfileV2
             public bool                                        TerminationiLvl               { get; set; }
             public int                                         TerminationiLvlInt            { get; set; }
 
-            public bool            ExecuteCommands { get; set; }
-            public List<string>    CustomCommands  { get; set; } = [];
-            public bool            PlayEndSound               { get; set; }
-            public bool            CustomSound                { get; set; }
-            public float           CustomSoundVolume          { get; set; } = 0.5f;
-            public Sounds          SoundEnum                  { get; set; } = Sounds.None;
-            public string          SoundPath                  { get; set; } = "";
-            public TerminationMode TerminationMethodEnum      { get; set; } = TerminationMode.Do_Nothing;
-            public bool            TerminationKeepActive      { get; set; } = true;
+            public LoopActions Actions { get; set; } = [];
+
+            public TerminationMode                 TerminationMethodEnum     { get; set; } = TerminationMode.Do_Nothing;
+            public bool                            TerminationKeepActive     { get; set; } = true;
+        }
+    }
+
+    public class LoopActions : List<LoopActionConfig>
+    {
+        private float imguiListX = 400;
+
+        public LoopActionConfig? FindConfig<T>() where T : LoopActionConfig => 
+            this.FirstOrDefault(lac => lac is T);
+
+        public bool RunConfig<T>(bool queue = true) where T : LoopActionConfig
+        {
+            LoopActionConfig? config = this.FindConfig<T>();
+            if (config == null)
+                return false;
+
+            config.Run(ref queue);
+            return queue;
+        }
+
+        public void OnGui(string id, LoopActionCategory category = LoopActionCategory.All)
+        {
+            if (!ImGui.BeginListBox($"##LoopActions_{id}", new Vector2(ImGui.GetContentRegionAvail().X, this.imguiListX)))
+                return;
+
+            ImGui.PushItemWidth(150f.Scale());
+
+            for (int index = 0; index < this.Count; index++)
+            {
+                using ImRaii.IdDisposable _ = ImRaii.PushId($"{id}_{index}");
+
+                LoopActionConfig actionConfig = this[index];
+
+                using (ImRaii.Disabled(index <= 0))
+                {
+                    if (ImGuiComponents.IconButton($"Order{index}Up", FontAwesomeIcon.ArrowUp))
+                    {
+                        this.Remove(actionConfig);
+                        this.Insert(index - 1, actionConfig);
+                        Save();
+                    }
+                }
+
+                ImGui.SameLine(0, 2);
+
+                using (ImRaii.Disabled(this.Count <= index + 1))
+                {
+                    if (ImGuiComponents.IconButton($"Order{index}Down", FontAwesomeIcon.ArrowDown))
+                    {
+                        this.Remove(actionConfig);
+                        this.Insert(index + 1, actionConfig);
+                        Save();
+                    }
+                }
+
+                ImGui.SameLine();
+
+                if (ImGui.GetIO().KeyCtrl)
+                {
+                    using (ImRaii.PushColor(ImGuiCol.Button, ImGuiHelper.AccentRed with { W = 0.15f.Scale() }))
+                    using (ImRaii.PushColor(ImGuiCol.Text, ImGuiHelper.AccentRed))
+                    using (ImRaii.PushFont(UiBuilder.IconFont))
+                    {
+                        if (ImGui.Button($"{FontAwesomeIcon.TrashAlt.ToIconString()}###deleteDataLoopAction{id}_{index}", new Vector2(28f.Scale(), 0)))
+                        {
+                            this.Remove(actionConfig);
+                            index--;
+                            Save();
+                            continue;
+                        }
+
+                        ImGui.SameLine();
+                    }
+                }
+
+                actionConfig.OnGUI();
+            }
+
+            ImGui.PopItemWidth();
+
+            this.imguiListX = ImGui.GetCursorPosY();
+            ImGui.EndListBox();
+
+            using (ImRaii.PushFont(UiBuilder.IconFont))
+            {
+                if (ImGui.Button($"{FontAwesomeIcon.Plus.ToIconString()}###addLoopAction{id}", new Vector2(28f.Scale(), 0)))
+                    ImGui.OpenPopup($"##LoopActions{id}ContextMenu");
+            }
+
+            if (ImGui.IsPopupOpen($"##LoopActions{id}ContextMenu"))
+                if (ImGui.BeginPopup($"##LoopActions{id}ContextMenu", ImGuiWindowFlags.AlwaysAutoResize))
+                {
+                    HashSet<Type> shownTypes = [];
+
+                    void DrawLoopActions(List<Tuple<Type, string>> tuples)
+                    {
+                        foreach ((Type type, string name) in tuples)
+                        {
+                            if(!shownTypes.Add(type))
+                                continue;
+
+                            if (ImGui.Selectable($"{name}##{id}_{type}_{name}") && Activator.CreateInstance(type) is LoopActionConfig actionConfig)
+                            {
+                                this.Add(actionConfig);
+                                Save();
+                            }
+                        }
+                    }
+
+                    DrawLoopActions(LoopActionConfig.actionCategories[category]);
+
+                    if (category != LoopActionCategory.All)
+                    {
+                        LoopActionCategory[] actionCategories = Enum.GetValues<LoopActionCategory>();
+
+                        foreach (LoopActionCategory actionCategory in actionCategories)
+                        {
+                            if(actionCategory == category || actionCategory == LoopActionCategory.All)
+                                continue;
+
+                            ImGui.Separator();
+                            DrawLoopActions(LoopActionConfig.actionCategories[actionCategory]);
+                        }
+                    }
+
+                    ImGui.EndPopup();
+                }
         }
     }
 
     public TrustMemberName?[] SelectedTrustMembers { get; set; } = new TrustMemberName?[3];
 
-
-    public static void Save()
-    {
+    public static void Save() => 
         ConfigurationMain.Save();
-    }
 }

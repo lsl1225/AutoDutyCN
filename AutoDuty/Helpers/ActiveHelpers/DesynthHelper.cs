@@ -9,16 +9,17 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace AutoDuty.Helpers
 {
-    using System;
-    using System.Collections.Generic;
-    using Lumina.Excel.Sheets;
     using ECommons.MathHelpers;
     using FFXIVClientStructs.FFXIV.Client.UI.Misc;
+    using global::AutoDuty.Configurations;
+    using Lumina.Excel.Sheets;
+    using System;
+    using System.Collections.Generic;
 
-    internal class DesynthHelper : ActiveHelperBase<DesynthHelper>
+    public class DesynthHelper : ActiveHelperBase<DesynthHelper, DesynthLoopActionConfig>
     {
-        protected override string Name        => nameof(DesynthHelper);
-        protected override string DisplayName => "Desynthing";
+        public override string Name        => nameof(DesynthHelper);
+        public override string DisplayName => "Desynthing";
 
         public override string[]? Commands { get; init; } = ["desynth"];
         public override string? CommandDescription { get; init; } = "Desynth's items in your inventory";
@@ -69,7 +70,7 @@ namespace AutoDuty.Helpers
             else if (GenericHelpers.TryGetAddonByName("SalvageDialog", out AtkUnitBase* addonSalvageDialog) && GenericHelpers.IsAddonReady(addonSalvageDialog))
             {
                 this.DebugLog("Confirming SalvageDialog");
-                AddonHelper.FireCallBack(addonSalvageDialog, true, 15, Configuration.Loop.Between.AutoDesynthNQOnly);
+                AddonHelper.FireCallBack(addonSalvageDialog, true, 15, this.ActionConfig.NQOnly);
                 AddonHelper.FireCallBack(addonSalvageDialog, true, 0,  false);
                 return;
             }
@@ -110,9 +111,9 @@ namespace AutoDuty.Helpers
                         if (itemLevel == null || itemSheetRow == null || desynthLevel <= 0) 
                             continue;
 
-                        if (!Configuration.Loop.Between.AutoDesynthSkillUp || (desynthLevel < itemLevel + Configuration.Loop.Between.AutoDesynthSkillUpLimit && desynthLevel < this._maxDesynthLevel))
+                        if (!this.ActionConfig.SkillUp || (desynthLevel < itemLevel + this.ActionConfig.SkillUpLimit && desynthLevel < this._maxDesynthLevel))
                         {
-                            if (Configuration.Loop.Between.AutoDesynthNoGearset)
+                            if (this.ActionConfig.NoGearset)
                             {
                                 if (gearsetItemIds == null)
                                 {
@@ -163,12 +164,12 @@ namespace AutoDuty.Helpers
             }
         }
 
-        public bool NextCategory(bool reset = false)
+        private bool NextCategory(bool reset = false)
         {
             AgentSalvage.SalvageItemCategory[]? categories = Enum.GetValues<AgentSalvage.SalvageItemCategory>();
             for (int i = reset ? 0 : (int) this.curCategory + 1; i < categories.Length; i++)
             {
-                if(Bitmask.IsBitSet(Configuration.Loop.Between.AutoDesynthCategories, i))
+                if(Bitmask.IsBitSet(this.ActionConfig.Categories, i))
                 {
                     this.curCategory = categories[i];
                     return true;

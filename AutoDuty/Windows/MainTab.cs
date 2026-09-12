@@ -386,18 +386,18 @@ namespace AutoDuty.Windows
                                         if (ImGui.Selectable(Loc.Get("MainTab.LevelingModes."+autoLevelMode)+"##LevelingModeComboAuto", Plugin.LevelingModeEnum == autoLevelMode))
                                         {
                                             Plugin.LevelingModeEnum = autoLevelMode;
-                                               ConfigurationProfileV2.Save();
-                                            if (AutoDuty.Configuration.Loop.Pre.AutoEquipRecommendedGear)
-                                                AutoEquipHelper.Invoke();
+                                            ConfigurationProfileV2.Save();
+
+                                            AutoDuty.Configuration.Loop.Pre.Actions.RunConfig<AutoEquipLoopActionConfig>();
                                         }
 
                                         if (AutoDuty.Configuration.Meta.DutyModeEnum == DutyMode.Trust)
-                                            if (ImGui.Selectable(Loc.Get("MainTab.LevelingModes."+"Trust_Solo")+"##LevelingModeComboTrustGroup", Plugin.LevelingModeEnum == LevelingMode.Trust_Solo))
+                                            if (ImGui.Selectable(Loc.Get("MainTab.LevelingModes." + "Trust_Solo") + "##LevelingModeComboTrustGroup", Plugin.LevelingModeEnum == LevelingMode.Trust_Solo))
                                             {
                                                 Plugin.LevelingModeEnum = LevelingMode.Trust_Solo;
-                                                   ConfigurationProfileV2.Save();
-                                                if (AutoDuty.Configuration.Loop.Pre.AutoEquipRecommendedGear)
-                                                    AutoEquipHelper.Invoke();
+                                                ConfigurationProfileV2.Save();
+
+                                                AutoDuty.Configuration.Loop.Pre.Actions.RunConfig<AutoEquipLoopActionConfig>();
                                             }
 
 

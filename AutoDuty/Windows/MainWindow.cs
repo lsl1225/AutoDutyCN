@@ -72,8 +72,8 @@ public sealed class MainWindow : Window, IDisposable
         using ImRaii.DisabledDisposable _ = ImRaii.Disabled(MultiboxUtility.Config.MultiBox && !MultiboxUtility.Config.Host);
 
         int loopTimes = AutoDuty.Configuration.Meta.LoopTimes;
-        if ((AutoDuty.Configuration.Overlay.UseSliderInputs  && ImGui.SliderInt("Times", ref loopTimes, 1, 100)) ||
-            (!AutoDuty.Configuration.Overlay.UseSliderInputs && ImGui.InputInt("Times", ref loopTimes, 1)))
+        if ((AutoDuty.Configuration.Meta.UseSliderInputs  && ImGui.SliderInt("Times", ref loopTimes, 1, 100)) ||
+            (!AutoDuty.Configuration.Meta.UseSliderInputs && ImGui.InputInt("Times", ref loopTimes, 1)))
         {
             if (loopTimes <= 0)
                 loopTimes = 1;
@@ -129,7 +129,7 @@ public sealed class MainWindow : Window, IDisposable
                 StopAndReset();
             ImGui.SameLine(0,5);
         }
-
+/*
         using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Looping) || Plugin.States.HasFlag(PluginState.Navigating)))
         {
             //using (ImRaii.Disabled(AutoDuty.Configuration.Overlay is { OverrideOverlayButtons: true, GotoButton: false }))
@@ -161,7 +161,7 @@ public sealed class MainWindow : Window, IDisposable
 
 
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Between.AutoGCTurnin: false /*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.TurninButton*/}))
+            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Between.AutoGCTurnin: false *//*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.TurninButton*//*}))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
@@ -179,7 +179,7 @@ public sealed class MainWindow : Window, IDisposable
                 }
             }
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Between.AutoDesynth: false /*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.DesynthButton*/}))
+            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Between.AutoDesynth: false *//*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.DesynthButton*//*}))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
@@ -190,7 +190,7 @@ public sealed class MainWindow : Window, IDisposable
                 }
             }
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Between.AutoExtract: false /*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.ExtractButton*/}))
+            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Between.AutoExtract: false *//*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.ExtractButton*//*}))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
@@ -209,7 +209,7 @@ public sealed class MainWindow : Window, IDisposable
             }
             
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Pre.AutoRepair: false /*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.RepairButton*/}))
+            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Pre.AutoRepair: false *//*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.RepairButton*//*}))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
@@ -228,7 +228,7 @@ public sealed class MainWindow : Window, IDisposable
                 }
             }
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Pre.AutoEquipRecommendedGear: false /*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.EquipButton*/}))
+            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.LoopActions.AutoEquipRecommendedGear: false *//*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.EquipButton*//*}))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
@@ -247,7 +247,7 @@ public sealed class MainWindow : Window, IDisposable
             }
 
             ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Between.AutoOpenCoffers: false /*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.CofferButton*/}))
+            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Between.AutoOpenCoffers: false *//*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.CofferButton*//*}))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
@@ -258,7 +258,7 @@ public sealed class MainWindow : Window, IDisposable
             }
             ImGui.SameLine(0, 5);
 
-            using (ImRaii.Disabled(!(AutoDuty.Configuration.Loop.Between.TripleTriadRegister || AutoDuty.Configuration.Loop.Between.TripleTriadSell)/* && (!AutoDuty.Configuration.Overlay.OverrideOverlayButtons || !AutoDuty.Configuration.Overlay.TTButton)*/))
+            using (ImRaii.Disabled(!(AutoDuty.Configuration.Loop.Between.TripleTriadRegister || AutoDuty.Configuration.Loop.Between.TripleTriadSell)*//* && (!AutoDuty.Configuration.Overlay.OverrideOverlayButtons || !AutoDuty.Configuration.Overlay.TTButton)*//*))
             {
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
                 {
@@ -285,6 +285,7 @@ public sealed class MainWindow : Window, IDisposable
                     ArmoireHelper.Invoke();
             }
         }
+*/
     }
 
     internal static void ToolTip(string text)

@@ -19,6 +19,7 @@ namespace AutoDuty.IPC
     using Helpers;
     using Data;
     using ECommons.IPC.Subscribers.AutoRetainer;
+    using ECommons.IPC.Subscribers.LifestreamIPC;
     using ECommons.IPC.Subscribers.RotationSolverReborn;
     using ECommons.IPC.Subscribers.Skippy;
     using WrathCombo.API;
@@ -48,13 +49,13 @@ namespace AutoDuty.IPC
         internal static bool GetMultiModeState() =>
             AutoRetainer.GetMultiModeStatus();
 
-        public static bool RetainersAvailable()
+        public static bool RetainersAvailable(long remainingTime)
         {
-            if (AutoDuty.Configuration.Loop.Between.EnableAutoRetainer && IsEnabled)
+            if (IsEnabled)
             {
                 long? remaining = AutoRetainer.GetClosestRetainerVentureSecondsRemaining(Player.CID);
                 Svc.Log.Debug($"AutoRetainer IPC - Closest Retainer Venture Remaining Time: {remaining}");
-                return remaining.HasValue && remaining < AutoDuty.Configuration.Loop.Between.AutoRetainerRemainingTime;
+                return remaining < remainingTime;
             }
 
             return false;
@@ -396,8 +397,21 @@ namespace AutoDuty.IPC
         public static void ChangeCharacter(string name, string world) =>
             Lifestream.ChangeCharacter(name, world);
 
+        public static bool IsEstateRegistered(bool fc) =>
+            (fc ? Lifestream.HasFreeCompanyHouse() : Lifestream.HasPrivateHouse()) ?? false;
+
+        public static void Teleport(PropertyType type) =>
+            Lifestream.EnqueuePropertyShortcut(PropertyType.Auto, HouseEnterMode.Enter_house);
+
         public static bool IsBusy =>
             Lifestream.IsBusy();
+    }
+
+    public static class SND_IPCSubscriber
+    {
+        internal static bool IsEnabled       => IPCSubscriber_Common.IsReady("SomethingNeedDoing");
+        public static   bool AnyMacroRunning => SomethingNeedDoing.IsAnyMacroRunning();
+
     }
 
     public static class GlamourLog_IPCSubscriber

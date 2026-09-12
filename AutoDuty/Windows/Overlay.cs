@@ -34,7 +34,7 @@ public unsafe class Overlay : Window
         
         int heightDiff = (this.lineHeight - this.lineHeightPrev);
 
-        if (AutoDuty.Configuration.Overlay.OverlayAnchorBottom && heightDiff != 0)
+        if (AutoDuty.Configuration.Overlay.AnchorBottom && heightDiff != 0)
         {
             this.Position ??= this.pos;
             this.Position -= new Vector2(0, ImGui.GetTextLineHeightWithSpacing() * 1.1f * heightDiff) * ImGuiHelpers.GlobalScale;
@@ -60,7 +60,7 @@ public unsafe class Overlay : Window
             return;
         }
 
-        if(!AutoDuty.Configuration.Overlay.ShowOverlay)
+        if(!AutoDuty.Configuration.Overlay.Show)
         {
             this.IsOpen = false;
             return;
@@ -70,7 +70,7 @@ public unsafe class Overlay : Window
 
         if (!Plugin.States.HasAnyFlag(PluginState.Looping, PluginState.Navigating))
         {
-            if (AutoDuty.Configuration.Overlay.HideOverlayWhenStopped)
+            if (AutoDuty.Configuration.Overlay.HideWhenStopped)
             {
                 this.IsOpen = false;
                 return;
@@ -89,7 +89,7 @@ public unsafe class Overlay : Window
                                     if (ImGuiEx.IconButton(Dalamud.Interface.FontAwesomeIcon.WindowClose, "CloseOverlay"))
                                     {
                                         this.IsOpen                                = false;
-                                        AutoDuty.Configuration.Overlay.ShowOverlay = false;
+                                        AutoDuty.Configuration.Overlay.Show = false;
                                         Plugin.MainWindow.IsOpen                   = true;
                                     }
                                 }
@@ -132,7 +132,7 @@ public unsafe class Overlay : Window
                                 if (ImGuiEx.IconButton(Dalamud.Interface.FontAwesomeIcon.WindowClose, "CloseOverlay"))
                                 {
                                     this.IsOpen                        = false;
-                                    AutoDuty.Configuration.Overlay.ShowOverlay = false;
+                                    AutoDuty.Configuration.Overlay.Show = false;
                                     Plugin.MainWindow.IsOpen           = true;
                                 }
                             });
@@ -186,7 +186,7 @@ public unsafe class Overlay : Window
         if(Plugin.isDev)
             lineActions.Add(() => ImGui.Text(Plugin.Stage.ToString()));
 
-        if(AutoDuty.Configuration.Overlay.OverlayAnchorBottom)
+        if(AutoDuty.Configuration.Overlay.AnchorBottom)
             for (int i = lineActions.Count - 1; i >= 0; i--)
                 lineActions[i]();
         else

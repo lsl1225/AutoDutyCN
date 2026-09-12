@@ -2,18 +2,14 @@ namespace AutoDuty.Configurations;
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Xml;
 using Windows;
-using Configurations;
 using ECommons;
 using ECommons.Configuration;
 using ECommons.DalamudServices;
-using FFXIVClientStructs;
 using Helpers;
 using Multibox;
 using Newtonsoft.Json;
@@ -300,7 +296,7 @@ public class ConfigurationMain
         this.SetProfile(CONFIGNAME_BARE);
         Svc.Framework.RunOnTick(() =>
                                 {
-                                    DebugLog($"Setting to default profile for {Player.Name} ({Player.CID}) {PlayerHelper.IsValid}");
+                                    DebugLog($"Setting to default profile for {(Player.Available ? Player.Name : "Unknown")} ({Player.CID}) {PlayerHelper.IsValid}");
 
                                     if (Player.Available && this.profileByCID.TryGetValue(Player.CID, out string? charProfile))
                                         if (this.SetProfile(charProfile))
@@ -440,6 +436,8 @@ public class ConfigurationMain
     {
         ConfigurationProfileV2 newConfig = new();
 
+        
+
         // Meta Config
         newConfig.Meta.AutoDutyModeEnum               = oldConfig.AutoDutyModeEnum;
         newConfig.Meta.LoopTimes                      = oldConfig.LoopTimes;
@@ -456,14 +454,14 @@ public class ConfigurationMain
         newConfig.Log.LogEventLevel = oldConfig.LogEventLevel;
 
         // Overlay Config
-        newConfig.Overlay.ShowOverlay            = oldConfig.ShowOverlay;
-        newConfig.Overlay.HideOverlayWhenStopped = oldConfig.HideOverlayWhenStopped;
-        newConfig.Overlay.LockOverlay            = oldConfig.LockOverlay;
-        newConfig.Overlay.OverlayNoBG            = oldConfig.OverlayNoBG;
-        newConfig.Overlay.OverlayAnchorBottom    = oldConfig.OverlayAnchorBottom;
+        newConfig.Overlay.Show            = oldConfig.ShowOverlay;
+        newConfig.Overlay.HideWhenStopped = oldConfig.HideOverlayWhenStopped;
+        newConfig.Overlay.Lock            = oldConfig.LockOverlay;
+        newConfig.Overlay.NoBG            = oldConfig.OverlayNoBG;
+        newConfig.Overlay.AnchorBottom    = oldConfig.OverlayAnchorBottom;
         newConfig.Overlay.ShowDutyLoopText       = oldConfig.ShowDutyLoopText;
         newConfig.Overlay.ShowActionText         = oldConfig.ShowActionText;
-        newConfig.Overlay.UseSliderInputs        = oldConfig.UseSliderInputs;
+        newConfig.Meta.UseSliderInputs        = oldConfig.UseSliderInputs;
 
         /*
         newConfig.Overlay.OverrideOverlayButtons = oldConfig.OverrideOverlayButtons;
@@ -476,7 +474,7 @@ public class ConfigurationMain
         newConfig.Overlay.CofferButton           = oldConfig.CofferButton;
         newConfig.Overlay.TTButton               = oldConfig.TTButton;
         */
-
+        
         // Duty Config
         newConfig.DutyConfig.AutoExitDuty                  = oldConfig.AutoExitDuty;
         newConfig.DutyConfig.OnlyExitWhenDutyDone          = oldConfig.OnlyExitWhenDutyDone;
@@ -504,8 +502,8 @@ public class ConfigurationMain
         newConfig.DutyConfig.BossMod.MaxDistanceToTargetRoleRanged = oldConfig.MaxDistanceToTargetRoleRanged;
 
         // Positional
-        newConfig.DutyConfig.PositionalEnum    = oldConfig.PositionalEnum;
-        newConfig.DutyConfig.PositionalAvarice = oldConfig.positionalAvarice;
+        newConfig.DutyConfig.BossMod.PositionalEnum    = oldConfig.PositionalEnum;
+        newConfig.DutyConfig.BossMod.PositionalAvarice = oldConfig.positionalAvarice;
 
         // Navigation and Loot
         newConfig.DutyConfig.AutoManageVnavAlignCamera  = oldConfig.AutoManageVnavAlignCamera;
@@ -542,61 +540,145 @@ public class ConfigurationMain
 
         // Loop Config - Pre Loop
         newConfig.Loop.Pre.Enabled                                          = oldConfig.EnablePreLoopActions;
-        newConfig.Loop.Pre.ExecuteCommands                           = oldConfig.ExecuteCommandsPreLoop;
-        newConfig.Loop.Pre.CustomCommands                            = oldConfig.CustomCommandsPreLoop;
-        newConfig.Loop.Pre.RetireMode                                       = oldConfig.RetireMode;
-        newConfig.Loop.Pre.RetireLocationEnum                               = oldConfig.RetireLocationEnum;
-        newConfig.Loop.Pre.PersonalHomeEntrancePath                         = oldConfig.PersonalHomeEntrancePath;
-        newConfig.Loop.Pre.FCEstateEntrancePath                             = oldConfig.FCEstateEntrancePath;
-        newConfig.Loop.Pre.AutoEquipRecommendedGear                         = oldConfig.AutoEquipRecommendedGear;
-        newConfig.Loop.Pre.AutoEquipRecommendedGearSource                   = oldConfig.AutoEquipRecommendedGearSource;
-        newConfig.Loop.Pre.AutoEquipRecommendedGearGearsetterOldToInventory = oldConfig.AutoEquipRecommendedGearGearsetterOldToInventory;
-        newConfig.Loop.Pre.AutoRepair                                       = oldConfig.AutoRepair;
-        newConfig.Loop.Pre.AutoRepairPct                                    = oldConfig.AutoRepairPct;
-        newConfig.Loop.Pre.AutoRepairSelf                                   = oldConfig.AutoRepairSelf;
-        newConfig.Loop.Pre.PreferredRepairNPC                               = oldConfig.PreferredRepairNPC;
-        newConfig.Loop.Pre.AutoConsume                                      = oldConfig.AutoConsume;
-        newConfig.Loop.Pre.AutoConsumeIgnoreStatus                          = oldConfig.AutoConsumeIgnoreStatus;
-        newConfig.Loop.Pre.AutoConsumeTime                                  = oldConfig.AutoConsumeTime;
-        newConfig.Loop.Pre.AutoConsumeItemsList                             = oldConfig.AutoConsumeItemsList;
+
+        newConfig.Loop.Pre.Actions =
+        [
+            new ExecuteCommandsLoopActionConfig
+            {
+                Enabled        = oldConfig.ExecuteCommandsPreLoop,
+                CustomCommands = oldConfig.CustomCommandsPreLoop
+            },
+            new PlaylistPreLoopActionConfig(),
+            new ConsumeItemsLoopActionConfig
+            {
+                Enabled                 = oldConfig.AutoConsume,
+                AutoConsumeIgnoreStatus = oldConfig.AutoConsumeIgnoreStatus,
+                AutoConsumeTime         = oldConfig.AutoConsumeTime,
+                AutoConsumeItemsList    = oldConfig.AutoConsumeItemsList
+            },
+            new AutoEquipLoopActionConfig
+            {
+                Enabled                  = oldConfig.AutoEquipRecommendedGear,
+                RecommendedGearSource    = oldConfig.AutoEquipRecommendedGearSource,
+                GearsetterOldToInventory = oldConfig.AutoEquipRecommendedGearGearsetterOldToInventory
+            },
+            new RepairLoopActionConfig
+            {
+                Enabled            = oldConfig.AutoRepair,
+                AutoRepairPct      = oldConfig.AutoRepairPct,
+                AutoRepairSelf     = oldConfig.AutoRepairSelf,
+                PreferredRepairNPC = oldConfig.PreferredRepairNPC
+            },
+            new RetireLoopActionConfig
+            {
+                Enabled            = oldConfig.RetireMode,
+                RetireLocationEnum = oldConfig.RetireLocationEnum
+            }
+        ];
 
         // Loop Config - Between Loop
-        newConfig.Loop.Between.Enabled                          = oldConfig.EnableBetweenLoopActions;
-        newConfig.Loop.Between.ExecuteLastLoop = oldConfig.ExecuteBetweenLoopActionLastLoop;
-        newConfig.Loop.Between.WaitTimeBeforeAfterLoopActions   = oldConfig.WaitTimeBeforeAfterLoopActions;
-        newConfig.Loop.Between.ExecuteCommands       = oldConfig.ExecuteCommandsBetweenLoop;
-        newConfig.Loop.Between.CustomCommands        = oldConfig.CustomCommandsBetweenLoop;
-        newConfig.Loop.Between.AutoExtract                      = oldConfig.AutoExtract;
-        newConfig.Loop.Between.AutoOpenCoffers                  = oldConfig.AutoOpenCoffers;
-        newConfig.Loop.Between.AutoOpenCoffersGearset           = oldConfig.AutoOpenCoffersGearset;
-        newConfig.Loop.Between.AutoOpenCoffersBlacklistUse      = oldConfig.AutoOpenCoffersBlacklistUse;
-        newConfig.Loop.Between.AutoOpenCoffersBlacklist         = oldConfig.AutoOpenCoffersBlacklist;
-        newConfig.Loop.Between.AutoExtractAll                   = oldConfig.AutoExtractAll;
-        newConfig.Loop.Between.AutoDesynth                      = oldConfig.AutoDesynth;
-        newConfig.Loop.Between.AutoDesynthSkillUp               = oldConfig.AutoDesynthSkillUp;
-        newConfig.Loop.Between.AutoDesynthSkillUpLimit          = oldConfig.AutoDesynthSkillUpLimit;
-        newConfig.Loop.Between.AutoDesynthNQOnly                = oldConfig.AutoDesynthNQOnly;
-        newConfig.Loop.Between.AutoDesynthNoGearset             = oldConfig.AutoDesynthNoGearset;
-        newConfig.Loop.Between.AutoDesynthCategories            = oldConfig.AutoDesynthCategories;
-        newConfig.Loop.Between.AutoGCTurnin                     = oldConfig.AutoGCTurnin;
-        newConfig.Loop.Between.AutoGCTurninSlotsLeft            = oldConfig.AutoGCTurninSlotsLeft;
-        newConfig.Loop.Between.AutoGCTurninSlotsLeftBool        = oldConfig.AutoGCTurninSlotsLeftBool;
-        newConfig.Loop.Between.AutoGCTurninUseTicket            = oldConfig.AutoGCTurninUseTicket;
-        newConfig.Loop.Between.ArmoireEntrust                   = oldConfig.ArmoireEntrust;
-        newConfig.Loop.Between.GlamourChestEntrust              = oldConfig.GlamourChestEntrust;
+        newConfig.Loop.Between.Enabled                        = oldConfig.EnableBetweenLoopActions;
+        newConfig.Loop.Between.ExecuteLastLoop                = oldConfig.ExecuteBetweenLoopActionLastLoop;
 
-        newConfig.Loop.Between.TripleTriadRegister         = oldConfig.TripleTriadRegister;
-        newConfig.Loop.Between.TripleTriadSell             = oldConfig.TripleTriadSell;
-        newConfig.Loop.Between.TripleTriadSellMinItemCount = oldConfig.TripleTriadSellMinItemCount;
-        newConfig.Loop.Between.TripleTriadSellMinSlotCount = oldConfig.TripleTriadSellMinSlotCount;
-
-        newConfig.Loop.Between.DiscardItems = oldConfig.DiscardItems;
-
-        newConfig.Loop.Between.EnableAutoRetainer          = oldConfig.EnableAutoRetainer;
-        newConfig.Loop.Between.PreferredSummoningBellEnum  = oldConfig.PreferredSummoningBellEnum;
-        newConfig.Loop.Between.AutoRetainerRemainingTime   = oldConfig.AutoRetainer_RemainingTime;
-        newConfig.Loop.Between.EnableAutoRetainerMultiMode = oldConfig.EnableAutoRetainerMultiMode;
-        newConfig.Loop.Between.AutoRetainerMultiModeType   = oldConfig.AutoRetainerMultiModeType;
+        newConfig.Loop.Between.Actions =
+        [
+            new WaitLoopActionConfig
+            {
+                WaitTime = oldConfig.WaitTimeBeforeAfterLoopActions
+            },
+            new ExecuteCommandsLoopActionConfig
+            {
+                Enabled        = oldConfig.ExecuteCommandsBetweenLoop,
+                CustomCommands = oldConfig.CustomCommandsBetweenLoop
+            },
+            new CofferOpenLoopActionConfig
+            {
+                Enabled = oldConfig.AutoOpenCoffers,
+                Gearset = oldConfig.AutoOpenCoffersGearset,
+                UseBlacklist = oldConfig.AutoOpenCoffersBlacklistUse,
+                Blacklist = oldConfig.AutoOpenCoffersBlacklist
+            },
+            new AutoRetainerLoopActionConfig
+            {
+                Enabled                    = oldConfig is { EnableAutoRetainer: true, EnableAutoRetainerMultiMode: false },
+                PreferredSummoningBellEnum = oldConfig.PreferredSummoningBellEnum,
+                AutoRetainerRemainingTime  = oldConfig.AutoRetainer_RemainingTime
+            },
+            new AutoRetainerMultiModeLoopActionConfig
+            {
+                Enabled = oldConfig.EnableAutoRetainerMultiMode,
+                MultiModeType = oldConfig.AutoRetainerMultiModeType
+            },
+            new PlaylistSwitchLoopActionConfig(),
+            new AutoEquipLoopActionConfig
+            {
+                Enabled                  = oldConfig.AutoEquipRecommendedGear,
+                RecommendedGearSource    = oldConfig.AutoEquipRecommendedGearSource,
+                GearsetterOldToInventory = oldConfig.AutoEquipRecommendedGearGearsetterOldToInventory
+            },
+            new GlamourLoopActionConfig
+            {
+                Enabled = oldConfig.GlamourChestEntrust
+            },
+            new ArmoireLoopActionConfig
+            {
+                Enabled = oldConfig.ArmoireEntrust
+            },
+            new RepairLoopActionConfig
+            {
+                Enabled            = oldConfig.AutoRepair,
+                AutoRepairPct      = oldConfig.AutoRepairPct,
+                AutoRepairSelf     = oldConfig.AutoRepairSelf,
+                PreferredRepairNPC = oldConfig.PreferredRepairNPC
+            },
+            new ExtractLoopActionConfig
+            {
+                Enabled = oldConfig.AutoExtract,
+                AutoExtractAll = oldConfig.AutoExtractAll
+            },
+            new DesynthLoopActionConfig
+            {
+                Enabled = oldConfig.AutoDesynth,
+                SkillUp = oldConfig.AutoDesynthSkillUp,
+                SkillUpLimit = oldConfig.AutoDesynthSkillUpLimit,
+                NQOnly = oldConfig.AutoDesynthNQOnly,
+                NoGearset = oldConfig.AutoDesynthNoGearset,
+                Categories = oldConfig.AutoDesynthCategories
+            },
+            new GCTurnInLoopActionConfig
+            {
+                Enabled = oldConfig.AutoGCTurnin,
+                SlotsLeftBool = oldConfig.AutoGCTurninSlotsLeftBool,
+                SlotsLeft = oldConfig.AutoGCTurninSlotsLeft,
+                UseTicket = oldConfig.AutoGCTurninUseTicket
+            },
+            new TripleTriadUseLoopActionConfig
+            {
+                Enabled = oldConfig.TripleTriadRegister
+            },
+            new TripleTriadSellLoopActionConfig
+            {
+                Enabled = oldConfig.TripleTriadSell,
+                TripleTriadSellMinItemCount = oldConfig.TripleTriadSellMinItemCount,
+                TripleTriadSellMinSlotCount = oldConfig.TripleTriadSellMinSlotCount
+            },
+            new DiscardItemsLoopActionConfig
+            {
+                Enabled = oldConfig.DiscardItems
+            },
+            new RetireLoopActionConfig
+            {
+                Enabled            = oldConfig.RetireMode,
+                RetireLocationEnum = oldConfig.RetireLocationEnum
+            },
+            new ConsumeItemsLoopActionConfig
+            {
+                Enabled                 = oldConfig.AutoConsume,
+                AutoConsumeIgnoreStatus = oldConfig.AutoConsumeIgnoreStatus,
+                AutoConsumeTime         = oldConfig.AutoConsumeTime,
+                AutoConsumeItemsList    = oldConfig.AutoConsumeItemsList
+            },
+        ];
 
         // Loop Config - Termination
         newConfig.Loop.Termination.Enabled                       = oldConfig.EnableTerminationActions;
@@ -615,19 +697,30 @@ public class ConfigurationMain
         newConfig.Loop.Termination.TerminationInventoryFreeSlots = oldConfig.TerminationInventoryFreeSlots;
         newConfig.Loop.Termination.TerminationiLvl               = oldConfig.TerminationiLvl;
         newConfig.Loop.Termination.TerminationiLvlInt            = oldConfig.TerminationiLvlInt;
-        newConfig.Loop.Termination.ExecuteCommands    = oldConfig.ExecuteCommandsTermination;
-        newConfig.Loop.Termination.CustomCommands     = oldConfig.CustomCommandsTermination;
-        newConfig.Loop.Termination.PlayEndSound                  = oldConfig.PlayEndSound;
-        newConfig.Loop.Termination.CustomSound                   = oldConfig.CustomSound;
-        newConfig.Loop.Termination.CustomSoundVolume             = oldConfig.CustomSoundVolume;
-        newConfig.Loop.Termination.SoundEnum                     = oldConfig.SoundEnum;
-        newConfig.Loop.Termination.SoundPath                     = oldConfig.SoundPath;
+
+        newConfig.Loop.Termination.Actions =
+        [
+            new ExecuteCommandsLoopActionConfig
+            {
+                Enabled        = oldConfig.ExecuteCommandsTermination,
+                CustomCommands = oldConfig.CustomCommandsTermination
+            },
+            new PlaySoundLoopActionConfig
+            {
+                Enabled              = oldConfig.PlayEndSound,
+                CustomSound          = oldConfig.CustomSound,
+                CustomSoundVolume    = oldConfig.CustomSoundVolume,
+                SoundEnum            = oldConfig.SoundEnum,
+                SoundPath            = oldConfig.SoundPath
+            }
+        ];
+
         newConfig.Loop.Termination.TerminationMethodEnum         = oldConfig.TerminationMethodEnum;
         newConfig.Loop.Termination.TerminationKeepActive         = oldConfig.TerminationKeepActive;
 
         // Other Config
         newConfig.SelectedTrustMembers = oldConfig.SelectedTrustMembers;
-
+        
         return newConfig;
     }
 
@@ -639,8 +732,9 @@ public class ConfigurationMain
                                                                                TypeNameHandling               = TypeNameHandling.Auto,
                                                                                TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
                                                                                Culture                        = CultureInfo.InvariantCulture,
-                                                                               SerializationBinder            = new AutoDutySerializationBinder()
-                                                                           };
+                                                                               SerializationBinder            = new AutoDutySerializationBinder(),
+                                                                               ObjectCreationHandling         = ObjectCreationHandling.Replace
+    };
 
     public class AutoDutySerializationBinder : DefaultSerializationBinder
     {

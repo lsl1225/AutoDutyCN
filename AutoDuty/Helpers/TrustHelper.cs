@@ -163,7 +163,7 @@ namespace AutoDuty.Helpers
             if (dawnSheet == null || jobSheet == null)
                 return;
 
-            void AddMember(TrustMemberName name, byte index, byte[] memberId, TrustRole role, ClassJobType classJob, uint levelInit = 71, uint levelCap = 100, uint unlockQuest = 0)
+            void AddMember(TrustMemberName name, byte index, byte[] memberId, TrustRole role, Job classJob, uint levelInit = 71, uint levelCap = 100, uint unlockQuest = 0)
             {
                 TrustMember member = new()
                                      {
@@ -185,16 +185,16 @@ namespace AutoDuty.Helpers
                     MembersByMemberId.Add(id, member);
             }
 
-            AddMember(TrustMemberName.Alphinaud, 0, [0,6],      TrustRole.Healer,     ClassJobType.Sage);
-            AddMember(TrustMemberName.Alisaie,   1, [1],        TrustRole.DPS,        ClassJobType.RedMage);
-            AddMember(TrustMemberName.Thancred,  2, [2],        TrustRole.Tank,       ClassJobType.Gunbreaker);
-            AddMember(TrustMemberName.Urianger,  3, [3],        TrustRole.Healer,     ClassJobType.Astrologian);
-            AddMember(TrustMemberName.Yshtola,   4, [4],        TrustRole.DPS,        ClassJobType.Black_Mage);
-            AddMember(TrustMemberName.Ryne,      5, [5],        TrustRole.DPS,        ClassJobType.Rogue,       71, 80);
-            AddMember(TrustMemberName.Estinien,  5, [7],        TrustRole.DPS,        ClassJobType.Dragoon,     81);
-            AddMember(TrustMemberName.Graha,     6, [8, 9, 10], TrustRole.AllRounder, ClassJobType.Black_Mage,  81, unlockQuest: 69318);
-            AddMember(TrustMemberName.Zero,      7, [103],      TrustRole.DPS,        ClassJobType.Reaper,      90, 90);
-            AddMember(TrustMemberName.Krile,     7, [11],       TrustRole.DPS,        ClassJobType.Pictomancer, 91);
+            AddMember(TrustMemberName.Alphinaud, 0, [0,6],      TrustRole.Healer,     Job.SGE);
+            AddMember(TrustMemberName.Alisaie,   1, [1],        TrustRole.DPS,        Job.RDM);
+            AddMember(TrustMemberName.Thancred,  2, [2],        TrustRole.Tank,       Job.GNB);
+            AddMember(TrustMemberName.Urianger,  3, [3],        TrustRole.Healer,     Job.AST);
+            AddMember(TrustMemberName.Yshtola,   4, [4],        TrustRole.DPS,        Job.BLM);
+            AddMember(TrustMemberName.Ryne,      5, [5],        TrustRole.DPS,        Job.ROG,       71, 80);
+            AddMember(TrustMemberName.Estinien,  5, [7],        TrustRole.DPS,        Job.DRG,     81);
+            AddMember(TrustMemberName.Graha,     6, [8, 9, 10], TrustRole.AllRounder, Job.BLM,  81, unlockQuest: 69318);
+            AddMember(TrustMemberName.Zero,      7, [103],      TrustRole.DPS,        Job.RPR,      90, 90);
+            AddMember(TrustMemberName.Krile,     7, [11],       TrustRole.DPS,        Job.PCT, 91);
         }
 
         public static void ResetTrustIfInvalid()

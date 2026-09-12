@@ -16,7 +16,7 @@
       },
       "Pictomancy": {
         "type": "Direct",
-        "requested": "[1.0.*, )",
+        "requested": "[1.0.10, )",
         "resolved": "1.0.10",
         "contentHash": "xHRbKtdyT15T58oZH4QSHdsnjlRMc3Vi4DbrnnIWeeZfDX3yyBu0CiVYUR37ALIGcOd1sl0bpX/9GpLl+PEMTg==",
         "dependencies": {
@@ -126,7 +126,7 @@
       "nightmareui": {
         "type": "Project",
         "dependencies": {
-          "ECommons": "[3.2.1.17, )"
+          "ECommons": "[3.2.1.18, )"
         }
       }
     }

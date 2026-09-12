@@ -1,6 +1,5 @@
 using AutoDuty.Helpers;
 using AutoDuty.IPC;
-using AutoDuty.Configurations;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
@@ -9,38 +8,27 @@ using Dalamud.Interface.Utility.Raii;
 using ECommons;
 using ECommons.DalamudServices;
 using ECommons.ImGuiMethods;
-using ECommons.MathHelpers;
-using FFXIVClientStructs.FFXIV.Client.UI;
-using System.Globalization;
-using static AutoDuty.Helpers.RepairNPCHelper;
 
 namespace AutoDuty.Windows;
 
 using Dalamud.Game.ClientState.Objects.Types;
 using Data;
-using ECommons.Configuration;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
-using ECommons.IPC.Subscribers.AutoRetainer;
 using ECommons.IPC.Subscribers.RotationSolverReborn;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
-using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using FFXIVClientStructs.Interop;
 using FFXIVClientStructs.STD;
 using Lumina.Excel.Sheets;
 using Multibox;
-using Newtonsoft.Json;
 using NightmareUI.Censoring;
 using Properties;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using System.Text;
 using Configurations;
 using FFXIVClientStructs.FFXIV.Client.Game.InstanceContent;
 using Achievement = Lumina.Excel.Sheets.Achievement;
@@ -50,42 +38,12 @@ public static class ConfigTab
 {
     internal static string followName = "";
 
-    private static ConfigurationProfileV2     Configuration => AutoDuty.Configuration;
-    private static string                     preLoopCommand     = string.Empty;
-    private static string                     betweenLoopCommand = string.Empty;
-    private static string                     terminationCommand = string.Empty;
-    private static Dictionary<uint, Item>     Items { get; set; } = Svc.Data.GetExcelSheet<Item>()?.Where(x => !x.Name.ToString().IsNullOrEmpty()).ToDictionary(x => x.RowId, x => x) ?? [];
+    private static ConfigurationProfileV2     Configuration => AutoDuty.Configuration; 
+    public static Dictionary<uint, Item>     Items         { get; set; } = Svc.Data.GetExcelSheet<Item>()?.Where(x => !x.Name.ToString().IsNullOrEmpty()).ToDictionary(x => x.RowId, x => x) ?? [];
     private static string                     stopItemQtyItemNameInput = "";
     private static KeyValuePair<uint, string> stopItemQtySelectedItem  = new(0, "");
 
-    private static string                     autoOpenCoffersNameInput    = "";
-    private static KeyValuePair<uint, string> autoOpenCoffersSelectedItem = new(0, "");
-
-    public class ConsumableItem
-    {
-        public uint ItemId;
-        public string Name = string.Empty;
-        public bool CanBeHq;
-        public ushort StatusId;
-    }
-
-    private static List<ConsumableItem> ConsumableItems { get; } = [..Svc.Data.GetExcelSheet<Item>()
-                                                                         .Where(x => !x.Name.ToString().IsNullOrEmpty() && 
-                                                                                     x.ItemUICategory.ValueNullable?.RowId is 44 or 45 or 46 && x.ItemAction.ValueNullable?.Data[0] is 48 or 49)
-                                                                         .Select(x => new ConsumableItem
-                                                                                      {
-                                                                                          StatusId = x.ItemAction.Value!.Data[0],
-                                                                                          ItemId   = x.RowId,
-                                                                                          Name     = x.Name.ToString(),
-                                                                                          CanBeHq  = x.CanBeHq
-                                                                                      })];
-
-    private static string         consumableItemsItemNameInput = "";
-    private static ConsumableItem consumableItemsSelectedItem  = new();
-
     private static string profileRenameInput = "";
-
-    private static readonly Sounds[] validSounds = [..((Sounds[])Enum.GetValues(typeof(Sounds))).Where(s => s is not Sounds.None and not Sounds.Unknown)];
 
     private static bool overlayHeaderSelected      = false;
     private static bool multiboxHeaderSelected     = false;
@@ -99,17 +57,6 @@ public static class ConfigTab
     private static bool preLoopHeaderSelected      = false;
     private static bool betweenLoopHeaderSelected  = false;
     private static bool terminationHeaderSelected  = false;
-
-    public static void BuildManuals()
-    {
-        ConsumableItems.Add(new ConsumableItem { StatusId = 1086, ItemId = 14945, Name = "Squadron Enlistment Manual", CanBeHq = false });
-        ConsumableItems.Add(new ConsumableItem { StatusId = 1080, ItemId = 14948, Name = "Squadron Battle Manual", CanBeHq = false });
-        ConsumableItems.Add(new ConsumableItem { StatusId = 1081, ItemId = 14949, Name = "Squadron Survival Manual", CanBeHq = false });
-        ConsumableItems.Add(new ConsumableItem { StatusId = 1082, ItemId = 14950, Name = "Squadron Engineering Manual", CanBeHq = false });
-        ConsumableItems.Add(new ConsumableItem { StatusId = 1083, ItemId = 14951, Name = "Squadron Spiritbonding Manual", CanBeHq = false });
-        ConsumableItems.Add(new ConsumableItem { StatusId = 1084, ItemId = 14952, Name = "Squadron Rationing Manual", CanBeHq = false });
-        ConsumableItems.Add(new ConsumableItem { StatusId = 1085, ItemId = 14953, Name = "Squadron Gear Maintenance Manual", CanBeHq = false });
-    }
 
     public static void Draw()
     {
@@ -291,30 +238,30 @@ public static class ConfigTab
 
         if (overlayHeaderSelected == true)
         {
-            bool showOverlay = Configuration.Overlay.ShowOverlay;
+            bool showOverlay = Configuration.Overlay.Show;
             if (ImGui.Checkbox(Loc.Get("ConfigTab.Overlay.ShowOverlay"), ref showOverlay))
             {
-                Configuration.Overlay.ShowOverlay = showOverlay;
+                Configuration.Overlay.Show = showOverlay;
                 ConfigurationProfileV2.Save();
             }
             ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.Overlay.ShowOverlayHelp"));
-            if (Configuration.Overlay.ShowOverlay)
+            if (Configuration.Overlay.Show)
             {
                 ImGui.Indent();
                 ImGui.Columns(2, "##OverlayColumns", false);
 
                 //ImGui.SameLine(0, 53);
-                bool overlayWhenStopped = Configuration.Overlay.HideOverlayWhenStopped;
+                bool overlayWhenStopped = Configuration.Overlay.HideWhenStopped;
                 if (ImGui.Checkbox(Loc.Get("ConfigTab.Overlay.HideWhenStopped"), ref overlayWhenStopped))
                 {
-                    Configuration.Overlay.HideOverlayWhenStopped = overlayWhenStopped;
+                    Configuration.Overlay.HideWhenStopped = overlayWhenStopped;
                     ConfigurationProfileV2.Save();
                 }
                 ImGui.NextColumn();
-                bool lockOverlay = Configuration.Overlay.LockOverlay;
+                bool lockOverlay = Configuration.Overlay.Lock;
                 if (ImGui.Checkbox(Loc.Get("ConfigTab.Overlay.LockOverlay"), ref lockOverlay))
                 {
-                    Configuration.Overlay.LockOverlay = lockOverlay;
+                    Configuration.Overlay.Lock = lockOverlay;
                     ConfigurationProfileV2.Save();
                 }
                 ImGui.NextColumn();
@@ -328,10 +275,10 @@ public static class ConfigTab
                 }
 
                 ImGui.NextColumn();
-                bool overlayNoBG = Configuration.Overlay.OverlayNoBG;
+                bool overlayNoBG = Configuration.Overlay.NoBG;
                 if (ImGui.Checkbox(Loc.Get("ConfigTab.Overlay.TransparentBG"), ref overlayNoBG))
                 {
-                    Configuration.Overlay.OverlayNoBG = overlayNoBG;
+                    Configuration.Overlay.NoBG = overlayNoBG;
                     ConfigurationProfileV2.Save();
                 }
                 ImGui.NextColumn();
@@ -342,10 +289,10 @@ public static class ConfigTab
                     ConfigurationProfileV2.Save();
                 }
                 ImGui.NextColumn();
-                bool overlayAnchorBottom = Configuration.Overlay.OverlayAnchorBottom;
+                bool overlayAnchorBottom = Configuration.Overlay.AnchorBottom;
                 if (ImGui.Checkbox(Loc.Get("ConfigTab.Overlay.AnchorBottom"), ref overlayAnchorBottom))
                 {
-                    Configuration.Overlay.OverlayAnchorBottom = overlayAnchorBottom;
+                    Configuration.Overlay.AnchorBottom = overlayAnchorBottom;
                     ConfigurationProfileV2.Save();
                 }
                 ImGui.NextColumn();
@@ -360,10 +307,10 @@ public static class ConfigTab
             }
 
             ImGui.SameLine();
-            bool sliderInputs = Configuration.Overlay.UseSliderInputs;
+            bool sliderInputs = Configuration.Meta.UseSliderInputs;
             if (ImGui.Checkbox(Loc.Get("ConfigTab.Overlay.SliderInputs"), ref sliderInputs))
             {
-                Configuration.Overlay.UseSliderInputs = sliderInputs;
+                Configuration.Meta.UseSliderInputs = sliderInputs;
                 ConfigurationProfileV2.Save();
             }
 
@@ -508,7 +455,7 @@ public static class ConfigTab
                 if (ImGui.BeginCombo("##RotationPluginSelection", Configuration.DutyConfig.RotationPlugin.ToCustomString()))
                 {
                     foreach (RotationPlugin rotationPlugin in Enum.GetValues(typeof(RotationPlugin)).Cast<RotationPlugin>().Reverse())
-                        using (rotationPlugin.HasFlag(RotationPlugin.All) ? _ : ImGuiHelper.RequiresPlugin(rotationPlugin switch
+                        using (rotationPlugin.HasFlag(RotationPlugin.All) ? (IDisposable?) null : ImGuiHelper.RequiresPlugin(rotationPlugin switch
                                {
                                    RotationPlugin.BossMod => ExternalPlugin.BossMod,
                                    RotationPlugin.RotationSolverReborn => ExternalPlugin.RotationSolverReborn,
@@ -755,15 +702,15 @@ public static class ConfigTab
                     using (ImRaii.Disabled(Configuration.DutyConfig.BossMod.PositionalRoleBased))
                     {
                         ImGui.SameLine(0, 10);
-                        if (ImGui.Button(Configuration.DutyConfig.PositionalEnum.ToLocalizedString()))
+                        if (ImGui.Button(Configuration.DutyConfig.BossMod.PositionalEnum.ToLocalizedString()))
                             ImGui.OpenPopup("PositionalPopup");
             
                         if (ImGui.BeginPopup("PositionalPopup"))
                         {
                             foreach (Positional positional in Enum.GetValues(typeof(Positional)))
-                                if (ImGui.Selectable(positional.ToLocalizedString(), Configuration.DutyConfig.PositionalEnum == positional))
+                                if (ImGui.Selectable(positional.ToLocalizedString(), Configuration.DutyConfig.BossMod.PositionalEnum == positional))
                                 {
-                                    Configuration.DutyConfig.PositionalEnum = positional;
+                                    Configuration.DutyConfig.BossMod.PositionalEnum = positional;
                                     ConfigurationProfileV2.Save();
                                 }
 
@@ -808,7 +755,7 @@ public static class ConfigTab
                 if (ImGui.BeginCombo("##ConfigLootMethod", Configuration.DutyConfig.LootMethodEnum.ToCustomString()))
                 {
                     foreach (LootMethod lootMethod in Enum.GetValues(typeof(LootMethod)))
-                        using (lootMethod == LootMethod.Pandora ? ImGuiHelper.RequiresPlugin(ExternalPlugin.Pandora, $"{lootMethod}_Looting", inline: true) : _)
+                        using (lootMethod == LootMethod.Pandora ? ImGuiHelper.RequiresPlugin(ExternalPlugin.Pandora, $"{lootMethod}_Looting", inline: true) : (IDisposable?)null)
                         {
                             if (ImGui.Selectable(lootMethod.ToCustomString(), Configuration.DutyConfig.LootMethodEnum == lootMethod))
                             {
@@ -1021,347 +968,7 @@ public static class ConfigTab
             }
 
             using (ImRaii.Disabled(!Configuration.Loop.Pre.Enabled))
-            {
-                ImGui.Separator();
-                bool         preExecuteCommands = Configuration.Loop.Pre.ExecuteCommands;
-                List<string> preCustomCommands  = Configuration.Loop.Pre.CustomCommands;
-                MakeCommands("ConfigTab.PreLoop.ExecuteCommands", ref preExecuteCommands, ref preCustomCommands, ref preLoopCommand, "CommandsPreLoop");
-                Configuration.Loop.Pre.ExecuteCommands = preExecuteCommands;
-                Configuration.Loop.Pre.CustomCommands  = preCustomCommands;
-
-                ImGui.Separator();
-
-                ImGui.TextColored(ImGuiHelper.VersionColor,
-                                  string.Format(Loc.Get("ConfigTab.PreLoop.BetweenLoopNote"), Configuration.Loop.Between.Enabled ? Loc.Get("ConfigTab.PreLoop.Enable").ToLower() : "disabled"));
-
-                bool retireMode = Configuration.Loop.Pre.RetireMode;
-                if (ImGui.Checkbox(Loc.Get("ConfigTab.PreLoop.RetireTo"), ref retireMode))
-                {
-                    Configuration.Loop.Pre.RetireMode = retireMode;
-                    ConfigurationProfileV2.Save();
-                }
-
-                using (ImRaii.Disabled(!Configuration.Loop.Pre.RetireMode))
-                {
-                    ImGui.SameLine(0, 5);
-                    ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-                    if (ImGui.BeginCombo("##RetireLocation", Configuration.Loop.Pre.RetireLocationEnum.ToLocalizedString()))
-                    {
-                        foreach (RetireLocation retireLocation in Enum.GetValues(typeof(RetireLocation)))
-                            if (ImGui.Selectable(retireLocation.ToLocalizedString(), Configuration.Loop.Pre.RetireLocationEnum == retireLocation))
-                            {
-                                Configuration.Loop.Pre.RetireLocationEnum = retireLocation;
-                                ConfigurationProfileV2.Save();
-                            }
-
-                        ImGui.EndCombo();
-                    }
-
-                    if (Configuration is { Loop.Pre: { RetireMode: true, RetireLocationEnum: RetireLocation.Personal_Home } })
-                    {
-                        if (ImGui.Button(Loc.Get("ConfigTab.PreLoop.AddCurrentPosition")))
-                        {
-                            Configuration.Loop.Pre.PersonalHomeEntrancePath.Add(Player.Position);
-                            ConfigurationProfileV2.Save();
-                        }
-
-                        ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.PreLoop.HomePathHelp"));
-
-                        using (ImRaii.ListBox("##PersonalHomeVector3List", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetTextLineHeightWithSpacing() * Configuration.Loop.Pre.PersonalHomeEntrancePath.Count + 5)))
-                        {
-                            bool removeItem = false;
-                            int  removeAt   = 0;
-
-                            foreach ((Vector3 Value, int Index) item in Configuration.Loop.Pre.PersonalHomeEntrancePath.Select((Value, Index) => (Value, Index)))
-                            {
-                                ImGui.Selectable($"{item.Value}");
-                                if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
-                                {
-                                    removeItem = true;
-                                    removeAt   = item.Index;
-                                }
-                            }
-
-                            if (removeItem)
-                            {
-                                Configuration.Loop.Pre.PersonalHomeEntrancePath.RemoveAt(removeAt);
-                                ConfigurationProfileV2.Save();
-                            }
-                        }
-                    }
-
-                    if (Configuration.Loop.Pre is { RetireMode: true, RetireLocationEnum: RetireLocation.FC_Estate })
-                    {
-                        if (ImGui.Button(Loc.Get("ConfigTab.PreLoop.AddCurrentPosition")))
-                        {
-                            Configuration.Loop.Pre.FCEstateEntrancePath.Add(Player.Position);
-                            ConfigurationProfileV2.Save();
-                        }
-
-                        ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.PreLoop.HomePathHelp"));
-
-                        using (ImRaii.ListBox("##FCEstateVector3List", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, (ImGui.GetTextLineHeightWithSpacing() * Configuration.Loop.Pre.FCEstateEntrancePath.Count) + 5)))
-                        {
-                            bool removeItem = false;
-                            int removeAt   = 0;
-
-                            foreach ((Vector3 Value, int Index) item in Configuration.Loop.Pre.FCEstateEntrancePath.Select((value, index) => (Value: value, Index: index)))
-                            {
-                                ImGui.Selectable($"{item.Value}");
-                                if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
-                                {
-                                    removeItem = true;
-                                    removeAt   = item.Index;
-                                }
-                            }
-
-                            if (removeItem)
-                            {
-                                Configuration.Loop.Pre.FCEstateEntrancePath.RemoveAt(removeAt);
-                                ConfigurationProfileV2.Save();
-                            }
-                        }
-                    }
-                }
-
-                bool equipRecommendedGear = Configuration.Loop.Pre.AutoEquipRecommendedGear;
-                if (ImGui.Checkbox(Loc.Get("ConfigTab.PreLoop.AutoEquipGear"), ref equipRecommendedGear))
-                {
-                    Configuration.Loop.Pre.AutoEquipRecommendedGear = equipRecommendedGear;
-                    ConfigurationProfileV2.Save();
-                }
-
-                using (ImRaii.Disabled(!Configuration.Loop.Pre.AutoEquipRecommendedGear))
-                {
-                    ImGui.SameLine(0, 5);
-                    ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X/3*2);
-                    if (ImGui.BeginCombo("##AutoEquipRecommendedSource", Configuration.Loop.Pre.AutoEquipRecommendedGearSource.ToCustomString()))
-                    {
-                        foreach (GearsetUpdateSource updateSource in Enum.GetValues(typeof(GearsetUpdateSource)))
-                            using (updateSource == GearsetUpdateSource.Vanilla ? _ : ImGuiHelper.RequiresPlugin(updateSource == GearsetUpdateSource.Gearsetter ? ExternalPlugin.Gearsetter : ExternalPlugin.Stylist, "GearSet", inline: true))
-                            {
-                                if (ImGui.Selectable(updateSource.ToCustomString(), Configuration.Loop.Pre.AutoEquipRecommendedGearSource == updateSource, flags: ImGuiSelectableFlags.AllowItemOverlap))
-                                {
-                                    Configuration.Loop.Pre.AutoEquipRecommendedGearSource = updateSource;
-                                    ConfigurationProfileV2.Save();
-                                }
-                            }
-
-                        ImGui.EndCombo();
-                    }
-                }
-
-                ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.PreLoop.GearSourceHelp"));
-
-
-                if (Configuration.Loop.Pre.AutoEquipRecommendedGear)
-                {
-                    ImGui.Indent();
-                    if(Configuration.Loop.Pre.AutoEquipRecommendedGearSource == GearsetUpdateSource.Gearsetter)
-                        using (ImRaii.Disabled(!Gearsetter_IPCSubscriber.IsEnabled))
-                        {
-                            ImGui.Indent();
-                            bool oldToInventory = Configuration.Loop.Pre.AutoEquipRecommendedGearGearsetterOldToInventory;
-                            if (ImGui.Checkbox(Loc.Get("ConfigTab.PreLoop.MoveOldToInventory"), ref oldToInventory))
-                            {
-                                Configuration.Loop.Pre.AutoEquipRecommendedGearGearsetterOldToInventory = oldToInventory;
-                                ConfigurationProfileV2.Save();
-                            }
-                            ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.PreLoop.MoveOldToInventoryHelp"));
-                            ImGui.Unindent();
-                        }
-
-                    if (!Gearsetter_IPCSubscriber.IsEnabled && !Stylist_IPCSubscriber.IsEnabled) 
-                        ImGui.Text(Loc.Get("ConfigTab.PreLoop.RequiresGearsetterOrStylist"));
-
-
-                    if (Configuration.Loop.Pre.AutoEquipRecommendedGearSource == GearsetUpdateSource.Gearsetter && !Gearsetter_IPCSubscriber.IsEnabled ||
-                        Configuration.Loop.Pre.AutoEquipRecommendedGearSource == GearsetUpdateSource.Stylist    && !Stylist_IPCSubscriber.IsEnabled)
-                    {
-
-                        Configuration.Loop.Pre.AutoEquipRecommendedGearSource = GearsetUpdateSource.Vanilla;
-                        ConfigurationProfileV2.Save();
-                    }
-
-
-                    ImGui.Unindent();
-                }
-
-                bool autoRepair = Configuration.Loop.Pre.AutoRepair;
-                if (ImGui.Checkbox(Loc.Get("ConfigTab.PreLoop.AutoRepair"), ref autoRepair))
-                {
-                    Configuration.Loop.Pre.AutoRepair = autoRepair;
-                    ConfigurationProfileV2.Save();
-                }
-
-                if (Configuration.Loop.Pre.AutoRepair)
-                {
-                    ImGui.SameLine();
-
-                    if (ImGui.RadioButton(Loc.Get("ConfigTab.PreLoop.Self"), Configuration.Loop.Pre.AutoRepairSelf))
-                    {
-                        Configuration.Loop.Pre.AutoRepairSelf = true;
-                        ConfigurationProfileV2.Save();
-                    }
-
-                    ImGui.SameLine();
-                    ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.PreLoop.SelfHelp"));
-                    ImGui.SameLine();
-
-                    if (ImGui.RadioButton(Loc.Get("ConfigTab.PreLoop.CityNpc"), !Configuration.Loop.Pre.AutoRepairSelf))
-                    {
-                        Configuration.Loop.Pre.AutoRepairSelf = false;
-                        ConfigurationProfileV2.Save();
-                    }
-
-                    ImGui.SameLine();
-                    ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.PreLoop.CityNpcHelp"));
-                    ImGui.Indent();
-                    ImGui.Text(Loc.Get("ConfigTab.PreLoop.TriggerAt"));
-                    ImGui.SameLine();
-                    ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-                    int autoRepairPct = (int)Configuration.Loop.Pre.AutoRepairPct;
-                    if (ImGui.SliderInt("##Repair@", ref autoRepairPct, 0, 99, "%d%%"))
-                    {
-                        Configuration.Loop.Pre.AutoRepairPct = Math.Clamp((uint)autoRepairPct, 0, 99);
-                        ConfigurationProfileV2.Save();
-                    }
-
-                    ImGui.PopItemWidth();
-                    if (!Configuration.Loop.Pre.AutoRepairSelf)
-                    {
-                        ImGui.Text(Loc.Get("ConfigTab.PreLoop.PreferredRepairNPC"));
-                        ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.PreLoop.PreferredRepairNPCHelp"));
-                        ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-                        if (ImGui.BeginCombo("##PreferredRepair",
-                                             Configuration.Loop.Pre.PreferredRepairNPC != null ?
-                                                 $"{CultureInfo.InvariantCulture.TextInfo.ToTitleCase(Configuration.Loop.Pre.PreferredRepairNPC.Name.ToLowerInvariant())} ({Svc.Data.GetExcelSheet<TerritoryType>()?.GetRowOrDefault(Configuration.Loop.Pre.PreferredRepairNPC.TerritoryType)?.PlaceName.ValueNullable?.Name.ToString()})  ({MapHelper.ConvertWorldXZToMap(Configuration.Loop.Pre.PreferredRepairNPC.Position.ToVector2(), Svc.Data.GetExcelSheet<TerritoryType>().GetRow(Configuration.Loop.Pre.PreferredRepairNPC.TerritoryType).Map.Value!).X.ToString("0.0", CultureInfo.InvariantCulture)}, {MapHelper.ConvertWorldXZToMap(Configuration.Loop.Pre.PreferredRepairNPC.Position.ToVector2(), Svc.Data.GetExcelSheet<TerritoryType>().GetRow(Configuration.Loop.Pre.PreferredRepairNPC.TerritoryType).Map.Value).Y.ToString("0.0", CultureInfo.InvariantCulture)})" :
-                                                 Loc.Get("ConfigTab.PreLoop.GrandCompanyInn")))
-                        {
-                            if (ImGui.Selectable(Loc.Get("ConfigTab.PreLoop.GrandCompanyInn"), Configuration.Loop.Pre.PreferredRepairNPC == null))
-                            {
-                                Configuration.Loop.Pre.PreferredRepairNPC = null;
-                                ConfigurationProfileV2.Save();
-                            }
-
-                            foreach (RepairNpcData repairNPC in RepairNPCs)
-                            {
-                                if (repairNPC.TerritoryType <= 0)
-                                {
-                                    ImGui.Text(CultureInfo.InvariantCulture.TextInfo.ToTitleCase(repairNPC.Name.ToLowerInvariant()));
-                                    continue;
-                                }
-
-                                TerritoryType? territoryType = Svc.Data.GetExcelSheet<TerritoryType>()?.GetRow(repairNPC.TerritoryType);
-
-                                if (territoryType == null) continue;
-
-                                if (ImGui.Selectable($"{CultureInfo.InvariantCulture.TextInfo.ToTitleCase(repairNPC.Name.ToLowerInvariant())} ({territoryType.Value.PlaceName.ValueNullable?.Name.ToString()})  ({MapHelper.ConvertWorldXZToMap(repairNPC.Position.ToVector2(), territoryType.Value.Map.Value!).X.ToString("0.0", CultureInfo.InvariantCulture)}, {MapHelper.ConvertWorldXZToMap(repairNPC.Position.ToVector2(), territoryType.Value.Map.Value!).Y.ToString("0.0", CultureInfo.InvariantCulture)})", Configuration.Loop.Pre.PreferredRepairNPC == repairNPC))
-                                {
-                                    Configuration.Loop.Pre.PreferredRepairNPC = repairNPC;
-                                    ConfigurationProfileV2.Save();
-                                }
-                            }
-
-                            ImGui.EndCombo();
-                        }
-
-                        ImGui.PopItemWidth();
-                    }
-
-                    ImGui.Unindent();
-                }
-
-                bool autoConsume = Configuration.Loop.Pre.AutoConsume;
-                if (ImGui.Checkbox(Loc.Get("ConfigTab.PreLoop.AutoConsume"), ref autoConsume))
-                {
-                    Configuration.Loop.Pre.AutoConsume = autoConsume;
-                    ConfigurationProfileV2.Save();
-                }
-
-                ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.PreLoop.AutoConsumeHelp"));
-                if (Configuration.Loop.Pre.AutoConsume)
-                {
-                    ImGui.SameLine();
-                    ImGui.Columns(3, "##AutoConsumeColumns");
-                    //ImGui.SameLine(0, 5);
-                    ImGui.NextColumn();
-                    bool preAutoConsumeIgnoreStatus = Configuration.Loop.Pre.AutoConsumeIgnoreStatus;
-                    if (ImGui.Checkbox(Loc.Get("ConfigTab.PreLoop.IgnoreStatus"), ref preAutoConsumeIgnoreStatus))
-                    {
-                        Configuration.Loop.Pre.AutoConsumeIgnoreStatus = preAutoConsumeIgnoreStatus;
-                        ConfigurationProfileV2.Save();
-                    }
-
-                    ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.PreLoop.IgnoreStatusHelp"));
-                    ImGui.NextColumn();
-                    //ImGui.SameLine(0, 5);
-
-                    ImGui.PushItemWidth(80 * ImGuiHelpers.GlobalScale);
-
-                    using (ImRaii.Disabled(Configuration.Loop.Pre.AutoConsumeIgnoreStatus))
-                    {
-                        int consumeTime = Configuration.Loop.Pre.AutoConsumeTime;
-                        if (ImGui.InputInt(Loc.Get("ConfigTab.PreLoop.MinTimeRemaining"), ref consumeTime, 1))
-                        {
-                            Configuration.Loop.Pre.AutoConsumeTime = Math.Clamp(consumeTime, 0, 59);
-                            ConfigurationProfileV2.Save();
-                        }
-
-                        ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.PreLoop.MinTimeRemainingHelp"));
-                    }
-
-                    ImGui.PopItemWidth();
-                    ImGui.Columns(1);
-                    ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 115 * ImGuiHelpers.GlobalScale);
-                    if (ImGui.BeginCombo("##SelectAutoConsumeItem", consumableItemsSelectedItem.Name))
-                    {
-                        ImGui.InputTextWithHint(Loc.Get("ConfigTab.PreLoop.ItemName"), Loc.Get("ConfigTab.PreLoop.ItemNameHint"), ref consumableItemsItemNameInput, 1000);
-                        foreach (ConsumableItem? item in ConsumableItems.Where(x => x.Name.Contains(consumableItemsItemNameInput, StringComparison.InvariantCultureIgnoreCase))!)
-                            if (ImGui.Selectable($"{item.Name}"))
-                                consumableItemsSelectedItem = item;
-
-                        ImGui.EndCombo();
-                    }
-
-                    ImGui.PopItemWidth();
-
-                    ImGui.SameLine(0, 5);
-                    using (ImRaii.Disabled(consumableItemsSelectedItem == null))
-                    {
-                        if (ImGui.Button(Loc.Get("ConfigTab.PreLoop.AddItem")))
-                        {
-                            if (Configuration.Loop.Pre.AutoConsumeItemsList.Any(x => x.Key == consumableItemsSelectedItem!.StatusId))
-                                Configuration.Loop.Pre.AutoConsumeItemsList.RemoveAll(x => x.Key == consumableItemsSelectedItem!.StatusId);
-
-                            Configuration.Loop.Pre.AutoConsumeItemsList.Add(new KeyValuePair<ushort, ConsumableItem>(consumableItemsSelectedItem!.StatusId, consumableItemsSelectedItem));
-                            ConfigurationProfileV2.Save();
-                        }
-                    }
-
-                    using (ImRaii.ListBox("##ConsumableItemList", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X,
-                                                                                              (ImGui.GetTextLineHeightWithSpacing() * Configuration.Loop.Pre.AutoConsumeItemsList.Count) + 5)))
-                    {
-                        bool                                  boolRemoveItem = false;
-                        KeyValuePair<ushort, ConsumableItem> removeItem     = new();
-                        foreach (KeyValuePair<ushort, ConsumableItem> item in Configuration.Loop.Pre.AutoConsumeItemsList)
-                        {
-                            ImGui.Selectable($"{item.Value.Name}");
-                            if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
-                            {
-                                boolRemoveItem = true;
-                                removeItem     = item;
-                            }
-                        }
-
-                        if (boolRemoveItem)
-                        {
-                            Configuration.Loop.Pre.AutoConsumeItemsList.Remove(removeItem);
-                            ConfigurationProfileV2.Save();
-                        }
-                    }
-                }
-            }
+                Configuration.Loop.Pre.Actions.OnGui("PreLoopActions", LoopActionCategory.Pre);
         }
 
         //Between Loop Settings
@@ -1375,7 +982,7 @@ public static class ConfigTab
         if (betweenLoopHeader)
             betweenLoopHeaderSelected = !betweenLoopHeaderSelected;
 
-        if (betweenLoopHeaderSelected == true)
+        if (betweenLoopHeaderSelected)
         {
             ImGui.Columns(2, "##BetweenLoopHeaderColumns");
 
@@ -1400,463 +1007,9 @@ public static class ConfigTab
                 ImGui.Columns(1);
 
                 ImGui.Separator();
-                ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - ImGui.CalcItemWidth());
-                int waitTime = Configuration.Loop.Between.WaitTimeBeforeAfterLoopActions;
-                if (ImGui.InputInt(Loc.Get("ConfigTab.BetweenLoop.WaitTime"), ref waitTime, 10, 100))
-                {
-                    if (waitTime < 0)
-                        waitTime = 0;
-                    Configuration.Loop.Between.WaitTimeBeforeAfterLoopActions = waitTime;
-                    ConfigurationProfileV2.Save();
-                }
-                ImGui.PopItemWidth();
-                ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.BetweenLoop.WaitTimeHelp"));
+                Configuration.Loop.Between.Actions.OnGui("BetweenLoopActions");
                 ImGui.Separator();
 
-                bool         betweenExecuteCommands = Configuration.Loop.Between.ExecuteCommands;
-                List<string> betweenCustomCommands  = Configuration.Loop.Between.CustomCommands;
-                MakeCommands("ConfigTab.BetweenLoop.ExecuteCommands", ref betweenExecuteCommands, ref betweenCustomCommands, ref betweenLoopCommand, "CommandsBetweenLoop");
-                Configuration.Loop.Between.ExecuteCommands = betweenExecuteCommands;
-                Configuration.Loop.Between.CustomCommands = betweenCustomCommands;
-
-                bool autoExtract = Configuration.Loop.Between.AutoExtract;
-                if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.AutoExtract"), ref autoExtract))
-                {
-                    Configuration.Loop.Between.AutoExtract = autoExtract;
-                    ConfigurationProfileV2.Save();
-                }
-
-                if (Configuration.Loop.Between.AutoExtract)
-                {
-                    ImGui.SameLine(0, 10);
-                    if (ImGui.RadioButton(Loc.Get("ConfigTab.BetweenLoop.Equipped"), !Configuration.Loop.Between.AutoExtractAll))
-                    {
-                        Configuration.Loop.Between.AutoExtractAll = false;
-                        ConfigurationProfileV2.Save();
-                    }
-                    ImGui.SameLine(0, 5);
-                    if (ImGui.RadioButton(Loc.Get("ConfigTab.BetweenLoop.All"), Configuration.Loop.Between.AutoExtractAll))
-                    {
-                        Configuration.Loop.Between.AutoExtractAll = true;
-                        ConfigurationProfileV2.Save();
-                    }
-                }
-
-                bool autoOpenCoffers = Configuration.Loop.Between.AutoOpenCoffers;
-                if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.AutoOpenCoffers"), ref autoOpenCoffers))
-                {
-                    Configuration.Loop.Between.AutoOpenCoffers = autoOpenCoffers;
-                    ConfigurationProfileV2.Save();
-                }
-
-                ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.BetweenLoop.AutoOpenCoffersHelp"));
-                if (Configuration.Loop.Between.AutoOpenCoffers)
-                    unsafe
-                    {
-                        ImGui.Indent();
-                        ImGui.Text(Loc.Get("ConfigTab.BetweenLoop.OpenCoffersWithGearset"));
-                        ImGui.AlignTextToFramePadding();
-                        ImGui.SameLine();
-
-                        RaptureGearsetModule* module = RaptureGearsetModule.Instance();
-                        
-                        if (Configuration.Loop.Between.AutoOpenCoffersGearset != null && !module->IsValidGearset((int) Configuration.Loop.Between.AutoOpenCoffersGearset))
-                        {
-                            Configuration.Loop.Between.AutoOpenCoffersGearset = null;
-                            ConfigurationProfileV2.Save();
-                        }
-
-
-                        if (ImGui.BeginCombo("##CofferGearsetSelection", Configuration.Loop.Between.AutoOpenCoffersGearset != null ? module->GetGearset(Configuration.Loop.Between.AutoOpenCoffersGearset.Value)->NameString : Loc.Get("ConfigTab.BetweenLoop.CurrentGearset")))
-                        {
-                            if (ImGui.Selectable(Loc.Get("ConfigTab.BetweenLoop.CurrentGearset"), Configuration.Loop.Between.AutoOpenCoffersGearset == null))
-                            {
-                                Configuration.Loop.Between.AutoOpenCoffersGearset = null;
-                                ConfigurationProfileV2.Save();
-                            }
-
-                            foreach (RaptureGearsetModule.GearsetEntry gearsetEntry in module->Entries)
-                            {
-                                if (module->IsValidGearset(gearsetEntry.Id) && ImGui.Selectable($"{gearsetEntry.Id+1}: {gearsetEntry.NameString}", Configuration.Loop.Between.AutoOpenCoffersGearset == gearsetEntry.Id))
-                                {
-                                    Configuration.Loop.Between.AutoOpenCoffersGearset = gearsetEntry.Id;
-                                    ConfigurationProfileV2.Save();
-                                }
-                            }
-
-                            ImGui.EndCombo();
-                        }
-
-                        bool openCoffersBlacklistUse = Configuration.Loop.Between.AutoOpenCoffersBlacklistUse;
-                        if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.UseBlacklist"), ref openCoffersBlacklistUse))
-                        {
-                            Configuration.Loop.Between.AutoOpenCoffersBlacklistUse = openCoffersBlacklistUse;
-                            ConfigurationProfileV2.Save();
-                        }
-
-                        ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.BetweenLoop.UseBlacklistHelp"));
-                        if (Configuration.Loop.Between.AutoOpenCoffersBlacklistUse)
-                        {
-                            if (ImGui.BeginCombo(Loc.Get("ConfigTab.BetweenLoop.SelectCoffer"), autoOpenCoffersSelectedItem.Value))
-                            {
-                                ImGui.InputTextWithHint(Loc.Get("ConfigTab.BetweenLoop.CofferName"), Loc.Get("ConfigTab.BetweenLoop.CofferNameHint"), ref autoOpenCoffersNameInput, 1000);
-                                foreach (KeyValuePair<uint, Item> item in 
-                                         Items.Where(x => CofferHelper.ValidCoffer(x.Value) && x.Value.Name.ToString().Contains(autoOpenCoffersNameInput, StringComparison.InvariantCultureIgnoreCase)))
-                                    if (ImGui.Selectable($"{item.Value.Name.ToString()}"))
-                                        autoOpenCoffersSelectedItem = new KeyValuePair<uint, string>(item.Key, item.Value.Name.ToString());
-                                ImGui.EndCombo();
-                            }
-
-                            ImGui.SameLine(0, 5);
-                            using (ImRaii.Disabled(autoOpenCoffersSelectedItem.Value.IsNullOrEmpty()))
-                            {
-                                if (ImGui.Button(Loc.Get("ConfigTab.BetweenLoop.AddCoffer")))
-                                {
-                                    if (!Configuration.Loop.Between.AutoOpenCoffersBlacklist.TryAdd(autoOpenCoffersSelectedItem.Key, autoOpenCoffersSelectedItem.Value))
-                                    {
-                                        Configuration.Loop.Between.AutoOpenCoffersBlacklist.Remove(autoOpenCoffersSelectedItem.Key);
-                                        Configuration.Loop.Between.AutoOpenCoffersBlacklist.Add(autoOpenCoffersSelectedItem.Key, autoOpenCoffersSelectedItem.Value);
-                                    }
-                                    autoOpenCoffersSelectedItem = new KeyValuePair<uint, string>(0, "");
-                                    ConfigurationProfileV2.Save();
-                                }
-                            }
-                            
-                            if (!ImGui.BeginListBox("##CofferBlackList", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, (ImGui.GetTextLineHeightWithSpacing() * Configuration.Loop.Between.AutoOpenCoffersBlacklist.Count) + 5))) 
-                                return;
-
-                            foreach (KeyValuePair<uint, string> item in Configuration.Loop.Between.AutoOpenCoffersBlacklist)
-                            {
-                                ImGui.Selectable($"{item.Value}");
-                                if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
-                                {
-                                    Configuration.Loop.Between.AutoOpenCoffersBlacklist.Remove(item);
-                                    ConfigurationProfileV2.Save();
-                                }
-                            }
-                            ImGui.EndListBox();
-                        }
-                        
-                        ImGui.Unindent();
-                    }
-
-                using (ImGuiHelper.RequiresPlugin(ExternalPlugin.AutoRetainer, "DiscardConfig", inline: true))
-                {
-                    bool discardItems = Configuration.Loop.Between.DiscardItems;
-                    if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.DiscardItems"), ref discardItems))
-                    {
-                        Configuration.Loop.Between.DiscardItems = discardItems;
-                        ConfigurationProfileV2.Save();
-                    }
-                }
-                if (!AutoRetainer_IPCSubscriber.IsEnabled)
-                    if (Configuration.Loop.Between.DiscardItems)
-                    {
-                        Configuration.Loop.Between.DiscardItems = false;
-                        ConfigurationProfileV2.Save();
-                    }
-
-
-                ImGui.Columns(2, "##DesynthColumns");
-                float columnY = ImGui.GetCursorPosY();
-
-                bool autoDesynth = Configuration.Loop.Between.AutoDesynth;
-                if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.AutoDesynth"), ref autoDesynth))
-                {
-                    Configuration.Loop.Between.AutoDesynth = autoDesynth;
-                    ConfigurationProfileV2.Save();
-                }
-
-                if (Configuration.Loop.Between.AutoDesynth)
-                {
-                    ImGui.Indent();
-                    bool desynthSkillUp = Configuration.Loop.Between.AutoDesynthSkillUp;
-                    if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.OnlySkillUps"), ref desynthSkillUp))
-                    {
-                        Configuration.Loop.Between.AutoDesynthSkillUp = desynthSkillUp;
-                        ConfigurationProfileV2.Save();
-                    }
-
-                    if (Configuration.Loop.Between.AutoDesynthSkillUp)
-                    {
-                        ImGui.Indent();
-                        ImGui.Text(Loc.Get("ConfigTab.BetweenLoop.ItemLevelLimit"));
-                        ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.BetweenLoop.ItemLevelLimitHelp"));
-                        ImGui.SameLine();
-                        ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-
-                        int autoDesynthSkillUp = Configuration.Loop.Between.AutoDesynthSkillUpLimit;
-                        if (ImGui.SliderInt("##AutoDesynthSkillUpLimit", ref autoDesynthSkillUp, 0, 50))
-                        {
-                            Configuration.Loop.Between.AutoDesynthSkillUpLimit = Math.Clamp(autoDesynthSkillUp, 0, 50);
-                            ConfigurationProfileV2.Save();
-                        }
-                        ImGui.PopItemWidth();
-                        ImGui.Unindent();
-                    }
-
-                    bool desynthNQOnly = Configuration.Loop.Between.AutoDesynthNQOnly;
-                    if (ImGui.Checkbox($"{Loc.Get("ConfigTab.BetweenLoop.Desynth.NQOnly")}##Desynth{nameof(Configuration.Loop.Between.AutoDesynthNQOnly)}", ref desynthNQOnly))
-                    {
-                        Configuration.Loop.Between.AutoDesynthNQOnly = desynthNQOnly;
-                        ConfigurationProfileV2.Save();
-                    }
-
-                    bool desynthNoGearset = Configuration.Loop.Between.AutoDesynthNoGearset;
-                    if (ImGui.Checkbox($"{Loc.Get("ConfigTab.BetweenLoop.ProtectGearsets")}##Desynth{nameof(Configuration.Loop.Between.AutoDesynthNoGearset)}", ref desynthNoGearset))
-                    {
-                        Configuration.Loop.Between.AutoDesynthNoGearset = desynthNoGearset;
-                        ConfigurationProfileV2.Save();
-                    }
-
-                    if (ImGui.CollapsingHeader(Loc.Get("ConfigTab.BetweenLoop.DesynthCategories")))
-                    {
-                        ImGui.Indent();
-                        AgentSalvage.SalvageItemCategory[] values = Enum.GetValues<AgentSalvage.SalvageItemCategory>();
-                        for (int index = 0; index < values.Length; index++)
-                        {
-                            bool   x            = Bitmask.IsBitSet(Configuration.Loop.Between.AutoDesynthCategories, index);
-                            string categoryName = values[index].ToLocalizedString();
-                            if (ImGui.Checkbox(categoryName + $"##DesynthCategory{index}", ref x))
-                            {
-                                ulong autoDesynthCategories = Configuration.Loop.Between.AutoDesynthCategories;
-                                if (x)
-                                    Bitmask.SetBit(ref autoDesynthCategories, index);
-                                else
-                                    Bitmask.ResetBit(ref autoDesynthCategories, index);
-                                Configuration.Loop.Between.AutoDesynthCategories = autoDesynthCategories;
-                                ConfigurationProfileV2.Save();
-                            }
-                        }
-                        ImGui.Unindent();
-                    }
-
-                    ImGui.Unindent();
-                }
-
-                ImGui.NextColumn();
-                ImGui.SetCursorPosY(columnY);
-                //ImGui.SameLine(0, 5);
-                using (ImGuiHelper.RequiresPlugin(ExternalPlugin.AutoRetainer, "GCTurnin"))
-                {
-                    bool autoGCTurnin = Configuration.Loop.Between.AutoGCTurnin;
-                    if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.AutoGCTurnin"), ref autoGCTurnin))
-                    {
-                        Configuration.Loop.Between.AutoGCTurnin = autoGCTurnin;
-                        ConfigurationProfileV2.Save();
-                    }
-                    if (Configuration.Loop.Between.AutoGCTurnin)
-                    {
-                        ImGui.Indent();
-                        bool gcTurninSlotsLeftBool = Configuration.Loop.Between.AutoGCTurninSlotsLeftBool;
-                        if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.InventorySlotsLeft"), ref gcTurninSlotsLeftBool))
-                        {
-                            Configuration.Loop.Between.AutoGCTurninSlotsLeftBool = gcTurninSlotsLeftBool;
-                            ConfigurationProfileV2.Save();
-                        }
-
-                        ImGui.SameLine(0);
-                        using (ImRaii.Disabled(!Configuration.Loop.Between.AutoGCTurninSlotsLeftBool))
-                        {
-                            int gcTurninSlotsLeft = Configuration.Loop.Between.AutoGCTurninSlotsLeft;
-                            ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-
-                            if (MakeSliderOrInput(ref gcTurninSlotsLeft, "##Slots", 0, 140))
-                            {
-                                Configuration.Loop.Between.AutoGCTurninSlotsLeft = Math.Clamp(gcTurninSlotsLeft, 0, 140);
-                                ConfigurationProfileV2.Save();
-                            }
-
-                            ImGui.PopItemWidth();
-                        }
-
-                        bool gcTurninUseTicket = Configuration.Loop.Between.AutoGCTurninUseTicket;
-                        if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.UseGCAetheryteTicket"), ref gcTurninUseTicket))
-                        {
-                            Configuration.Loop.Between.AutoGCTurninUseTicket = gcTurninUseTicket;
-                            ConfigurationProfileV2.Save();
-                        }
-                        ImGui.Unindent();
-                    }
-                }
-                ImGui.Columns(1);
-
-                if (!AutoRetainer_IPCSubscriber.IsEnabled)
-                    if (Configuration.Loop.Between.AutoGCTurnin)
-                    {
-                        Configuration.Loop.Between.AutoGCTurnin = false;
-                        ConfigurationProfileV2.Save();
-                    }
-
-                ImGui.Columns(2, "TripleTriadColumns");
-                bool tripleTriadRegister = Configuration.Loop.Between.TripleTriadRegister;
-                if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.RegisterTripleTriadCards"), ref tripleTriadRegister))
-                {
-                    Configuration.Loop.Between.TripleTriadRegister = tripleTriadRegister;
-                    ConfigurationProfileV2.Save();
-                }
-
-                ImGui.NextColumn();
-                bool tripleTriadSell = Configuration.Loop.Between.TripleTriadSell;
-                if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.SellTripleTriadCards"), ref tripleTriadSell))
-                {
-                    Configuration.Loop.Between.TripleTriadSell = tripleTriadSell;
-                    ConfigurationProfileV2.Save();
-                }
-
-                if (Configuration.Loop.Between.TripleTriadSell)
-                {
-                    ImGui.PushItemWidth(150 * ImGuiHelpers.GlobalScale);
-
-
-                    ImGui.Text(Loc.Get("ConfigTab.BetweenLoop.SlotsOccupied"));
-                    ImGui.SameLine();
-                    float curX = ImGui.GetCursorPosX();
-
-                    int   minSlotCount = Configuration.Loop.Between.TripleTriadSellMinSlotCount;
-                    if (MakeSliderOrInput(ref minSlotCount, "TripleTriadSellingMinSlot", 1, 5))
-                    {
-                        Configuration.Loop.Between.TripleTriadSellMinSlotCount = Math.Max(minSlotCount, 1);
-                        ConfigurationProfileV2.Save();
-                    }
-
-                    ImGui.Text(Loc.Get("ConfigTab.BetweenLoop.CardCount"));
-                    ImGui.SameLine();
-                    ImGui.SetCursorPosX(curX);
-
-                    int tripleTriadSellMinItemCount = Configuration.Loop.Between.TripleTriadSellMinItemCount;
-                    if (MakeSliderOrInput(ref tripleTriadSellMinItemCount, "TripleTriadSellingMinItem", 1, 99, inputStepFast: 10))
-                    {
-                        Configuration.Loop.Between.TripleTriadSellMinItemCount = Math.Max(tripleTriadSellMinItemCount, 1);
-                        ConfigurationProfileV2.Save();
-                    }
-                    ImGui.PopItemWidth();
-                }
-
-                ImGui.Columns(1);
-
-                using (ImGuiHelper.RequiresPlugin(ExternalPlugin.GlamourLog, "EntrustGlamourLog"))
-                {
-                    ImGui.Columns(2);
-
-                    bool glamourChestEntrust = Configuration.Loop.Between.GlamourChestEntrust;
-                    if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.GlamourEntrust") + "##GlamourEntrust", ref glamourChestEntrust))
-                    {
-                        Configuration.Loop.Between.GlamourChestEntrust = glamourChestEntrust;
-                        ConfigurationProfileV2.Save();
-                    }
-
-                    ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.BetweenLoop.GlamourEntrustHelp"));
-
-                    ImGui.NextColumn();
-                    float x = ImGui.GetCursorPosX() - 100f.Scale();
-
-                    bool armoireEntrust = Configuration.Loop.Between.ArmoireEntrust;
-                    if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.ArmoireEntrust") + "##ArmoireEntrust", ref armoireEntrust))
-                    {
-                        Configuration.Loop.Between.ArmoireEntrust = armoireEntrust;
-                        ConfigurationProfileV2.Save();
-                    }
-                    ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.BetweenLoop.ArmoireEntrustHelp"));
-                    ImGui.Columns(1);
-
-                    ImGui.SetCursorPosX(x);
-                }
-
-                using (ImGuiHelper.RequiresPlugin(ExternalPlugin.AutoRetainer, "AR", inline: true))
-                {
-                    bool enableAutoRetainer = Configuration.Loop.Between.EnableAutoRetainer;
-                    if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.EnableAutoRetainer"), ref enableAutoRetainer))
-                    {
-                        Configuration.Loop.Between.EnableAutoRetainer = enableAutoRetainer;
-                        ConfigurationProfileV2.Save();
-                    }
-                }
-
-                if (Configuration.Loop.Between.EnableAutoRetainer)
-                {
-                    ImGui.Indent();
-                    using (ImGuiHelper.RequiresPlugin(ExternalPlugin.Lifestream, "ARM", inline: true))
-                    {
-                        bool multiMode = Configuration.Loop.Between.EnableAutoRetainerMultiMode;
-                        if (ImGui.Checkbox(Loc.Get("ConfigTab.BetweenLoop.EnableAutoRetainerMultiMode"), ref multiMode))
-                        {
-                            Configuration.Loop.Between.EnableAutoRetainerMultiMode = multiMode;
-                            ConfigurationProfileV2.Save();
-                        }
-                    }
-
-                    ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.BetweenLoop.EnableAutoRetainerMultiModeHelp"));
-
-                    ImGui.Separator();
-
-                    if (Configuration.Loop.Between.EnableAutoRetainerMultiMode)
-                    {
-                        ImGui.Indent();
-
-                        if (ImGui.BeginCombo("##MultiModeType", Configuration.Loop.Between.AutoRetainerMultiModeType.ToLocalizedString()))
-                        {
-                            foreach (MultiModeType multiModeType in Enum.GetValues<MultiModeType>())
-                                if (ImGui.Selectable(multiModeType.ToLocalizedString()))
-                                {
-                                    Configuration.Loop.Between.AutoRetainerMultiModeType = multiModeType;
-                                    ConfigurationProfileV2.Save();
-                                }
-                            ImGui.EndCombo();
-                        }
-
-                        ImGui.Unindent();
-                    }
-
-                    if (Configuration.Loop.Between.EnableAutoRetainerMultiMode)
-                        ImGui.BeginDisabled();
-
-                    ImGui.Text(Loc.Get("ConfigTab.BetweenLoop.PreferredSummoningBell"));
-                    ImGuiComponents.HelpMarker(Loc.Get("ConfigTab.BetweenLoop.PreferredSummoningBellHelp"));
-                    if (ImGui.BeginCombo("##PreferredBell", Configuration.Loop.Between.PreferredSummoningBellEnum.ToLocalizedString()))
-                    {
-                        foreach (SummoningBellLocations summoningBells in Enum.GetValues(typeof(SummoningBellLocations)))
-                            if (ImGui.Selectable(summoningBells.ToLocalizedString()))
-                            {
-                                Configuration.Loop.Between.PreferredSummoningBellEnum = summoningBells;
-                                ConfigurationProfileV2.Save();
-                            }
-
-                        ImGui.EndCombo();
-                    }
-
-                    ImGui.PushItemWidth(150 * ImGuiHelpers.GlobalScale);
-                    ImGui.AlignTextToFramePadding();
-                    ImGui.Text(Loc.Get("ConfigTab.BetweenLoop.WaitingUpTo"));
-                    ImGui.SameLine();
-
-                    long retainerRemainingTime = Configuration.Loop.Between.AutoRetainerRemainingTime;
-                    if (MakeSliderOrInputLong(ref retainerRemainingTime, "AutoRetainerTimeWaiting", 0L, 300L, 1L, 100L))
-                    {
-                        Configuration.Loop.Between.AutoRetainerRemainingTime = Math.Max(retainerRemainingTime, 0L);
-                        ConfigurationProfileV2.Save();
-                    }
-                    ImGui.SameLine();
-                    ImGui.Text(Loc.Get("ConfigTab.BetweenLoop.Seconds"));
-                    ImGui.PopItemWidth();
-                    ImGui.Unindent();
-
-                    if (Configuration.Loop.Between.EnableAutoRetainerMultiMode)
-                        ImGui.EndDisabled();
-                }
-
-                if (!AutoRetainer_IPCSubscriber.IsEnabled)
-                    if (Configuration.Loop.Between.EnableAutoRetainer)
-                    {
-                        Configuration.Loop.Between.EnableAutoRetainer = false;
-                        Configuration.Loop.Between.EnableAutoRetainerMultiMode = false;
-                        ConfigurationProfileV2.Save();
-                    }
-                if(!Lifestream_IPCSubscriber.IsEnabled)
-                {
-                    Configuration.Loop.Between.EnableAutoRetainerMultiMode = false;
-                    ConfigurationProfileV2.Save();
-                }
             }
         }
 
@@ -2087,27 +1240,11 @@ public static class ConfigTab
                     ImGui.Unindent();
                 }
 
+                ImGui.Separator();
 
-                bool         executeCommands = Configuration.Loop.Termination.ExecuteCommands;
-                List<string> customCommands  = Configuration.Loop.Termination.CustomCommands;
-                MakeCommands("ConfigTab.Termination.ExecuteCommandsOnTermination", ref executeCommands,  ref customCommands, ref terminationCommand, "CommandsTermination");
-                Configuration.Loop.Termination.ExecuteCommands = executeCommands;
-                Configuration.Loop.Termination.CustomCommands = customCommands;
+                Configuration.Loop.Termination.Actions.OnGui("TerminationActions", LoopActionCategory.Termination);
 
-                bool endSound = Configuration.Loop.Termination.PlayEndSound;
-                if (ImGui.Checkbox(Loc.Get("ConfigTab.Termination.PlaySoundOnCompletion"), ref endSound)) //Heavily Inspired by ChatAlerts
-                {
-                    Configuration.Loop.Termination.PlayEndSound = endSound;
-                    ConfigurationProfileV2.Save();
-                }
-
-                if (Configuration.Loop.Termination.PlayEndSound)
-                {
-                    if (ImGuiEx.IconButton(FontAwesomeIcon.Play, "##ConfigSoundTest", new Vector2(ImGui.GetItemRectSize().Y)))
-                        SoundHelper.StartSound(Configuration.Loop.Termination.PlayEndSound, Configuration.Loop.Termination.CustomSound, Configuration.Loop.Termination.SoundEnum);
-                    ImGui.SameLine();
-                    DrawGameSound();
-                }
+                ImGui.Separator();
 
                 ImGui.Text(Loc.Get("ConfigTab.Termination.OnCompletionOfAllLoops"));
                 ImGui.SameLine(0, 10);
@@ -2386,89 +1523,13 @@ public static class ConfigTab
         }
 
         return;
-
-        static bool MakeSliderOrInput(ref int configValue, string valString, int sliderMin, int sliderMax, int inputStep = 1, int inputStepFast = 2) =>
-            Configuration.Overlay.UseSliderInputs  && ImGui.SliderInt($"###{valString}Slider", ref configValue, sliderMin, sliderMax) ||
-            !Configuration.Overlay.UseSliderInputs && ImGui.InputInt($"###{valString}Input", ref configValue, step: inputStep, stepFast: inputStepFast);
-
-        static bool MakeSliderOrInputLong(ref long configValue, string valString, long sliderMin, long sliderMax, long inputStep = 1, long inputStepFast = 2) =>
-            Configuration.Overlay.UseSliderInputs  && ImGui.SliderLong($"###{valString}Slider", ref configValue, sliderMin, sliderMax) ||
-            !Configuration.Overlay.UseSliderInputs && ImGui.InputLong($"###{valString}Input", ref configValue, step: inputStep, stepFast: inputStepFast);
-
-        static void MakeCommands(string checkbox, ref bool execute, ref List<string> commands, ref string curCommand, string id)
-        {
-            if (ImGui.Checkbox($"{Loc.Get(checkbox)}{(execute ? ":" : string.Empty)} ", ref execute))
-                ConfigurationProfileV2.Save();
-
-            ImGuiComponents.HelpMarker(Loc.Get(checkbox + "Help", "/echo test"));
-
-            if (execute)
-            {
-                ImGui.Indent();
-                ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - 185 * ImGuiHelpers.GlobalScale);
-                if (ImGui.InputTextWithHint($"##Commands{checkbox}_{id}", "enter command starting with /", ref curCommand, 500, ImGuiInputTextFlags.EnterReturnsTrue))
-                    if (!curCommand.IsNullOrEmpty() && curCommand[0] == '/' && (ImGui.IsKeyDown(ImGuiKey.Enter) || ImGui.IsKeyDown(ImGuiKey.KeypadEnter)))
-                    {
-                        commands.Add(curCommand);
-                        curCommand = string.Empty;
-                        ConfigurationProfileV2.Save();
-                    }
-
-                ImGui.PopItemWidth();
-                    
-                ImGui.SameLine(0, 5);
-                using (ImRaii.Disabled(curCommand.IsNullOrEmpty() || curCommand[0] != '/'))
-                {
-                    if (ImGui.Button($"Add Command##CommandButton{checkbox}_{id}"))
-                    {
-                        commands.Add(curCommand);
-                        ConfigurationProfileV2.Save();
-                    }
-                }
-                if (!ImGui.BeginListBox($"##CommandList{checkbox}_{id}", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, (ImGui.GetTextLineHeightWithSpacing() * commands.Count) + 5))) 
-                    return;
-
-                bool removeItem = false;
-                int removeAt   = 0;
-
-                foreach ((string Value, int Index) item in commands.Select((Value, Index) => (Value, Index)))
-                {
-                    ImGui.Selectable($"{item.Value}##Selectable{checkbox}_{id}");
-                    if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
-                    {
-                        removeItem = true;
-                        removeAt   = item.Index;
-                    }
-                }
-                if (removeItem)
-                {
-                    commands.RemoveAt(removeAt);
-                    ConfigurationProfileV2.Save();
-                }
-                ImGui.EndListBox();
-                ImGui.Unindent();
-            }
-        }
     }
 
-    private static void DrawGameSound()
-    {
-        ImGui.SameLine(0, 10);
-        ImGui.PushItemWidth(150 * ImGuiHelpers.GlobalScale);
-        if (ImGui.BeginCombo("##ConfigEndSoundMethod", Configuration.Loop.Termination.SoundEnum.ToName()))
-        {
-            foreach (Sounds sound in validSounds)
-                if (ImGui.Selectable(sound.ToName()))
-                {
-                    unsafe
-                    {
-                        Configuration.Loop.Termination.SoundEnum = sound;
-                        UIGlobals.PlaySoundEffect((uint)sound);
-                        ConfigurationProfileV2.Save();
-                    }
-                }
+    public static bool MakeSliderOrInput(ref int configValue, string valString, int sliderMin, int sliderMax, int inputStep = 1, int inputStepFast = 2) =>
+        Configuration.Meta.UseSliderInputs  && ImGui.SliderInt($"###{valString}Slider", ref configValue, sliderMin, sliderMax) ||
+        !Configuration.Meta.UseSliderInputs && ImGui.InputInt($"###{valString}Input", ref configValue, step: inputStep, stepFast: inputStepFast);
 
-            ImGui.EndCombo();
-        }
-    }
+    public static bool MakeSliderOrInputLong(ref long configValue, string valString, long sliderMin, long sliderMax, long inputStep = 1, long inputStepFast = 2) =>
+        Configuration.Meta.UseSliderInputs  && ImGui.SliderLong($"###{valString}Slider", ref configValue, sliderMin, sliderMax) ||
+        !Configuration.Meta.UseSliderInputs && ImGui.InputLong($"###{valString}Input", ref configValue, step: inputStep, stepFast: inputStepFast);
 }

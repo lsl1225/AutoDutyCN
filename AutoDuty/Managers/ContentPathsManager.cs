@@ -20,7 +20,7 @@ namespace AutoDuty.Managers
     {
         internal static Dictionary<uint, ContentPathContainer> DictionaryPaths = [];
 
-        internal class ContentPathContainer
+        public class ContentPathContainer
         {
             public ContentPathContainer(Content content)
             {
@@ -93,7 +93,7 @@ namespace AutoDuty.Managers
                 this.Paths.Add(new DutyPath(name, this));
         }
 
-        internal class DutyPath
+        public class DutyPath
         {
             public DutyPath(string filePath, ContentPathContainer container)
             {

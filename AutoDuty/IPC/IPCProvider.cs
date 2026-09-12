@@ -11,7 +11,7 @@ namespace AutoDuty.IPC
     using ECommons.DalamudServices;
     using Newtonsoft.Json.Linq;
 
-    internal class IPCProvider
+    public class IPCProvider
     {
         internal IPCProvider() => 
             EzIPC.Init(this);

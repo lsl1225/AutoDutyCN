@@ -23,7 +23,7 @@ namespace AutoDuty.Helpers
 
             public static bool PositionalChanged(out Positional positional)
             {
-                if (avariceReady && Configuration is { DutyConfig: { AutoManageBossModAISettings: true, PositionalAvarice: true } })
+                if (avariceReady && Configuration is { DutyConfig: { AutoManageBossModAISettings: true, BossMod.PositionalAvarice: true } })
                 {
                     positional = Positional.Any;
 
@@ -35,13 +35,13 @@ namespace AutoDuty.Helpers
                             positional = Positional.Flank;
                     }
 
-                    if (Configuration.DutyConfig.PositionalEnum != positional)
+                    if (Configuration.DutyConfig.BossMod.PositionalEnum != positional)
                     {
-                        Configuration.DutyConfig.PositionalEnum = positional;
+                        Configuration.DutyConfig.BossMod.PositionalEnum = positional;
                         return true;
                     }
                 }
-                positional = Configuration.DutyConfig.PositionalEnum;
+                positional = Configuration.DutyConfig.BossMod.PositionalEnum;
                 return false;
             }
 

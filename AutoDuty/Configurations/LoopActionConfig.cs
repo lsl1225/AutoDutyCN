@@ -1085,6 +1085,8 @@ public class PlaylistPreLoopActionConfig : LoopActionConfig<PlaylistPreLoopActio
     static PlaylistPreLoopActionConfig() =>
             Name = "Playlist Pre Loop";
 
+    public override string? HelpText => Loc.Get("LoopActions.PlaylistPreLoop.Help");
+
     public override bool Locked => true;
     protected override bool HasConfig => false;
 
@@ -1106,6 +1108,8 @@ public class PlaylistSwitchLoopActionConfig : LoopActionConfig<PlaylistSwitchLoo
 {
     static PlaylistSwitchLoopActionConfig() =>
             Name = "Playlist Duty Switch";
+
+    public override string? HelpText => Loc.Get("LoopActions.PlaylistSwitchLoop.Help");
 
     public override    bool   Locked    => true;
     protected override bool   HasConfig => false;

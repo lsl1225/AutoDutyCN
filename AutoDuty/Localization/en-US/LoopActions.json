@@ -22,6 +22,12 @@
       "WaitingUpTo": "Waiting up to...",
       "Seconds": "seconds"
     },
+    "PlaylistPreLoop": {
+      "Help": "If in playlist mode, changes gear set to the first entry's specified gearset"
+    },
+    "PlaylistSwitchLoop": {
+      "Help": "If in playlist mode, changes gear set to the next entry's specified gearset, and switches the active loop to the next playlist entry, if applicable"
+    },
     "TripleTriadSell": {
       "SlotsOccupied": "Slots occupied",
       "CardCount": "Card count"

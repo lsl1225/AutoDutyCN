@@ -13,14 +13,15 @@ namespace AutoDuty.Helpers
     using Dalamud.Utility.Signatures;
     using FFXIVClientStructs.Interop;
     using FFXIVClientStructs.STD;
+    using Lumina.Excel.Sheets;
     using Multibox;
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Lumina.Excel.Sheets;
+    using Configurations;
     using static Data.Classes;
 
-    internal unsafe class QueueHelper : ActiveHelperBase<QueueHelper>
+    internal unsafe class QueueHelper : ActiveHelperBase<QueueHelper, LoopActionConfigBare>
     {
         public QueueHelper()
         {
@@ -37,7 +38,7 @@ namespace AutoDuty.Helpers
 
         internal static void Invoke(Content? content, DutyMode dutyMode)
         {
-            if (State != ActionState.Running && content != null && dutyMode != DutyMode.None && (!_dutyMode.HasAnyFlag(DutyMode.Regular, DutyMode.Trial, DutyMode.Raid) || AutoDuty.Configuration.Unsynced || AutoDuty.Configuration.OverridePartyValidation))
+            if (State != ActionState.Running && content != null && dutyMode != DutyMode.None && (!_dutyMode.HasAnyFlag(DutyMode.Regular, DutyMode.Trial, DutyMode.Raid) || AutoDuty.Configuration.Meta.Unsynced || AutoDuty.Configuration.DutyConfig.OverridePartyValidation))
             {
                 _dutyMode = dutyMode;
                 _content = content;
@@ -48,8 +49,8 @@ namespace AutoDuty.Helpers
             }
         }
 
-        protected override string Name        => nameof(QueueHelper);
-        protected override string DisplayName => $"Queueing {_dutyMode}: {_content?.Name}";
+        public override string Name        => nameof(QueueHelper);
+        public override string DisplayName => $"Queueing {_dutyMode}: {_content?.Name}";
 
         internal override void Stop()
         {
@@ -202,9 +203,9 @@ namespace AutoDuty.Helpers
         }
 
         public static bool ShouldBeUnSynced() =>
-            AutoDuty.Configuration.AutoDutyModeEnum == AutoDutyMode.Playlist ? 
+            AutoDuty.Configuration.Meta.AutoDutyModeEnum == AutoDutyMode.Playlist ? 
                 (Plugin.PlaylistCurrentEntry?.unsynced == true && Plugin.PlaylistCurrentEntry?.DutyMode.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial) == true) : 
-                AutoDuty.Configuration.Unsynced && AutoDuty.Configuration.DutyModeEnum.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial);
+                AutoDuty.Configuration.Meta.Unsynced && AutoDuty.Configuration.Meta.DutyModeEnum.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial);
 
         private void QueueRegular()
         {

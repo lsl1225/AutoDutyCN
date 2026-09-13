@@ -6,12 +6,13 @@ using Lumina.Data;
 
 namespace AutoDuty.Helpers
 {
+    using Dalamud.Utility;
+    using Lumina;
+    using Lumina.Excel;
+    using Lumina.Excel.Sheets;
     using System.Collections.Generic;
     using System.Linq;
     using static Data.Classes;
-    using Dalamud.Utility;
-    using Lumina.Excel;
-    using Lumina.Excel.Sheets;
 
     internal static class ContentHelper
     {
@@ -179,9 +180,9 @@ namespace AutoDuty.Helpers
                 level = PlayerHelper.GetCurrentLevelFromSheet();
 
             if (mode == DutyMode.None)
-                mode = Configuration.DutyModeEnum;
+                mode = Configuration.Meta.DutyModeEnum;
 
-            unsync ??= Configuration.Unsynced && mode.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial);
+            unsync ??= Configuration.Meta.Unsynced && mode.EqualsAny(DutyMode.Raid, DutyMode.Regular, DutyMode.Trial);
 
             if (unsync.Value)
                 if (content.ExVersion == 5)

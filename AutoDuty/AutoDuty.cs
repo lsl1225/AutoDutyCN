@@ -706,7 +706,7 @@ public sealed class AutoDuty : IDalamudPlugin
                                                                                                                    {
                                                                                                                        CID   = Player.CID,
                                                                                                                        Name  = Player.Name,
-                                                                                                                       World = Player.CurrentWorldName
+                                                                                                                       World = Player.HomeWorldName
                                                                                                                    });
 
                                                           if (Configuration.Overlay.Show &&

@@ -79,9 +79,9 @@ public class ConfigurationMain
     [JsonObject(MemberSerialization.OptOut)]
     public class StatData
     {
-        public          int                  dungeonsRun;
-        public readonly List<DutyDataRecord> dutyRecords = [];
-        public          TimeSpan             timeSpent   = TimeSpan.Zero;
+        public int                  dungeonsRun;
+        public List<DutyDataRecord> dutyRecords = [];
+        public TimeSpan             timeSpent   = TimeSpan.Zero;
 
         public StatData Filter(Func<DutyDataRecord, bool> filter)
         {
@@ -138,7 +138,7 @@ public class ConfigurationMain
             string v1ConfigPath = Path.Combine(EzConfig.GetPluginConfigDirectory(), "AutoDutyConfig.json");
             if (File.Exists(v1ConfigPath))
             {
-                reinit   = true;
+                reinit = true;
                 EzConfig.Set(Instance = EzConfig.LoadConfiguration<ConfigurationMain>("AutoDutyConfig.json"));
                 Instance.Migrate();
             }

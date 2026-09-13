@@ -356,9 +356,15 @@ public class ConfigurationProfileV2
 
             public bool Enabled { get; set; } = true;
 
-            public LoopActions Actions { get; set; } = [];
+            public LoopActions Actions { get; set; } = [ 
+                new ExecuteCommandsLoopActionConfig { Enabled = false }, 
+                new PlaylistPreLoopActionConfig(),
+                new ConsumeItemsLoopActionConfig { Enabled = false },
+                new AutoEquipLoopActionConfig { Enabled = false },
+                new RepairLoopActionConfig { Enabled = false },
+                new RetireLoopActionConfig { Enabled = false }
+            ];
         }
-
         
         public BetweenLoopConfig Between { get; set; }
 
@@ -371,7 +377,23 @@ public class ConfigurationProfileV2
             public bool Enabled         { get; set; } = true;
             public bool ExecuteLastLoop { get; set; } = false;
 
-            public LoopActions Actions { get; set; } = [ new PlaylistSwitchLoopActionConfig(), new AutoRetainerLoopActionConfig(), new AutoEquipLoopActionConfig() ];
+            public LoopActions Actions { get; set; } =
+            [
+                new WaitLoopActionConfig { Enabled                  = false },
+                new ExecuteCommandsLoopActionConfig { Enabled       = false },
+                new CofferOpenLoopActionConfig { Enabled            = false },
+                new AutoRetainerLoopActionConfig { Enabled          = false },
+                new AutoRetainerMultiModeLoopActionConfig { Enabled = false },
+                new PlaylistSwitchLoopActionConfig(),
+                new AutoEquipLoopActionConfig { Enabled       = false },
+                new ExtractLoopActionConfig { Enabled         = false },
+                new DesynthLoopActionConfig { Enabled         = false },
+                new GCTurnInLoopActionConfig { Enabled        = false },
+                new TripleTriadUseLoopActionConfig { Enabled  = false },
+                new TripleTriadSellLoopActionConfig { Enabled = false },
+                new DiscardItemsLoopActionConfig { Enabled    = false },
+                new ConsumeItemsLoopActionConfig { Enabled    = false }
+            ];
         }
 
         public TerminationConfig Termination { get; set; }
@@ -399,7 +421,11 @@ public class ConfigurationProfileV2
             public bool                                        TerminationiLvl               { get; set; }
             public int                                         TerminationiLvlInt            { get; set; }
 
-            public LoopActions Actions { get; set; } = [];
+            public LoopActions Actions { get; set; } =
+            [
+                new ExecuteCommandsLoopActionConfig { Enabled = false },
+                new PlaySoundLoopActionConfig { Enabled       = false }
+            ];
 
             public TerminationMode                 TerminationMethodEnum     { get; set; } = TerminationMode.Do_Nothing;
             public bool                            TerminationKeepActive     { get; set; } = true;

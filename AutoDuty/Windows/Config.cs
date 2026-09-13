@@ -970,6 +970,7 @@ public static class ConfigTab
             if(ImGui.Button(Loc.Get("ConfigTab.PreLoop.ActionsCopyFromBetweenLoop")))
             {
                 Configuration.Loop.Pre.Actions = Configuration.Loop.Between.Actions.JSONClone(ConfigurationMain.JsonSerializerSettings);
+                Configuration.Loop.Pre.Actions.Add(new PlaylistPreLoopActionConfig());
                 ConfigurationProfileV2.Save();
             }
 

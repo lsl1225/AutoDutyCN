@@ -958,12 +958,18 @@ public static class ConfigTab
         if (preLoopHeader)
             preLoopHeaderSelected = !preLoopHeaderSelected;
 
-        if (preLoopHeaderSelected == true)
+        if (preLoopHeaderSelected)
         {
             bool preLoopEnabled = Configuration.Loop.Pre.Enabled;
             if (ImGui.Checkbox($"{Loc.Get("ConfigTab.PreLoop.Enable")}###PreLoopEnable", ref preLoopEnabled))
             {
                 Configuration.Loop.Pre.Enabled = preLoopEnabled;
+                ConfigurationProfileV2.Save();
+            }
+
+            if(ImGui.Button(Loc.Get("ConfigTab.PreLoop.ActionsCopyFromBetweenLoop")))
+            {
+                Configuration.Loop.Pre.Actions = Configuration.Loop.Between.Actions.JSONClone(ConfigurationMain.JsonSerializerSettings);
                 ConfigurationProfileV2.Save();
             }
 

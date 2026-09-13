@@ -107,8 +107,7 @@
       "ExecuteCommandsHelp": "Execute commands on start of all loops\nFor example {0}",
       "BetweenLoopNote": "The following are also done between loop, if Between Loop is enabled (currently {0})",
       "RetireTo": "Retire To ",
-      "AddCurrentPosition": "Add Current Position",
-      "HomePathHelp": "For most houses where the door is a straight shot from teleport location this is not needed, in the rare situations where the door needs a path to get to it, you can create that path here, or if your door seems to be further away from the teleport location than your neighbors, simply goto your door and hit Add Current Position"
+      "ActionsCopyFromBetweenLoop": "Copy Actions from Between Loop"
     },
     "BetweenLoop": {
       "Header": "Between Loop Settings",

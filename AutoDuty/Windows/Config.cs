@@ -971,6 +971,7 @@ public static class ConfigTab
             {
                 Configuration.Loop.Pre.Actions = Configuration.Loop.Between.Actions.JSONClone(ConfigurationMain.JsonSerializerSettings);
                 Configuration.Loop.Pre.Actions.Add(new PlaylistPreLoopActionConfig());
+                Configuration.Loop.Pre.Actions.RemoveAll(lac => lac is PlaylistSwitchLoopActionConfig);
                 ConfigurationProfileV2.Save();
             }
 

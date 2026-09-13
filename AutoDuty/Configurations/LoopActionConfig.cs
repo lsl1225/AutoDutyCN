@@ -1056,20 +1056,25 @@ public class WaitLoopActionConfig : LoopActionConfig<WaitLoopActionConfig>
             this.WaitTime = waitTime;
             ConfigurationProfileV2.Save();
         }
-        ImGuiComponents.HelpMarker(Loc.Get("LoopActions.Wait.WaitTimeHelp"));
 
         ImGui.AlignTextToFramePadding();
         WaitPlugins waitPlugins = this.WaitOnPlugins;
-        if (ImGuiEx.EnumCombo("##WaitOnPlugins", ref waitPlugins))
+
+        if (ImGui.BeginCombo("##WaitOnPlugins", waitPlugins.ToString()))
         {
-            if(waitPlugins == WaitPlugins.None)
-                this.WaitOnPlugins = WaitPlugins.None;
-            else if(this.WaitOnPlugins.HasFlag(waitPlugins))
-                this.WaitOnPlugins &= ~waitPlugins;
-            else
-                this.WaitOnPlugins |= waitPlugins;
-            ConfigurationProfileV2.Save();
+            foreach (WaitPlugins plugin in Enum.GetValues<WaitPlugins>())
+                if (plugin is not WaitPlugins.None && ImGui.Selectable(plugin.ToString(), waitPlugins.HasFlag(plugin)))
+                {
+                    if (this.WaitOnPlugins.HasFlag(plugin))
+                        this.WaitOnPlugins &= ~plugin;
+                    else
+                        this.WaitOnPlugins |= plugin;
+
+                    ConfigurationProfileV2.Save();
+                }
+            ImGui.EndCombo();
         }
+
         ImGui.SameLine();
         ImGui.Text(Loc.Get("LoopActions.Wait.WaitOnPlugins"));
     }

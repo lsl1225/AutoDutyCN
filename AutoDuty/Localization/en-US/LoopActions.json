@@ -1,5 +1,6 @@
 {
   "LoopActions": {
+    "Hint": "Hold CTRL to delete an entry",
     "AutoEquip": {
       "GearSourceHelp": "Vanilla - Uses Gear from Armory Chest Only\nGearsetter - Asks gearsetter, can move old items to inventory\nStylist - Uses your stylist settings",
       "MoveOldToInventory": "Move old items to inventory",

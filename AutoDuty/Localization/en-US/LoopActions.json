@@ -82,7 +82,7 @@
       "ExecuteCommandsHelp": "Execute commands on start of all loops\nFor example {0}"
     },
     "Wait": {
-      "WaitTime": "(s) Wait time",
+      "WaitTime": "(ms) Wait time",
       "WaitOnPlugins": "Waits on the specified plugins to be done with their actions"
     }
   }

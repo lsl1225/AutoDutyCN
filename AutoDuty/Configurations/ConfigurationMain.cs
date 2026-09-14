@@ -584,7 +584,7 @@ public class ConfigurationMain
         [
             new WaitLoopActionConfig
             {
-                WaitTime = oldConfig.WaitTimeBeforeAfterLoopActions
+                WaitTime = oldConfig.WaitTimeBeforeAfterLoopActions * 1000
             },
             new ExecuteCommandsLoopActionConfig
             {

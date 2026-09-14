@@ -517,6 +517,8 @@ public class ConfigurationProfileV2
                 if (ImGui.Button($"{FontAwesomeIcon.Plus.ToIconString()}###addLoopAction{id}", new Vector2(28f.Scale(), 0)))
                     ImGui.OpenPopup($"##LoopActions{id}ContextMenu");
             }
+            ImGui.SameLine();
+            ImGui.TextColored(ImGuiHelper.VersionColor, Loc.Get("LoopActions.Hint"));
 
             if (ImGui.IsPopupOpen($"##LoopActions{id}ContextMenu"))
                 if (ImGui.BeginPopup($"##LoopActions{id}ContextMenu", ImGuiWindowFlags.AlwaysAutoResize))

@@ -1,5 +1,6 @@
 {
   "LoopActions": {
+    "Hint": "Hold CTRL to delete an entry",
     "AutoEquip": {
       "GearSourceHelp": "Vanilla - Uses Gear from Armory Chest Only\nGearsetter - Asks gearsetter, can move old items to inventory\nStylist - Uses your stylist settings",
       "MoveOldToInventory": "Move old items to inventory",
@@ -82,7 +83,7 @@
       "ExecuteCommandsHelp": "Execute commands on start of all loops\nFor example {0}"
     },
     "Wait": {
-      "WaitTime": "(s) Wait time",
+      "WaitTime": "(ms) Wait time",
       "WaitOnPlugins": "Waits on the specified plugins to be done with their actions"
     }
   }

@@ -173,6 +173,19 @@ public class ConfigurationProfileV2
         public bool AnchorBottom    { get; set; } = false;
         public bool ShowDutyLoopText       { get; set; } = true;
         public bool ShowActionText         { get; set; } = true;
+
+        public bool GoToActions { get; set; } = true;
+
+        public LoopActions LoopActions { get; set; } = [ 
+            new GCTurnInLoopActionConfig(),
+            new DesynthLoopActionConfig(),
+            new ExtractLoopActionConfig(),
+            new RepairLoopActionConfig(),
+            new AutoEquipLoopActionConfig(),
+            new CofferOpenLoopActionConfig(),
+            new TripleTriadUseLoopActionConfig(),
+            new TripleTriadSellLoopActionConfig()
+        ];
     }
 
     public DutyConfigConfig DutyConfig { get; set; }
@@ -449,7 +462,7 @@ public class ConfigurationProfileV2
             return queue;
         }
 
-        public void OnGui(string id, LoopActionCategory category = LoopActionCategory.All)
+        public void OnGui(string id, LoopActionCategory category = LoopActionCategory.All, bool startOpened = true)
         {
             if (!ImGui.BeginListBox($"##LoopActions_{id}", new Vector2(ImGui.GetContentRegionAvail().X, this.imguiListX)))
                 return;
@@ -487,7 +500,6 @@ public class ConfigurationProfileV2
                 ImGui.SameLine();
 
                 if (ImGui.GetIO().KeyCtrl)
-                {
                     using (ImRaii.PushColor(ImGuiCol.Button, ImGuiHelper.AccentRed with { W = 0.15f.Scale() }))
                     using (ImRaii.PushColor(ImGuiCol.Text, ImGuiHelper.AccentRed))
                     using (ImRaii.PushFont(UiBuilder.IconFont))
@@ -502,9 +514,8 @@ public class ConfigurationProfileV2
 
                         ImGui.SameLine();
                     }
-                }
 
-                actionConfig.OnGUI();
+                actionConfig.OnGUI(startOpened);
             }
 
             ImGui.PopItemWidth();
@@ -529,7 +540,7 @@ public class ConfigurationProfileV2
                     {
                         foreach ((Type type, string name) in tuples)
                         {
-                            if(!shownTypes.Add(type))
+                            if (!shownTypes.Add(type))
                                 continue;
 
                             if (ImGui.Selectable($"{name}##{id}_{type}_{name}") && Activator.CreateInstance(type) is LoopActionConfig actionConfig)
@@ -548,7 +559,7 @@ public class ConfigurationProfileV2
 
                         foreach (LoopActionCategory actionCategory in actionCategories)
                         {
-                            if(actionCategory == category || actionCategory == LoopActionCategory.All)
+                            if (actionCategory == category || actionCategory == LoopActionCategory.All)
                                 continue;
 
                             ImGui.Separator();

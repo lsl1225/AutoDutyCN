@@ -85,7 +85,8 @@ public abstract class LoopActionConfig
     }
 
     public abstract void Run(ref bool queue);
-    public abstract void OnGUI();
+    public abstract void OnGUI(bool   openWhenEnabled = true);
+    public abstract bool OnGUIButton();
 }
 
 [JsonObject(MemberSerialization.OptIn)]
@@ -94,10 +95,11 @@ public abstract class LoopActionConfig<C> : LoopActionConfig where C : LoopActio
     public static LoopActionCategory LoopActionCategory { get; set; } = LoopActionCategory.Global;
     public static string             Name               { get; set; } = null!;
 
-    public virtual ExternalPlugin     RequiredPlugins    => ExternalPlugin.None;
-    public virtual string             ActionText         => "Executing: " + Name;
-    public virtual bool               Locked             => false;
-    public virtual string?            HelpText           => null;
+    public abstract string         OverlayName     { get; }
+    public virtual  ExternalPlugin RequiredPlugins => ExternalPlugin.None;
+    public virtual  string         ActionText      => "Executing: " + Name;
+    public virtual  bool           Locked          => false;
+    public virtual  string?        HelpText        => null;
 
     public override void Run(ref bool queue)
     {
@@ -118,12 +120,12 @@ public abstract class LoopActionConfig<C> : LoopActionConfig where C : LoopActio
 
     private bool init;
 
-    public override void OnGUI()
+    public override void OnGUI(bool openWhenEnabled = true)
     {
         if (!this.init)
         {
             this.init       = true;
-            this.configOpen = this.Enabled && this.HasConfig;
+            this.configOpen = openWhenEnabled && this.Enabled && this.HasConfig;
         }
 
 
@@ -168,6 +170,23 @@ public abstract class LoopActionConfig<C> : LoopActionConfig where C : LoopActio
         }
     }
 
+    public override bool OnGUIButton()
+    {
+        if (!this.Enabled)
+            return false;
+
+        if (ImGui.GetWindowSize().X > 200 ? ImGuiEx.ButtonWrapped(this.OverlayName) : ImGui.Button(this.OverlayName))
+        {
+            bool queue = true;
+            this.Run(ref queue);
+        }
+
+        if(this.HelpText != null)
+            ImGuiComponents.HelpMarker(this.HelpText);
+
+        return true;
+    }
+
     public abstract void OnGuiSettings();
 }
 
@@ -176,6 +195,7 @@ public class LoopActionConfigBare : LoopActionConfig<LoopActionConfigBare>
     static LoopActionConfigBare() => 
         Name = string.Empty;
 
+    public override    string OverlayName                 { get; } = null!;
     protected override void   RunInternal(ref bool queue) => throw new NotImplementedException();
     public override    void   OnGuiSettings()             => throw new NotImplementedException();
 }
@@ -202,6 +222,8 @@ public class AutoEquipLoopActionConfig : ActiveLoopActionConfig<AutoEquipHelper,
 {
     static AutoEquipLoopActionConfig() =>
         LoopActionCategory = LoopActionCategory.Pre;
+
+    public override string OverlayName => Loc.Get("Overlay.Button.Equip");
 
     [JsonProperty] public GearsetUpdateSource RecommendedGearSource { get; set; } = GearsetUpdateSource.Vanilla;
 
@@ -261,6 +283,8 @@ public class RepairLoopActionConfig : ActiveLoopActionConfig<RepairHelper, Repai
 {
     static RepairLoopActionConfig() =>
         LoopActionCategory = LoopActionCategory.Pre;
+
+    public override string OverlayName => Loc.Get("Overlay.Button.Repair");
 
     [JsonProperty] public uint           AutoRepairPct      { get; set; } = 50;
     [JsonProperty] public bool           AutoRepairSelf     { get; set; }
@@ -346,6 +370,7 @@ public class RepairLoopActionConfig : ActiveLoopActionConfig<RepairHelper, Repai
 public class AutoRetainerLoopActionConfig : ActiveLoopActionConfig<AutoRetainerHelper, AutoRetainerLoopActionConfig>
 {
     public override ExternalPlugin RequiredPlugins => ExternalPlugin.AutoRetainer;
+    public override string OverlayName => Loc.Get("Overlay.Button.AutoRetainer");
 
     [JsonProperty] public SummoningBellLocations PreferredSummoningBellEnum { get; set; } = SummoningBellLocations.Inn;
     [JsonProperty] public long                   AutoRetainerRemainingTime  { get; set; }
@@ -386,6 +411,7 @@ public class AutoRetainerLoopActionConfig : ActiveLoopActionConfig<AutoRetainerH
 public class AutoRetainerMultiModeLoopActionConfig : ActiveLoopActionConfig<AutoRetainerMultiModeHelper, AutoRetainerMultiModeLoopActionConfig>
 {
     public override ExternalPlugin RequiredPlugins => ExternalPlugin.AutoRetainer | ExternalPlugin.Lifestream;
+    public override       string        OverlayName   => Loc.Get("Overlay.Button.AutoRetainerMulti");
 
     [JsonProperty] public MultiModeType MultiModeType { get; set; } = MultiModeType.Everything;
 
@@ -409,6 +435,7 @@ public class DiscardItemsLoopActionConfig : ActiveLoopActionConfig<DiscardHelper
 {
     protected override bool           HasConfig       => false;
     public override    ExternalPlugin RequiredPlugins => ExternalPlugin.AutoRetainer;
+    public override string OverlayName => Loc.Get("Overlay.Button.Discard");
 
     public override void OnGuiSettings() => 
         throw new NotImplementedException();
@@ -416,7 +443,8 @@ public class DiscardItemsLoopActionConfig : ActiveLoopActionConfig<DiscardHelper
 
 public class TripleTriadUseLoopActionConfig : ActiveLoopActionConfig<TripleTriadCardUseHelper, TripleTriadUseLoopActionConfig>
 {
-    protected override bool HasConfig => false;
+    protected override bool   HasConfig   => false;
+    public override    string OverlayName => Loc.Get("Overlay.Button.TripleTriadUse");
 
     public override void OnGuiSettings() => 
         throw new NotImplementedException();
@@ -424,6 +452,8 @@ public class TripleTriadUseLoopActionConfig : ActiveLoopActionConfig<TripleTriad
 
 public class TripleTriadSellLoopActionConfig : ActiveLoopActionConfig<TripleTriadCardSellHelper, TripleTriadSellLoopActionConfig>
 {
+    public override string OverlayName => Loc.Get("Overlay.Button.TripleTriadSell");
+
     [JsonProperty] public int TripleTriadSellMinItemCount { get; set; } = 1;
     [JsonProperty] public int TripleTriadSellMinSlotCount { get; set; } = 1;
 
@@ -463,6 +493,7 @@ public class ArmoireLoopActionConfig : ActiveLoopActionConfig<ArmoireHelper, Arm
 {
     public override ExternalPlugin RequiredPlugins => ExternalPlugin.GlamourLog;
     public override string?        HelpText        => Loc.Get("LoopActions.Armoire.Help");
+    public override string         OverlayName     => Loc.Get("Overlay.Button.Armoire");
 
     protected override bool HasConfig => false;
 
@@ -474,6 +505,7 @@ public class GlamourLoopActionConfig : ActiveLoopActionConfig<GlamourChestHelper
 {
     public override ExternalPlugin RequiredPlugins => ExternalPlugin.GlamourLog;
     public override string?        HelpText        => Loc.Get("LoopActions.Glamour.Help");
+    public override string         OverlayName     => Loc.Get("Overlay.Button.Glamour");
 
     protected override bool HasConfig => false;
 
@@ -483,6 +515,8 @@ public class GlamourLoopActionConfig : ActiveLoopActionConfig<GlamourChestHelper
 
 public class ExtractLoopActionConfig : ActiveLoopActionConfig<ExtractHelper, ExtractLoopActionConfig>
 {
+    public override string OverlayName => Loc.Get("Overlay.Button.Extract");
+
     [JsonProperty] public bool AutoExtractAll { get; set; }
 
     public override void OnGuiSettings()
@@ -505,6 +539,7 @@ public class ExtractLoopActionConfig : ActiveLoopActionConfig<ExtractHelper, Ext
 public class GCTurnInLoopActionConfig : ActiveLoopActionConfig<GCTurninHelper, GCTurnInLoopActionConfig>
 {
     public override ExternalPlugin RequiredPlugins => ExternalPlugin.AutoRetainer;
+    public override string         OverlayName     => Loc.Get("Overlay.Button.TurnIn");
 
     [JsonProperty] public bool SlotsLeftBool { get; set; }
     [JsonProperty] public int  SlotsLeft     { get; set; } = 5;
@@ -547,6 +582,8 @@ public class GCTurnInLoopActionConfig : ActiveLoopActionConfig<GCTurninHelper, G
 
 public class DesynthLoopActionConfig : ActiveLoopActionConfig<DesynthHelper, DesynthLoopActionConfig>
 {
+    public override string OverlayName => Loc.Get("Overlay.Button.Desynth");
+
     [JsonProperty] public bool  SkillUp      { get; set; }
     [JsonProperty] public int   SkillUpLimit { get; set; } = 50;
     [JsonProperty] public bool  NQOnly       { get; set; }
@@ -620,7 +657,8 @@ public class DesynthLoopActionConfig : ActiveLoopActionConfig<DesynthHelper, Des
 
 public class CofferOpenLoopActionConfig : ActiveLoopActionConfig<CofferHelper, CofferOpenLoopActionConfig>
 {
-    public override string? HelpText => Loc.Get("LoopActions.Coffers.Help");
+    public override string? HelpText    => Loc.Get("LoopActions.Coffers.Help");
+    public override string  OverlayName => Loc.Get("Overlay.Button.Coffers");
 
     [JsonProperty] public byte?                    Gearset      { get; set; }
     [JsonProperty] public bool                     UseBlacklist { get; set; }
@@ -731,6 +769,8 @@ public class RetireLoopActionConfig : LoopActionConfig<RetireLoopActionConfig>
         LoopActionCategory = LoopActionCategory.Pre;
     }
 
+    public override string OverlayName => Loc.Get("Overlay.Button.Retire");
+
     [JsonProperty] public RetireLocation RetireLocationEnum { get; set; } = RetireLocation.Inn;
 
     protected override void RunInternal(ref bool queue)
@@ -798,7 +838,8 @@ public class ConsumeItemsLoopActionConfig : LoopActionConfig<ConsumeItemsLoopAct
         LoopActionCategory = LoopActionCategory.Pre;
     }
 
-    public override string? HelpText => Loc.Get("LoopActions.ConsumeItems.AutoConsumeHelp");
+    public override string? HelpText    => Loc.Get("LoopActions.ConsumeItems.AutoConsumeHelp");
+    public override string  OverlayName => Loc.Get("Overlay.Button.ConsumeItems");
 
     [JsonProperty] public bool AutoConsumeIgnoreStatus { get; set; } = false;
     [JsonProperty] public int AutoConsumeTime { get; set; } = 29;
@@ -948,7 +989,8 @@ public class ExecuteCommandsLoopActionConfig : LoopActionConfig<ExecuteCommandsL
         LoopActionCategory = LoopActionCategory.Pre | LoopActionCategory.Termination;
     }
 
-    public override string?            HelpText           => Loc.Get("LoopActions.ExecuteCommands.ExecuteCommandsHelp", "/echo test");
+    public override string? HelpText    => Loc.Get("LoopActions.ExecuteCommands.ExecuteCommandsHelp", "/echo test");
+    public override string  OverlayName => Loc.Get("Overlay.Button.ExecuteCommands");
 
     [JsonProperty] public List<string> CustomCommands  { get; set; } = [];
 
@@ -966,7 +1008,6 @@ public class ExecuteCommandsLoopActionConfig : LoopActionConfig<ExecuteCommandsL
         MakeCommands("LoopActions.ExecuteCommands.ExecuteCommands", ref preCustomCommands, ref loopCommand, "Commands");
         this.CustomCommands  = preCustomCommands;
     }
-
 
     private static void MakeCommands(string checkbox, ref List<string> commands, ref string curCommand, string id)
     {
@@ -1032,6 +1073,8 @@ public class WaitLoopActionConfig : LoopActionConfig<WaitLoopActionConfig>
         SND        = 1 << 1,
     }
 
+    public override string OverlayName => Loc.Get("Overlay.Button.Wait");
+
     [JsonProperty] public int  WaitTime          { get; set; } = 1000;
     [JsonProperty] public WaitPlugins WaitOnPlugins { get; set; } = WaitPlugins.None;
 
@@ -1085,10 +1128,11 @@ public class PlaylistPreLoopActionConfig : LoopActionConfig<PlaylistPreLoopActio
     static PlaylistPreLoopActionConfig() =>
             Name = "Playlist Pre Loop";
 
-    public override string? HelpText => Loc.Get("LoopActions.PlaylistPreLoop.Help");
+    public override string? HelpText    => Loc.Get("LoopActions.PlaylistPreLoop.Help");
 
-    public override bool Locked => true;
-    protected override bool HasConfig => false;
+    public override    string OverlayName { get; } = null!;
+    public override    bool   Locked      => true;
+    protected override bool   HasConfig   => false;
 
     protected override unsafe void RunInternal(ref bool queue)
     {
@@ -1109,7 +1153,8 @@ public class PlaylistSwitchLoopActionConfig : LoopActionConfig<PlaylistSwitchLoo
     static PlaylistSwitchLoopActionConfig() =>
             Name = "Playlist Duty Switch";
 
-    public override string? HelpText => Loc.Get("LoopActions.PlaylistSwitchLoop.Help");
+    public override string? HelpText    => Loc.Get("LoopActions.PlaylistSwitchLoop.Help");
+    public override string  OverlayName { get; } = null!;
 
     public override    bool   Locked    => true;
     protected override bool   HasConfig => false;
@@ -1173,6 +1218,8 @@ public class PlaySoundLoopActionConfig : LoopActionConfig<PlaySoundLoopActionCon
         Name = "Play Sound";
         LoopActionCategory = LoopActionCategory.Termination;
     }
+
+    public override string OverlayName => Loc.Get("Overlay.Button.PlaySound");
 
     [JsonProperty] public bool   CustomSound       { get; set; }
     [JsonProperty] public float  CustomSoundVolume { get; set; } = 0.5f;

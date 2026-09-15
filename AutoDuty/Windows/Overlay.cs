@@ -13,7 +13,7 @@ using System;
 using System.Collections.Generic;
 using Configurations;
 
-public unsafe class Overlay : Window
+public class Overlay : Window
 {
     public Overlay() : base("AutoDuty Overlay", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize) => 
         this.RespectCloseHotkey = false;
@@ -22,11 +22,9 @@ public unsafe class Overlay : Window
     private static string hideTextAction = " ";
     private static string loopsText = "";
 
-
     private Vector2 pos;
     private int     lineHeightPrev = 1;
     private int     lineHeight     = 1;
-
 
     public override void PreDraw()
     {
@@ -88,9 +86,9 @@ public unsafe class Overlay : Window
                                     ImGui.SameLine(0, 5);
                                     if (ImGuiEx.IconButton(Dalamud.Interface.FontAwesomeIcon.WindowClose, "CloseOverlay"))
                                     {
-                                        this.IsOpen                                = false;
+                                        this.IsOpen                         = false;
                                         AutoDuty.Configuration.Overlay.Show = false;
-                                        Plugin.MainWindow.IsOpen                   = true;
+                                        Plugin.MainWindow.IsOpen            = true;
                                     }
                                 }
                             });
@@ -126,7 +124,6 @@ public unsafe class Overlay : Window
                                 ImGui.SameLine();
                                 if (ImGuiEx.IconButton($"\uf013##Config", "OpenAutoDuty"))
                                     Plugin.MainWindow.IsOpen = !Plugin.MainWindow.IsOpen;
-
 
                                 ImGui.SameLine();
                                 if (ImGuiEx.IconButton(Dalamud.Interface.FontAwesomeIcon.WindowClose, "CloseOverlay"))

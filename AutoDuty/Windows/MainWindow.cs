@@ -129,19 +129,12 @@ public sealed class MainWindow : Window, IDisposable
                 StopAndReset();
             ImGui.SameLine(0,5);
         }
-/*
-        using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Looping) || Plugin.States.HasFlag(PluginState.Navigating)))
+
+        using (ImRaii.Disabled(Plugin.States.HasAnyFlag(PluginState.Looping, PluginState.Navigating, PluginState.Other)))
         {
-            //using (ImRaii.Disabled(AutoDuty.Configuration.Overlay is { OverrideOverlayButtons: true, GotoButton: false }))
-            {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
-                {
-                    if (ImGui.Button(Loc.Get("Overlay.Button.Goto")))
-                    {
-                        ImGui.OpenPopup("GotoPopup");
-                    }   
-                }
-            }
+            if (AutoDuty.Configuration.Overlay.GoToActions)
+                if (ImGui.Button(Loc.Get("Overlay.Button.Goto")))
+                    ImGui.OpenPopup("GotoPopup");
 
             if (ImGui.BeginPopup("GotoPopup"))
             {
@@ -149,7 +142,7 @@ public sealed class MainWindow : Window, IDisposable
                 if (ImGui.Selectable(Loc.Get("MainWindow.Goto.Inn"))) GotoInnHelper.Invoke();
                 if (ImGui.Selectable(Loc.Get("MainWindow.Goto.GCSupply"))) GotoHelper.Invoke(PlayerHelper.GetGrandCompanyTerritoryType(PlayerHelper.GetGrandCompany()), [GCTurninHelper.GCSupplyLocation], 0.25f, 3f);
                 if (ImGui.Selectable(Loc.Get("MainWindow.Goto.FlagMarker"))) MapHelper.MoveToMapMarker();
-                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.SummoningBell"))) SummoningBellHelper.Invoke(AutoDuty.Configuration.Loop.Between.PreferredSummoningBellEnum);
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.SummoningBell"))) SummoningBellHelper.Invoke(AutoRetainerHelper.Instance.ActionConfig.PreferredSummoningBellEnum);
                 if (ImGui.Selectable(Loc.Get("MainWindow.Goto.Apartment"))) GotoHousingHelper.Invoke(Housing.Apartment);
                 if (ImGui.Selectable(Loc.Get("MainWindow.Goto.PersonalHome"))) GotoHousingHelper.Invoke(Housing.Personal_Home);
                 if (ImGui.Selectable(Loc.Get("MainWindow.Goto.FCEstate"))) GotoHousingHelper.Invoke(Housing.FC_Estate);
@@ -158,134 +151,16 @@ public sealed class MainWindow : Window, IDisposable
                 ImGui.EndPopup();
             }
 
+            bool step = true;
 
-
-            ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Between.AutoGCTurnin: false *//*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.TurninButton*//*}))
+            foreach (LoopActionConfig action in AutoDuty.Configuration.Overlay.LoopActions)
             {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
-                {
-                    if (ImGui.Button(Loc.Get("Overlay.Button.TurnIn")))
-                    {
-                        if (AutoRetainer_IPCSubscriber.IsEnabled)
-                            GCTurninHelper.Invoke();
-                        else
-                            ShowPopup(Loc.Get("Overlay.Popup.MissingPlugin"), Loc.Get("Overlay.Tooltip.TurnInMissing"));
-                    }
-                    if (AutoRetainer_IPCSubscriber.IsEnabled)
-                        ToolTip(Loc.Get("Overlay.Tooltip.TurnIn"));
-                    else
-                        ToolTip(Loc.Get("Overlay.Tooltip.TurnInMissing"));
-                }
-            }
-            ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Between.AutoDesynth: false *//*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.DesynthButton*//*}))
-            {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
-                {
-                    if (ImGui.Button(Loc.Get("Overlay.Button.Desynth")))
-                        DesynthHelper.Invoke();
-                    ToolTip(Loc.Get("Overlay.Tooltip.Desynth"));
-
-                }
-            }
-            ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Between.AutoExtract: false *//*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.ExtractButton*//*}))
-            {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
-                {
-                    if (ImGui.Button(Loc.Get("Overlay.Button.Extract")))
-                    {
-                        if (QuestManager.IsQuestComplete(66174))
-                            ExtractHelper.Invoke();
-                        else
-                            ShowPopup(Loc.Get("Overlay.Popup.MissingQuestCompletion"), Loc.Get("Overlay.Tooltip.ExtractMissing"));
-                    }
-                    if (QuestManager.IsQuestComplete(66174))
-                        ToolTip(Loc.Get("Overlay.Tooltip.Extract"));
-                    else
-                        ToolTip(Loc.Get("Overlay.Tooltip.ExtractMissing"));
-                }
-            }
-            
-            ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Pre.AutoRepair: false *//*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.RepairButton*//*}))
-            {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
-                {
-                    if (ImGui.Button(Loc.Get("Overlay.Button.Repair")))
-                    {
-                        if (InventoryHelper.CanRepair(100))
-                            RepairHelper.Invoke();
-                        //else
-                            //ShowPopup("", "");
-                    }
-                    //if ()
-                        ToolTip(Loc.Get("Overlay.Tooltip.Repair"));
-                    //else
-                        //ToolTip("");
-                    
-                }
-            }
-            ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.LoopActions.AutoEquipRecommendedGear: false *//*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.EquipButton*//*}))
-            {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
-                {
-                    if (ImGui.Button(Loc.Get("Overlay.Button.Equip")))
-                    {
-                        AutoEquipHelper.Invoke();
-                        //else
-                        //ShowPopup("", "");
-                    }
-
-                    //if ()
-                    ToolTip(Loc.Get("Overlay.Tooltip.Equip"));
-                    //else
-                    //ToolTip("");
-                }
-            }
-
-            ImGui.SameLine(0, 5);
-            using (ImRaii.Disabled(AutoDuty.Configuration is { Loop.Between.AutoOpenCoffers: false *//*, Overlay.OverrideOverlayButtons: false } || !AutoDuty.Configuration.Overlay.CofferButton*//*}))
-            {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
-                {
-                    if (ImGui.Button(Loc.Get("Overlay.Button.Coffers")))
-                        CofferHelper.Invoke();
-                    ToolTip(Loc.Get("Overlay.Tooltip.Coffers"));
-                }
-            }
-            ImGui.SameLine(0, 5);
-
-            using (ImRaii.Disabled(!(AutoDuty.Configuration.Loop.Between.TripleTriadRegister || AutoDuty.Configuration.Loop.Between.TripleTriadSell)*//* && (!AutoDuty.Configuration.Overlay.OverrideOverlayButtons || !AutoDuty.Configuration.Overlay.TTButton)*//*))
-            {
-                using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
-                {
-                    if (ImGui.Button(Loc.Get("Overlay.Button.TripleTriad")))
-                        ImGui.OpenPopup("TTPopup");
-                    
-                }
-            }
-
-            if (ImGui.BeginPopup("TTPopup"))
-            {
-                if (ImGui.Selectable(Loc.Get("MainWindow.TT.RegisterCards")))
-                    TripleTriadCardUseHelper.Invoke();
-                if (ImGui.Selectable(Loc.Get("MainWindow.TT.SellCards")))
-                    TripleTriadCardSellHelper.Invoke();
-                ImGui.EndPopup();
-            }
-
-            ImGui.SameLine(0, 5);
-
-            using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Other)))
-            {
-                if (ImGui.Button(Loc.Get("Overlay.Button.Armoire")))
-                    ArmoireHelper.Invoke();
+                if(step)
+                    ImGui.SameLine(0, 5);
+                step = action.OnGUIButton();
             }
         }
-*/
+
     }
 
     internal static void ToolTip(string text)

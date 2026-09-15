@@ -60,7 +60,6 @@ public class ConfigurationProfileV2
 
         public DutyMode dutyModeEnum = DutyMode.Support;
 
-        [JsonIgnore]
         public DutyMode DutyModeEnum
         {
             get => this.AutoDutyModeEnum switch

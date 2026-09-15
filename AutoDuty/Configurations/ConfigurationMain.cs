@@ -463,17 +463,19 @@ public class ConfigurationMain
         newConfig.Overlay.ShowActionText         = oldConfig.ShowActionText;
         newConfig.Meta.UseSliderInputs        = oldConfig.UseSliderInputs;
 
-        /*
-        newConfig.Overlay.OverrideOverlayButtons = oldConfig.OverrideOverlayButtons;
-        newConfig.Overlay.GotoButton             = oldConfig.GotoButton;
-        newConfig.Overlay.TurninButton           = oldConfig.TurninButton;
-        newConfig.Overlay.DesynthButton          = oldConfig.DesynthButton;
-        newConfig.Overlay.ExtractButton          = oldConfig.ExtractButton;
-        newConfig.Overlay.RepairButton           = oldConfig.RepairButton;
-        newConfig.Overlay.EquipButton            = oldConfig.EquipButton;
-        newConfig.Overlay.CofferButton           = oldConfig.CofferButton;
-        newConfig.Overlay.TTButton               = oldConfig.TTButton;
-        */
+        newConfig.Overlay.GoToActions = oldConfig.GotoButton;
+        newConfig.Overlay.LoopActions =
+        [
+            new GCTurnInLoopActionConfig { Enabled = oldConfig.TurninButton },
+            new DesynthLoopActionConfig { Enabled = oldConfig.DesynthButton },
+            new ExtractLoopActionConfig { Enabled = oldConfig.ExtractButton },
+            new RepairLoopActionConfig { Enabled = oldConfig.RepairButton },
+            new AutoEquipLoopActionConfig { Enabled = oldConfig.EquipButton },
+            new CofferOpenLoopActionConfig { Enabled = oldConfig.CofferButton },
+            new TripleTriadUseLoopActionConfig(),
+            new TripleTriadSellLoopActionConfig()
+        ];
+
         
         // Duty Config
         newConfig.DutyConfig.AutoExitDuty                  = oldConfig.AutoExitDuty;

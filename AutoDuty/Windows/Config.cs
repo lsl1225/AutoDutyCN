@@ -296,9 +296,23 @@ public static class ConfigTab
                     ConfigurationProfileV2.Save();
                 }
                 ImGui.NextColumn();
+
+                ImGui.Columns(1);
+                ImGui.Separator();
+
+                ImGui.Text(Loc.Get("ConfigTab.Overlay.ButtonsHeader"));
+
+                bool gotoActions = Configuration.Overlay.GoToActions;
+                if (ImGui.Checkbox(Loc.Get("Overlay.Button.Goto"), ref gotoActions))
+                {
+                    Configuration.Overlay.GoToActions = gotoActions;
+                    ConfigurationProfileV2.Save();
+                }
+
+                Configuration.Overlay.LoopActions.OnGui("OverlayActions", startOpened: false);
+
                 ImGui.Unindent();
             }
-            ImGui.Columns(1);
             bool onStartup = Configuration.Meta.ShowMainWindowOnStartup;
             if (ImGui.Checkbox(Loc.Get("ConfigTab.Overlay.ShowMainWindowOnStartup"), ref onStartup))
             {
@@ -313,7 +327,6 @@ public static class ConfigTab
                 Configuration.Meta.UseSliderInputs = sliderInputs;
                 ConfigurationProfileV2.Save();
             }
-
         }
 
         if (Plugin.isDev)

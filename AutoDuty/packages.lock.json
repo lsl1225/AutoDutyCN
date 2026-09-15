@@ -30,8 +30,8 @@
       "WrathCombo.API": {
         "type": "Direct",
         "requested": "[0.5.*, )",
-        "resolved": "0.5.7",
-        "contentHash": "A7KURat4s3efIj+KO5LTy6Vky1Y0Hsnqt4XWBL6xYsLlYSxlqhBCS3Y/LrEkohDuGletwRjfkx8IiLTiVnEmxw=="
+        "resolved": "0.5.8",
+        "contentHash": "AudBr8hlqPitv2hRs7i1Nh8ahUIZ1b9KmPjgPfiUMhjFjsRguH5XZlWdzKKM0wmOFvabgR8mLfXDrqBmzBgGSQ=="
       },
       "KamiToolKit": {
         "type": "Transitive",

@@ -27,6 +27,7 @@
       "TransparentBG": "Use Transparent BG",
       "ShowActionText": "Show AD Action Text",
       "AnchorBottom": "Anchor at Bottom",
+      "ButtonsHeader": "The following are buttons available in Overlay/Maintab",
       "OverrideButtons": "Override Overlay Buttons",
       "OverrideButtonsHelp": "Overlay buttons by default are enabled if their config is enabled\nThis will allow you to chose which buttons are enabled",
       "ShowMainWindowOnStartup": "Show Main Window on Startup",

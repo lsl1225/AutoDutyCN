@@ -466,14 +466,53 @@ public class ConfigurationMain
         newConfig.Overlay.GoToActions = oldConfig.GotoButton;
         newConfig.Overlay.LoopActions =
         [
-            new GCTurnInLoopActionConfig { Enabled = oldConfig.TurninButton },
-            new DesynthLoopActionConfig { Enabled = oldConfig.DesynthButton },
-            new ExtractLoopActionConfig { Enabled = oldConfig.ExtractButton },
-            new RepairLoopActionConfig { Enabled = oldConfig.RepairButton },
-            new AutoEquipLoopActionConfig { Enabled = oldConfig.EquipButton },
-            new CofferOpenLoopActionConfig { Enabled = oldConfig.CofferButton },
+            new GCTurnInLoopActionConfig
+            {
+                Enabled       = oldConfig.autoGCTurnin,
+                SlotsLeftBool = oldConfig.AutoGCTurninSlotsLeftBool,
+                SlotsLeft     = oldConfig.AutoGCTurninSlotsLeft,
+                UseTicket     = oldConfig.AutoGCTurninUseTicket
+            },
+            new DesynthLoopActionConfig
+            {
+                Enabled      = oldConfig.DesynthButton,
+                SkillUp      = oldConfig.AutoDesynthSkillUp,
+                SkillUpLimit = oldConfig.AutoDesynthSkillUpLimit,
+                NQOnly       = oldConfig.AutoDesynthNQOnly,
+                NoGearset    = oldConfig.AutoDesynthNoGearset,
+                Categories   = oldConfig.AutoDesynthCategories
+            },
+            new ExtractLoopActionConfig
+            {
+                Enabled        = oldConfig.ExtractButton,
+                AutoExtractAll = oldConfig.AutoExtractAll
+            },
+            new RepairLoopActionConfig
+            {
+                Enabled            = oldConfig.RepairButton,
+                AutoRepairPct      = oldConfig.AutoRepairPct,
+                AutoRepairSelf     = oldConfig.AutoRepairSelf,
+                PreferredRepairNPC = oldConfig.PreferredRepairNPC
+            },
+            new AutoEquipLoopActionConfig
+            {
+                Enabled                  = oldConfig.EquipButton,
+                RecommendedGearSource    = oldConfig.AutoEquipRecommendedGearSource,
+                GearsetterOldToInventory = oldConfig.AutoEquipRecommendedGearGearsetterOldToInventory
+            },
+            new CofferOpenLoopActionConfig
+            {
+                Enabled      = oldConfig.CofferButton,
+                Gearset      = oldConfig.AutoOpenCoffersGearset,
+                UseBlacklist = oldConfig.AutoOpenCoffersBlacklistUse,
+                Blacklist    = oldConfig.AutoOpenCoffersBlacklist
+            },
             new TripleTriadUseLoopActionConfig(),
-            new TripleTriadSellLoopActionConfig()
+            new TripleTriadSellLoopActionConfig
+            {
+                TripleTriadSellMinItemCount = oldConfig.TripleTriadSellMinItemCount,
+                TripleTriadSellMinSlotCount = oldConfig.TripleTriadSellMinSlotCount
+            },
         ];
 
         

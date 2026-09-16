@@ -67,7 +67,7 @@
             Blue_Mage   = 1 << 21,
             Casters     = Black_Mage | Summoner | Red_Mage | Pictomancer | Blue_Mage,
             DPS         = Melee      | Aiming   | Casters,
-            All         = Tanks      | Healers  | DPS 
+            All         = Tanks      | Healers  | DPS
         }
 
         public enum JobRole

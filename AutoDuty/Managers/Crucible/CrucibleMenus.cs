@@ -29,22 +29,6 @@ namespace AutoDuty.Managers
         private static readonly TimeSpan ItemGap       = TimeSpan.FromSeconds(10);
         private static readonly TimeSpan ItemMenuWait  = TimeSpan.FromMilliseconds(1500);
 
-        // XBMItem rows, best first
-        private static readonly uint[] ShopHealing = [140, 79, 78, 77, 76, 82, 81, 80];
-
-        private static readonly uint[] FightItems =
-        [
-            140,            // Beast Potion Kit: restores 40% whenever HP falls below 50%
-            79, 78, 77, 76, // G4-G1 Beast Potion
-            82, 81, 80,     // G3-G1 Crucible Ash
-            112,            // Potion of Tempered Constitution
-            102,            // Crucible Tannin: damage taken -20%
-            137,            // Tome of the Impervious: Blink
-            135             // Vampiric Essence
-        ];
-
-        private static readonly uint[] BoardItems = [79, 78, 77, 76, 82, 81, 80];
-
         private DateTime confirmFrom = DateTime.MinValue;
         private DateTime next;
 
@@ -186,10 +170,6 @@ namespace AutoDuty.Managers
             return true;
         }
 
-        private static readonly string[] Healing = ["Restores", "Recovers", "revive", "Reraise", "Auto-potion"];
-        private static readonly string[] Defence = ["Damage Taken", "Vulnerability", "Maximum HP", "Blink", "Tough Skin", "Stoneskin", "Evasion", "Absorbs"];
-        private static readonly string[] Damage  = ["Damage Dealt", "potency", "Critical", "Haste", "Recast"];
-
         private void PickTreasure(AtkUnitBase* treasure, DateTime now)
         {
             this.next = now + Retry;
@@ -198,23 +178,19 @@ namespace AutoDuty.Managers
             if (choices.Count == 0)
                 return;
 
-            CrucibleUi.Choice best = choices.OrderBy(x => TreasureRank(x.Text)).ThenBy(x => x.Param).First();
-            Svc.Log.Info($"[Crucible] Treasure: taking \"{best.Text}\" from {string.Join(" / ", choices.Select(x => $"[{TreasureRank(x.Text)}] {x.Text}"))}");
+            var offered = choices.Select(x => (Choice: x, Item: CrucibleItemData.ItemIn(x.Text))).ToList();
+            var best    = offered.OrderBy(x => CrucibleItemData.TreasureRank(x.Item)).ThenBy(x => x.Choice.Param).First();
 
-            if (Screens.Treasure.Take(treasure, best.NodeId))
+            Svc.Log.Info($"[Crucible] Treasure: taking {Describe(best)} from {string.Join(" / ", offered.Select(Describe))}");
+
+            if (Screens.Treasure.Take(treasure, best.Choice.NodeId))
             {
                 this.confirmFrom = now;
-                this.Status      = $"Taking \"{best.Text}\"";
+                this.Status      = $"Taking {(best.Item != 0 ? CrucibleItemData.NameOf(best.Item) : best.Choice.Text)}";
             }
-        }
 
-        private static int TreasureRank(string text)
-        {
-            if (Healing.Any(x => text.Contains(x, StringComparison.OrdinalIgnoreCase)))
-                return 0;
-            if (Defence.Any(x => text.Contains(x, StringComparison.OrdinalIgnoreCase)))
-                return 1;
-            return Damage.Any(x => text.Contains(x, StringComparison.OrdinalIgnoreCase)) ? 2 : 3;
+            static string Describe((CrucibleUi.Choice Choice, uint Item) x) =>
+                x.Item != 0 ? $"{CrucibleItemData.NameOf(x.Item)} ({x.Item})" : $"unknown \"{x.Choice.Text}\"";
         }
 
         private void Rest(AtkUnitBase* party, DateTime now)
@@ -329,7 +305,7 @@ namespace AutoDuty.Managers
             this.confirmFrom = now;
             this.shopNext    = now + ShopStep;
 
-            if (CrucibleItemData.KindOf(buy.Row) == CrucibleItemData.Kind.Feed)
+            if (CrucibleItemData.ShopFeed.Contains(buy.Row))
             {
                 this.fedThisVisit = true;
                 this.feedFrom     = now;
@@ -340,29 +316,22 @@ namespace AutoDuty.Managers
 
         private CrucibleUi.ShopEntry? ChooseBuy(List<CrucibleUi.ShopEntry> stock, int held, HashSet<uint> ownedGear)
         {
-            if (held < ItemCap)
-                foreach (uint row in ShopHealing)
-                {
-                    CrucibleUi.ShopEntry healing = stock.FirstOrDefault(x => x.Row == row);
-                    if (healing.Row != 0)
-                        return healing;
-                }
+            if (held < ItemCap && FirstInStock(stock, CrucibleItemData.ShopHealing) is { } healing)
+                return healing;
 
-            CrucibleUi.ShopEntry gear = stock.Where(x => CrucibleItemData.KindOf(x.Row) == CrucibleItemData.Kind.Gear && !ownedGear.Contains(x.Row))
-                                             .OrderBy(x => CrucibleItemData.Rank(x.Row))
-                                             .ThenByDescending(x => x.Price)
-                                             .FirstOrDefault();
-            if (gear.Row != 0)
+            if (FirstInStock(stock.Where(x => !ownedGear.Contains(x.Row)), CrucibleItemData.ShopGear) is { } gear)
                 return gear;
 
-            if (this.fedThisVisit)
-                return null;
+            return this.fedThisVisit ? null : FirstInStock(stock, CrucibleItemData.ShopFeed);
+        }
 
-            CrucibleUi.ShopEntry feed = stock.Where(x => CrucibleItemData.KindOf(x.Row) == CrucibleItemData.Kind.Feed)
-                                             .OrderBy(x => CrucibleItemData.Rank(x.Row))
-                                             .ThenBy(x => x.Price)
-                                             .FirstOrDefault();
-            return feed.Row != 0 ? feed : null;
+        private static CrucibleUi.ShopEntry? FirstInStock(IEnumerable<CrucibleUi.ShopEntry> stock, uint[] priority)
+        {
+            Dictionary<uint, CrucibleUi.ShopEntry> byRow = stock.GroupBy(x => x.Row).ToDictionary(g => g.Key, g => g.First());
+            foreach (uint row in priority)
+                if (byRow.TryGetValue(row, out CrucibleUi.ShopEntry entry))
+                    return entry;
+            return null;
         }
 
         private void Feed(DateTime now)
@@ -431,7 +400,7 @@ namespace AutoDuty.Managers
                 return;
 
             List<CrucibleUi.ItemSlot> items = CrucibleUi.HudItems(hud);
-            CrucibleUi.ItemSlot pick = (fighting ? FightItems : BoardItems).Select(row => items.FirstOrDefault(x => x.Row == row))
+            CrucibleUi.ItemSlot pick = (fighting ? CrucibleItemData.FightItems : CrucibleItemData.BoardItems).Select(row => items.FirstOrDefault(x => x.Row == row))
                                                                           .FirstOrDefault(x => x.Row != 0);
             if (pick.Row == 0)
                 return;

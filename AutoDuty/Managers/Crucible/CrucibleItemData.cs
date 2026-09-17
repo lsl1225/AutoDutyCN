@@ -1,249 +1,215 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using ECommons.DalamudServices;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
 
 namespace AutoDuty.Managers;
 
 internal static class CrucibleItemData
 {
-    public enum Kind : byte
+    public static readonly uint[] ShopHealing =
+    [
+        140, // Beast Potion Kit
+        79,  // G4 Beast Potion
+        78,  // G3 Beast Potion
+        77,  // G2 Beast Potion
+        76,  // G1 Beast Potion
+        82,  // G3 Crucible Ash
+        81,  // G2 Crucible Ash
+        80   // G1 Crucible Ash
+    ];
+
+    public static readonly uint[] ShopGear =
+    [
+        23, // Angel Robe
+        3,  // Ring of Curing
+        73, // Empress Hairpin
+        2,  // Ring of Sacrifice
+        27, // Hero's Crown
+        24, // Master Shield
+        15, // Earth Shield
+        49, // Wind Armor
+        21, // Genji Armor
+        47, // Wind Shield
+        25, // Mystic Veil
+        16, // Water Shield
+        35, // Astral Mantle
+        44, // Ninja Suit
+        9,  // Power Armlet
+        11, // Green Beret
+        51, // Mythril Armor
+        58, // Thief's Garb
+        72, // Demonic Armor
+        32, // Umbral Mantle
+        62, // Thunder Armor
+        48, // Wind Mask
+        28, // Mirage Vest
+        14, // Ice Shield
+        54, // Beast Mask
+        26, // Black Cowl
+        66, // Flame Shield
+        52, // Mythril Gloves
+        70, // Spirited Ring
+        34, // Umbral Wristlet
+        13, // Ring of Protection
+        69, // Merchant's Shoes
+        29, // Soulreaper's Armor
+        1,  // Belt of Constitution
+        20, // Genji Greatshield
+        12, // Mystic Boots
+        31, // Coward's Knife
+        37, // Astral Wristlet
+        53, // Mythril Greaves
+        10, // Twisted Headband
+        56, // Beast Earring
+        63, // Warded Shield
+        17, // Force Shield
+        33, // Umbral Band
+        36, // Astral Band
+        75, // Warrior's Buckler
+        6,  // Steel Armor
+        5,  // Hexed Hat
+        68, // Merchant's Garb
+        60, // Thief's Boots
+        61, // Thunder Axe
+        50, // Heavy Axe
+        71, // Demonic Helm
+        65, // Flame Knife
+        19, // Genji Gloves
+        57, // Thief's Knife
+        7,  // Crown of the Wild
+        8,  // Staff of the Wise
+        30, // Briar Armor
+        38, // Flame-wreathed Axe
+        39, // Icebitten Axe
+        40, // Thunderstruck Axe
+        41, // Earthcrushed Axe
+        42, // Deepdrowned Axe
+        43, // Windblown Axe
+        64, // Gold Hairpin
+        22, // Silver Specs
+        46, // Ninja Eyepatch
+        55, // Beastly Knife
+        74, // Haste Belt
+        45, // Ninja Gloves
+        59, // Thief's Gloves
+        67, // Merchant's Cap
+        18, // Crimson Ribbon
+        4   // Chemist's Satchel
+    ];
+
+    public static readonly uint[] ShopFeed =
+    [
+        144, // G1 Primafodder
+        145, // G2 Primafodder
+        149, // Crab Ball Simular
+        153, // Yellow Egg Simular
+        155, // Milk Simular
+        163, // Magnum Water
+        165, // Noble Blood Simular
+        174, // Lugworm Simular
+        185, // Cream Cheese Simular
+        188, // Cornbread Simular
+        191, // Belladonna Simular
+        202, // Cottage Cheese Simular
+        203, // Lassi Simular
+        148, // Honey Simular
+        154, // Tomato Simular
+        157, // Porcini Simular
+        158, // Morel Simular
+        159, // Black Truffle Simular
+        160, // White Truffle Simular
+        161, // Mushroom Simular
+        166, // Lily Simular
+        169, // Black Scorpion Simular
+        171, // Angelfish Simular
+        175, // Crucible Tonic
+        176, // Carrot Simular
+        177, // Onion Simular
+        178, // Lettuce Simular
+        179, // Lemon Simular
+        180, // Untaming Oil
+        181, // Mucus Simular
+        182, // Sap Simular
+        183, // Salt Simular
+        184, // Syrup Simular
+        187, // Toast Simular
+        194, // Herbal Tea Simular
+        195, // Honeycomb Simular
+        197, // Grape Juice Simular
+        146, // Meat Simular
+        147, // Hydrolixer
+        150, // Banana Simular
+        151, // Berry Simular
+        152, // Egg Simular
+        156, // Rolanberry Cheese Simular
+        162, // Sole Simular
+        164, // Blood Simular
+        167, // Flounder Simular
+        170, // Herring Simular
+        172, // Grape Simular
+        173, // Orange Simular
+        186, // Red Egg Simular
+        189, // Mandrake Simular
+        190, // Tarantula Simular
+        192, // Steak Simular
+        193, // Roe Simular
+        196, // Orange Juice Simular
+        198, // Skewer Simular
+        199, // Pineapple Juice Simular
+        200, // Oyster Simular
+        201, // Blue Cheese Simular
+        168  // White Scorpion Simular
+    ];
+
+    public static readonly uint[] FightItems =
+    [
+        140, // Beast Potion Kit
+        79,  // G4 Beast Potion
+        78,  // G3 Beast Potion
+        77,  // G2 Beast Potion
+        76,  // G1 Beast Potion
+        82,  // G3 Crucible Ash
+        81,  // G2 Crucible Ash
+        80,  // G1 Crucible Ash
+        112, // Potion of Tempered Constitution
+        102, // Crucible Tannin
+        137, // Tome of the Impervious
+        135  // Vampiric Essence
+    ];
+
+    public static readonly uint[] BoardItems =
+    [
+        79, // G4 Beast Potion
+        78, // G3 Beast Potion
+        77, // G2 Beast Potion
+        76, // G1 Beast Potion
+        82, // G3 Crucible Ash
+        81, // G2 Crucible Ash
+        80  // G1 Crucible Ash
+    ];
+
+    public static readonly uint[] TreasureOrder = ShopHealing.Concat(FightItems).Concat(ShopGear).Concat(ShopFeed).Distinct().ToArray();
+
+    private static ExcelSheet<XBMItem>? items;
+
+    private static ExcelSheet<XBMItem> Items => items ??= Svc.Data.GetExcelSheet<XBMItem>();
+
+    public static string NameOf(uint row) =>
+        Items.TryGetRow(row, out XBMItem item) && item.Unknown2.ExtractText() is { Length: > 0 } name ? name : $"item {row}";
+
+    public static uint ItemIn(string text) =>
+        Items.Where(x => x.RowId > 0)
+             .Select(x => (x.RowId, Name: x.Unknown2.ExtractText()))
+             .Where(x => x.Name.Length > 0 && text.Contains(x.Name, StringComparison.OrdinalIgnoreCase))
+             .OrderByDescending(x => x.Name.Length)
+             .Select(x => x.RowId)
+             .FirstOrDefault();
+
+    public static int TreasureRank(uint row)
     {
-        None = 0,
-        Gear = 1,
-        Item = 2,
-        Feed = 3,
+        int index = Array.IndexOf(TreasureOrder, row);
+        return index < 0 ? int.MaxValue : index;
     }
-
-    private static readonly string[] Healing = { "Restores", "Recovers", "revive", "Reraise", "Auto-potion" };
-
-    private static readonly string[] Defence =
-        { "Damage Taken", "Vulnerability", "Maximum HP", "Blink", "Tough Skin", "Stoneskin", "Evasion", "Absorbs", "Block" };
-
-    private static readonly string[] Damage = { "Damage Dealt", "potency", "Critical", "Haste", "Recast", "TP" };
-
-    public static Kind KindOf(uint row) => Rows.TryGetValue(row, out var r) ? (Kind)r.Kind : Kind.None;
-
-    public static string NameOf(uint row) => Rows.TryGetValue(row, out var r) ? r.Name : $"item {row}";
-
-    public static string EffectOf(uint row) => Rows.TryGetValue(row, out var r) ? r.Effect : "";
-
-    public static int Rank(uint row) => Rank(EffectOf(row));
-
-    public static int Rank(string text)
-    {
-        if (Healing.Any(x => text.Contains(x, StringComparison.OrdinalIgnoreCase)))
-            return 0;
-
-        if (Defence.Any(x => text.Contains(x, StringComparison.OrdinalIgnoreCase)))
-            return 1;
-
-        return Damage.Any(x => text.Contains(x, StringComparison.OrdinalIgnoreCase)) ? 2 : 3;
-    }
-
-    private static readonly Dictionary<uint, (byte Kind, string Name, string Effect)> Rows = new()
-    {
-        [1] = (1, "Belt of Constitution", "Maximum HP +20%"),
-        [2] = (1, "Ring of Sacrifice", "Revives beastmaster upon KO by sacrificing the summoned familiar.\nIneffective if a familiar is not summoned."),
-        [3] = (1, "Ring of Curing", "Recovers 25% of maximum HP at the end of battles."),
-        [4] = (1, "Chemist's Satchel", "Procures one random beast potion upon resting at campsites."),
-        [5] = (1, "Hexed Hat", "Magic Vulnerability -10%"),
-        [6] = (1, "Steel Armor", "Physical Vulnerability -15%"),
-        [7] = (1, "Crown of the Wild", "Physical Damage Dealt +10%\nCritical Hit Rate +3%\n※Effects also apply to summoned familiar."),
-        [8] = (1, "Staff of the Wise", "Magic Damage Dealt +20%\n※Effects also apply to summoned familiar."),
-        [9] = (1, "Power Armlet", "Physical Damage Dealt +12%\nEvasion +3%"),
-        [10] = (1, "Twisted Headband", "Physical Damage Dealt +5%\nPhysical Vulnerability -5%"),
-        [11] = (1, "Green Beret", "Critical Hit Power +35\nDamage Dealt +3%\nMaximum HP +7%"),
-        [12] = (1, "Mystic Boots", "Evasion +8%\nMovement Speed +50%\nIncreases HP recovery via actions and crucible items by 15%."),
-        [13] = (1, "Ring of Protection", "Damage Taken -10%\nMaximum HP +7%"),
-        [14] = (1, "Ice Shield", "Damage Taken -30%\nSlow +10%\n30% chance to absorb ice damage as HP."),
-        [15] = (1, "Earth Shield", "30% chance to absorb earth damage as HP.\n10% chance to grant Stoneskin upon blocking with shield.\nStoneskin Effect: Absorbs damage totaling 15% of maximum HP\nDuration: 60s"),
-        [16] = (1, "Water Shield", "Block Strength +50%\n30% chance to absorb water damage as HP.\n10% chance to grant Reflect upon blocking with shield.\nReflect Effect: Reflects most magic attacks back at the caster\nDuration: 60s"),
-        [17] = (1, "Force Shield", "Block Strength +75%\nMagic Vulnerability -10%"),
-        [18] = (1, "Crimson Ribbon", "Petrification Resistance +100%\nBlind Resistance +100%\nParalysis Resistance +100%"),
-        [19] = (1, "Genji Gloves", "Damage Dealt +12%\nParalysis Resistance +100%\n10% chance to recover TP upon completing a combo with a beastmaster instinctual skill."),
-        [20] = (1, "Genji Greatshield", "Block Strength +30%\nEvasion +10%"),
-        [21] = (1, "Genji Armor", "Movement Speed -20%\nDamage Taken -20%\nMaximum HP +30%"),
-        [22] = (1, "Silver Specs", "Critical Hit Rate +15%\nBlind Resistance +100%"),
-        [23] = (1, "Angel Robe", "Damage Taken -7%\nPoison Resistance +100%\n5% chance to grant one stack of Rehabilitation upon suffering damage.\nRehabilitation Effect: Restores 3% of maximum HP at regular intervals\nDuration: 12s\nMaximum Stacks: 8"),
-        [24] = (1, "Master Shield", "Block Strength +125%\nDamage Taken -25%\nMaximum HP +35%"),
-        [25] = (1, "Mystic Veil", "Magic Damage Dealt +18%\nMagic Vulnerability -15%\nIncreases HP recovery via actions and crucible items by 15%."),
-        [26] = (1, "Black Cowl", "Maximum HP +6%\nEvasion +8%\nSleep Resistance +100%"),
-        [27] = (1, "Hero's Crown", "Maximum HP +30%\nDamage Dealt +18%\nGrants Excellence upon completing a combo with a beastmaster instinctual skill.\nExcellence Effect: Nullifies most attacks and increases damage dealt by 10%\nDuration: 9s"),
-        [28] = (1, "Mirage Vest", "20% chance to grant one stack of Blink upon suffering damage.\nBlink Effect: Nullifies most physical attacks, reducing one stack per nullification\nDuration: 120s"),
-        [29] = (1, "Soulreaper's Armor", "Maximum HP +10%\nDamage Taken -5%\nDoom Resistance +100%"),
-        [30] = (1, "Briar Armor", "Deals unaspected damage with a potency of 360 each time you suffer physical damage.\nCounter damage is affected by magic damage increase effects of other beast gear, items, and abilities."),
-        [31] = (1, "Coward's Knife", "Damage Dealt +1%\n35% chance to offer escape from an enemy space, thus avoiding battle and forfeiting loot. Ineffective on elite enemy or boss spaces.\nGrants one stack of Guerrilla Tactics upon fleeing.\nGuerrilla Tactics Effect: Increases damage dealt by 18% and evasion by 4%"),
-        [32] = (1, "Umbral Mantle", "Maximum HP +12%\n25% chance to recover TP upon completing a combo with a beastmaster instinctual skill."),
-        [33] = (1, "Umbral Band", "Physical Vulnerability -9%\n10% chance to recover TP upon completing a combo with a beastmaster instinctual skill."),
-        [34] = (1, "Umbral Wristlet", "Magic Vulnerability -15%\nMaximum HP +5%\nStun Resistance +100%"),
-        [35] = (1, "Astral Mantle", "Rapid Recast +25%\nDamage Taken -7%\nMaximum HP +15%"),
-        [36] = (1, "Astral Band", "Rapid Recast +15%\nPhysical Vulnerability -8%"),
-        [37] = (1, "Astral Wristlet", "Rapid Recast +15%\nMagic Vulnerability -8%"),
-        [38] = (1, "Flame-wreathed Axe", "Deals additional fire damage with a potency of 240 after each auto-attack.\nAdditional damage is affected by magic damage increase effects of other beast gear, items, and abilities.\nWhen carrying multiple pieces of beast gear that influence auto-attacks, only one will take effect."),
-        [39] = (1, "Icebitten Axe", "Deals additional ice damage with a potency of 240 after each auto-attack.\nAdditional damage is affected by magic damage increase effects of other beast gear, items, and abilities.\nWhen carrying multiple pieces of beast gear that influence auto-attacks, only one will take effect."),
-        [40] = (1, "Thunderstruck Axe", "Deals additional lightning damage with a potency of 240 after each auto-attack.\nAdditional damage is affected by magic damage increase effects of other beast gear, items, and abilities.\nWhen carrying multiple pieces of beast gear that influence auto-attacks, only one will take effect."),
-        [41] = (1, "Earthcrushed Axe", "Deals additional earth damage with a potency of 240 after each auto-attack.\nAdditional damage is affected by magic damage increase effects of other beast gear, items, and abilities.\nWhen carrying multiple pieces of beast gear that influence auto-attacks, only one will take effect."),
-        [42] = (1, "Deepdrowned Axe", "Deals additional water damage with a potency of 240 after each auto-attack.\nAdditional damage is affected by magic damage increase effects of other beast gear, items, and abilities.\nWhen carrying multiple pieces of beast gear that influence auto-attacks, only one will take effect."),
-        [43] = (1, "Windblown Axe", "Deals additional wind damage with a potency of 240 after each auto-attack.\nAdditional damage is affected by magic damage increase effects of other beast gear, items, and abilities.\nWhen carrying multiple pieces of beast gear that influence auto-attacks, only one will take effect."),
-        [44] = (1, "Ninja Suit", "Maximum HP +17%\nEvasion +8%\nGrants one stack of Haste for each attack evaded.\nHaste Effect: Reduces weaponskill cast time and recast time, spell cast time and recast time, and auto-attack delay by 2%\nDuration: 60s\nMaximum Stacks: 5"),
-        [45] = (1, "Ninja Gloves", "Haste +2%\nPhysical Damage Dealt +3%"),
-        [46] = (1, "Ninja Eyepatch", "Haste +5%\nCritical Hit Rate +5%"),
-        [47] = (1, "Wind Shield", "30% chance to absorb wind damage as HP.\n50% chance to grant Blink upon blocking with shield.\nBlink Effect: Nullifies most physical attacks, reducing one stack per nullification\nDuration: 120s"),
-        [48] = (1, "Wind Mask", "Magic Vulnerability -10%\nIncreases HP recovery via actions and crucible items by 15%.\nGrants Keen Edge upon evading an attack.\nKeen Edge Effect: Inflicts damage over time on self in exchange for increasing damage dealt by 30%\nDuration: 21s"),
-        [49] = (1, "Wind Armor", "Damage Taken -15%\nMagic Damage Dealt +20%\nIncreases HP recovery via actions and crucible items by 30%."),
-        [50] = (1, "Heavy Axe", "Damage Dealt +25%\nMovement Speed -20%"),
-        [51] = (1, "Mythril Armor", "Damage Taken -15%\nMaximum HP +15%"),
-        [52] = (1, "Mythril Gloves", "Damage Taken -5%\nPhysical Damage Dealt +5%\nMaximum HP +5%"),
-        [53] = (1, "Mythril Greaves", "Damage Taken -10%\nMaximum HP +5%"),
-        [54] = (1, "Beast Mask", "Physical Vulnerability -10%\nCritical Hit Rate +15%"),
-        [55] = (1, "Beastly Knife", "Critical Hit Rate +8%\n25% chance to grant one stack of Damage Up upon landing a critical hit.\nDamage Up Effect: Increases damage dealt by 3%\nDuration: 30s\nMaximum Stacks: 8"),
-        [56] = (1, "Beast Earring", "Critical Hit Rate +15%\nMaximum HP +2%"),
-        [57] = (1, "Thief's Knife", "Haste +1%\nGrants two items on treasure spaces."),
-        [58] = (1, "Thief's Garb", "Loot Drop Rate +80%\nDamage Taken -8%\nMaximum HP +18%"),
-        [59] = (1, "Thief's Gloves", "Loot Drop Rate +70%\nHaste +2%"),
-        [60] = (1, "Thief's Boots", "Loot Drop Rate +40%\nEvasion +2%"),
-        [61] = (1, "Thunder Axe", "Damage Dealt +30%\n5% chance to inflict Stun on self upon suffering damage.\nDuration: 3s"),
-        [62] = (1, "Thunder Armor", "30% chance to absorb lightning damage as HP.\n5% chance of granting one stack of High Wire upon landing a critical hit.\nHigh Wire Effect: Increases damage dealt by 10% and reduces damage taken by 5%\nDuration: 180s\nMaximum Stacks: 4"),
-        [63] = (1, "Warded Shield", "Grants one stack of Magic Vulnerability Down upon blocking with shield.\nMagic Vulnerability Down Effect: Reduces magic damage taken by 5%\nDuration: 60s\nMaximum Stacks: 8"),
-        [64] = (1, "Gold Hairpin", "Rapid Recast +10%\n25% chance to recover TP upon completing a combo with a beastmaster instinctual skill."),
-        [65] = (1, "Flame Knife", "Damage Dealt +25%\nHaste +5%\n10% chance to inflict Chains of Condemnation on self upon landing a critical hit.\nChains of Condemnation Effect: Suffers magic damage upon moving\nDuration: 9s"),
-        [66] = (1, "Flame Shield", "Block Strength +50%\nDamage Dealt +3%\n30% chance to absorb fire damage as HP."),
-        [67] = (1, "Merchant's Cap", "Territory Tokens Earned +25%\nCritical Hit Rate -10%\nDamage Dealt +5%"),
-        [68] = (1, "Merchant's Garb", "Territory Tokens Earned +25%\nPhysical Vulnerability -10%"),
-        [69] = (1, "Merchant's Shoes", "Territory Tokens Earned +25%\nEvasion +4%\nMaximum HP +12%"),
-        [70] = (1, "Spirited Ring", "Maximum HP +3%\nTP Accumulation +25%"),
-        [71] = (1, "Demonic Helm", "Damage Dealt +20%\nTP Accumulation +20%\n1% chance to inflict Doom on self upon suffering damage.\nDuration: 2s"),
-        [72] = (1, "Demonic Armor", "Maximum HP +5%\nTP Accumulation +5%\nGrants one stack of High Wire upon defeating an enemy.\nHigh Wire Effect: Increases damage dealt by 10% and reduces damage taken by 5%\nDuration: 180s\nMaximum Stacks: 4"),
-        [73] = (1, "Empress Hairpin", "Evasion +10%\nMaximum HP -8%\n2% chance to grant one stack of Rehabilitation upon landing a critical hit.\nRehabilitation Effect: Restores 3% of maximum HP at regular intervals\nDuration: 12s\nMaximum Stacks: 8"),
-        [74] = (1, "Haste Belt", "Haste +6%"),
-        [75] = (1, "Warrior's Buckler", "Block Strength +100%\nPhysical Vulnerability -5%\nMaximum HP +2%"),
-        [76] = (2, "G1 Beast Potion", "Restores 10% of HP to self or familiar."),
-        [77] = (2, "G2 Beast Potion", "Restores 23% of HP to self or familiar."),
-        [78] = (2, "G3 Beast Potion", "Restores 36% of HP to self or familiar."),
-        [79] = (2, "G4 Beast Potion", "Restores 50% of HP to self or familiar."),
-        [80] = (2, "G1 Crucible Ash", "Restores 10% of HP to self and nearby allies."),
-        [81] = (2, "G2 Crucible Ash", "Restores 25% of HP to self and nearby allies."),
-        [82] = (2, "G3 Crucible Ash", "Restores 40% of HP to self and nearby allies."),
-        [83] = (2, "Crucible Antidote", "Instantly cures most instances of poison for self or familiar, restoring 25% of maximum HP upon success.\n※Can only be used on Crucible battlegrounds."),
-        [84] = (2, "Crucible Needle", "Instantly cures most instances of petrification for familiar, restoring 50% of maximum HP upon success. Additionally grants Stoneskin.\nStoneskin Effect: Absorbs damage totaling 50% of maximum HP\nDuration: 60s\n※Can only be used on Crucible battlegrounds."),
-        [85] = (2, "Crucible Eye Drops", "Instantly cures most instances of blindness for self or familiar, restoring 25% of maximum HP upon success.\n※Can only be used on Crucible battlegrounds."),
-        [86] = (2, "G1 Antipoison Soul Serum", "Increases poison resistance by 100% for self or familiar.\nDuration: 180s\nAdditional Effect: When carrying a crimson ribbon, restores 50% of target's total HP\n※Can only be used on Crucible battlegrounds."),
-        [87] = (2, "G2 Antipoison Soul Serum", "Increases poison resistance by 100% for self and nearby allies.\nDuration: 300s\nAdditional Effect: When carrying a crimson ribbon, restores 50% of target's total HP\n※Can only be used on Crucible battlegrounds."),
-        [88] = (2, "G1 Antiparalysis Soul Serum", "Increases paralysis resistance by 100% for self or familiar.\nDuration: 180s\nAdditional Effect: When carrying a crimson ribbon, restores 50% of target's total HP\n※Can only be used on Crucible battlegrounds."),
-        [89] = (2, "G2 Antiparalysis Soul Serum", "Increases paralysis resistance by 100% for self and nearby allies.\nDuration: 300s\nAdditional Effect: When carrying a crimson ribbon, restores 50% of target's total HP\n※Can only be used on Crucible battlegrounds."),
-        [90] = (2, "G1 Antiblind Soul Serum", "Increases blind resistance by 100% for self or familiar.\nDuration: 180s\nAdditional Effect: When carrying a crimson ribbon, restores 50% of target's total HP\n※Can only be used on Crucible battlegrounds."),
-        [91] = (2, "G2 Antiblind Soul Serum", "Increases blind resistance by 100% for self and nearby allies.\nDuration: 300s\nAdditional Effect: When carrying a crimson ribbon, restores 50% of target's total HP\n※Can only be used on Crucible battlegrounds."),
-        [92] = (2, "G1 Antipetrification Soul Serum", "Increases petrification resistance by 100% for self or familiar.\nDuration: 180s\nAdditional Effect: When carrying a crimson ribbon, restores 50% of target's total HP\n※Can only be used on Crucible battlegrounds."),
-        [93] = (2, "G2 Antipetrification Soul Serum", "Increases petrification resistance by 100% for self and nearby allies.\nDuration: 300s\nAdditional Effect: When carrying a crimson ribbon, restores 50% of target's total HP\n※Can only be used on Crucible battlegrounds."),
-        [94] = (2, "G1 Antisleep Soul Serum", "Increases sleep resistance by 100% for self or familiar.\nDuration: 180s\nAdditional Effect: When carrying a crimson ribbon, restores 50% of target's total HP\n※Can only be used on Crucible battlegrounds."),
-        [95] = (2, "G2 Antisleep Soul Serum", "Increases sleep resistance by 100% for self and nearby allies.\nDuration: 300s\nAdditional Effect: When carrying a crimson ribbon, restores 50% of target's total HP\n※Can only be used on Crucible battlegrounds."),
-        [96] = (2, "Blessed Horn", "Revives an incapacitated familiar.\n※Can only be used while traversing a Crucible board."),
-        [97] = (2, "Beastly Smokebomb", "Creates a distraction, allowing escape from battle. Ineffective against elite enemies and bosses.\nUse by selecting “Flee” upon an enemy space."),
-        [98] = (2, "G1 Beastmaster Reraiser", "Grants Reraise to self.\nReraise Effect: 70% chance of automatic revival upon KO"),
-        [99] = (2, "G2 Beastmaster Reraiser", "Grants Reraise to self.\nReraise Effect: 95% chance of automatic revival upon KO"),
-        [100] = (2, "Thief's Eye", "Triples the loot drop rate for the next enemy space cleared.\nDuration: 30m\n※Can only be used on Crucible battlegrounds."),
-        [101] = (2, "Merchant's Eye", "Doubles the territory tokens earned for the next enemy space cleared.\nDuration: 30m\n※Can only be used on Crucible battlegrounds."),
-        [102] = (2, "Crucible Tannin", "Grants Tough Skin to self or familiar.\nTough Skin Effect: Reduces damage taken by 20%\nDuration: 60s\nAdditional Effect: When carrying an ice shield, duration increases to 90s\n※Can only be used on Crucible battlegrounds."),
-        [103] = (2, "Crucible Stimulant", "Grants Hasty Spirit to self or familiar.\nHasty Spirit Effect: Reduces weaponskill cast time and recast time, spell cast time and recast time, and auto-attack delay by 15%\nDuration: 60s\nAdditional Effect: When carrying thief's gloves, duration increases to 90s\n※Can only be used on Crucible battlegrounds."),
-        [104] = (2, "Potion of Tempered Strength", "Grants Liquid Strength to self or familiar.\nLiquid Strength Effect: Increases physical damage dealt by 30%\nDuration: 15s\n※Can only be used on Crucible battlegrounds."),
-        [105] = (2, "Potion of Feral Strength", "Inflicts Stun while also granting Liquid Strength to self or familiar.\nStun Duration: 15s\nLiquid Strength Effect: Increases physical damage dealt by 45%\nDuration: 30s\n※Can only be used on Crucible battlegrounds."),
-        [106] = (2, "Potion of Tempered Magic", "Grants Liquid Magic to self or familiar.\nLiquid Magic Effect: Increases magic damage dealt by 30%\nDuration: 15s\n※Can only be used on Crucible battlegrounds."),
-        [107] = (2, "Potion of Feral Magic", "Inflicts Nightmare while also granting Liquid Magic to self or familiar.\nNightmare Duration: 30s\nLiquid Magic Effect: Increases magic damage dealt by 50%\nDuration: 30s\n※Can only be used on Crucible battlegrounds."),
-        [108] = (2, "Potion of Tempered Intensity", "Grants Liquid Intensity to self or familiar.\nLiquid Intensity Effect: Increases critical hit rate by 30%\nDuration: 30s\nAdditional Effect: When carrying silver specs, duration increases to 60s\n※Can only be used on Crucible battlegrounds."),
-        [109] = (2, "Potion of Feral Intensity", "Inflicts Petrification while also granting Liquid Intensity to self or familiar.\nPetrification Duration: 15s\nLiquid Intensity Effect: Increases critical hit rate by 50%\nDuration: 30s\nAdditional Effect: When carrying silver specs, duration increases to 60s\n※Can only be used on Crucible battlegrounds."),
-        [110] = (2, "Potion of Tempered Evasion", "Grants Liquid Evasion to self or familiar.\nLiquid Evasion Effect: Increases evasion by 25%\nDuration: 30s\n※Can only be used on Crucible battlegrounds."),
-        [111] = (2, "Potion of Feral Evasion", "Inflicts Blind while also granting Liquid Evasion to self or familiar.\nBlind Duration: 30s\nLiquid Evasion Effect: Increases evasion by 25%\nDuration: 60s\n※Can only be used on Crucible battlegrounds."),
-        [112] = (2, "Potion of Tempered Constitution", "Grants Liquid Constitution while also restoring 10% of HP to self or familiar.\nLiquid Constitution Effect: Increases maximum HP by 20%\nEffect ends upon combat completion.\n※Can only be used on Crucible battlegrounds."),
-        [113] = (2, "Potion of Feral Constitution", "Inflicts Pollen while also granting Liquid Constitution and restoring 10% of HP to self or familiar.\nPollen Duration: 180s\nLiquid Constitution Effect: Increases maximum HP by 30%\nEffect ends upon combat completion.\n※Can only be used on Crucible battlegrounds."),
-        [114] = (2, "Potion of Breathtaking Swiftness", "Grants Spirit of the Breathtaker to self.\nSpirit of the Breathtaker Effect: Increases movement speed by 20%, evasion by 5%, and poison resistance by 100%\nEffect ends upon combat completion.\n※Can only be used on Crucible battlegrounds."),
-        [115] = (2, "Crucible Feather", "Grants 100 TP to self or familiar.\nAdditional Effect: When carrying a spirited ring, grants 250 TP\n※Can only be used on Crucible battlegrounds."),
-        [116] = (2, "G1 Wildfire Weakener", "Grants Through Fire to self and nearby allies.\nThrough Fire Effect: 50% chance to absorb fire damage as HP\nDuration: 15s\n※Can only be used on Crucible battlegrounds."),
-        [117] = (2, "G2 Wildfire Weakener", "Grants Through Fire to self and nearby allies.\nThrough Fire Effect: 70% chance to absorb fire damage as HP\nDuration: 15s\n※Can only be used on Crucible battlegrounds."),
-        [118] = (2, "G1 Wildwave Weakener", "Grants Through Water to self and nearby allies.\nThrough Water Effect: 50% chance to absorb water damage as HP\nDuration: 15s\n※Can only be used on Crucible battlegrounds."),
-        [119] = (2, "G2 Wildwave Weakener", "Grants Through Water to self and nearby allies.\nThrough Water Effect: 70% chance to absorb water damage as HP\nDuration: 15s\n※Can only be used on Crucible battlegrounds."),
-        [120] = (2, "G1 Wildearth Weakener", "Grants Through Earth to self and nearby allies.\nThrough Earth Effect: 50% chance to absorb earth damage as HP\nDuration: 15s\n※Can only be used on Crucible battlegrounds."),
-        [121] = (2, "G2 Wildearth Weakener", "Grants Through Earth to self and nearby allies.\nThrough Earth Effect: 70% chance to absorb earth damage as HP\nDuration: 15s\n※Can only be used on Crucible battlegrounds."),
-        [122] = (2, "G1 Wildthunder Weakener", "Grants Through Thunder to self and nearby allies.\nThrough Thunder Effect: 50% chance to absorb lightning damage as HP\nDuration: 15s\n※Can only be used on Crucible battlegrounds."),
-        [123] = (2, "G2 Wildthunder Weakener", "Grants Through Thunder to self and nearby allies.\nThrough Thunder Effect: 70% chance to absorb lightning damage as HP\nDuration: 15s\n※Can only be used on Crucible battlegrounds."),
-        [124] = (2, "G1 Wildgale Weakener", "Grants Through Wind to self and nearby allies.\nThrough Wind Effect: 50% chance to absorb wind damage as HP\nDuration: 15s\n※Can only be used on Crucible battlegrounds."),
-        [125] = (2, "G2 Wildgale Weakener", "Grants Through Wind to self and nearby allies.\nThrough Wind Effect: 70% chance to absorb wind damage as HP\nDuration: 15s\n※Can only be used on Crucible battlegrounds."),
-        [126] = (2, "G1 Wildfreeze Weakener", "Grants Through Ice to self and nearby allies.\nThrough Ice Effect: 50% chance to absorb ice damage as HP\nDuration: 15s\n※Can only be used on Crucible battlegrounds."),
-        [127] = (2, "G2 Wildfreeze Weakener", "Grants Through Ice to self and nearby allies.\nThrough Ice Effect: 70% chance to absorb ice damage as HP\nDuration: 15s\n※Can only be used on Crucible battlegrounds."),
-        [128] = (2, "Fang of Fire", "Deals ranged fire damage with a potency of 2,500 to target and all enemies within 12 yalms of it.\nAdditional Effect: Targets suffering from Deep Freeze receive additional damage with a potency of 1,000\nDamage is affected by magic damage increase effects of other beast gear, items, or abilities.\n※Can only be used on Crucible battlegrounds."),
-        [129] = (2, "Fang of Ice", "Deals ranged ice damage with a potency of 2,000 to target and all enemies within 12 yalms of it.\nAdditional Effect: Afflicts target with Deep Freeze\nDuration: 20s\nDamage is affected by magic damage increase effects of other beast gear, items, and abilities.\n※Can only be used on Crucible battlegrounds."),
-        [130] = (2, "Fang of Water", "Deals ranged water damage with a potency of 2,000 to target and all enemies within 12 yalms of it.\nAdditional Effect: Removes one beneficial status from target, thereby granting 100 TP\nDamage is affected by magic damage increase effects of other beast gear, items, and abilities.\n※Can only be used on Crucible battlegrounds."),
-        [131] = (2, "Fang of Lightning", "Deals ranged lightning damage with a potency of 2,000 to target and all enemies within 12 yalms of it.\nAdditional Effect: Afflicts target with Paralysis\nDuration: 30s\nDamage is affected by magic damage increase effects of other beast gear, items, and abilities.\n※Can only be used on Crucible battlegrounds."),
-        [132] = (2, "Fang of Earth", "Deals ranged earth damage with a potency of 2,000 to target and all enemies within 12 yalms of it.\nAdditional Effect: Afflicts target with Heavy\nDuration: 60s\nDamage is affected by magic damage increase effects of other beast gear, items, and abilities.\n※Can only be used on Crucible battlegrounds."),
-        [133] = (2, "Fang of Wind", "Deals ranged wind damage with a potency of 2,000 to target and all enemies within 12 yalms of it.\nAdditional Effect: 15-yalm knockback\nDamage is affected by magic damage increase effects of other beast gear, items, and abilities.\n※Can only be used on Crucible battlegrounds."),
-        [134] = (2, "Vampiric Fang", "Deals ranged piercing physical damage with a potency of 1,500 to target and all enemies within 12 yalms of it.\nPotency increases up to 3,300 as your maximum HP increases, and damage is partially absorbed as HP.\n※Can only be used on Crucible battlegrounds."),
-        [135] = (2, "Vampiric Essence", "Grants Life Siphon to self or familiar.\nLife Siphon Effect: Absorbs 10% of damage dealt as HP\nDuration: 60s\nAdditional Effect: When carrying demonic armor, duration increases to 90s\n※Can only be used on Crucible battlegrounds."),
-        [136] = (2, "Tome of Reflection", "Grants Reflect to self or familiar.\nReflect Effect: Reflects most magic attacks back at the caster\nDuration: 30s\nAdditional Effect: When carrying a hexed hat, duration increases to 60s\n※Can only be used on Crucible battlegrounds."),
-        [137] = (2, "Tome of the Impervious", "Grants five stacks of Blink to self or familiar.\nBlink Effect: Nullifies most physical attacks, reducing one stack per nullification\nDuration: 120s\nSpirit of the Breathtaker Effect: Grants three additional stacks\n※Can only be used on Crucible battlegrounds."),
-        [138] = (2, "Temporal Sand", "Grants Sandstill to self.\nSandstill Effect: Returns you to the moment combat commences upon incapacitation\n※Can only be used outside of combat."),
-        [139] = (2, "Celestial Sand", "Calls down a Starstorm that deals fire damage with a potency of 3,000 to target and all enemies within 18 yalms of it.\nAdditional Effect: Increases TP Gauge by 50 for every enemy hit\nAdditional Effect: Reduces target's fire resistance by 20%\nDuration: 60s\nDamage is affected by magic damage increase effects of other beast gear, items, and abilities.\n※Can only be used on Crucible battlegrounds."),
-        [140] = (2, "Beast Potion Kit", "Grants Auto-potion to self.\nAuto-potion Effect: Restores 40% of HP automatically when HP falls below 50%\n50% chance for the effect to expire when triggered. Chance is reduced to 10% when under the effect of Spirit of the Breathtaker.\nDuration: 150s\nAdditional Effect: When carrying thief's garb, duration increases to 240s\n※Can only be used on Crucible battlegrounds."),
-        [141] = (2, "Beast Remedy Kit", "Grants Auto-remedy to self.\nAuto-remedy Effect: Automatically cures the next status ailment suffered\nDuration: 240s\n※Can only be used on Crucible battlegrounds."),
-        [142] = (2, "Spellforge Tome", "Ensures all attacks deal magic damage. Effects also apply to familiars.\nDuration: 180s\n※Can only be used on Crucible battlegrounds."),
-        [143] = (2, "Steelsting Tome", "Ensures all attacks deliver physical damage. Effects also apply to familiars.\nDuration: 180s\n※Can only be used on Crucible battlegrounds."),
-        [144] = (3, "G1 Primafodder", "Maximum HP +15%\nDamage Dealt +5%\nAdditional Effect: Restores 10% of HP upon consumption\nAdditional Effect: Increases familiar's earned EXP by 25%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, soulkin, and ashkin.]"),
-        [145] = (3, "G2 Primafodder", "Maximum HP +30%\nDamage Dealt +10%\nAdditional Effect: Restores 18% of HP upon consumption\nAdditional Effect: Increases familiar's earned EXP by 50%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, soulkin, and ashkin.]"),
-        [146] = (3, "Meat Simular", "Physical Damage Dealt +20%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, and ashkin.]"),
-        [147] = (3, "Hydrolixer", "Aetheric Burst Potency +35%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, and ashkin.]"),
-        [148] = (3, "Honey Simular", "Physical Vulnerability -25%\nAetheric Burst Potency +10%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, and ashkin.]"),
-        [149] = (3, "Crab Ball Simular", "Critical Hit Rate +35%\nMagic Vulnerability -30%\nMaximum HP +10%\nAdditional Effect: Restores 7% of HP upon consumption\n[Suitable for soulkin.]"),
-        [150] = (3, "Banana Simular", "Aetheric Burst Potency +10%\nGrants one stack of Physical Damage Up upon landing a critical hit.\nPhysical Damage Up Effect: Increases physical damage dealt by 10%\nDuration: 30s\nMaximum Stacks: 5\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, and ashkin.]"),
-        [151] = (3, "Berry Simular", "Critical Hit Power +60\nAetheric Burst Potency +10%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, and ashkin.]"),
-        [152] = (3, "Egg Simular", "Haste +5%\nPhysical Damage Dealt +25%\n[Suitable for beastkin, vilekin, cloudkin, wavekin, and scalekin.]"),
-        [153] = (3, "Yellow Egg Simular", "Haste +15%\nDamage Dealt +5%\nMaximum HP +35%\nAdditional Effect: Restores 20% of HP upon consumption\n[Suitable for seedkin.]"),
-        [154] = (3, "Tomato Simular", "Evasion +10%\nPhysical Damage Dealt +10%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, and ashkin.]"),
-        [155] = (3, "Milk Simular", "Haste +5%\nMaximum HP +50%\nAdditional Effect: Restores 26% of HP upon consumption\n[Suitable for beastkin, vilekin, cloudkin, wavekin, and scalekin.]"),
-        [156] = (3, "Rolanberry Cheese Simular", "Haste +5%\nAetheric Burst Potency +25%\n[Suitable for beastkin, vilekin, cloudkin, wavekin, and scalekin.]"),
-        [157] = (3, "Porcini Simular", "Poison Resistance +100%\nDamage Taken -10%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, soulkin, and ashkin.]"),
-        [158] = (3, "Morel Simular", "Paralysis Resistance +100%\nDamage Taken -10%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, soulkin, and ashkin.]"),
-        [159] = (3, "Black Truffle Simular", "Blind Resistance +100%\nDamage Taken -10%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, soulkin, and ashkin.]"),
-        [160] = (3, "White Truffle Simular", "Petrification Resistance +100%\nDamage Taken -10%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, soulkin, and ashkin.]"),
-        [161] = (3, "Mushroom Simular", "Sleep Resistance +100%\nDamage Taken -10%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, soulkin, and ashkin.]"),
-        [162] = (3, "Sole Simular", "Physical Damage Dealt +20%\nTP Accumulation +50%\n[Suitable for cloudkin.]"),
-        [163] = (3, "Magnum Water", "Maximum HP +30%\nDamage Dealt +15%\nAdditional Effect: Restores 18% of HP upon consumption\nGrants one stack of Rehabilitation upon defeating an enemy.\nRehabilitation Effect: Restores 3% of maximum HP at regular intervals\nDuration: 6s\nMaximum Stacks: 8\n[Suitable for wavekin.]"),
-        [164] = (3, "Blood Simular", "Critical Hit Rate +50%\nDamage Dealt +35%\nAdditional Effect: Inflicts damage over time on self\n[Suitable for vilekin.]"),
-        [165] = (3, "Noble Blood Simular", "Maximum HP +20%\nCritical Hit Rate +15%\nAdditional Effect: Restores 13% of HP upon consumption\n5% chance to grant one stack of Rehabilitation upon landing a critical hit.\nRehabilitation Effect: Restores 3% of maximum HP at regular intervals\nDuration: 6s\nMaximum Stacks: 8\n[Suitable for wavekin.]"),
-        [166] = (3, "Lily Simular", "Damage Dealt +10%\nDamage Taken -10%\nAdditional Effect: Preserves the effects of feed when resting at a campsite\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, soulkin, and ashkin.]"),
-        [167] = (3, "Flounder Simular", "Physical Damage Dealt +10%\n30% chance to recover TP upon completing a combo with a familiar instinctual skill.\n[Suitable for beastkin, vilekin, seedkin, wavekin, scalekin, and ashkin.]"),
-        [168] = (3, "White Scorpion Simular", "Grants Reflect when summoned by a beastmaster.\nReflect Effect: Reflects most magic attacks back at the caster\nDuration: 60s\n[Suitable for scalekin.]"),
-        [169] = (3, "Black Scorpion Simular", "Damage Dealt +15%\nDamage Taken -35%\n3% chance to inflict Poison on self upon suffering damage.\nDuration: 30s\n[Suitable for scalekin.]"),
-        [170] = (3, "Herring Simular", "Aetheric Burst Potency +25%\n35% chance to recover TP upon completing a combo with a familiar instinctual skill.\n[Suitable for cloudkin.]"),
-        [171] = (3, "Angelfish Simular", "Damage Taken -10%\nTP Accumulation +30%\n[Suitable for beastkin, vilekin, seedkin, wavekin, and ashkin.]"),
-        [172] = (3, "Grape Simular", "Critical Hit Rate +35%\nPhysical Damage Dealt +15%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, and ashkin.]"),
-        [173] = (3, "Orange Simular", "Critical Hit Rate +25%\nAetheric Burst Potency +20%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, and ashkin.]"),
-        [174] = (3, "Lugworm Simular", "Maximum HP +30%\nAdditional Effect: Restores 18% of HP upon consumption\nGrants one stack of Magic Vulnerability Down upon suffering damage.\nMagic Vulnerability Down Effect: Reduces magic damage taken by 5%\nDuration: 60s\nMaximum Stacks: 8\n[Suitable for soulkin.]"),
-        [175] = (3, "Crucible Tonic", "Grants one stack of High Wire upon defeating an enemy.\nHigh Wire Effect: Increases damage dealt by 15% and reduces damage taken by 8%\nDuration: 60s\nMaximum Stacks: 4\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, soulkin, and ashkin.]"),
-        [176] = (3, "Carrot Simular", "Evasion +10%\nAetheric Burst Potency +5%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, and ashkin.]"),
-        [177] = (3, "Onion Simular", "Evasion +15%\nDamage Taken -5%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, and ashkin.]"),
-        [178] = (3, "Lettuce Simular", "Evasion +5%\nGrants one stack of High Wire for each attack evaded.\nHigh Wire Effect: Increases damage dealt by 15% and reduces damage taken by 8%\nDuration: 60s\nMaximum Stacks: 4\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, and ashkin.]"),
-        [179] = (3, "Lemon Simular", "Aetheric Burst Potency +10%\nGrants one stack of Blink upon landing a critical hit.\nBlink Effect: Nullifies most physical attacks, reducing one stack per nullification\nDuration: 120s\nMaximum Stacks: 5\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, and ashkin.]"),
-        [180] = (3, "Untaming Oil", "Haste +20%\nGrants one stack of High Wire for each combo completed with a familiar instinctual skill.\nHigh Wire Effect: Increases damage dealt by 15% and reduces damage taken by 8%\nDuration: 60s\nMaximum Stacks: 4\n[Suitable for soulkin.]"),
-        [181] = (3, "Mucus Simular", "Damage Dealt +30%\nDamage Taken -30%\nInflicts Nightmare on self upon landing a critical hit.\nDuration: 30s\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, and ashkin.]"),
-        [182] = (3, "Sap Simular", "Physical Vulnerability -40%\nAetheric Burst Potency +20%\n[Suitable for scalekin.]"),
-        [183] = (3, "Salt Simular", "Evasion +25%\n15% chance to grant Stoneskin upon evading an attack.\nStoneskin Effect: Absorbs damage equivalent to 12% of maximum HP\nDuration: 60s\n[Suitable for soulkin.]"),
-        [184] = (3, "Syrup Simular", "Damage Dealt +30%\nPhysical Vulnerability -30%\n3% chance to inflict Paralysis on self upon suffering damage.\nDuration: 30s\n[Suitable for vilekin.]"),
-        [185] = (3, "Cream Cheese Simular", "Maximum HP +50%\nDamage Taken -20%\nAdditional Effect: Restores 26% of HP upon consumption\n50% chance to grant one stack of Haste upon suffering damage.\nHaste Effect: Reduces weaponskill cast time and recast time, spell cast time and recast time, and auto-attack delay by 3%\nDuration: 60s\nMaximum Stacks: 5\n[Suitable for seedkin.]"),
-        [186] = (3, "Red Egg Simular", "Haste +15%\nDamage Dealt +30%\nAdditional Effect: Inflicts damage over time on self\n[Suitable for beastkin, vilekin, cloudkin, wavekin, and scalekin.]"),
-        [187] = (3, "Toast Simular", "Magic Vulnerability -30%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, and ashkin.]"),
-        [188] = (3, "Cornbread Simular", "Magic Vulnerability -40%\nAetheric Burst Potency +10%\nMaximum HP +15%\nAdditional Effect: Restores 10% of HP upon consumption\n[Suitable for vilekin.]"),
-        [189] = (3, "Mandrake Simular", "Physical Damage Dealt +40%\nInflicts Blind on self upon landing a critical hit.\nDuration: 30s\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, soulkin, and ashkin.]"),
-        [190] = (3, "Tarantula Simular", "Critical Hit Rate +25%\nGrants one stack of Damage Up upon landing a critical hit.\nDamage Up Effect: Increases damage dealt by 10%\nDuration: 60s\nMaximum Stacks: 5\n[Suitable for soulkin.]"),
-        [191] = (3, "Belladonna Simular", "Damage Taken -30%\nMaximum HP +30%\nAdditional Effect: Restores 18% of HP upon consumption\n3% chance to inflict Petrification on self upon suffering damage.\nDuration: 30s\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, soulkin, and ashkin.]"),
-        [192] = (3, "Steak Simular", "Delivers blunt physical damage with a potency of 350 each time your familiar suffers physical damage.\nCounter damage is affected by physical damage increase effects of other feed and crucible items, and your familiar's strength.\n[Suitable for beastkin, vilekin, cloudkin, scalekin, and ashkin.]"),
-        [193] = (3, "Roe Simular", "Aetheric Burst Potency +10%\n30% chance to recover TP upon completing a combo with a familiar instinctual skill.\n[Suitable for beastkin, vilekin, seedkin, wavekin, scalekin, and ashkin.]"),
-        [194] = (3, "Herbal Tea Simular", "Grants Stoneskin when summoned by a beastmaster.\nStoneskin Effect: Absorbs damage equivalent to 24% of maximum HP\nDuration: 60s\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, and ashkin.]"),
-        [195] = (3, "Honeycomb Simular", "Physical Vulnerability -30%\nDamage Dealt +10%\n30% chance to recover TP upon completing a combo with a familiar instinctual skill.\n[Suitable for soulkin.]"),
-        [196] = (3, "Orange Juice Simular", "Magic Damage Dealt +30%\nAetheric Burst Potency +15%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, and ashkin.]"),
-        [197] = (3, "Grape Juice Simular", "Physical Damage Dealt +30%\nAetheric Burst Potency +50%\nMaximum HP -80%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, and ashkin.]"),
-        [198] = (3, "Skewer Simular", "Slow +200%\nPhysical Damage Dealt +50%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, and ashkin.]"),
-        [199] = (3, "Pineapple Juice Simular", "Slow +200%\nMagic Damage Dealt +50%\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, scalekin, and ashkin.]"),
-        [200] = (3, "Oyster Simular", "Increases Familiar TP Gauge by 100 upon commencing battle or when summoned by a beastmaster during combat.\n[Suitable for cloudkin.]"),
-        [201] = (3, "Blue Cheese Simular", "Deals unaspected damage with a potency of 350 each time your familiar suffers magic damage.\nCounter damage is affected by magic damage increase effects of other feed and crucible items, and your familiar's intelligence.\n[Suitable for seedkin and wavekin.]"),
-        [202] = (3, "Cottage Cheese Simular", "Maximum HP +30%\nHaste +15%\nAdditional Effect: Restores 18% of HP upon consumption\n30% chance to recover TP upon completing a combo with a familiar instinctual skill.\n[Suitable for vilekin.]"),
-        [203] = (3, "Lassi Simular", "Maximum HP +30%\nAdditional Effect: Restores 18% of HP upon consumption\nAdditional Effect: Completely restores HP at campsites\n[Suitable for beastkin, vilekin, cloudkin, seedkin, wavekin, and scalekin.]"),
-    };
 }

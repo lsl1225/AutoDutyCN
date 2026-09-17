@@ -2,12 +2,15 @@ using AutoDuty.Configurations;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using Lumina.Excel;
+using Lumina.Excel.Sheets;
 using Newtonsoft.Json;
 
 namespace AutoDuty.Managers
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using Screens = CrucibleUi.Screens;
 
@@ -45,16 +48,23 @@ namespace AutoDuty.Managers
         private static readonly string[]  DetailWindows = ["XBMMonsterBookDetail", "XBMPetActionDetail"];
         private static readonly TimeSpan CacheInterval = TimeSpan.FromMilliseconds(750);
 
-        private static readonly string[] EnglishNames =
-        [
-            "Cu Sith", "Squirrel", "Lamb", "Pugil", "Opo-opo", "Dodo", "Coblyn", "Diremite", "Megalocrab", "Wespe",
-            "Vulture", "Mandragora", "Geshunpest", "Puk", "Crab", "Mantis", "Slime", "Dullahan", "Bat", "Flying Trap",
-            "Ziz", "Sabotender", "Golem", "Apkallu", "Adamantoise", "Buffalo", "Uragnite", "Worm", "Spriggan", "Goobbue",
-            "Gigantoad", "Colibri", "Coeurl", "Raptor", "Drake", "Treant", "Antling", "Chimera", "Morbol", "Ghost",
-            "Salamander", "Cobra", "Hydra", "Damselfly", "Rotting Goobbue", "Zu", "Ice Golem", "Karlabos", "Rafflesia", "Behemoth"
-        ];
+        private static SortedDictionary<uint, string>? sheetNames;
 
-        public static int Total => EnglishNames.Length;
+        private static SortedDictionary<uint, string> SheetNames
+        {
+            get
+            {
+                if (sheetNames != null)
+                    return sheetNames;
+
+                sheetNames = [];
+                ExcelSheet<Pet> pets = Svc.Data.GetExcelSheet<Pet>();
+                foreach (XBMPet familiar in Svc.Data.GetExcelSheet<XBMPet>())
+                    if (familiar.RowId > 0 && pets.TryGetRow((uint)familiar.Unknown4, out Pet pet) && pet.Name.ExtractText() is { Length: > 0 } name)
+                        sheetNames[familiar.RowId] = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(name);
+                return sheetNames;
+            }
+        }
 
         private static DateTime nextCacheRead;
 
@@ -86,7 +96,7 @@ namespace AutoDuty.Managers
 
         public static string NameOf(uint number) =>
             Familiars.TryGetValue(number, out CrucibleFamiliar? seen) && seen.Name.Length > 0 ? seen.Name :
-            number >= 1 && number <= EnglishNames.Length ? EnglishNames[number - 1] : $"No. {number}";
+            SheetNames.TryGetValue(number, out string? name) ? name : $"No. {number}";
 
         public static uint NumberFor(string name)
         {
@@ -97,8 +107,7 @@ namespace AutoDuty.Managers
             if (seen is { Number: > 0 })
                 return seen.Number;
 
-            int index = Array.FindIndex(EnglishNames, x => string.Equals(x, name, StringComparison.OrdinalIgnoreCase));
-            return index >= 0 ? (uint)index + 1 : 0;
+            return SheetNames.FirstOrDefault(x => string.Equals(x.Value, name, StringComparison.OrdinalIgnoreCase)).Key;
         }
 
         public static IEnumerable<uint> Owned()
@@ -107,9 +116,7 @@ namespace AutoDuty.Managers
             bool        ready   = manager != null && manager->State == XBMManager.DataState.Received;
             IReadOnlyDictionary<uint, CrucibleFamiliar> cached = Familiars;
 
-            return Enumerable.Range(1, EnglishNames.Length)
-                             .Select(x => (uint)x)
-                             .Where(x => ready ? manager->IsPetUnlocked(x) : cached.ContainsKey(x));
+            return SheetNames.Keys.Where(x => ready ? manager->IsPetUnlocked(x) : cached.ContainsKey(x));
         }
 
         public static bool OwnershipKnown

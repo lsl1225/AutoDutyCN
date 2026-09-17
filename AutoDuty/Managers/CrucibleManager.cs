@@ -4,6 +4,7 @@ using ECommons.Automation.NeoTaskManager;
 using ECommons.DalamudServices;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using Lumina.Excel;
 
 namespace AutoDuty.Managers
 {
@@ -109,6 +110,25 @@ namespace AutoDuty.Managers
             return false;
         }
 
+        private static string? challengeText;
+
+        private static string ChallengeText =>
+            challengeText ??= Svc.Data.GetExcelSheet<RawRow>(name: "custom/009/CtsXbmEntrance_00976").TryGetRow(1, out RawRow row)
+                                  ? row.ReadStringColumn(1).ExtractText().TrimEnd('.', '。', ' ')
+                                  : "";
+
+        private static unsafe void ChooseChallenge(AtkUnitBase* menu)
+        {
+            int index = ChallengeText.Length > 0 ? CrucibleUi.SelectStringIndex(menu, ChallengeText) : -1;
+            if (index < 0)
+            {
+                Svc.Log.Warning($"[Crucible] Lauda's menu has no \"{ChallengeText}\" option");
+                return;
+            }
+
+            AddonHelper.FireCallBack(menu, true, index);
+        }
+
         private unsafe bool OpenBoard(uint board)
         {
             if (CrucibleUi.IsOpen(CrucibleUi.TeamWindow))
@@ -136,8 +156,7 @@ namespace AutoDuty.Managers
 
             if (CrucibleUi.TryReady("SelectString", out AtkUnitBase* menu))
             {
-                int index = CrucibleUi.SelectStringIndex(menu, "Challenge");
-                AddonHelper.FireCallBack(menu, true, index < 0 ? 0 : index);
+                ChooseChallenge(menu);
                 EzThrottler.Throttle("CrucibleOpenBoard", 600, true);
                 return false;
             }
@@ -239,8 +258,7 @@ namespace AutoDuty.Managers
 
                     if (CrucibleUi.TryReady("SelectString", out AtkUnitBase* menu) && EzThrottler.Throttle("CrucibleOpenBoard", 1000))
                     {
-                        int index = CrucibleUi.SelectStringIndex(menu, "Challenge");
-                        AddonHelper.FireCallBack(menu, true, index < 0 ? 0 : index);
+                        ChooseChallenge(menu);
                     }
                     else if (GenericHelpers.TryGetAddonByName("Talk", out AtkUnitBase* talk) && GenericHelpers.IsAddonReady(talk))
                     {

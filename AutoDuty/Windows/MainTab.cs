@@ -183,6 +183,13 @@ namespace AutoDuty.Windows
                         ImGui.Spacing();
                     }
 
+                    if (Plugin.CurrentTerritoryContent?.DutyModes.HasFlag(DutyMode.Crucible) == true)
+                    {
+                        DrawCrucibleMenuToggles();
+                        ImGui.Separator();
+                        ImGui.Spacing();
+                    }
+
                     DrawPathSelection();
                     if (!Plugin.States.HasFlag(PluginState.Looping) && !Plugin.Overlay.IsOpen)
                         MainWindow.GotoAndActions();
@@ -324,7 +331,6 @@ namespace AutoDuty.Windows
                     }
                 }
 
-
                 
                 using (ImRaii.Disabled(Plugin.States.HasFlag(PluginState.Looping)))
                 {
@@ -400,7 +406,6 @@ namespace AutoDuty.Windows
                                                 AutoDuty.Configuration.Loop.Pre.Actions.RunConfig<AutoEquipLoopActionConfig>();
                                             }
 
-
                                         ImGui.EndCombo();
                                     }
 
@@ -439,13 +444,15 @@ namespace AutoDuty.Windows
                                     }
                                 }
 
+                                if (AutoDuty.Configuration.Meta.DutyModeEnum == DutyMode.Crucible && Player.Available)
+                                    DrawCrucible();
+
                                 if (AutoDuty.Configuration.Meta.DutyModeEnum == DutyMode.Trust && Player.Available)
                                 {
                                     ImGui.Separator();
                                     if (DutySelected is { Content.TrustMembers.Count: > 0 })
                                     {
                                         ImGuiEx.LineCentered(() => ImGuiEx.TextUnderlined(Loc.Get("MainTab.SelectTrustParty")));
-
 
                                         TrustHelper.ResetTrustIfInvalid();
                                         for (int i = 0; i < AutoDuty.Configuration.SelectedTrustMembers.Length; i++)
@@ -534,7 +541,6 @@ namespace AutoDuty.Windows
                             if (ConfigurationMain.Instance.dutyCountResetDate <= DateTime.UtcNow)
                                 ConfigurationMain.Instance.dutyCountSinceReset.Clear();
                         }
-
 
                         ImGui.SameLine();
                         ImGui.Text($"|{Loc.Get("MainTab.DungeonsRemaining", Math.Max(0, 100 - ConfigurationMain.Instance.dutyCountSinceReset.GetValueOrDefault(Player.CID, 0)))}");
@@ -724,8 +730,6 @@ namespace AutoDuty.Windows
                                             ContentPathsManager.ContentPathContainer entryContainer = ContentPathsManager.DictionaryPaths[entry.Id];
                                             Content                                  entryContent   = ContentHelper.DictionaryContent[entry.Id];
 
-
-
                                             ImGui.PushItemWidth(80f.Scale());
                                             if (ImGui.InputInt($"##Playlist{i}Count", ref entry.count, step: 1, stepFast: 2, @"%dx")) 
                                                 entry.count = Math.Max(1, entry.count);
@@ -785,7 +789,6 @@ namespace AutoDuty.Windows
                                                     entryIlvl = (ushort) gearset->ItemLevel;
                                                 }
 
-
                                                 short level = PlayerHelper.GetCurrentLevelFromSheet(entryJob);
                                                 entryIlvl ??= InventoryHelper.CurrentItemLevel;
                                                 DrawSearchBar();
@@ -820,7 +823,6 @@ namespace AutoDuty.Windows
                                                     ImGui.EndCombo();
                                                 }
                                             }
-
 
                                             ImGui.PopItemWidth();
                                             ImGui.SameLine();
@@ -862,7 +864,6 @@ namespace AutoDuty.Windows
                                                 Plugin.PlaylistCurrent.Entries.RemoveAt(i);
                                         }
 
-
                                         if (ImGuiComponents.IconButton("PlaylistAdd", FontAwesomeIcon.Plus)) 
                                             Plugin.PlaylistCurrent.Entries.Add(new PlaylistEntry { DutyMode = Plugin.PlaylistCurrent.Entries.Count != 0 ? Plugin.PlaylistCurrent.Entries.Last().DutyMode : DutyMode.Support });
 
@@ -881,6 +882,230 @@ namespace AutoDuty.Windows
                     }
                     ImGui.EndListBox();
                 }
+            }
+        }
+
+        private static void DrawCrucible()
+        {
+            ConfigurationProfileV2.MetaConfig.CrucibleConfig crucible = AutoDuty.Configuration.Meta.Crucible;
+
+            ImGui.Separator();
+            ImGuiEx.LineCentered(() => ImGuiEx.TextUnderlined(Loc.Get("MainTab.Crucible.Team")));
+
+            foreach (CrucibleTeamMode mode in Enum.GetValues<CrucibleTeamMode>())
+            {
+                if (mode != CrucibleTeamMode.Recommended)
+                    ImGui.SameLine();
+                if (ImGui.RadioButton(Loc.Get($"MainTab.Crucible.Modes.{mode}"), crucible.TeamMode == mode) && crucible.TeamMode != mode)
+                {
+                    crucible.TeamMode = mode;
+                    ConfigurationProfileV2.Save();
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(Loc.Get($"MainTab.Crucible.ModesHelp.{mode}"));
+            }
+
+            List<uint>                                  team   = CrucibleTeam.For(crucible.TeamMode);
+            IReadOnlyDictionary<uint, CrucibleFamiliar> cached = CrucibleTeam.Familiars;
+            List<uint>                                  owned  = CrucibleTeam.Owned().ToList();
+
+            if (ImGui.CollapsingHeader($"{Loc.Get("MainTab.Crucible.Familiars", team.Count, CrucibleTeam.TeamSize)}###CrucibleFamiliars"))
+            {
+                using (ImRaii.Disabled(!ImGui.GetIO().KeyCtrl || cached.Count == 0))
+                    if (ImGui.SmallButton(Loc.Get("MainTab.Crucible.ClearRanks")))
+                        CrucibleTeam.ClearSaved();
+
+                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                    ImGui.SetTooltip(Loc.Get("MainTab.Crucible.ClearRanksHelp"));
+
+                if (owned.Count == 0)
+                    ImGuiEx.TextWrapped(Loc.Get("MainTab.Crucible.NoFamiliars"));
+                else
+                    DrawCrucibleFamiliarTable(crucible, team, cached, owned);
+            }
+
+            if (ImGui.CollapsingHeader($"{Loc.Get("MainTab.Crucible.Menus")}###CrucibleMenus"))
+                DrawCrucibleMenuToggles();
+        }
+
+        private static readonly Vector4 CruciblePickedRow = new(0.25f, 0.55f, 0.95f, 0.18f);
+        private static readonly Vector4 CrucibleFaded     = new(1f, 1f, 1f, 0.45f);
+
+        private static void DrawCrucibleFamiliarTable(ConfigurationProfileV2.MetaConfig.CrucibleConfig crucible, List<uint> team,
+                                                      IReadOnlyDictionary<uint, CrucibleFamiliar> cached, List<uint> owned)
+        {
+            bool custom = crucible.TeamMode == CrucibleTeamMode.Custom;
+
+            IEnumerable<uint> rows = crucible.TeamMode switch
+            {
+                CrucibleTeamMode.Leveling    => owned.OrderBy(x => CrucibleTeam.LevelingKey(x)).ThenBy(x => x),
+                CrucibleTeamMode.Recommended => owned.OrderByDescending(x => cached.TryGetValue(x, out CrucibleFamiliar? f) ? f.Rank : -1)
+                                                     .ThenByDescending(x => cached.TryGetValue(x, out CrucibleFamiliar? f) ? f.Score() : -1)
+                                                     .ThenBy(x => x),
+                _ => owned
+            };
+
+            float scale     = ImGuiHelpers.GlobalScale;
+            float rowHeight = ImGui.GetFrameHeightWithSpacing();
+            float height    = Math.Min(owned.Count + 1, 12) * rowHeight + 4 * scale;
+
+            ImGuiTableFlags flags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersOuter | ImGuiTableFlags.ScrollY | ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.PadOuterX;
+            if (!ImGui.BeginTable("##CrucibleTable", 6, flags, new Vector2(0, height)))
+                return;
+
+            ImGui.TableSetupScrollFreeze(0, 1);
+            ImGui.TableSetupColumn("##pick",                                 ImGuiTableColumnFlags.WidthFixed, ImGui.GetFrameHeight());
+            ImGui.TableSetupColumn("No.",                                    ImGuiTableColumnFlags.WidthFixed, 28 * scale);
+            ImGui.TableSetupColumn(Loc.Get("MainTab.Crucible.Familiar"),    ImGuiTableColumnFlags.WidthStretch);
+            ImGui.TableSetupColumn(Loc.Get("MainTab.Crucible.Rank"),        ImGuiTableColumnFlags.WidthFixed, 36 * scale);
+            ImGui.TableSetupColumn("EXP",                                    ImGuiTableColumnFlags.WidthFixed, 90 * scale);
+            ImGui.TableSetupColumn("HP",                                     ImGuiTableColumnFlags.WidthFixed, 44 * scale);
+            ImGui.TableHeadersRow();
+
+            foreach (uint number in rows)
+            {
+                cached.TryGetValue(number, out CrucibleFamiliar? familiar);
+                bool picked = team.Contains(number);
+
+                ImGui.TableNextRow(ImGuiTableRowFlags.None, ImGui.GetFrameHeight());
+                if (picked && !custom)
+                    ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg1, ImGui.ColorConvertFloat4ToU32(CruciblePickedRow));
+
+                ImGui.TableNextColumn();
+                bool full = !picked && team.Count >= CrucibleTeam.TeamSize;
+                using (ImRaii.Disabled(!custom || full))
+                    if (ImGui.Checkbox($"##CruciblePick{number}", ref picked))
+                        CrucibleTeam.SetCustomPick(number, picked);
+                if (custom && full && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                    ImGui.SetTooltip(Loc.Get("MainTab.Crucible.CustomFull", CrucibleTeam.TeamSize));
+
+                ImGui.TableNextColumn();
+                ImGui.AlignTextToFramePadding();
+                RightAligned(number.ToString(), CrucibleFaded);
+
+                ImGui.TableNextColumn();
+                ImGui.AlignTextToFramePadding();
+                ImGui.TextUnformatted(CrucibleTeam.NameOf(number));
+                if (ImGui.IsItemHovered())
+                    DrawCrucibleFamiliarTooltip(number, familiar);
+
+                ImGui.TableNextColumn();
+                ImGui.AlignTextToFramePadding();
+                if (familiar is { Rank: > 0 })
+                    Centered(familiar.Rank.ToString(), null);
+                else
+                    Centered("—", CrucibleFaded);
+
+                ImGui.TableNextColumn();
+                float share = CrucibleUi.ExpShare(familiar?.Exp ?? "");
+                if (familiar is { Exp.Length: > 0 })
+                    ImGui.ProgressBar(share, new Vector2(-1, ImGui.GetFrameHeight()), familiar.Exp);
+                else
+                {
+                    ImGui.AlignTextToFramePadding();
+                    Centered("—", CrucibleFaded);
+                }
+
+                ImGui.TableNextColumn();
+                ImGui.AlignTextToFramePadding();
+                if (familiar is { Hp: > 0 })
+                    RightAligned(familiar.Hp.ToString(), null);
+                else
+                    RightAligned("—", CrucibleFaded);
+            }
+
+            ImGui.EndTable();
+
+            ImGui.TextColored(CrucibleFaded, Loc.Get(custom ? "MainTab.Crucible.TableLegendCustom" : "MainTab.Crucible.TableLegend"));
+
+            static void RightAligned(string text, Vector4? color)
+            {
+                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(text).X));
+                Text(text, color);
+            }
+
+            static void Centered(string text, Vector4? color)
+            {
+                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, (ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(text).X) / 2));
+                Text(text, color);
+            }
+
+            static void Text(string text, Vector4? color)
+            {
+                if (color is { } c)
+                    ImGui.TextColored(c, text);
+                else
+                    ImGui.TextUnformatted(text);
+            }
+        }
+
+        private static void DrawCrucibleFamiliarTooltip(uint number, CrucibleFamiliar? familiar)
+        {
+            ImGui.BeginTooltip();
+
+            ImGui.TextUnformatted($"No. {number}  {CrucibleTeam.NameOf(number)}");
+
+            if (familiar is not { Rank: > 0 })
+            {
+                ImGui.TextColored(CrucibleFaded, Loc.Get("MainTab.Crucible.NotSeen"));
+            }
+            else
+            {
+                if (familiar.Classification.Length > 0)
+                    ImGui.TextColored(CrucibleFaded, familiar.Classification);
+
+                ImGui.Separator();
+                if (ImGui.BeginTable("##CrucibleStats", 2, ImGuiTableFlags.SizingFixedFit))
+                {
+                    Stat("Rank",             familiar.Rank.ToString());
+                    Stat("EXP",              familiar.Exp.Length > 0 ? familiar.Exp : "—");
+                    Stat("HP",               familiar.Hp.ToString());
+                    Stat("Strength",         familiar.Strength.ToString());
+                    Stat("Intelligence",     familiar.Intelligence.ToString());
+                    Stat("Constitution",     familiar.Constitution.ToString());
+                    Stat("Phys. Resistance", familiar.PhysicalResistance.ToString());
+                    Stat("Mag. Resistance",  familiar.MagicResistance.ToString());
+                    ImGui.EndTable();
+                }
+            }
+
+            ImGui.EndTooltip();
+
+            static void Stat(string label, string value)
+            {
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn();
+                ImGui.TextColored(CrucibleFaded, label);
+                ImGui.TableNextColumn();
+                ImGui.TextUnformatted(value);
+            }
+        }
+
+        private static void DrawCrucibleMenuToggles()
+        {
+            ConfigurationProfileV2.MetaConfig.CrucibleConfig crucible = AutoDuty.Configuration.Meta.Crucible;
+
+            Toggle("FightPicks", crucible.FightPicks, v => crucible.FightPicks = v);
+            ImGui.SameLine();
+            Toggle("Loot", crucible.Loot, v => crucible.Loot = v);
+            ImGui.SameLine();
+            Toggle("Treasure", crucible.Treasure, v => crucible.Treasure = v);
+            Toggle("Shop", crucible.Shop, v => crucible.Shop = v);
+            ImGui.SameLine();
+            Toggle("Rest", crucible.Rest, v => crucible.Rest = v);
+            ImGui.SameLine();
+            Toggle("Items", crucible.Items, v => crucible.Items = v);
+            Toggle("MenusWithoutRun", crucible.MenusWithoutRun, v => crucible.MenusWithoutRun = v);
+
+            static void Toggle(string key, bool value, Action<bool> set)
+            {
+                if (ImGui.Checkbox(Loc.Get($"MainTab.Crucible.Toggles.{key}"), ref value))
+                {
+                    set(value);
+                    ConfigurationProfileV2.Save();
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(Loc.Get($"MainTab.Crucible.TogglesHelp.{key}"));
             }
         }
 

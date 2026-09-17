@@ -61,6 +61,9 @@ public class ConfigurationMain
             this.CID.GetHashCode();
     }
 
+    [JsonProperty]
+    public Dictionary<ulong, CrucibleCharacterData> crucibleByCID = [];
+
     public const string PLAYLISTNAME_EPHEMERAL = "Ephemeral";
     [JsonProperty]
     public List<Playlist> Playlists { get; set; } = [];
@@ -94,7 +97,6 @@ public class ConfigurationMain
             return newStat;
         }
     }
-
 
     [JsonProperty]
     //Dev Options
@@ -171,8 +173,6 @@ public class ConfigurationMain
         foreach (ProfileData profile in this.profileData)
             if(profile.Name != CONFIGNAME_BARE)
                 RegisterProfileData(profile);
-
-
 
         ProfileData profileBare = new()
                                   {

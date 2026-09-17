@@ -209,6 +209,13 @@
             Crucible   = 1 << 8
         }
 
+        public enum CrucibleTeamMode : int
+        {
+            Recommended = 0,
+            Leveling    = 1,
+            Custom      = 2
+        }
+
         public enum LevelingMode : int
         {
             None = 0,

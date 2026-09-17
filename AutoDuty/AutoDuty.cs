@@ -281,6 +281,7 @@ public sealed class AutoDuty : IDalamudPlugin
     public readonly   ActionsManager           actions           = null!;
     private readonly  SquadronManager          squadronManager   = null!;
     private readonly  VariantManager           variantManager    = null!;
+    private readonly  CrucibleManager          crucibleManager   = null!;
     private readonly  OverrideAFK              overrideAfk       = null!;
     private readonly  IPCProvider              ipcProvider       = null!;
 
@@ -354,6 +355,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.ipcProvider     = new IPCProvider();
             this.squadronManager = new SquadronManager(this.taskManager);
             this.variantManager  = new VariantManager(this.taskManager);
+            this.crucibleManager = new CrucibleManager(this.taskManager);
             this.actions         = new ActionsManager(Plugin, this.taskManager);
             this.overrideCamera   = new OverrideCamera();
             this.Overlay          = new Overlay();
@@ -1332,6 +1334,13 @@ public sealed class AutoDuty : IDalamudPlugin
             this.taskManager.Enqueue(() => GotoBarracksHelper.State != ActionState.Running && GotoInnHelper.State != ActionState.Running, "Queue-WaitGotoComplete", new TaskManagerConfiguration(int.MaxValue));
             this.squadronManager.RegisterSquadron(content);
         }
+        else if (Configuration.Meta.DutyModeEnum == DutyMode.Crucible)
+        {
+            this.taskManager.Enqueue(CrucibleManager.GotoLauda, "Queue-GotoLaudaInvoke");
+            this.taskManager.EnqueueDelay(50);
+            this.taskManager.Enqueue(() => GotoHelper.State != ActionState.Running, "Queue-WaitGotoComplete", new TaskManagerConfiguration(int.MaxValue));
+            this.crucibleManager.RegisterCrucible(content);
+        }
 
         this.taskManager.Enqueue(() => !PlayerHelper.IsValid, "Queue-WaitNotValid");
         this.taskManager.Enqueue(() => PlayerHelper.IsValid,  "Queue-WaitValid", new TaskManagerConfiguration(int.MaxValue));
@@ -2041,6 +2050,8 @@ public sealed class AutoDuty : IDalamudPlugin
         this.PreStageChecks();
 
         this.DutyData?.FrameworkUpdate(framework);
+
+        this.crucibleManager.Update();
 
         switch (this.Stage)
         {

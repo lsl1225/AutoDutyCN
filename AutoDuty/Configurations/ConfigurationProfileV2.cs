@@ -82,6 +82,24 @@ public class ConfigurationProfileV2
         public bool PreferTrustOverSupportLeveling { get; set; } = false;
         public bool SquadronAssignLowestMembers    { get; set; } = true;
 
+        public CrucibleConfig Crucible { get; set; } = new();
+
+        [JsonObject(MemberSerialization.OptOut)]
+        public class CrucibleConfig
+        {
+            public CrucibleTeamMode TeamMode   { get; set; } = CrucibleTeamMode.Recommended;
+            public List<uint>       CustomTeam { get; set; } = [];
+
+            public bool FightPicks { get; set; } = true;
+            public bool Loot       { get; set; } = true;
+            public bool Treasure   { get; set; } = true;
+            public bool Shop       { get; set; } = true;
+            public bool Rest       { get; set; } = true;
+            public bool Items      { get; set; } = true;
+
+            public bool MenusWithoutRun { get; set; } = false;
+        }
+
         public bool ShowMainWindowOnStartup { get; set; } = false;
 
         public bool UseSliderInputs { get; set; } = false;

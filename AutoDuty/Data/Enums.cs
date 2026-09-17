@@ -205,7 +205,15 @@
             Trial      = 1 << 4,
             Raid       = 1 << 5,
             Variant    = 1 << 6,
-            NoviceHall = 1 << 7
+            NoviceHall = 1 << 7,
+            Crucible   = 1 << 8
+        }
+
+        public enum CrucibleTeamMode : int
+        {
+            Recommended = 0,
+            Leveling    = 1,
+            Custom      = 2
         }
 
         public enum LevelingMode : int

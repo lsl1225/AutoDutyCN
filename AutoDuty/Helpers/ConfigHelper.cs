@@ -218,15 +218,31 @@ namespace AutoDuty.Helpers
             instance ??= ConfigurationMain.Instance.GetCurrentConfig;
 
             PropertyInfo[] properties = instance.GetType().GetProperties(All | BindingFlags.DeclaredOnly);
-            if (properties.Length == 0) 
+            if (properties.Length == 0)
                 return;
 
             foreach (PropertyInfo property in properties)
             {
-                if (property.PropertyType.FullName?.Contains("ConfigurationProfileV2") ?? false)
-                    ListConfig(property.GetValue(instance), prefix + property.Name + ".");
-                else
+                if (property.SetMethod != null && property.PropertyType.IsAssignableTo(typeof(string)))
+                    Svc.Log.Info($"{prefix}{property.Name} = {property.GetValue(instance)} ({property.PropertyType.Name}");
+
+                if (property.PropertyType.IsAssignableTo(typeof(IList)) && !property.PropertyType.IsAssignableTo(typeof(string)))
+                {
+                    IList valueList = (IList)property.GetValue(instance)!;
+                    for (int index = 0; index < valueList.Count; index++)
+                    {
+                        object? value = valueList[index];
+                        ListConfig(value, $"{prefix}{property.Name}.[{index}/{value?.GetType().Name}].");
+                    }
+                } 
+                else if ((property.PropertyType.FullName?.Contains(nameof(ConfigurationProfileV2)) ?? false) || (property.PropertyType.FullName?.Contains(nameof(LoopActionConfig)) ?? false))
+                {
+                    ListConfig(property.GetValue(instance), $"{prefix}{property.Name}.");
+                }
+                else if(property.SetMethod != null)
+                {
                     Svc.Log.Info($"{prefix}{property.Name} = {property.GetValue(instance)} ({property.PropertyType.Name}{(property.PropertyType.IsEnum ? $" {string.Join(", ", Enum.GetNames(property.PropertyType))}" : "")})");
+                }
             }
         }
 
@@ -242,6 +258,27 @@ namespace AutoDuty.Helpers
             {
                 string subConfig = configName[..dotIndex];
                 Svc.Log.Debug("Subconfig found: " + subConfig);
+
+
+                if (subConfig[0] == '[')
+                    if (type.IsAssignableTo(typeof(IList)))
+                    {
+                        IList  valueList   = (IList)instance;
+                        string indexString = subConfig[1..^1];
+
+                        if (int.TryParse(indexString, out int index))
+                            if (valueList.Count <= index)
+                            {
+                                object? value = valueList[index];
+                                if (value != null)
+                                    return FindConfig(configName[(dotIndex + 1)..], value.GetType(), value);
+                            }
+
+                        foreach (object o in valueList)
+                            if (o.GetType().Name.Equals(indexString))
+                                return FindConfig(configName[(dotIndex + 1)..], o.GetType(), o);
+                    }
+
 
                 PropertyInfo[] p = type.GetProperties(All);
                 foreach (PropertyInfo property in p)

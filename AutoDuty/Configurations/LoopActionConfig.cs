@@ -560,15 +560,12 @@ public class GCTurnInLoopActionConfig : ActiveLoopActionConfig<GCTurninHelper, G
         using (ImRaii.Disabled(!this.SlotsLeftBool))
         {
             int gcTurninSlotsLeft = this.SlotsLeft;
-            ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-
+            
             if (MakeSliderOrInput(ref gcTurninSlotsLeft, "##Slots", 0, 140))
             {
                 this.SlotsLeft = Math.Clamp(gcTurninSlotsLeft, 0, 140);
                 ConfigurationProfileV2.Save();
             }
-
-            ImGui.PopItemWidth();
         }
 
         bool gcTurninUseTicket = this.UseTicket;

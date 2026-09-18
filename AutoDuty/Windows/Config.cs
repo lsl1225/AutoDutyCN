@@ -327,6 +327,13 @@ public static class ConfigTab
                 Configuration.Meta.UseSliderInputs = sliderInputs;
                 ConfigurationProfileV2.Save();
             }
+            ImGui.SameLine();
+            bool loopActionsOpen = Configuration.Meta.LoopActionsOpenByDefault;
+            if (ImGuiEx.CheckboxWrapped(Loc.Get("ConfigTab.Overlay.LoopActionsOpenByDefault"), ref loopActionsOpen))
+            {
+                Configuration.Meta.LoopActionsOpenByDefault = loopActionsOpen;
+                ConfigurationProfileV2.Save();
+            }
         }
 
         if (Plugin.isDev)

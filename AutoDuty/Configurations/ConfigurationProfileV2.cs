@@ -99,7 +99,8 @@ public class ConfigurationProfileV2
 
         public bool ShowMainWindowOnStartup { get; set; } = false;
 
-        public bool UseSliderInputs { get; set; } = false;
+        public bool UseSliderInputs          { get; set; } = false;
+        public bool LoopActionsOpenByDefault { get; set; } = true;
     }
 
     public LogConfig Log { get; set; }
@@ -464,7 +465,7 @@ public class ConfigurationProfileV2
     {
         private float imguiListX = 400;
 
-        public LoopActionConfig? FindConfig<T>() where T : LoopActionConfig => 
+        public LoopActionConfig? FindConfig<T>() where T : LoopActionConfig =>  
             this.FirstOrDefault(lac => lac is T);
 
         public bool RunConfig<T>(bool queue = true) where T : LoopActionConfig
@@ -530,7 +531,7 @@ public class ConfigurationProfileV2
                         ImGui.SameLine();
                     }
 
-                actionConfig.OnGUI(startOpened);
+                actionConfig.OnGUI(startOpened && AutoDuty.Configuration.Meta.LoopActionsOpenByDefault);
             }
 
             ImGui.PopItemWidth();

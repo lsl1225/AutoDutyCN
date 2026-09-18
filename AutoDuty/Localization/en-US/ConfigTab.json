@@ -31,7 +31,8 @@
       "OverrideButtons": "Override Overlay Buttons",
       "OverrideButtonsHelp": "Overlay buttons by default are enabled if their config is enabled\nThis will allow you to chose which buttons are enabled",
       "ShowMainWindowOnStartup": "Show Main Window on Startup",
-      "SliderInputs": "Slider Inputs"
+      "SliderInputs": "Slider Inputs",
+      "LoopActionsOpenByDefault": "Open enabled Loop Actions by default"
     },
     "Duty": {
       "Header": "Duty Config Settings",

@@ -5,11 +5,12 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace AutoDuty.Managers
 {
+    using Helpers;
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Linq;
     using System.Text.RegularExpressions;
-    using Helpers;
 
     internal static unsafe class CrucibleUi
     {
@@ -155,7 +156,7 @@ namespace AutoDuty.Managers
             return count;
         }
 
-        public static int SelectStringIndex(AtkUnitBase* addon, string contains)
+        public static int SelectStringIndex(AtkUnitBase* addon, params string[] contains)
         {
             AddonSelectString* select = (AddonSelectString*)addon;
             ref PopupMenu      menu   = ref select->PopupMenu.PopupMenu;
@@ -168,7 +169,7 @@ namespace AutoDuty.Managers
                     continue;
 
                 string entry = MemoryHelper.ReadSeStringNullTerminated((nint)menu.EntryNames[i].Value).TextValue;
-                if (entry.Contains(contains, StringComparison.OrdinalIgnoreCase))
+                if (contains.Any(s => entry.Contains(s, StringComparison.OrdinalIgnoreCase)))
                     return i;
             }
 

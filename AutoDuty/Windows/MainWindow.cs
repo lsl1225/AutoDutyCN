@@ -148,6 +148,7 @@ public sealed class MainWindow : Window, IDisposable
                 if (ImGui.Selectable(Loc.Get("MainWindow.Goto.FCEstate"))) GotoHousingHelper.Invoke(Housing.FC_Estate);
 
                 if (ImGui.Selectable(Loc.Get("MainWindow.Goto.TripleTriadTrader"))) GotoHelper.Invoke(TripleTriadCardSellHelper.GoldSaucerTerritoryType, TripleTriadCardSellHelper.TripleTriadCardVendorLocation);
+                if (ImGui.Selectable(Loc.Get("MainWindow.Goto.Crucible"))) GotoHelper.Invoke(CrucibleManager.LaudaTerritory, CrucibleManager.LaudaPosition, lastPointTollerance: 4f);
                 ImGui.EndPopup();
             }
 

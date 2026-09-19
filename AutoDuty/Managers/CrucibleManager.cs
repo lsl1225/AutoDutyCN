@@ -19,10 +19,10 @@ namespace AutoDuty.Managers
 
     public class CrucibleManager(TaskManager _taskManager)
     {
-        internal const           uint   LaudaTerritory = 148u;
-        internal static readonly uint[] LaudaDataIds   = [1059316u, 1059339u, 1059759u];
+        public const           uint   LaudaTerritory = 148u;
+        public static readonly uint[] LaudaDataIds   = [1059316u, 1059339u, 1059759u];
 
-        private static readonly Vector3 LaudaPosition = new(25.50f, -6.00f, 67.52f);
+        public static readonly Vector3 LaudaPosition = new(25.50f, -6.00f, 67.52f);
 
         private static readonly Dictionary<uint, uint> BoardByDuty = new()
                                                                      {

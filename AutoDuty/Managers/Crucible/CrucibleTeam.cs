@@ -212,11 +212,11 @@ namespace AutoDuty.Managers
 
             bool changed = false;
             foreach (string window in DetailWindows)
-                if (CrucibleUi.Detail(window) is { } seen)
-                    changed |= Remember(seen);
+                if (CrucibleUi.FamiliarDetail(window) is { } seen)
+                    changed |= RememberFamiliar(seen);
 
             if (!Scanning && CrucibleUi.TryReady(CrucibleUi.BestiaryWindow, out AtkUnitBase* notebook) && CrucibleUi.BestiarySelected(notebook) is { } selected)
-                changed |= Remember(selected);
+                changed |= RememberFamiliar(selected);
 
             if (CrucibleUi.Team() is { } rows)
                 changed |= RememberTeam(rows);
@@ -236,7 +236,7 @@ namespace AutoDuty.Managers
                     continue;
 
                 team.Add(number);
-                changed |= Remember(number, row);
+                changed |= RememberFamiliarFromTeamRow(number, row);
             }
 
             CrucibleCharacterData mine = Mine(true)!;
@@ -264,10 +264,10 @@ namespace AutoDuty.Managers
             set => scanningUntil = value ? DateTime.UtcNow.AddSeconds(2) : DateTime.MinValue;
         }
 
-        public static bool RememberUnsaved(CrucibleFamiliar seen) =>
-            Remember(seen);
+        public static bool RememberFamiliarUnsaved(CrucibleFamiliar seen) =>
+            RememberFamiliar(seen);
 
-        private static bool Remember(CrucibleFamiliar seen)
+        private static bool RememberFamiliar(CrucibleFamiliar seen)
         {
             if (seen.Number == 0)
                 seen.Number = NumberFor(seen.Name);
@@ -280,7 +280,7 @@ namespace AutoDuty.Managers
             return seen != before;
         }
 
-        private static bool Remember(uint number, CrucibleUi.TeamRow row)
+        private static bool RememberFamiliarFromTeamRow(uint number, CrucibleUi.TeamRow row)
         {
             if (row.Hp == 0)
                 return false;
@@ -339,6 +339,7 @@ namespace AutoDuty.Managers
         private string           signature = "";
         private DateTime         signatureSince;
         private bool             triedRemoveAll;
+        private bool             rebuilding;
         private DateTime         requestedAt;
 
         private readonly List<uint> batch = [];
@@ -353,6 +354,10 @@ namespace AutoDuty.Managers
         private CrucibleFamiliar? scanRead;
         private bool        scanChanged;
         private bool        scanRetried;
+        private bool        scanClearing;
+        private int         scanCap = CrucibleTeam.TeamSize;
+        private uint        scanRequeued;
+        private int         clearTries;
 
         public string? Error  { get; private set; }
         public string  Status { get; private set; } = "";
@@ -365,11 +370,16 @@ namespace AutoDuty.Managers
             this.actions        = 0;
             this.signature      = "";
             this.triedRemoveAll = false;
+            this.rebuilding     = true;
             this.requestedAt    = DateTime.MinValue;
             this.batch.Clear();
             this.scanDone       = false;
             this.scanQueue      = null;
             this.scanning       = 0;
+            this.scanClearing   = false;
+            this.scanCap        = CrucibleTeam.TeamSize;
+            this.scanRequeued   = 0;
+            this.clearTries     = 0;
             CrucibleTeam.Scanning = false;
             this.Error          = null;
             this.Status         = "Setting up the team";
@@ -391,7 +401,7 @@ namespace AutoDuty.Managers
             {
                 if (this.scanQueue == null && CrucibleTeam.RememberTeam(rows))
                     ConfigurationMain.Save();
-                return this.Scan(party, now);
+                return this.Scan(party, rows.Count, now);
             }
 
             CrucibleTeam.UpdateCache();
@@ -492,8 +502,11 @@ namespace AutoDuty.Managers
             return false;
         }
 
-        private bool Scan(AtkUnitBase* party, DateTime now)
+        private bool Scan(AtkUnitBase* party, int teamCount, DateTime now)
         {
+            if (this.scanClearing)
+                return this.ClearForScan(party, teamCount, now);
+
             if (!CrucibleUi.TryReady(CrucibleUi.BestiaryWindow, out AtkUnitBase* notebook))
             {
                 if (this.scanQueue == null && CrucibleTeam.Owned().Any() && CrucibleTeam.MissingRanks().Count == 0)
@@ -526,12 +539,22 @@ namespace AutoDuty.Managers
                         return false;
                     }
 
-                    this.scanChanged |= CrucibleTeam.RememberUnsaved(selected);
+                    this.scanChanged |= CrucibleTeam.RememberFamiliarUnsaved(selected);
                     this.scanQueue.Remove(this.scanning);
                     this.scanning = 0;
                 }
                 else if (now - this.scanStarted > ScanPatience)
                 {
+                    if (teamCount > 0 && this.scanRequeued != this.scanning)
+                    {
+                        Svc.Log.Info($"[Crucible] The board won't take another familiar at {teamCount}; clearing it and re-reading No. {this.scanning}");
+                        this.scanCap      = Math.Min(this.scanCap, teamCount);
+                        this.scanRequeued = this.scanning;
+                        this.scanning     = 0;
+                        this.StartScanClear(party, teamCount, now);
+                        return false;
+                    }
+
                     Svc.Log.Warning($"[Crucible] No. {this.scanning} never showed in the bestiary's detail pane; skipping it");
                     this.scanQueue.Remove(this.scanning);
                     this.scanning = 0;
@@ -547,6 +570,13 @@ namespace AutoDuty.Managers
 
             if (this.scanQueue.Count == 0)
                 return this.FinishScan(now);
+
+            if (teamCount >= this.scanCap)
+            {
+                Svc.Log.Info($"[Crucible] Board is holding {teamCount}; clearing it before reading more ranks");
+                this.StartScanClear(party, teamCount, now);
+                return false;
+            }
 
             uint next = this.scanQueue[0];
             if (!this.ShowPageOf(notebook, next, now))
@@ -567,6 +597,95 @@ namespace AutoDuty.Managers
             return false;
         }
 
+        private void StartScanClear(AtkUnitBase* party, int teamCount, DateTime now)
+        {
+            this.scanClearing = true;
+            this.countBefore  = teamCount;
+            this.Status       = "Clearing the board to read more ranks";
+            Screens.PetParty.OpenRowMenu(party, 0);
+            this.SetStep(Step.AwaitRemoveAllMenu, now);
+        }
+
+        private bool ClearForScan(AtkUnitBase* party, int teamCount, DateTime now)
+        {
+            if (teamCount == 0)
+            {
+                this.scanClearing = false;
+                this.clearTries   = 0;
+                this.requestedAt  = DateTime.MinValue;
+                return false;
+            }
+
+            bool waitedTooLong = now - this.stepSince > StepPatience;
+
+            switch (this.step)
+            {
+                case Step.AwaitRemoveAllMenu:
+                    if (CrucibleUi.TryReady(CrucibleUi.ContextMenu, out AtkUnitBase* menu))
+                    {
+                        this.clearTries = 0;
+                        if (CrucibleUi.ContextMenuOptionCount(menu) >= 3)
+                        {
+                            Screens.Menu.ChooseRemoveAll(menu);
+                            this.SetStep(Step.AwaitRemoveAllConfirm, now);
+                        }
+                        else
+                        {
+                            Screens.Menu.ChooseFirst(menu);
+                            this.SetStep(Step.AwaitRemoved, now);
+                        }
+                    }
+                    else if (waitedTooLong)
+                    {
+                        return this.StalledClear(party, teamCount, now);
+                    }
+
+                    return false;
+
+                case Step.AwaitRemoveAllConfirm:
+                    if (CrucibleUi.TryReady(CrucibleUi.YesNo, out AtkUnitBase* confirm))
+                    {
+                        this.clearTries = 0;
+                        Screens.Prompt.Yes(confirm);
+                        this.SetStep(Step.AwaitRemoved, now);
+                    }
+                    else if (waitedTooLong)
+                    {
+                        return this.StalledClear(party, teamCount, now);
+                    }
+
+                    return false;
+
+                default:
+                    if (teamCount < this.countBefore)
+                    {
+                        this.clearTries = 0;
+                        this.StartScanClear(party, teamCount, now);
+                    }
+                    else if (waitedTooLong)
+                    {
+                        return this.StalledClear(party, teamCount, now);
+                    }
+
+                    return false;
+            }
+        }
+
+        private bool StalledClear(AtkUnitBase* party, int teamCount, DateTime now)
+        {
+            if (++this.clearTries <= 3)
+            {
+                this.StartScanClear(party, teamCount, now);
+                return false;
+            }
+
+            Svc.Log.Warning("[Crucible] Couldn't clear the board to keep reading ranks; going with the ranks already known");
+            this.scanQueue?.Clear();
+            this.scanClearing = false;
+            this.clearTries   = 0;
+            return false;
+        }
+
         private bool FinishScan(DateTime now)
         {
             if (this.scanQueue is { } && this.scanTotal > 0)
@@ -582,6 +701,7 @@ namespace AutoDuty.Managers
             this.scanDone       = true;
             this.goal           = refreshed;
             this.triedRemoveAll = false;
+            this.rebuilding     = true;
             this.signature      = "";
             this.Status         = "Setting up the team";
             this.SetStep(Step.Plan, now);
@@ -596,15 +716,26 @@ namespace AutoDuty.Managers
             if (++this.actions > MaxActions)
                 return this.Fail("Team setup kept going without settling; stopped.");
 
-            if (!this.triedRemoveAll && team.Count > 0 && !this.goal.ToHashSet().SetEquals(team))
+            if (this.rebuilding && team.Count > 0)
             {
-                this.triedRemoveAll = true;
-                this.countBefore    = team.Count;
-                this.Status         = "Removing every familiar";
+                if (!this.triedRemoveAll)
+                {
+                    this.triedRemoveAll = true;
+                    this.countBefore    = team.Count;
+                    this.Status         = "Removing every familiar";
+                    Screens.PetParty.OpenRowMenu(party, 0);
+                    this.SetStep(Step.AwaitRemoveAllMenu, now);
+                    return false;
+                }
+
+                this.countBefore = team.Count;
+                this.Status      = $"Removing {CrucibleTeam.NameOf(team[0])}";
                 Screens.PetParty.OpenRowMenu(party, 0);
-                this.SetStep(Step.AwaitRemoveAllMenu, now);
+                this.SetStep(Step.AwaitMenu, now);
                 return false;
             }
+
+            this.rebuilding = false;
 
             int extra = team.FindIndex(x => !this.goal.Contains(x));
             if (extra >= 0)

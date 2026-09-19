@@ -16,8 +16,8 @@ namespace AutoDuty.Managers
 
     public class CrucibleManager(TaskManager _taskManager)
     {
-        internal const uint LaudaTerritory = 148;
-        internal const uint LaudaDataId    = 1059316;
+        internal const           uint   LaudaTerritory = 148u;
+        internal static readonly uint[] LaudaDataIds   = [1059316u, 1059339u, 1059759u];
 
         private static readonly Vector3 LaudaPosition = new(25.50f, -6.00f, 67.52f);
 
@@ -42,7 +42,7 @@ namespace AutoDuty.Managers
             ContentHelper.DictionaryContent.TryGetValue(territoryType, out Content? content) && content.DutyModes.HasFlag(DutyMode.Crucible);
 
         internal static void GotoLauda() =>
-            GotoHelper.Invoke(LaudaTerritory, [LaudaPosition], LaudaDataId, 0.25f, 4f, false, false, true);
+            GotoHelper.Invoke(LaudaTerritory, [LaudaPosition], 0.25f, 4f);
 
         internal unsafe void RegisterCrucible(Content content)
         {
@@ -170,7 +170,7 @@ namespace AutoDuty.Managers
             if (!PlayerHelper.IsReady)
                 return false;
 
-            if (ObjectHelper.GetObjectByDataId(LaudaDataId) is not { IsTargetable: true } lauda)
+            if (ObjectHelper.GetObjectByDataIds(o => o.IsTargetable, LaudaDataIds) is not { } lauda)
                 return false;
 
             ObjectHelper.InteractWithObject(lauda, false);

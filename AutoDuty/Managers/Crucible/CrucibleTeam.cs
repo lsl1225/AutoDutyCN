@@ -3,7 +3,7 @@ using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Excel;
-using Lumina.Excel.Sheets.Experimental;
+using Lumina.Excel.Sheets;
 using Newtonsoft.Json;
 
 namespace AutoDuty.Managers
@@ -58,14 +58,21 @@ namespace AutoDuty.Managers
                 if (sheetNames != null)
                     return sheetNames;
 
-                sheetNames = [];
-            #pragma warning disable PendingExcelSchema
-                ExcelSheet<Pet> pets = Svc.Data.GetExcelSheet<Pet>();
-                foreach (XBMPet familiar in Svc.Data.GetExcelSheet<XBMPet>())
-                    if (familiar is { RowId: > 0, Pet.ValueNullable: { } pet } && pet.Name.ExtractText() is { Length: > 0 } name)
-                        sheetNames[familiar.RowId] = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(name);
-                return sheetNames;
-            #pragma warning restore PendingExcelSchema
+                SortedDictionary<uint, string> names = [];
+                try
+                {
+                    ExcelSheet<Pet> pets = Svc.Data.GetExcelSheet<Pet>();
+                    foreach (RawRow familiar in Svc.Data.GetExcelSheet<RawRow>(name: "XBMPet"))
+                        if (familiar.RowId > 0 && pets.TryGetRow((uint)familiar.ReadInt32Column(0), out Pet pet) && pet.Name.ExtractText() is { Length: > 0 } name)
+                            names[familiar.RowId] = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(name);
+                }
+                catch (Exception ex)
+                {
+                    Svc.Log.Error(ex, "[Crucible] Couldn't read the XBMPet sheet; familiar names are unknown");
+                    names.Clear();
+                }
+
+                return sheetNames = names;
             }
         }
 

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Windows;
+using Configurations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ECommons.DalamudServices;

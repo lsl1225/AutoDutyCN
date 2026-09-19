@@ -12,6 +12,7 @@ namespace AutoDuty.Managers
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using ECommons.Throttlers;
     using Screens = CrucibleUi.Screens;
 
     [JsonObject(MemberSerialization.OptOut)]
@@ -390,11 +391,14 @@ namespace AutoDuty.Managers
             if (this.Error != null)
                 return true;
 
+            if (!EzThrottler.Throttle("CrucibleTeamRegistration", 100))
+                return false;
+
             DateTime now = DateTime.UtcNow;
 
             AtkUnitBase*              party = CrucibleUi.Ready(CrucibleUi.TeamWindow);
             List<CrucibleUi.TeamRow>? rows  = CrucibleUi.Team();
-            if (party == null || rows == null)
+            if (party == null || rows == null || party->AtkValuesCount <= 0 || !party->AtkValues[0].Bool)
                 return false;
 
             if (!this.scanDone)
@@ -497,6 +501,10 @@ namespace AutoDuty.Managers
                     if (this.goal.All(team.Contains) || now - this.signatureSince > SettleTime || waitedTooLong)
                         this.SetStep(Step.Plan, now);
                     return false;
+                case Step.AddBatch:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             return false;

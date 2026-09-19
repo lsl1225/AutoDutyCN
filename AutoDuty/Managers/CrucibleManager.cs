@@ -64,13 +64,13 @@ namespace AutoDuty.Managers
             _taskManager.Enqueue(() => this.boardStep = 0, "RegisterCrucible-OpenBoard");
             _taskManager.Enqueue(() => this.OpenBoard(board), "RegisterCrucible-OpenBoard", new TaskManagerConfiguration(30000));
 
-            _taskManager.Enqueue(() => this.teamSetup.Start(AutoDuty.Configuration.Meta.Crucible.TeamMode), "RegisterCrucible-Team");
+            _taskManager.Enqueue(() => this.teamSetup.Start(AutoDuty.Configuration.Meta.Crucible.TeamMode), "RegisterCrucible-Team-Setup");
             _taskManager.Enqueue(() =>
                                  {
                                      bool done = this.teamSetup.Update();
                                      Plugin.action = this.teamSetup.Status;
                                      return done;
-                                 }, "RegisterCrucible-Team", new TaskManagerConfiguration(300000));
+                                 }, "RegisterCrucible-Team-Setup", new TaskManagerConfiguration(300000));
             _taskManager.Enqueue(() =>
                                  {
                                      if (this.teamSetup.Error == null)

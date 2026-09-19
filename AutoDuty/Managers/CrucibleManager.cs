@@ -8,6 +8,9 @@ using Lumina.Excel;
 
 namespace AutoDuty.Managers
 {
+    using Dalamud.Memory;
+    using FFXIVClientStructs.FFXIV.Client.UI;
+    using Lumina.Excel.Sheets;
     using System;
     using System.Collections.Generic;
     using System.Numerics;
@@ -64,13 +67,13 @@ namespace AutoDuty.Managers
             _taskManager.Enqueue(() => this.boardStep = 0, "RegisterCrucible-OpenBoard");
             _taskManager.Enqueue(() => this.OpenBoard(board), "RegisterCrucible-OpenBoard", new TaskManagerConfiguration(30000));
 
-            _taskManager.Enqueue(() => this.teamSetup.Start(AutoDuty.Configuration.Meta.Crucible.TeamMode), "RegisterCrucible-Team");
+            _taskManager.Enqueue(() => this.teamSetup.Start(AutoDuty.Configuration.Meta.Crucible.TeamMode), "RegisterCrucible-Team-Setup");
             _taskManager.Enqueue(() =>
                                  {
                                      bool done = this.teamSetup.Update();
                                      Plugin.action = this.teamSetup.Status;
                                      return done;
-                                 }, "RegisterCrucible-Team", new TaskManagerConfiguration(300000));
+                                 }, "RegisterCrucible-Team-Setup", new TaskManagerConfiguration(300000));
             _taskManager.Enqueue(() =>
                                  {
                                      if (this.teamSetup.Error == null)
@@ -115,7 +118,12 @@ namespace AutoDuty.Managers
         private static string ChallengeText =>
             challengeText ??= Svc.Data.GetExcelSheet<RawRow>(name: "custom/009/CtsXbmEntrance_00976").TryGetRow(1, out RawRow row)
                                   ? row.ReadStringColumn(1).ExtractText().TrimEnd('.', '。', ' ')
-                                  : "";
+                                  : string.Empty;
+
+        private static string QuestAlternativeText =>
+            challengeText ??= Svc.Data.GetExcelSheet<CustomTalk>().TryGetRow(721872, out CustomTalk row)
+                                  ? row.MainOption.ExtractText().TrimEnd('.', '。', ' ')
+                                  : string.Empty;
 
         private static unsafe void ChooseChallenge(AtkUnitBase* menu)
         {
@@ -151,6 +159,31 @@ namespace AutoDuty.Managers
                     EzThrottler.Throttle("CrucibleOpenBoard", 1000, true);
                 }
 
+                return false;
+            }
+
+            if (CrucibleUi.TryReady("SelectIconString", out AtkUnitBase* iconMenu))
+            {
+                AddonSelectIconString * select = (AddonSelectIconString*) iconMenu;
+                ref PopupMenu           iconPopMenu = ref select->PopupMenu.PopupMenu;
+                if (iconPopMenu.EntryNames == null)
+                    return false;
+
+                for (int i = 0; i < iconPopMenu.EntryCount; i++)
+                {
+                    if (iconPopMenu.EntryNames[i].Value == null)
+                        continue;
+
+                    string entry = MemoryHelper.ReadSeStringNullTerminated((nint)iconPopMenu.EntryNames[i].Value).TextValue;
+                    
+                    if(entry.Contains(QuestAlternativeText, StringComparison.OrdinalIgnoreCase))
+                    {
+                        AddonHelper.FireCallBack(iconMenu, true, i);
+                        break;
+                    }
+                }
+
+                EzThrottler.Throttle("CrucibleOpenBoard", 600, true);
                 return false;
             }
 

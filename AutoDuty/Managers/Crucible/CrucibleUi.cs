@@ -5,9 +5,11 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace AutoDuty.Managers
 {
+    using Helpers;
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Linq;
     using System.Text.RegularExpressions;
 
     internal static unsafe class CrucibleUi
@@ -50,19 +52,6 @@ namespace AutoDuty.Managers
         {
             addon = Ready(name);
             return addon != null;
-        }
-
-        public static void Fire(AtkUnitBase* addon, bool close, params int[] args)
-        {
-            AtkValue* values = stackalloc AtkValue[args.Length];
-            for (int i = 0; i < args.Length; i++)
-            {
-                values[i] = default;
-                values[i].SetInt(args[i]);
-            }
-
-            Svc.Log.Debug($"[Crucible] {addon->NameString} callback [{string.Join(", ", args)}]");
-            addon->FireCallback((uint)args.Length, values, close);
         }
 
         public static bool ClickButton(AtkUnitBase* addon, uint nodeId)
@@ -167,7 +156,7 @@ namespace AutoDuty.Managers
             return count;
         }
 
-        public static int SelectStringIndex(AtkUnitBase* addon, string contains)
+        public static int SelectStringIndex(AtkUnitBase* addon, params string[] contains)
         {
             AddonSelectString* select = (AddonSelectString*)addon;
             ref PopupMenu      menu   = ref select->PopupMenu.PopupMenu;
@@ -180,7 +169,7 @@ namespace AutoDuty.Managers
                     continue;
 
                 string entry = MemoryHelper.ReadSeStringNullTerminated((nint)menu.EntryNames[i].Value).TextValue;
-                if (entry.Contains(contains, StringComparison.OrdinalIgnoreCase))
+                if (contains.Any(s => entry.Contains(s, StringComparison.OrdinalIgnoreCase)))
                     return i;
             }
 
@@ -474,33 +463,33 @@ namespace AutoDuty.Managers
             {
                 private const uint RestOrReturnButton = 21;
 
-                public static void Pick(AtkUnitBase* party, int row)        => Fire(party, true, 1, row);
-                public static void OpenRowMenu(AtkUnitBase* party, int row) => Fire(party, true, 2, row);
-                public static void OpenBestiary(AtkUnitBase* party)         => Fire(party, true, 5);
-                public static bool Rest(AtkUnitBase* party)                 => ClickButton(party, RestOrReturnButton);
-                public static bool Return(AtkUnitBase* party)               => ClickButton(party, RestOrReturnButton);
+                public static void Pick(AtkUnitBase*         party, int row) => AddonHelper.FireCallBack(party, true, 1, row);
+                public static void OpenRowMenu(AtkUnitBase*  party, int row) => AddonHelper.FireCallBack(party, true, 2, row);
+                public static void OpenBestiary(AtkUnitBase* party) => AddonHelper.FireCallBack(party, true, 5);
+                public static bool Rest(AtkUnitBase*         party) => ClickButton(party, RestOrReturnButton);
+                public static bool Return(AtkUnitBase*       party) => ClickButton(party, RestOrReturnButton);
             }
 
             internal static class StageList
             {
-                public static void Highlight(AtkUnitBase* list, uint board) => Fire(list, true, 2, (int)board);
-                public static void Open(AtkUnitBase* list, uint board)      => Fire(list, true, 1, (int)board);
+                public static void Highlight(AtkUnitBase* list, uint board) => AddonHelper.FireCallBack(list, true, 2, (int)board);
+                public static void Open(AtkUnitBase*      list, uint board) => AddonHelper.FireCallBack(list, true, 1, (int)board);
             }
 
             internal static class StageDetail
             {
-                public static void Confirm(AtkUnitBase* layout) => Fire(layout, true, 8);
+                public static void Confirm(AtkUnitBase* layout) => AddonHelper.FireCallBack(layout, true, 8);
             }
 
             internal static class Notebook
             {
                 private const uint FirstEntryParam = 4;
 
-                public static void ShowPage(AtkUnitBase* notebook, int page) => Fire(notebook, true, 3, page);
+                public static void ShowPage(AtkUnitBase* notebook, int page) => AddonHelper.FireCallBack(notebook, true, 3, page);
 
                 public static bool PickEntry(AtkUnitBase* notebook, uint slotOnPage)
                 {
-                    Fire(notebook, true, 5, (int)slotOnPage);
+                    AddonHelper.FireCallBack(notebook, true, 5, (int)slotOnPage);
                     return ClickEvent(notebook, AtkEventType.MouseDown, FirstEntryParam + slotOnPage);
                 }
             }
@@ -509,9 +498,9 @@ namespace AutoDuty.Managers
             {
                 private const int RemoveAllOption = 2;
 
-                public static void ChooseFirst(AtkUnitBase* menu)     => Fire(menu, true, 0, 0, 0);
-                public static void ChooseRemoveAll(AtkUnitBase* menu) => Fire(menu, true, 0, RemoveAllOption, 0);
-                public static void Close(AtkUnitBase* menu)           => Fire(menu, true, 0, -1, 0);
+                public static void ChooseFirst(AtkUnitBase*     menu) => AddonHelper.FireCallBack(menu, true, 0, 0,               0);
+                public static void ChooseRemoveAll(AtkUnitBase* menu) => AddonHelper.FireCallBack(menu, true, 0, RemoveAllOption, 0);
+                public static void Close(AtkUnitBase*           menu) => AddonHelper.FireCallBack(menu, true, 0, -1,              0);
             }
 
             internal static class Booty
@@ -533,19 +522,19 @@ namespace AutoDuty.Managers
 
             internal static class ItemShop
             {
-                public static void Buy(AtkUnitBase* shop, int index) => Fire(shop, true, 2, index);
+                public static void Buy(AtkUnitBase* shop, int index) => AddonHelper.FireCallBack(shop, true, 2, index);
 
                 public static bool Close(AtkUnitBase* shop) => ClickButton(shop, 40);
             }
 
             internal static class MainHud
             {
-                public static void OpenItemMenu(AtkUnitBase* hud, int slot) => Fire(hud, true, 6, slot);
+                public static void OpenItemMenu(AtkUnitBase* hud, int slot) => AddonHelper.FireCallBack(hud, true, 6, slot);
             }
 
             internal static class Prompt
             {
-                public static void Yes(AtkUnitBase* prompt) => Fire(prompt, true, 0);
+                public static void Yes(AtkUnitBase* prompt) => AddonHelper.FireCallBack(prompt, true, 0);
             }
         }
     }

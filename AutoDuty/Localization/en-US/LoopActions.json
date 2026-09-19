@@ -80,7 +80,7 @@
       "AddItem": "Add Item"
     },
     "ExecuteCommands": {
-      "ExecuteCommandsHelp": "Execute commands on start of all loops\nFor example {0}"
+      "ExecuteCommandsHelp": "Execute commands\nFor example {0}"
     },
     "Wait": {
       "WaitTime": "(ms) Wait time",

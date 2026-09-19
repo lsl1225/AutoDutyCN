@@ -1829,7 +1829,7 @@ public sealed class AutoDuty : IDalamudPlugin
 
         bool? EnableWrath(bool active)
         {
-            if (Wrath_IPCSubscriber.IsEnabled)
+            if (Wrath_IPCSubscriber.IsEnabled && PlayerHelper.GetJob() != Job.BST)
             {
                 bool wrathRotationReady = true;
                 if (active)

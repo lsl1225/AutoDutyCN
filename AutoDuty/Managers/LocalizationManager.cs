@@ -3,13 +3,11 @@ namespace AutoDuty.Managers;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Windows;
 using Configurations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ECommons.DalamudServices;
 using ECommons.Throttlers;
-using FFXIVClientStructs.FFXIV.Application.Network.WorkDefinitions;
 
 internal static class LocalizationManager
 {

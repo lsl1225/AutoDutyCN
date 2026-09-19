@@ -1095,7 +1095,7 @@ namespace AutoDuty.Windows
             Toggle("Rest", crucible.Rest, v => crucible.Rest = v);
             ImGui.SameLine();
             Toggle("Items", crucible.Items, v => crucible.Items = v);
-            Toggle("MenusWithoutRun", crucible.MenusWithoutRun, v => crucible.MenusWithoutRun = v);
+            return;
 
             static void Toggle(string key, bool value, Action<bool> set)
             {

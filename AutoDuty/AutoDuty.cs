@@ -1229,7 +1229,7 @@ public sealed class AutoDuty : IDalamudPlugin
         {
             this.taskManager.Enqueue(() => PlayerHelper.IsReadyFull);
 
-            foreach (LoopActionConfig loopAction in Configuration.Loop.Between.Actions)
+            foreach (LoopActionConfig loopAction in Configuration.Loop.Termination.Actions)
             {
                 bool queue = false;
                 loopAction.Run(ref queue);

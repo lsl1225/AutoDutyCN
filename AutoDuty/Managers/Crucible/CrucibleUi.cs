@@ -358,7 +358,7 @@ namespace AutoDuty.Managers
             return rows;
         }
 
-        public static CrucibleFamiliar? Detail(string window)
+        public static CrucibleFamiliar? FamiliarDetail(string window)
         {
             AtkUnitBase* addon = Ready(window);
             if (addon == null)

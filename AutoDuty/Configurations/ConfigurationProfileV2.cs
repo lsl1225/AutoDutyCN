@@ -93,8 +93,6 @@ public class ConfigurationProfileV2
             public bool Shop       { get; set; } = true;
             public bool Rest       { get; set; } = true;
             public bool Items      { get; set; } = true;
-
-            public bool MenusWithoutRun { get; set; } = false;
         }
 
         public bool ShowMainWindowOnStartup { get; set; } = false;

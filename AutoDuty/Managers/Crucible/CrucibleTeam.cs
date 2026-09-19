@@ -212,11 +212,11 @@ namespace AutoDuty.Managers
 
             bool changed = false;
             foreach (string window in DetailWindows)
-                if (CrucibleUi.Detail(window) is { } seen)
-                    changed |= Remember(seen);
+                if (CrucibleUi.FamiliarDetail(window) is { } seen)
+                    changed |= RememberFamiliar(seen);
 
             if (!Scanning && CrucibleUi.TryReady(CrucibleUi.BestiaryWindow, out AtkUnitBase* notebook) && CrucibleUi.BestiarySelected(notebook) is { } selected)
-                changed |= Remember(selected);
+                changed |= RememberFamiliar(selected);
 
             if (CrucibleUi.Team() is { } rows)
                 changed |= RememberTeam(rows);
@@ -236,7 +236,7 @@ namespace AutoDuty.Managers
                     continue;
 
                 team.Add(number);
-                changed |= Remember(number, row);
+                changed |= RememberFamiliarFromTeamRow(number, row);
             }
 
             CrucibleCharacterData mine = Mine(true)!;
@@ -264,10 +264,10 @@ namespace AutoDuty.Managers
             set => scanningUntil = value ? DateTime.UtcNow.AddSeconds(2) : DateTime.MinValue;
         }
 
-        public static bool RememberUnsaved(CrucibleFamiliar seen) =>
-            Remember(seen);
+        public static bool RememberFamiliarUnsaved(CrucibleFamiliar seen) =>
+            RememberFamiliar(seen);
 
-        private static bool Remember(CrucibleFamiliar seen)
+        private static bool RememberFamiliar(CrucibleFamiliar seen)
         {
             if (seen.Number == 0)
                 seen.Number = NumberFor(seen.Name);
@@ -280,7 +280,7 @@ namespace AutoDuty.Managers
             return seen != before;
         }
 
-        private static bool Remember(uint number, CrucibleUi.TeamRow row)
+        private static bool RememberFamiliarFromTeamRow(uint number, CrucibleUi.TeamRow row)
         {
             if (row.Hp == 0)
                 return false;
@@ -539,7 +539,7 @@ namespace AutoDuty.Managers
                         return false;
                     }
 
-                    this.scanChanged |= CrucibleTeam.RememberUnsaved(selected);
+                    this.scanChanged |= CrucibleTeam.RememberFamiliarUnsaved(selected);
                     this.scanQueue.Remove(this.scanning);
                     this.scanning = 0;
                 }

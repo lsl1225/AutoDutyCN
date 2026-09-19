@@ -186,13 +186,7 @@ namespace AutoDuty.Managers
             CrucibleTeam.UpdateCache();
 
             bool running = (Plugin.States.HasFlag(PluginState.Looping) || Plugin.States.HasFlag(PluginState.Navigating)) && !Plugin.States.HasFlag(PluginState.Paused);
-            bool bypass  = AutoDuty.Configuration.Meta.Crucible.MenusWithoutRun;
-            bool board   = (running || bypass) && IsCrucibleTerritory(Svc.ClientState.TerritoryType);
-
-            if (bypass && !running && !board && _taskManager.NumQueuedTasks == 0)
-                this.UpdateManualQueue();
-            else
-                this.manualStep = ManualStep.Idle;
+            bool board   = running && IsCrucibleTerritory(Svc.ClientState.TerritoryType);
 
             if (!board)
             {
@@ -204,128 +198,6 @@ namespace AutoDuty.Managers
 
             this.onBoard = true;
             this.menus.Update();
-        }
-
-        private enum ManualStep
-        {
-            Idle,
-            Team,
-            Challenge,
-            Commence,
-            Finished
-        }
-
-        private ManualStep manualStep;
-        private DateTime   manualSince;
-
-        private unsafe void UpdateManualQueue()
-        {
-            DateTime now = DateTime.UtcNow;
-
-            switch (this.manualStep)
-            {
-                case ManualStep.Idle:
-                    if (!EzThrottler.Throttle("CrucibleManualQueue", 100))
-                        return;
-
-                    if (CrucibleUi.IsOpen(CrucibleUi.TeamWindow))
-                    {
-                        Svc.Log.Info($"[Crucible] Testing: Team Composition opened, setting up a {AutoDuty.Configuration.Meta.Crucible.TeamMode} team");
-                        this.teamSetup.Start(AutoDuty.Configuration.Meta.Crucible.TeamMode);
-                        this.SetManual(ManualStep.Team, now);
-                        return;
-                    }
-
-                    if (CrucibleUi.TryReady(CrucibleUi.BoardList, out AtkUnitBase* list))
-                    {
-                        if (Plugin.CurrentTerritoryContent is { } content && BoardByDuty.TryGetValue(content.ContentFinderCondition, out uint board) &&
-                            EzThrottler.Throttle("CrucibleOpenBoard", 600))
-                        {
-                            if (this.boardStep == 0)
-                                Screens.StageList.Highlight(list, board);
-                            else
-                                Screens.StageList.Open(list, board);
-                            this.boardStep = 1 - this.boardStep;
-                        }
-
-                        return;
-                    }
-
-                    this.boardStep = 0;
-
-                    if (Svc.Targets.Target?.BaseId != LaudaDataId)
-                        return;
-
-                    if (CrucibleUi.TryReady("SelectString", out AtkUnitBase* menu) && EzThrottler.Throttle("CrucibleOpenBoard", 1000))
-                    {
-                        ChooseChallenge(menu);
-                    }
-                    else if (GenericHelpers.TryGetAddonByName("Talk", out AtkUnitBase* talk) && GenericHelpers.IsAddonReady(talk))
-                    {
-                        AddonHelper.ClickTalk();
-                    }
-
-                    return;
-
-                case ManualStep.Team:
-                    if (!CrucibleUi.IsOpen(CrucibleUi.TeamWindow) && !CrucibleUi.IsOpen(CrucibleUi.BestiaryWindow))
-                    {
-                        this.SetManual(ManualStep.Idle, now);
-                        return;
-                    }
-
-                    if (!this.teamSetup.Update())
-                        return;
-
-                    if (this.teamSetup.Error != null)
-                    {
-                        Svc.Chat.PrintError($"[AutoDuty] Crucible team setup failed: {this.teamSetup.Error}");
-                        this.SetManual(ManualStep.Finished, now);
-                        return;
-                    }
-
-                    this.SetManual(ManualStep.Challenge, now);
-                    return;
-
-                case ManualStep.Challenge:
-                    if (CrucibleUi.TryReady(CrucibleUi.BoardLayout, out AtkUnitBase* layout))
-                    {
-                        Screens.StageDetail.Confirm(layout);
-                        this.challengedAt = now;
-                        this.SetManual(ManualStep.Commence, now);
-                    }
-                    else if (now - this.manualSince > TimeSpan.FromSeconds(10))
-                    {
-                        this.SetManual(ManualStep.Finished, now);
-                    }
-
-                    return;
-
-                case ManualStep.Commence:
-                    if (this.Commence())
-                    {
-                        this.SetManual(ManualStep.Finished, now);
-                    }
-                    else if (now - this.manualSince > TimeSpan.FromSeconds(20))
-                    {
-                        this.SetManual(ManualStep.Finished, now);
-                    }
-
-                    return;
-
-                case ManualStep.Finished:
-                    if (!CrucibleUi.IsOpen(CrucibleUi.TeamWindow) && !CrucibleUi.IsOpen(CrucibleUi.BoardLayout))
-                        this.SetManual(ManualStep.Idle, now);
-                    return;
-            }
-        }
-
-        private void SetManual(ManualStep step, DateTime now)
-        {
-            if (this.manualStep != step)
-                Svc.Log.Debug($"[Crucible] Testing queue: {this.manualStep} -> {step}");
-            this.manualStep  = step;
-            this.manualSince = now;
         }
     }
 }

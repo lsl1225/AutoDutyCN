@@ -40,6 +40,8 @@
       "ItemLevelLimitHelp": "분해 스킬이 '아이템 레벨 + 이 값'에 도달하면, 해당 아이템의 분해를 중단합니다.",
       "NQOnly": "NQ 결과 보증",
       "ProtectGearsets": "장비세트 보호",
+      "ProtectGearsetterUpgrades": "Gearsetter 업그레이드 장비 자동 분해 방지",
+      "ProtectGearsetterUpgradesHelp": "아직 어떤 장비세트에도 등록되지 않았더라도, Gearsetter가 업그레이드로 추천하는 장비는 분해하지 않고 보호합니다. Gearsetter 플러그인이 필요합니다.",
       "Categories": "분해 카테고리"
     },
     "Coffers": {

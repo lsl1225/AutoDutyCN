@@ -324,7 +324,7 @@ public sealed class AutoDuty : IDalamudPlugin
             this.assemblyDirectoryInfo = this.assemblyFileInfo.Directory;
 
             this.Version = 
-                ((PluginInterface.IsDev     ? new Version(0,0,0, 325) :
+                ((PluginInterface.IsDev     ? new Version(0,0,0, 344) :
                   PluginInterface.IsTesting ? PluginInterface.Manifest.TestingAssemblyVersion ?? PluginInterface.Manifest.AssemblyVersion : PluginInterface.Manifest.AssemblyVersion)!).Revision;
 
             if (!this.configDirectory.Exists)
@@ -1012,8 +1012,9 @@ public sealed class AutoDuty : IDalamudPlugin
             return;
         }
         //Svc.Log.Debug($"{flag} : {value}");
-        if (this.Stage is not Stage.Dead and not Stage.Revived and not Stage.Action && !this.recentlyWatchedCutscene && !Conditions.Instance()->WatchingCutscene && 
-            flag is not ConditionFlag.WatchingCutscene and not ConditionFlag.WatchingCutscene78 and not ConditionFlag.OccupiedInCutSceneEvent and (ConditionFlag.BetweenAreas or ConditionFlag.BetweenAreas51 or ConditionFlag.Jumping61) && 
+        if (this.Stage is not (Stage.Dead or Stage.Revived or Stage.Action) && !this.recentlyWatchedCutscene && !Conditions.Instance()->WatchingCutscene && 
+            (flag is not (ConditionFlag.WatchingCutscene or ConditionFlag.WatchingCutscene78 or ConditionFlag.OccupiedInCutSceneEvent) and (ConditionFlag.BetweenAreas or ConditionFlag.BetweenAreas51 or ConditionFlag.Jumping61) ||
+             (flag is ConditionFlag.SufferingStatusAffliction63 && PlayerHelper.HasStatus(1268))) && 
             value && this.States.HasFlag(PluginState.Navigating))
         {
             Svc.Log.Info($"Condition_ConditionChange: Indexer Increase and Change Stage to Condition");

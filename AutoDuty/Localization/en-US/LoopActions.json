@@ -15,6 +15,7 @@
       "TriggerAt": "Trigger @",
       "PreferredRepairNPC": "Preferred Repair NPC: ",
       "PreferredRepairNPCHelp": "It's a good idea to match the Repair NPC with Summoning Bell and if possible Retire Location",
+      "NPCSearchHint": "Start typing NPC or zone name to search",
       "GrandCompanyInn": "Grand Company Inn"
     },
     "AutoRetainer": {

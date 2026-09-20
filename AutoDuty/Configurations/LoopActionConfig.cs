@@ -295,6 +295,8 @@ public class RepairLoopActionConfig : ActiveLoopActionConfig<RepairHelper, Repai
     [JsonProperty] public bool           AutoRepairSelf     { get; set; }
     [JsonProperty] public RepairNpcData? PreferredRepairNPC { get; set; }
 
+    private static string preferredNPCSearchInput = "";
+
     public override bool ShouldRun() => base.ShouldRun() && InventoryHelper.CanRepair(this.AutoRepairPct);
 
     public override void OnGuiSettings()
@@ -344,7 +346,13 @@ public class RepairLoopActionConfig : ActiveLoopActionConfig<RepairHelper, Repai
                     ConfigurationProfileV2.Save();
                 }
 
-                foreach (RepairNpcData repairNPC in RepairNPCs)
+                ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
+                ImGui.InputTextWithHint("##PreferredRepairSearch", Loc.Get("LoopActions.Repair.NPCSearchHint"), ref preferredNPCSearchInput, 100);
+
+                foreach (RepairNpcData repairNPC in RepairNPCs.Where(x =>
+                                                                         string.IsNullOrEmpty(preferredNPCSearchInput)                                         ||
+                                                                         x.Name.Contains(preferredNPCSearchInput, StringComparison.InvariantCultureIgnoreCase) ||
+                                                                         (Svc.Data.GetExcelSheet<TerritoryType>()?.GetRowOrDefault(x.TerritoryType)?.PlaceName.ValueNullable?.Name.ToString().Contains(preferredNPCSearchInput, StringComparison.InvariantCultureIgnoreCase) ?? false)))
                 {
                     if (repairNPC.TerritoryType <= 0)
                     {

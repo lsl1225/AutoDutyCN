@@ -236,7 +236,12 @@ public class AutoEquipLoopActionConfig : ActiveLoopActionConfig<AutoEquipHelper,
         if (ImGui.BeginCombo("##AutoEquipRecommendedSource", this.RecommendedGearSource.ToCustomString()))
         {
             foreach (GearsetUpdateSource updateSource in Enum.GetValues(typeof(GearsetUpdateSource)))
-                using (ImGuiHelper.RequiresPlugin(updateSource == GearsetUpdateSource.Gearsetter ? ExternalPlugin.Gearsetter : ExternalPlugin.Stylist, "GearSet", inline: true))
+                using (ImGuiHelper.RequiresPlugin(updateSource switch
+                       {
+                           GearsetUpdateSource.Gearsetter => ExternalPlugin.Gearsetter,
+                           GearsetUpdateSource.Stylist => ExternalPlugin.Stylist,
+                           _ => ExternalPlugin.None
+                       }, "GearSet", inline: true))
                 {
                     if (ImGui.Selectable(updateSource.ToCustomString(), this.RecommendedGearSource == updateSource, flags: ImGuiSelectableFlags.AllowItemOverlap))
                     {

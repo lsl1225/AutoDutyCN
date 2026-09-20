@@ -53,6 +53,8 @@
       "ItemLevelLimitHelp": "Stops desynthesising an item once your desynthesis skill reaches the Item Level + this limit.",
       "NQOnly": "Guarantee NQ results",
       "ProtectGearsets": "Protect Gearsets",
+      "ProtectGearsetterUpgrades": "Protect Gearsetter upgrades from Auto Desynth",
+      "ProtectGearsetterUpgradesHelp": "Also protects items that Gearsetter recommends as an upgrade for any of your gearsets, even if they aren't equipped in one yet. Requires the Gearsetter plugin.",
       "Categories": "Desynth Categories"
     },
     "Coffers": {

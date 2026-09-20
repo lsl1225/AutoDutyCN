@@ -586,12 +586,12 @@ public class DesynthLoopActionConfig : ActiveLoopActionConfig<DesynthHelper, Des
 {
     public override string OverlayName => Loc.Get("Overlay.Button.Desynth");
 
-    [JsonProperty] public bool  SkillUp      { get; set; }
-    [JsonProperty] public int   SkillUpLimit { get; set; } = 50;
-    [JsonProperty] public bool  NQOnly       { get; set; }
-    [JsonProperty] public bool  NoGearset    { get; set; } = true;
-    [JsonProperty] public ulong Categories   { get; set; } = 0x1;
-
+    [JsonProperty] public bool  SkillUp                   { get; set; }
+    [JsonProperty] public int   SkillUpLimit              { get; set; } = 50;
+    [JsonProperty] public bool  NQOnly                    { get; set; }
+    [JsonProperty] public bool  NoGearset                 { get; set; } = true;
+    [JsonProperty] public bool  ProtectGearsetterUpgrades { get; set; }
+    [JsonProperty] public ulong Categories                { get; set; } = 0x1;
     public override void OnGuiSettings()
     {
         bool desynthSkillUp = this.SkillUp;
@@ -632,6 +632,24 @@ public class DesynthLoopActionConfig : ActiveLoopActionConfig<DesynthHelper, Des
             this.NoGearset = desynthNoGearset;
             ConfigurationProfileV2.Save();
         }
+
+        if (desynthNoGearset)
+        {
+            ImGui.Indent();
+            using (ImGuiHelper.RequiresPlugin(ExternalPlugin.Gearsetter, "DesynthGearsetter", inline: true))
+            {
+                bool gearsetterUpgrades = this.ProtectGearsetterUpgrades;
+                if (ImGui.Checkbox($"{Loc.Get("LoopActions.Desynth.ProtectGearsetterUpgrades")}##Desynth{nameof(this.ProtectGearsetterUpgrades)}", ref gearsetterUpgrades))
+                {
+                    this.ProtectGearsetterUpgrades = gearsetterUpgrades;
+                    ConfigurationProfileV2.Save();
+                }
+            }
+
+            ImGuiComponents.HelpMarker(Loc.Get("LoopActions.Desynth.ProtectGearsetterUpgradesHelp"));
+            ImGui.Unindent();
+        }
+
 
         if (ImGui.CollapsingHeader(Loc.Get("LoopActions.Desynth.Categories")))
         {

@@ -120,16 +120,17 @@ namespace AutoDuty.Helpers
                                     gearsetItemIds = [];
 
                                     RaptureGearsetModule* gearsetModule = RaptureGearsetModule.Instance();
-                                    byte                  num           = gearsetModule->NumGearsets;
-                                    for (byte j = 0; j < num; j++)
+                                    foreach (RaptureGearsetModule.GearsetEntry entry in gearsetModule->Entries)
                                     {
-                                        foreach (RaptureGearsetModule.GearsetEntry entry in gearsetModule->Entries)
-                                            foreach (RaptureGearsetModule.GearsetItem gearsetItem in entry.Items)
-                                            {
-                                                uint gearsetItemItemId = gearsetItem.ItemId;
-                                                if(gearsetItemItemId > 0) 
-                                                    gearsetItemIds.Add(gearsetItemItemId);
-                                            }
+                                        if (!gearsetModule->IsValidGearset(entry.Id))
+                                            continue;
+
+                                        foreach (RaptureGearsetModule.GearsetItem gearsetItem in entry.Items)
+                                        {
+                                            uint gearsetItemItemId = gearsetItem.ItemId;
+                                            if (gearsetItemItemId > 0)
+                                                gearsetItemIds.Add(gearsetItemItemId);
+                                        }
                                     }
                                 }
 

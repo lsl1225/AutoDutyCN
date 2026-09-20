@@ -73,7 +73,7 @@ namespace AutoDuty.Managers
                                      bool done = this.teamSetup.Update();
                                      Plugin.action = this.teamSetup.Status;
                                      return done;
-                                 }, "RegisterCrucible-Team-Setup", new TaskManagerConfiguration(300000));
+                                 }, "RegisterCrucible-Team-Setup", new TaskManagerConfiguration(300_000));
             _taskManager.Enqueue(() =>
                                  {
                                      if (this.teamSetup.Error == null)

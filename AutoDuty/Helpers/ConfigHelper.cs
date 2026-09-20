@@ -226,18 +226,37 @@ namespace AutoDuty.Helpers
                 if (property.SetMethod != null && property.PropertyType.IsAssignableTo(typeof(string)))
                     Svc.Log.Info($"{prefix}{property.Name} = {property.GetValue(instance)} ({property.PropertyType.Name}");
 
-                if (property.PropertyType.IsAssignableTo(typeof(IList)) && !property.PropertyType.IsAssignableTo(typeof(string)))
+                if (property.PropertyType.IsAssignableTo(typeof(IList)) && !property.PropertyType.IsAssignableTo(typeof(string))) 
                 {
-                    IList valueList = (IList)property.GetValue(instance)!;
+                    IList valueList      = (IList)property.GetValue(instance)!;
+
+                    Type? enumerableType = property.PropertyType.GetElementType() ?? property.PropertyType.GenericTypeArguments.FirstOrDefault() ?? property.PropertyType.BaseType?.GetElementType() ?? property.PropertyType.BaseType?.GenericTypeArguments.FirstOrDefault();
+
+                    if (enumerableType != null)
+                    {
+
+                        if (enumerableType.IsGenericType && enumerableType.GetGenericTypeDefinition().IsAssignableTo(typeof(Nullable<>)))
+                            enumerableType = enumerableType.GetGenericArguments().First();
+
+                        if (enumerableType.IsAssignableTo(typeof(Enum)) || enumerableType.IsAssignableTo(typeof(string)) || enumerableType.IsAssignableTo(typeof(uint)) && property.SetMethod != null)
+                        {
+                            Svc.Log.Info($"{prefix}{property.Name} = {property.GetValue(instance)} ({property.PropertyType.Name}{(enumerableType.IsEnum ? $" {string.Join(", ", Enum.GetNames(enumerableType))}" : "")})");
+                            return;
+                        }
+                    }
+
                     for (int index = 0; index < valueList.Count; index++)
                     {
                         object? value = valueList[index];
-                        ListConfig(value, $"{prefix}{property.Name}.[{index}/{value?.GetType().Name}].");
+                        if(value != null)
+                            ListConfig(value, $"{prefix}{property.Name}.[{index}/{value?.GetType().Name}].");
                     }
                 } 
                 else if ((property.PropertyType.FullName?.Contains(nameof(ConfigurationProfileV2)) ?? false) || (property.PropertyType.FullName?.Contains(nameof(LoopActionConfig)) ?? false))
                 {
-                    ListConfig(property.GetValue(instance), $"{prefix}{property.Name}.");
+                    object? value = property.GetValue(instance);
+                    if(value != null)
+                        ListConfig(value, $"{prefix}{property.Name}.");
                 }
                 else if(property.SetMethod != null)
                 {

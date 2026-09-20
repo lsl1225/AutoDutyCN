@@ -27,7 +27,7 @@
         ""
       ],
       "Conditions": [],
-      "Note": "",
+      "Note": "First Node",
       "Flags": "None"
     },
     {
@@ -92,7 +92,7 @@
         ""
       ],
       "Conditions": [],
-      "Note": "",
+      "Note": "Bone Knight",
       "Flags": "None"
     },
     {
@@ -207,7 +207,7 @@
         ""
       ],
       "Conditions": [],
-      "Note": "",
+      "Note": "Second L Fight",
       "Flags": "None"
     },
     {
@@ -272,7 +272,7 @@
         ""
       ],
       "Conditions": [],
-      "Note": "",
+      "Note": "Arch Demon Piece",
       "Flags": "None"
     },
     {
@@ -387,6 +387,21 @@
         ""
       ],
       "Conditions": [],
+      "Note": "Third L Camp",
+      "Flags": "None"
+    },
+    {
+      "Tag": "None",
+      "Name": "Wait",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "500"
+      ],
+      "Conditions": [],
       "Note": "",
       "Flags": "None"
     },
@@ -417,6 +432,41 @@
         ""
       ],
       "Conditions": [],
+      "Note": "Fourth Fight",
+      "Flags": "None"
+    },
+    {
+      "Tag": "None",
+      "Name": "ModifyIndex",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "-1"
+      ],
+      "Conditions": [
+        {
+          "$type": "AutoDuty.Data.PathActionConditionDistance, AutoDuty",
+          "origin": "Location",
+          "originId": 0,
+          "originLoc": {
+            "X": -700.0,
+            "Y": 0.0,
+            "Z": -32.9
+          },
+          "target": "Player",
+          "targetId": 0,
+          "targetLoc": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "operatorValue": ">",
+          "distance": 4.0
+        }
+      ],
       "Note": "",
       "Flags": "None"
     },
@@ -482,7 +532,7 @@
         ""
       ],
       "Conditions": [],
-      "Note": "",
+      "Note": "Banemite Piece",
       "Flags": "None"
     },
     {
@@ -597,6 +647,21 @@
         ""
       ],
       "Conditions": [],
+      "Note": "Fifth Treasure",
+      "Flags": "None"
+    },
+    {
+      "Tag": "None",
+      "Name": "Wait",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "500"
+      ],
+      "Conditions": [],
       "Note": "",
       "Flags": "None"
     },
@@ -627,7 +692,7 @@
         ""
       ],
       "Conditions": [],
-      "Note": "",
+      "Note": "Sixth Fight Golem",
       "Flags": "None"
     },
     {
@@ -692,7 +757,7 @@
         ""
       ],
       "Conditions": [],
-      "Note": "",
+      "Note": "Ogre Piece",
       "Flags": "None"
     },
     {
@@ -807,6 +872,21 @@
         ""
       ],
       "Conditions": [],
+      "Note": "Seventh Camp",
+      "Flags": "None"
+    },
+    {
+      "Tag": "None",
+      "Name": "Wait",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "500"
+      ],
+      "Conditions": [],
       "Note": "",
       "Flags": "None"
     },
@@ -835,6 +915,21 @@
       },
       "Arguments": [
         ""
+      ],
+      "Conditions": [],
+      "Note": "Eigth Shop",
+      "Flags": "None"
+    },
+    {
+      "Tag": "None",
+      "Name": "Wait",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Arguments": [
+        "500"
       ],
       "Conditions": [],
       "Note": "",
@@ -867,7 +962,7 @@
         ""
       ],
       "Conditions": [],
-      "Note": "",
+      "Note": "Final Boss",
       "Flags": "None"
     },
     {
@@ -982,7 +1077,7 @@
         ""
       ],
       "Conditions": [],
-      "Note": "",
+      "Note": "Pas de Seul",
       "Flags": "None"
     },
     {
@@ -1054,8 +1149,13 @@
     }
   ],
   "Meta": {
-    "CreatedAt": 340,
-    "Changelog": [],
+    "CreatedAt": 338,
+    "Changelog": [
+      {
+        "Version": 344,
+        "Change": "Stabilizing"
+      }
+    ],
     "Notes": []
   }
 }

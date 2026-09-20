@@ -12,6 +12,7 @@ namespace AutoDuty.Helpers
     using ECommons.MathHelpers;
     using FFXIVClientStructs.FFXIV.Client.UI.Misc;
     using global::AutoDuty.Configurations;
+    using global::AutoDuty.IPC;
     using Lumina.Excel.Sheets;
     using System;
     using System.Collections.Generic;
@@ -28,12 +29,56 @@ namespace AutoDuty.Helpers
 
         internal override void Start()
         {
-            this._maxDesynthLevel = PlayerHelper.GetMaxDesynthLevel();
-            if(this.NextCategory(true))
+            this.maxDesynthLevel          = PlayerHelper.GetMaxDesynthLevel();
+            this.gearsetterProtectedSlots = this.BuildGearsetterProtectedSlots();
+            if (this.NextCategory(true))
                 base.Start();
         }
 
-        private float _maxDesynthLevel = 1;
+        private float maxDesynthLevel = 1;
+
+        private HashSet<(InventoryType InventoryType, int Slot)> gearsetterProtectedSlots = [];
+
+        private unsafe HashSet<(InventoryType, int)> BuildGearsetterProtectedSlots()
+        {
+            HashSet<(InventoryType, int)> protectedSlots = [];
+
+            if (!this.ActionConfig.ProtectGearsetterUpgrades || !Gearsetter_IPCSubscriber.IsEnabled)
+                return protectedSlots;
+            
+            try
+            {
+                RaptureGearsetModule* gearsetModule = RaptureGearsetModule.Instance();
+
+                foreach (RaptureGearsetModule.GearsetEntry gearsetEntry in gearsetModule->Entries)
+                {
+                    if (!gearsetModule->IsValidGearset(gearsetEntry.Id))
+                        continue;
+
+                    List<(uint ItemId, InventoryType? SourceInventory, byte? SourceInventorySlot, RaptureGearsetModule.GearsetItemIndex TargetSlot)>? recommendations = 
+                        Gearsetter_IPCSubscriber.GetRecommendationsForGearset(gearsetEntry.Id);
+
+                    if (recommendations == null)
+                        continue;
+
+                    foreach ((uint recItemId, InventoryType? sourceInventory, byte? sourceInventorySlot, _) in recommendations)
+                    {
+                        if (sourceInventory == null || sourceInventorySlot == null)
+                            continue;
+
+                        if (protectedSlots.Add((sourceInventory.Value, sourceInventorySlot.Value)))
+                            this.DebugLog($"Gearsetter protects item {recItemId} in {sourceInventory} slot {sourceInventorySlot} (recommended for gearset {gearsetEntry.Id}) from Auto Desynth");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Svc.Log.Warning($"[AutoDesynth] Gearsetter IPC call failed while collecting upgrade protection, falling back to gearset-only protection for this run: {ex.Message}");
+                protectedSlots.Clear();
+            }
+
+            return protectedSlots;
+        }
 
         private AgentSalvage.SalvageItemCategory curCategory;
 
@@ -111,7 +156,7 @@ namespace AutoDuty.Helpers
                         if (itemLevel == null || itemSheetRow == null || desynthLevel <= 0) 
                             continue;
 
-                        if (!this.ActionConfig.SkillUp || (desynthLevel < itemLevel + this.ActionConfig.SkillUpLimit && desynthLevel < this._maxDesynthLevel))
+                        if (!this.ActionConfig.SkillUp || (desynthLevel < itemLevel + this.ActionConfig.SkillUpLimit && desynthLevel < this.maxDesynthLevel))
                         {
                             if (this.ActionConfig.NoGearset)
                             {
@@ -120,21 +165,28 @@ namespace AutoDuty.Helpers
                                     gearsetItemIds = [];
 
                                     RaptureGearsetModule* gearsetModule = RaptureGearsetModule.Instance();
-                                    byte                  num           = gearsetModule->NumGearsets;
-                                    for (byte j = 0; j < num; j++)
+                                    foreach (RaptureGearsetModule.GearsetEntry entry in gearsetModule->Entries)
                                     {
-                                        foreach (RaptureGearsetModule.GearsetEntry entry in gearsetModule->Entries)
-                                            foreach (RaptureGearsetModule.GearsetItem gearsetItem in entry.Items)
-                                            {
-                                                uint gearsetItemItemId = gearsetItem.ItemId;
-                                                if(gearsetItemItemId > 0) 
-                                                    gearsetItemIds.Add(gearsetItemItemId);
-                                            }
+                                        if (!gearsetModule->IsValidGearset(entry.Id))
+                                            continue;
+
+                                        foreach (RaptureGearsetModule.GearsetItem gearsetItem in entry.Items)
+                                        {
+                                            uint gearsetItemItemId = gearsetItem.ItemId;
+                                            if (gearsetItemItemId > 0)
+                                                gearsetItemIds.Add(gearsetItemItemId);
+                                        }
                                     }
                                 }
 
                                 if (gearsetItemIds.Contains(inventoryItem->GetItemId()))
                                     continue;
+                            }
+
+                            if (this.gearsetterProtectedSlots.Contains((item.InventoryType, (int)item.InventorySlot)))
+                            {
+                                this.DebugLog($"Skipping Item({i}): {itemSheetRow.Value.Name} - protected by Gearsetter as an upgrade for another gearset");
+                                continue;
                             }
 
                             this.DebugLog($"Salvaging Item({i}): {itemSheetRow.Value.Name} {inventoryItem->ItemId} {inventoryItem->GetItemId()} {inventoryItem->GetBaseItemId()} with iLvl {itemLevel} because our desynth level is {desynthLevel}");

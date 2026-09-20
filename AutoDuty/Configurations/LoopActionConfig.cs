@@ -295,6 +295,8 @@ public class RepairLoopActionConfig : ActiveLoopActionConfig<RepairHelper, Repai
     [JsonProperty] public bool           AutoRepairSelf     { get; set; }
     [JsonProperty] public RepairNpcData? PreferredRepairNPC { get; set; }
 
+    private static string preferredNPCSearchInput = "";
+
     public override bool ShouldRun() => base.ShouldRun() && InventoryHelper.CanRepair(this.AutoRepairPct);
 
     public override void OnGuiSettings()
@@ -344,7 +346,13 @@ public class RepairLoopActionConfig : ActiveLoopActionConfig<RepairHelper, Repai
                     ConfigurationProfileV2.Save();
                 }
 
-                foreach (RepairNpcData repairNPC in RepairNPCs)
+                ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
+                ImGui.InputTextWithHint("##PreferredRepairSearch", Loc.Get("LoopActions.Repair.NPCSearchHint"), ref preferredNPCSearchInput, 100);
+
+                foreach (RepairNpcData repairNPC in RepairNPCs.Where(x =>
+                                                                         string.IsNullOrEmpty(preferredNPCSearchInput)                                         ||
+                                                                         x.Name.Contains(preferredNPCSearchInput, StringComparison.InvariantCultureIgnoreCase) ||
+                                                                         (Svc.Data.GetExcelSheet<TerritoryType>()?.GetRowOrDefault(x.TerritoryType)?.PlaceName.ValueNullable?.Name.ToString().Contains(preferredNPCSearchInput, StringComparison.InvariantCultureIgnoreCase) ?? false)))
                 {
                     if (repairNPC.TerritoryType <= 0)
                     {
@@ -586,12 +594,12 @@ public class DesynthLoopActionConfig : ActiveLoopActionConfig<DesynthHelper, Des
 {
     public override string OverlayName => Loc.Get("Overlay.Button.Desynth");
 
-    [JsonProperty] public bool  SkillUp      { get; set; }
-    [JsonProperty] public int   SkillUpLimit { get; set; } = 50;
-    [JsonProperty] public bool  NQOnly       { get; set; }
-    [JsonProperty] public bool  NoGearset    { get; set; } = true;
-    [JsonProperty] public ulong Categories   { get; set; } = 0x1;
-
+    [JsonProperty] public bool  SkillUp                   { get; set; }
+    [JsonProperty] public int   SkillUpLimit              { get; set; } = 50;
+    [JsonProperty] public bool  NQOnly                    { get; set; }
+    [JsonProperty] public bool  NoGearset                 { get; set; } = true;
+    [JsonProperty] public bool  ProtectGearsetterUpgrades { get; set; }
+    [JsonProperty] public ulong Categories                { get; set; } = 0x1;
     public override void OnGuiSettings()
     {
         bool desynthSkillUp = this.SkillUp;
@@ -632,6 +640,24 @@ public class DesynthLoopActionConfig : ActiveLoopActionConfig<DesynthHelper, Des
             this.NoGearset = desynthNoGearset;
             ConfigurationProfileV2.Save();
         }
+
+        if (desynthNoGearset)
+        {
+            ImGui.Indent();
+            using (ImGuiHelper.RequiresPlugin(ExternalPlugin.Gearsetter, "DesynthGearsetter", inline: true))
+            {
+                bool gearsetterUpgrades = this.ProtectGearsetterUpgrades;
+                if (ImGui.Checkbox($"{Loc.Get("LoopActions.Desynth.ProtectGearsetterUpgrades")}##Desynth{nameof(this.ProtectGearsetterUpgrades)}", ref gearsetterUpgrades))
+                {
+                    this.ProtectGearsetterUpgrades = gearsetterUpgrades;
+                    ConfigurationProfileV2.Save();
+                }
+            }
+
+            ImGuiComponents.HelpMarker(Loc.Get("LoopActions.Desynth.ProtectGearsetterUpgradesHelp"));
+            ImGui.Unindent();
+        }
+
 
         if (ImGui.CollapsingHeader(Loc.Get("LoopActions.Desynth.Categories")))
         {

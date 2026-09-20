@@ -346,13 +346,10 @@ public class ConfigurationMain
             name = counter++ > 0 ? $"{templateName}{counter}" : templateName;
         while (this.profileByName.ContainsKey(name));
 
-        string?                   oldConfig = EzConfig.DefaultSerializationFactory.Serialize(this.GetCurrentConfig);
-        if(oldConfig != null)
-        {
-            ConfigurationProfileV2? newConfig = EzConfig.DefaultSerializationFactory.Deserialize<ConfigurationProfileV2>(oldConfig);
-            if(newConfig != null)
-                this.CreateProfile(name, newConfig);
-        }
+        ConfigurationProfileV2 newConfig = this.GetCurrentConfig.JSONClone(JsonSerializerSettings);
+
+        if (newConfig != null)
+            this.CreateProfile(name, newConfig);
     }
 
     public void RemoveCurrentProfile()

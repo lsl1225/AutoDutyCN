@@ -14,6 +14,7 @@
       "TriggerAt": "발동 임계값 @",
       "PreferredRepairNPC": "선호 수리 NPC: ",
       "PreferredRepairNPCHelp": "가능하면 수리 NPC를 소환 벨이나 귀환 위치와 맞추는 것을 권장합니다",
+      "NPCSearchHint": "NPC 이름 또는 지역명을 입력하여 검색",
       "GrandCompanyInn": "그랜드 컴퍼니 병사"
     },
     "AutoRetainer": {

@@ -220,6 +220,8 @@ namespace AutoDuty.Managers
             if (!Player.Available)
                 return;
 
+            Svc.Log.Debug("Crucible Team - Update Cache");
+
             bool changed = false;
             foreach (string window in DetailWindows)
                 if (CrucibleUi.FamiliarDetail(window) is { } seen)
@@ -237,6 +239,8 @@ namespace AutoDuty.Managers
 
         public static bool RememberTeam(List<CrucibleUi.TeamRow> rows)
         {
+            Svc.Log.Debug("Crucible Team - Remember Team");
+
             bool       changed = false;
             List<uint> team    = new(rows.Count);
             foreach (CrucibleUi.TeamRow row in rows)
@@ -441,6 +445,7 @@ namespace AutoDuty.Managers
 
             bool waitedTooLong = now - this.stepSince > StepPatience;
 
+            Svc.Log.Debug("Crucible Team - Executing step: " + this.step);
             switch (this.step)
             {
                 case Step.Plan:

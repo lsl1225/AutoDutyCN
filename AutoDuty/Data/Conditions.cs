@@ -434,7 +434,7 @@ public class PathActionConditionConditionFlag : PathActionCondition
     {
         Dictionary<ConditionFlag, string> dictionary = Enum.GetValues<ConditionFlag>().Distinct().
                                                             ToDictionary(value => value, value => $"({(int)value}) {value}");
-        ImGuiEx.EnumCombo("ConditionFlag", ref this.flag, names: dictionary);
+        ImGuiEx.EnumCombo("ConditionFlag", ref this.flag, names: dictionary, null);
     }
 
     public override IEnumerable<(Vector4 color, string text)> DrawStepEntry()

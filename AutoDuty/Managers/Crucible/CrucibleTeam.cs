@@ -358,7 +358,11 @@ internal static unsafe class CrucibleTeam
             alive = alive.OrderBy(row => LevelingKey(NumberFor(team[row].Name), team[row].Rank)).ThenBy(row => row);
         */
 
-        return team.Where(me => me.MaxHP == 0 || me.HP > 0).OrderByDescending(me => Familiars[me.Number].Rank).ThenByDescending(row => Familiars[row.Number].Score()).ToList();
+        List<ReaderXBMPetParty.MonsterEntry> monsterEntries = team.Where(me => me.MaxHP == 0 || me.HP > 0).OrderByDescending(me => Familiars[me.Number].Rank).ThenByDescending(row => Familiars[row.Number].Score()).ToList();
+
+        List<ReaderXBMPetParty.MonsterEntry> unblocked = monsterEntries.Where(me => !(BeastTierList.ActiveTierList.FirstOrDefault(x => x.ID == me.Number)?.BattleBlock ?? false)).ToList();
+
+        return unblocked.Count >= 3 ? monsterEntries.Concat(unblocked).Distinct().ToList() : monsterEntries;
     }
 
     public static void UpdateCache()

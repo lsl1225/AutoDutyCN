@@ -1097,7 +1097,7 @@ namespace AutoDuty.Windows
             float height    = Math.Min(owned.Count + 1, 12) * rowHeight + 4 * scale;
 
             const ImGuiTableFlags flags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersOuter | ImGuiTableFlags.ScrollY | ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.Resizable | ImGuiTableFlags.PadOuterX;
-            if (!ImGui.BeginTable("##CrucibleTable", 7, flags, new Vector2(0, height)))
+            if (!ImGui.BeginTable("##CrucibleFamiliarTable", 7, flags, new Vector2(0, height)))
                 return;
 
             ImGui.TableSetupScrollFreeze(0, 1);
@@ -1735,7 +1735,7 @@ namespace AutoDuty.Windows
                 smallButton: false
             );
 
-            using ImRaii.ChildDisposable child = ImRaii.Child("##Sidebar", new Vector2(0, ImGui.GetContentRegionAvail().Y-100f.Scale()), true);
+            using ImRaii.ChildDisposable child = ImRaii.Child("##CrucibleShopSidebar", new Vector2(0, ImGui.GetContentRegionAvail().Y-100f.Scale()), true);
             if (!child.Success)
                 return;
 

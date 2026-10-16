@@ -324,6 +324,7 @@ internal static unsafe class CrucibleTeam
         ConfigurationProfileV2.MetaConfig.CrucibleConfig crucible = ConfigurationMain.Instance.GetCurrentConfig.Meta.Crucible;
         IReadOnlyDictionary<uint, CrucibleFamiliar>      cached   = Familiars;
         return Owned().Where(x => crucible.ClassificationLock == 0 || FamiliarSheetDatas[x].Classification == crucible.ClassificationLock)
+                      .Where(x => !(BeastTierList.ActiveTierList.FirstOrDefault(en => en.ID == x)?.PickBlock ?? false))
                       .OrderByDescending(x => cached.TryGetValue(x, out CrucibleFamiliar? f) ? f.Rank : -1)
                       .ThenBy(x => cached.TryGetValue(x,  out CrucibleFamiliar? f) ? f.Score() : int.MaxValue)
                       .ThenBy(x => x)

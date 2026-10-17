@@ -782,7 +782,7 @@ namespace AutoDuty.Managers
             List<IGameObject>? treasureCofferObjects = null;
             Plugin.skipTreasureCoffer = false;
             this.StopForCombat(true, false);
-            taskManager.Enqueue(() => (Plugin.DutyData?.bossObject = GetBossObject()) != null,                           "Boss-GetBossObject");
+            taskManager.Enqueue(() => (Plugin.DutyData?.bossObject = GetBossObject(position: action.Position)) != null,            "Boss-GetBossObject");
             taskManager.Enqueue(() => BossMoveCheck(action.Position),                                                    "Boss-MoveCheck");
             taskManager.Enqueue(() => Plugin.action      = $"Boss: {Plugin.DutyData?.bossObject?.Name.TextValue ?? ""}", "Boss-SetActionVar");
             taskManager.Enqueue(() => Svc.Targets.Target = Plugin.DutyData?.bossObject,                                  "Boss-SetTarget");

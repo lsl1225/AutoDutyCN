@@ -29,7 +29,8 @@
       "ExtractMissing": "Materia Extraction requires having completed quest: Forging the Spirit",
       "Repair": "Click to Repair",
       "Equip": "Click to Equip Gear",
-      "Coffers": "Click to open coffers"
+      "Coffers": "Click to open coffers",
+      "Shop": "Click to buy items from configured shops"
     },
     "Popup": {
       "MissingPlugin": "Missing Plugin",

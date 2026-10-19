@@ -364,7 +364,8 @@
             Lifestream           = 1 << 8,
             AntiAFK              = 1 << 9,
             Pandora              = 1 << 10,
-            GlamourLog           = 1 << 11
+            GlamourLog           = 1 << 11,
+            Knightshopper        = 1 << 12,
         }
 
         public enum ConditionType

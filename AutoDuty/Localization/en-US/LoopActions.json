@@ -48,6 +48,10 @@
     "Glamour": {
       "Help": "Will entrust items to the glamour chest"
     },
+    "Shop": {
+      "Help": "Will buy items from various shops as configured in Knightshopper",
+      "CurrencySelection": "Currency"
+    },
     "Desynth": {
       "OnlySkillUps": "Only Skill Ups",
       "ItemLevelLimit": "Item Level Limit",

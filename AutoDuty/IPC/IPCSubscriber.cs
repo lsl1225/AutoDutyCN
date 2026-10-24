@@ -483,9 +483,9 @@ public static class GlamourLog_IPCSubscriber
         GlamourLog.IsContentComplete(content.RowId);
 }
 
-public static class Knightshopper_IPCSubsriber
+public static class Knightshopper_IPCSubscriber
 {
-    private static  EzIPCDisposalToken[] _disposalTokens = EzIPC.Init(typeof(Knightshopper_IPCSubsriber), "Knightshopper");
+    private static  EzIPCDisposalToken[] _disposalTokens = EzIPC.Init(typeof(Knightshopper_IPCSubscriber), "Knightshopper");
     internal static bool IsEnabled => IPCSubscriber_Common.IsReady("Knightshopper");
 
     public enum CurrencyId
@@ -541,6 +541,8 @@ public static class Knightshopper_IPCSubsriber
     [EzIPC("Purchase.Cancel")]     private static Func<Guid, bool>                                               PurchaseCancel;
 
     private static Guid currentPurchase = Guid.Empty;
+
+    public static void ResetPurchaseStatus() => currentPurchase = Guid.Empty;
 
     public static bool StartShopping(CurrencyId currency)
     {

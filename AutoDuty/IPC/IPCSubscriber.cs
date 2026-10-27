@@ -443,7 +443,7 @@ public static class Lifestream_IPCSubscriber
         Lifestream.ChangeCharacter(name, world);
 
     public static bool IsEstateRegistered(bool fc) =>
-        (fc ? Lifestream.HasFreeCompanyHouse() : Lifestream.HasPrivateHouse()) ?? false;
+        Player.Available && ((fc ? Lifestream.HasFreeCompanyHouse() : Lifestream.HasPrivateHouse()) ?? false);
 
     public static void Teleport(PropertyType type) =>
         Lifestream.EnqueuePropertyShortcut(type, HouseEnterMode.Enter_house);

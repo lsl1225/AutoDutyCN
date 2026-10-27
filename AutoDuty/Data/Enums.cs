@@ -216,6 +216,21 @@
             Custom      = 2
         }
 
+        public enum CrucibleLevelingMode : int
+        {
+            Full = 0,
+            Minus_3 = 1,
+            Only_3 = 2,
+            Carry_Minus_2 = 3
+        }
+
+        public enum CrucibleDegree
+        {
+            Standard = 0,
+            First = 1,
+            Second = 2,
+            Third = 3
+        }
         public enum LevelingMode : int
         {
             None = 0,
@@ -349,7 +364,8 @@
             Lifestream           = 1 << 8,
             AntiAFK              = 1 << 9,
             Pandora              = 1 << 10,
-            GlamourLog           = 1 << 11
+            GlamourLog           = 1 << 11,
+            Knightshopper        = 1 << 12,
         }
 
         public enum ConditionType

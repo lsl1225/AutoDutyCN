@@ -11,37 +11,30 @@ namespace AutoDuty.Managers
     using System.Linq;
     using System.Text.RegularExpressions;
     using ECommons;
+    using ECommons.StringHelpers;
+    using ECommons.UIHelpers;
     using ECommons.UIHelpers.AtkReaderImplementations;
     using Helpers;
 
     internal static unsafe class CrucibleUi
     {
-        public const string TeamWindow     = "XBMPetParty";
-        public const string BestiaryWindow = "XBMMonsterNotebook";
-        public const string BoardList      = "XBMStageList";
-        public const string BoardLayout    = "XBMStageDetailList";
-        public const string LootWindow     = "XBMContentsBooty";
-        public const string TreasureWindow = "XBMContentsTreasure";
-        public const string ResultWindow   = "XBMResult";
-        public const string ShopWindow     = "XBMContentsItemShop";
-        public const string YesNo          = "SelectYesno";
-        public const string ContextMenu    = "ContextMenu";
-        public const string MainHud        = "XBMContentsMainHUD";
+        public const string TeamWindow           = "XBMPetParty";
+        public const string BestiaryWindow       = "XBMMonsterNotebook";
+        public const string BestiaryWindowFilter = "XBMMonsterNotebookFilterSetting";
+        public const string BoardList            = "XBMStageList";
+        public const string BoardLayout          = "XBMStageDetailList";
+        public const string LootWindow           = "XBMContentsBooty";
+        public const string TreasureWindow       = "XBMContentsTreasure";
+        public const string ResultWindow         = "XBMResult";
+        public const string ShopWindow           = "XBMContentsItemShop";
+        public const string YesNo                = "SelectYesno";
+        public const string ContextMenu          = "ContextMenu";
+        public const string MainHud              = "XBMContentsMainHUD";
 
         public const int BestiaryPageSize = 25;
 
         private const uint TeamList = 11;
-
-        private static readonly Regex Number        = new("[0-9]+");
-        private static readonly Regex GroupedNumber = new("[0-9][0-9,]*");
-        private static readonly Regex LeadingGlyphs = new("^[^\\p{L}]+");
-
-        public readonly record struct TeamRow(string Name, int Rank, int Hp, int Strength, int PhysicalResistance, int Constitution, int Intelligence, int MagicResistance, int CurrentHp);
-
-        public readonly record struct Choice(uint NodeId, uint Param, string Text);
-
-        public readonly record struct ShopEntry(int Index, uint Row, int Price, bool Bought);
-
+        
         public static AtkUnitBase* Ready(string name)
         {
             AtkUnitBase* addon = (AtkUnitBase*)Svc.GameGui.GetAddonByName(name).Address;
@@ -123,32 +116,6 @@ namespace AutoDuty.Managers
             return null;
         }
 
-        public static List<Choice> Choices(AtkUnitBase* addon, uint minParam)
-        {
-            List<Choice> choices = [];
-            for (int i = 0; i < addon->UldManager.NodeListCount; i++)
-            {
-                AtkResNode* node = addon->UldManager.NodeList[i];
-                if (node == null || !node->IsVisible())
-                    continue;
-
-                AtkComponentNode* component = node->GetAsAtkComponentNode();
-                if (component == null || component->Component == null)
-                    continue;
-
-                AtkEvent* evt = node->AtkEventManager.Event;
-                while (evt != null && evt->State.EventType != AtkEventType.ButtonClick)
-                    evt = evt->NextEvent;
-
-                if (evt == null || evt->Param < minParam)
-                    continue;
-
-                choices.Add(new Choice(node->NodeId, evt->Param, AllText(&component->Component->UldManager)));
-            }
-
-            return choices;
-        }
-
         public static int ContextMenuOptionCount(AtkUnitBase* menu)
         {
             int count = 0;
@@ -180,102 +147,17 @@ namespace AutoDuty.Managers
 
         public readonly record struct ItemSlot(int Slot, uint Row, string Name);
 
-        public static List<ItemSlot> HudItems(AtkUnitBase* hud)
-        {
-            List<ItemSlot> items = [];
-            for (int slot = 0; slot < 10; slot++)
-            {
-                int at = 9 + slot * 5;
-                if (at + 4 >= hud->AtkValuesCount)
-                    break;
-
-                uint row = AsUInt(hud->AtkValues[at + 3]);
-                if (hud->AtkValues[at + 1].Byte == 0 || row == 0)
-                    continue;
-
-                items.Add(new ItemSlot(slot, row, hud->AtkValues[at + 4].GetValueAsString()));
-            }
-
-            return items;
-        }
-
-        private static class ShopValues
-        {
-            public const int Coins      = 1; 
-            public const int StockCount = 2;
-
-            public const int StockStart   = 3;
-            public const int StockListed  = 0; 
-            public const int StockItem    = 1; 
-            public const int StockPrice   = 2; 
-            public const int StockBought  = 4; 
-
-            public const int HeldStart = 154;
-            public const int HeldItem  = 3;    
-
-            public const int GearStart = 205;
-            public const int GearOwned = 0;    
-            public const int GearItem  = 3;   
-
-            public const int Stride = 5;
-            public const int Slots  = 10;
-        }
-
         public static int ShopCoins(AtkUnitBase* shop) =>
-            shop->AtkValuesCount > ShopValues.Coins ? FirstNumber(shop->AtkValues[ShopValues.Coins].GetValueAsString()) : 0;
+            (int)new ReaderXBMContentsItemShop(shop).Coins;
 
-        public static List<ShopEntry> ShopStock(AtkUnitBase* shop)
-        {
-            List<ShopEntry> stock = [];
-            if (shop->AtkValuesCount <= ShopValues.StockCount)
-                return stock;
+        public static List<ReaderXBMContentsItemShop.StockEntry> ShopStock(AtkUnitBase* shop) => 
+            new ReaderXBMContentsItemShop(shop).StockEntries;
 
-            int count = (int)AsUInt(shop->AtkValues[ShopValues.StockCount]);
-            for (int i = 0; i < count; i++)
-            {
-                int at = ShopValues.StockStart + i * ShopValues.Stride;
-                if (at + ShopValues.StockBought >= shop->AtkValuesCount)
-                    break;
+        public static uint[] ShopHeldItems(AtkUnitBase* shop) => 
+            new ReaderXBMContentsItemShop(shop).ItemEntriesValid.Select(ie => ie.Id).ToArray();
 
-                uint row = AsUInt(shop->AtkValues[at + ShopValues.StockItem]);
-                if (shop->AtkValues[at + ShopValues.StockListed].Byte == 0 || row == 0)
-                    continue;
-
-                stock.Add(new ShopEntry(i, row,
-                                        FirstNumber(shop->AtkValues[at + ShopValues.StockPrice].GetValueAsString()),
-                                        shop->AtkValues[at + ShopValues.StockBought].Byte != 0));
-            }
-
-            return stock;
-        }
-
-        public static int ShopHeldItems(AtkUnitBase* shop)
-        {
-            int held = 0;
-            for (int k = 0; k < ShopValues.Slots; k++)
-            {
-                int at = ShopValues.HeldStart + k * ShopValues.Stride + ShopValues.HeldItem;
-                if (at < shop->AtkValuesCount && AsUInt(shop->AtkValues[at]) != 0)
-                    held++;
-            }
-
-            return held;
-        }
-
-        public static HashSet<uint> ShopOwnedGear(AtkUnitBase* shop)
-        {
-            HashSet<uint> owned = [];
-            for (int k = 0; k < ShopValues.Slots; k++)
-            {
-                int at = ShopValues.GearStart + k * ShopValues.Stride;
-                if (at + ShopValues.GearItem >= shop->AtkValuesCount || shop->AtkValues[at + ShopValues.GearOwned].Byte == 0)
-                    continue;
-
-                owned.Add(AsUInt(shop->AtkValues[at + ShopValues.GearItem]));
-            }
-
-            return owned;
-        }
+        public static HashSet<uint> ShopOwnedGear(AtkUnitBase* shop) => 
+            new ReaderXBMContentsItemShop(shop).OwnedEntriesOwned.Select(ge => ge.Id).ToHashSet();
 
         public static IEnumerable<uint> BestiaryShowing(AtkUnitBase* notebook)
         {
@@ -301,62 +183,36 @@ namespace AutoDuty.Managers
             if (notebook->AtkValuesCount <= 273 || !reader.Selected)
                 return null;
 
-            uint number = reader.SelectedNumber;
-            int  rank   = reader.SelectedRank;
+            uint number = reader.CurrentNumber;
+            int  rank   = reader.CurrentRank;
             if (number == 0 || rank == 0)
                 return null;
 
-            return new CrucibleFamiliar
+            return new CrucibleFamiliar(number)
                    {
-                       Number             = number,
-                       Name               = reader.SelectedName.GetText(),
                        Rank               = rank,
-                       Hp                 = reader.SelectedMaxHP,
-                       Exp                = reader.SelectedXP.ToString(),
-                       Strength           = reader.SelectedStrength,
-                       PhysicalResistance = reader.SelectedPhysResistance,
-                       Constitution       = reader.SelectedConstitution,
-                       Intelligence       = reader.SelectedIntelligence,
-                       MagicResistance    = reader.SelectedMagicResistance,
-                       Classification     = reader.Classification.GetText()
+                       Hp                 = reader.CurrentMaxHP,
+                       Exp                = reader.CurrentXP.ToString(),
+                       Strength           = reader.CurrentStrength,
+                       PhysicalResistance = reader.CurrentPhysResistance,
+                       Constitution       = reader.CurrentConstitution,
+                       Intelligence       = reader.CurrentIntelligence,
+                       MagicResistance    = reader.CurrentMagicResistance,
                    };
         }
 
-        public static List<TeamRow>? Team()
+        public static List<ReaderXBMPetParty.MonsterEntry>? Team(ReaderXBMPetParty? party = null)
         {
-            AtkUnitBase* addon = Ready(TeamWindow);
-            if (addon == null)
-                return null;
-
-            AtkComponentList* list = (AtkComponentList*)addon->GetComponentByNodeId(TeamList);
-            if (list == null)
-                return null;
-
-            List<TeamRow> rows = new(list->ListLength);
-            for (int i = 0; i < list->ListLength; i++)
+            if (party == null)
             {
-                AtkComponentListItemRenderer* renderer = list->GetItemRenderer(i);
-                if (renderer == null)
+                AtkUnitBase* addon = Ready(TeamWindow);
+                if (addon == null)
                     return null;
 
-                AtkUldManager* uld  = &((AtkComponentBase*)renderer)->UldManager;
-                string         name = Text(uld, 17, visibleOnly: true);
-
-                if (name.Length == 0)
-                    break;
-
-                rows.Add(new TeamRow(name,
-                                     Digits(Text(uld, 9)),
-                                     MaxOf(Text(uld, 19)),
-                                     Digits(ComponentText(uld, 25, 3)),
-                                     Digits(ComponentText(uld, 26, 3)),
-                                     Digits(ComponentText(uld, 27, 3)),
-                                     Digits(ComponentText(uld, 28, 3)),
-                                     Digits(ComponentText(uld, 29, 3)),
-                                     CurrentOf(Text(uld, 19))));
+                party = new ReaderXBMPetParty(addon);
             }
 
-            return rows;
+            return party.TeamEntries;
         }
 
         public static CrucibleFamiliar? FamiliarDetail(string window)
@@ -371,31 +227,28 @@ namespace AutoDuty.Managers
             if (name.Length == 0 || hp.Length == 0)
                 return null;
 
-            return new CrucibleFamiliar
+            return new CrucibleFamiliar((uint)DigitParsers.Digits(Text(uld, 12)))
                    {
-                       Number             = (uint)Digits(Text(uld, 12)),
-                       Name               = name,
-                       Rank               = Digits(Text(uld, 40)),
+                       Rank               = DigitParsers.Digits(Text(uld, 40)),
                        Hp                 = MaxOf(hp),
-                       Strength           = Digits(ComponentText(uld, 47, 3)),
-                       PhysicalResistance = Digits(ComponentText(uld, 48, 3)),
-                       Constitution       = Digits(ComponentText(uld, 49, 3)),
-                       Intelligence       = Digits(ComponentText(uld, 50, 3)),
-                       MagicResistance    = Digits(ComponentText(uld, 51, 3)),
+                       Strength           = DigitParsers.Digits(ComponentText(uld, 47, 3)),
+                       PhysicalResistance = DigitParsers.Digits(ComponentText(uld, 48, 3)),
+                       Constitution       = DigitParsers.Digits(ComponentText(uld, 49, 3)),
+                       Intelligence       = DigitParsers.Digits(ComponentText(uld, 50, 3)),
+                       MagicResistance    = DigitParsers.Digits(ComponentText(uld, 51, 3)),
                        Exp                = Text(uld, 42),
-                       Classification     = Text(uld, 21),
-                       Element            = LeadingGlyphs.Replace(Text(uld, 23), "")
+                       //Element            = DigitParsers.LeadingGlyphs().Replace(Text(uld, 23), "")
                    };
         }
 
         public static float ExpShare(string exp)
         {
-            int slash = exp.IndexOf('/');
-            return slash > 0 && TryNumber(exp[..slash], out float have) && TryNumber(exp[(slash + 1)..], out float need) && need > 0 ? have / need : 0f;
-
+            TryNumber(exp, out float total);
+            return total / 100f;
+            
             static bool TryNumber(string text, out float value)
             {
-                Match match = GroupedNumber.Match(text);
+                Match match = DigitParsers.GroupedNumber().Match(text);
                 value = 0;
                 return match.Success && float.TryParse(match.Value.Replace(",", ""), NumberStyles.Float, CultureInfo.InvariantCulture, out value);
             }
@@ -445,28 +298,16 @@ namespace AutoDuty.Managers
         private static uint AsUInt(AtkValue value) =>
             value.Type.ToString() == "UInt" ? value.UInt : (uint)Math.Max(0, value.Int);
 
-        private static int FirstNumber(string text)
-        {
-            Match match = GroupedNumber.Match(text);
-            return match.Success && int.TryParse(match.Value.Replace(",", ""), out int value) ? value : 0;
-        }
-
-        private static int Digits(string text)
-        {
-            Match match = Number.Match(text);
-            return match.Success && int.TryParse(match.Value, out int value) ? value : 0;
-        }
-
         private static int CurrentOf(string fraction)
         {
             int slash = fraction.IndexOf('/');
-            return Digits(slash >= 0 ? fraction[..slash] : fraction);
+            return DigitParsers.Digits(slash >= 0 ? fraction[..slash] : fraction);
         }
 
         private static int MaxOf(string fraction)
         {
             int slash = fraction.LastIndexOf('/');
-            return Digits(slash >= 0 ? fraction[(slash + 1)..] : fraction);
+            return DigitParsers.Digits(slash >= 0 ? fraction[(slash + 1)..] : fraction);
         }
 
         internal static class Screens
@@ -475,11 +316,14 @@ namespace AutoDuty.Managers
             {
                 private const uint RestOrReturnButton = 21;
 
+                public static int  GetTeamSize(AtkUnitBase*  party)          => (int) new ReaderXBMPetParty(party).TeamSize;
                 public static void Pick(AtkUnitBase*         party, int row) => AddonHelper.FireCallBack(party, true, 1, row);
                 public static void OpenRowMenu(AtkUnitBase*  party, int row) => AddonHelper.FireCallBack(party, true, 2, row);
                 public static void OpenBestiary(AtkUnitBase* party) => AddonHelper.FireCallBack(party, true, 5);
+                public static void RestReturn(AtkUnitBase*   party) => AddonHelper.FireCallBack(party, true, 4);
                 public static bool Rest(AtkUnitBase*         party) => ClickButton(party, RestOrReturnButton);
                 public static bool Return(AtkUnitBase*       party) => ClickButton(party, RestOrReturnButton);
+
             }
 
             internal static class StageList
@@ -490,13 +334,17 @@ namespace AutoDuty.Managers
 
             internal static class StageDetail
             {
-                public static void Confirm(AtkUnitBase* layout) => AddonHelper.FireCallBack(layout, true, 8);
+                public static void SetDegree(AtkUnitBase* layout, CrucibleDegree degree) => AddonHelper.FireCallBack(layout, true, 2, (int)degree);
+                public static void Confirm(AtkUnitBase*   layout) => AddonHelper.FireCallBack(layout, true, 8);
             }
 
             internal static class Notebook
             {
-                private const uint FirstEntryParam = 4;
+                public static void Close(AtkUnitBase* notebook) => AddonHelper.FireCallBack(notebook, true, 0);
 
+                public static void OpenFilter(AtkUnitBase* notebook) => AddonHelper.FireCallBack(notebook, true, 2);
+
+                private const uint FirstEntryParam = 4;
                 public static void ShowPage(AtkUnitBase* notebook, uint page) => AddonHelper.FireCallBack(notebook, true, 3, page);
 
                 public static bool PickEntry(AtkUnitBase* notebook, uint slotOnPage)
@@ -504,6 +352,11 @@ namespace AutoDuty.Managers
                     AddonHelper.FireCallBack(notebook, true, 5, (int)slotOnPage);
                     return ClickEvent(notebook, AtkEventType.MouseDown, FirstEntryParam + slotOnPage);
                 }
+            }
+
+            internal static class NotebookFilter
+            {
+                public static void ResetFilters(AtkUnitBase* filter) => AddonHelper.FireCallBack(filter, true, 0u, string.Empty, 0u, 0u, 0u);
             }
 
             internal static class Menu
@@ -517,14 +370,16 @@ namespace AutoDuty.Managers
 
             internal static class Booty
             {
-                public static bool TakeAll(AtkUnitBase* loot) => ClickButton(loot, 46);
+                public static void Close(AtkUnitBase* loot)            => AddonHelper.FireCallBack(loot, true, 0);
+                public static void TakeCoins(AtkUnitBase* loot)            => AddonHelper.FireCallBack(loot, true, 3);
+                public static void Take(AtkUnitBase*      loot, int index) => AddonHelper.FireCallBack(loot, true, 4, index);
+                public static bool TakeAll(AtkUnitBase*   loot) => ClickButton(loot, 46);
             }
 
             internal static class Treasure
             {
-                public const uint FirstItemParam = 2;
-
-                public static bool Take(AtkUnitBase* treasure, uint nodeId) => ClickButton(treasure, nodeId);
+                public static void Close(AtkUnitBase* treasure) => AddonHelper.FireCallBack(treasure, true, 0);
+                public static void Take(AtkUnitBase* treasure, uint nodeId) => AddonHelper.FireCallBack(treasure, true, 2, nodeId);
             }
 
             internal static class Result

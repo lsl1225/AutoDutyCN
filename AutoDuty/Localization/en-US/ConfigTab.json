@@ -195,6 +195,9 @@
       "NoInfo": "{0}: No Info",
       "ResynchronizeStep": "Resynchronize Step"
     },
+    "PluginConfig": {
+      "Header": "Other Plugins using AD"
+    },
     "Enums": {
       "Positional": {
         "Any": "Any",

@@ -131,6 +131,7 @@ public sealed class AutoDuty : IDalamudPlugin
     internal readonly WindowSystem           windowSystem = new("AutoDuty");
 
     internal DateTime runStartTime = DateTime.UnixEpoch;
+    public   string?  currentlyActivePluginConfig;
 
     public   int   Version { get; set; }
     internal Stage previousStage = Stage.Stopped;
@@ -2108,6 +2109,12 @@ public sealed class AutoDuty : IDalamudPlugin
     private void StopAndResetAll()
     {
         ConfigOverrideHelper.Pop();
+
+        if (this.currentlyActivePluginConfig != null)
+        {
+            ConfigurationMain.Instance.ActivatePluginProfile(this.currentlyActivePluginConfig, false);
+            this.currentlyActivePluginConfig = null;
+        }
 
         if (this.bareModeSettingsActive != SettingsActive.None)
         {

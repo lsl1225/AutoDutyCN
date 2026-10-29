@@ -195,6 +195,9 @@
       "NoInfo": "{0}: No Info",
       "ResynchronizeStep": "Resynchronize Step"
     },
+    "PluginConfig": {
+      "Header": "Other Plugins using AD"
+    },
     "Enums": {
       "Positional": {
         "Any": "Any",
@@ -207,7 +210,8 @@
         "Apartment": "Apartment",
         "Personal_Home": "Personal Home",
         "FC_Estate": "FC Estate",
-        "GC_Barracks": "GC Barracks"
+        "GC_Barracks": "GC Barracks",
+        "Lifestream_Auto": "Lifestream Auto"
       },
       "SummoningBellLocations": {
         "Inn": "Inn",

@@ -32,12 +32,14 @@ using NightmareUI.Censoring;
 using Properties;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Achievement = Lumina.Excel.Sheets.Achievement;
 using Vector2 = FFXIVClientStructs.FFXIV.Common.Math.Vector2;
 
 public static class ConfigTab
 {
+    private static  string colliderInput = "";
     internal static string followName = "";
 
     private static ConfigurationProfileV2     Configuration => AutoDuty.Configuration; 
@@ -258,6 +260,7 @@ public static class ConfigTab
                     Configuration.Overlay.HideWhenStopped = overlayWhenStopped;
                     ConfigurationProfileV2.Save();
                 }
+
                 ImGui.NextColumn();
                 bool lockOverlay = Configuration.Overlay.Lock;
                 if (ImGui.Checkbox(Loc.Get("ConfigTab.Overlay.LockOverlay"), ref lockOverlay))
@@ -265,6 +268,7 @@ public static class ConfigTab
                     Configuration.Overlay.Lock = lockOverlay;
                     ConfigurationProfileV2.Save();
                 }
+
                 ImGui.NextColumn();
                 //ImGui.SameLine(0, 57);
 
@@ -282,6 +286,7 @@ public static class ConfigTab
                     Configuration.Overlay.NoBG = overlayNoBG;
                     ConfigurationProfileV2.Save();
                 }
+
                 ImGui.NextColumn();
                 bool showActionText = Configuration.Overlay.ShowActionText;
                 if (ImGui.Checkbox(Loc.Get("ConfigTab.Overlay.ShowActionText"), ref showActionText))
@@ -289,6 +294,7 @@ public static class ConfigTab
                     Configuration.Overlay.ShowActionText = showActionText;
                     ConfigurationProfileV2.Save();
                 }
+
                 ImGui.NextColumn();
                 bool overlayAnchorBottom = Configuration.Overlay.AnchorBottom;
                 if (ImGui.Checkbox(Loc.Get("ConfigTab.Overlay.AnchorBottom"), ref overlayAnchorBottom))
@@ -296,24 +302,24 @@ public static class ConfigTab
                     Configuration.Overlay.AnchorBottom = overlayAnchorBottom;
                     ConfigurationProfileV2.Save();
                 }
+
                 ImGui.NextColumn();
 
                 ImGui.Columns(1);
-                ImGui.Separator();
-
-                ImGui.Text(Loc.Get("ConfigTab.Overlay.ButtonsHeader"));
-
-                bool gotoActions = Configuration.Overlay.GoToActions;
-                if (ImGui.Checkbox(Loc.Get("Overlay.Button.Goto"), ref gotoActions))
-                {
-                    Configuration.Overlay.GoToActions = gotoActions;
-                    ConfigurationProfileV2.Save();
-                }
-
-                Configuration.Overlay.LoopActions.OnGui("OverlayActions", startOpened: false);
-
                 ImGui.Unindent();
             }
+
+            ImGui.Text(Loc.Get("ConfigTab.Overlay.ButtonsHeader"));
+
+            bool gotoActions = Configuration.Overlay.GoToActions;
+            if (ImGui.Checkbox(Loc.Get("Overlay.Button.Goto"), ref gotoActions))
+            {
+                Configuration.Overlay.GoToActions = gotoActions;
+                ConfigurationProfileV2.Save();
+            }
+
+            Configuration.Overlay.LoopActions.OnGui("OverlayActions", startOpened: false);
+
             bool onStartup = Configuration.Meta.ShowMainWindowOnStartup;
             if (ImGui.Checkbox(Loc.Get("ConfigTab.Overlay.ShowMainWindowOnStartup"), ref onStartup))
             {
@@ -390,14 +396,26 @@ public static class ConfigTab
 
                 unsafe
                 {
-                    static V* FindPtr<K, V>(ref StdMap<K, Pointer<V>> map, K key) where K : unmanaged, IComparable where V : unmanaged => 
-                        map.TryGetValuePointer(key, out Pointer<V>* ptr) && ptr != null ? ptr->Value : null;
+                    using ImRaii.ItemWidthDisposable __ = ImRaii.ItemWidth(200);
 
-                    LayoutManager*                           layout = LayoutWorld.Instance()->ActiveLayout;
-                    StdMap<ulong, Pointer<ILayoutInstance>>* insts  = layout != null ? FindPtr(ref layout->InstancesByType, InstanceType.CollisionBox) : null;
-                    ILayoutInstance*                         inst   = insts  != null ? FindPtr(ref *insts,                  0x0063AE21_0B000000ul) : null;
-                    Collider*                                coll   = inst   != null ? inst->GetCollider() : null;
-                    ImGui.Text("Collider present: " + (inst != null && inst->IsColliderActive()));
+                    ImGui.Text("Collider -");
+                    ImGui.SameLine();
+                    ImGui.InputText("##ColliderInput", ref colliderInput, 256);
+
+
+                    if (ulong.TryParse(colliderInput, NumberStyles.HexNumber, null, out ulong parsedId))
+                    {
+                        static V* FindPtr<K, V>(ref StdMap<K, Pointer<V>> map, K key) where K : unmanaged, IComparable where V : unmanaged =>
+                            map.TryGetValuePointer(key, out Pointer<V>* ptr) && ptr != null ? ptr->Value : null;
+
+                        LayoutManager*                           layout = LayoutWorld.Instance()->ActiveLayout;
+                        StdMap<ulong, Pointer<ILayoutInstance>>* insts  = layout != null ? FindPtr(ref layout->InstancesByType, InstanceType.CollisionBox) : null;
+                        ILayoutInstance*                         inst   = insts  != null ? FindPtr(ref *insts,                  parsedId) : null;
+                        Collider*                                coll   = inst   != null ? inst->GetCollider() : null;
+
+                        ImGui.SameLine();
+                        ImGui.Text("Collider present: " + (inst != null && inst->IsColliderActive()));
+                    }
                 }
 
                 unsafe
